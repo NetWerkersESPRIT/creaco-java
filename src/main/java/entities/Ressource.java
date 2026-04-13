@@ -6,19 +6,18 @@ public class Ressource {
     private String url;
     private String type;
     private String contenu;
-    private String dateDeCreation;
-    private String dateDeModification;
-    private int coursId;
-
+    private String date_de_creation;
+    private String date_de_modification;
+    private int cours_id;
     public Ressource() {}
 
-    public Ressource(String nom, String url, String type, String contenu, String dateDeCreation, int coursId) {
+    public Ressource(String nom, String url, String type, String contenu, String date_de_creation, int cours_id) {
         this.nom = nom;
         this.url = url;
         this.type = type;
         this.contenu = contenu;
-        this.dateDeCreation = dateDeCreation;
-        this.coursId = coursId;
+        this.date_de_creation = date_de_creation;
+        this.cours_id = cours_id;
     }
 
     public Ressource(int id, String nom, String url, String type, String contenu, String dateDeCreation, String dateDeModification, int coursId) {
@@ -27,9 +26,9 @@ public class Ressource {
         this.url = url;
         this.type = type;
         this.contenu = contenu;
-        this.dateDeCreation = dateDeCreation;
-        this.dateDeModification = dateDeModification;
-        this.coursId = coursId;
+        this.date_de_creation = date_de_creation;
+        this.date_de_modification = Date_de_modification;
+        this.cours_id = cours_id;
     }
 
     public int getId() {
@@ -80,20 +79,20 @@ public class Ressource {
         this.dateDeCreation = dateDeCreation;
     }
 
-    public String getDateDeModification() {
-        return dateDeModification;
+    public String getDate_de_modification() {
+        return date_de_modification;
     }
 
-    public void setDateDeModification(String dateDeModification) {
-        this.dateDeModification = dateDeModification;
+    public void setDate_de_modification(String date_de_modification) {
+        this.date_de_modification = date_de_modification;
     }
 
-    public int getCoursId() {
-        return coursId;
+    public int getCourse_id() {
+        return course_id;
     }
 
-    public void setCoursId(int coursId) {
-        this.coursId = coursId;
+    public void setCourse_id(int course_id) {
+        this.course_id = course_id;
     }
 
     @Override
@@ -105,8 +104,8 @@ public class Ressource {
                 ", type='" + type + '\'' +
                 ", contenu='" + contenu + '\'' +
                 ", dateDeCreation='" + dateDeCreation + '\'' +
-                ", dateDeModification='" + dateDeModification + '\'' +
-                ", coursId=" + coursId +
+                ", dateDeModification='" + date_de_modification + '\'' +
+                ", coursId=" + course_id +
                 '}';
     }
 }
