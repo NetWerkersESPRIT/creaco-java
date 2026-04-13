@@ -1,4 +1,4 @@
-package main.java.org.Per.Controllers.Entities;
+package entities;
 
 public class Course {
     private int id;
