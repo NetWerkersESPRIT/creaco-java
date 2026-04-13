@@ -20,14 +20,14 @@ public class Ressource {
         this.cours_id = cours_id;
     }
 
-    public Ressource(int id, String nom, String url, String type, String contenu, String dateDeCreation, String dateDeModification, int coursId) {
+    public Ressource(int id, String nom, String url, String type, String contenu, String date_de_creation, String date_de_modification, int cours_id) {
         this.id = id;
         this.nom = nom;
         this.url = url;
         this.type = type;
         this.contenu = contenu;
         this.date_de_creation = date_de_creation;
-        this.date_de_modification = Date_de_modification;
+        this.date_de_modification = date_de_modification;
         this.cours_id = cours_id;
     }
 
@@ -72,27 +72,27 @@ public class Ressource {
     }
 
     public String getDateDeCreation() {
-        return dateDeCreation;
+        return date_de_creation;
     }
 
-    public void setDateDeCreation(String dateDeCreation) {
-        this.dateDeCreation = dateDeCreation;
+    public void setDateDeCreation(String date_de_creation) {
+        this.date_de_creation = date_de_creation;
     }
 
-    public String getDate_de_modification() {
+    public String getDateDeModification() {
         return date_de_modification;
     }
 
-    public void setDate_de_modification(String date_de_modification) {
+    public void setDateDeModification(String date_de_modification) {
         this.date_de_modification = date_de_modification;
     }
 
-    public int getCourse_id() {
-        return course_id;
+    public int getCourseId() {
+        return cours_id;
     }
 
-    public void setCourse_id(int course_id) {
-        this.course_id = course_id;
+    public void setCourseId(int cours_id) {
+        this.cours_id = cours_id;
     }
 
     @Override
@@ -103,9 +103,9 @@ public class Ressource {
                 ", url='" + url + '\'' +
                 ", type='" + type + '\'' +
                 ", contenu='" + contenu + '\'' +
-                ", dateDeCreation='" + dateDeCreation + '\'' +
+                ", dateDeCreation='" + date_de_creation + '\'' +
                 ", dateDeModification='" + date_de_modification + '\'' +
-                ", coursId=" + course_id +
+                ", coursId=" + cours_id +
                 '}';
     }
 }

@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Creaco JavaFX" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="main.Main" />
+    <module name="netwerkers" />
+    <shortenClasspath name="ARGS_FILE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
