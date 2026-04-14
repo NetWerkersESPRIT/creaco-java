@@ -32,6 +32,9 @@ public class CourseCategoryFormController {
     private TextField nameField;
 
     @FXML
+    private Label nameErrorLabel;
+
+    @FXML
     private TextField slugField;
 
     @FXML
@@ -60,8 +63,8 @@ public class CourseCategoryFormController {
         String description = descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
         String slug = slugField.getText() == null || slugField.getText().isBlank() ? toSlug(name) : slugField.getText().trim();
 
-        if (name.isBlank()) {
-            throw new IllegalStateException("Category name is required.");
+        if (!validateForm(name)) {
+            return;
         }
 
         LocalDate today = LocalDate.now();
@@ -91,6 +94,39 @@ public class CourseCategoryFormController {
         nameField.setText(category.getNom());
         slugField.setText(category.getSlug());
         descriptionArea.setText(category.getDescription());
+    }
+
+    private boolean validateForm(String name) {
+        nameErrorLabel.setText("");
+        nameErrorLabel.setVisible(false);
+        nameErrorLabel.setManaged(false);
+
+        if (name.isBlank()) {
+            nameErrorLabel.setText("Category name is required.");
+            nameErrorLabel.setVisible(true);
+            nameErrorLabel.setManaged(true);
+            AlertHelper.showError("Validation error", "Please enter a category name before saving.");
+            return false;
+        }
+
+        try {
+            boolean exists = courseCategoryService.existsByNom(name);
+            if (exists && (category == null || !name.equalsIgnoreCase(category.getNom()))) {
+                nameErrorLabel.setText("A category with this name already exists.");
+                nameErrorLabel.setVisible(true);
+                nameErrorLabel.setManaged(true);
+                AlertHelper.showError("Validation error", "Category name must be unique.");
+                return false;
+            }
+        } catch (SQLException exception) {
+            nameErrorLabel.setText("Unable to validate category name uniqueness.");
+            nameErrorLabel.setVisible(true);
+            nameErrorLabel.setManaged(true);
+            AlertHelper.showError("Validation error", "Unable to verify if the category name is unique.");
+            return false;
+        }
+
+        return true;
     }
 
     private void openCategoryList() {

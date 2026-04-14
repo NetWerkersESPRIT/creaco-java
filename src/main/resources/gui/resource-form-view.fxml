@@ -40,22 +40,25 @@
                         <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
                     </padding>
                     <children>
-                        <VBox spacing="8.0">
+                        <VBox spacing="4.0">
                             <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Name" />
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Name *" />
                                 <TextField fx:id="nameField" promptText="Resource name" />
+                                <Label fx:id="nameErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                             </children>
                         </VBox>
-                        <VBox spacing="8.0">
+                        <VBox spacing="4.0">
                             <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Type" />
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Type *" />
                                 <TextField fx:id="typeField" promptText="PDF, video, image..." />
+                                <Label fx:id="typeErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                             </children>
                         </VBox>
-                        <VBox spacing="8.0">
+                        <VBox spacing="4.0">
                             <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="URL" />
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="URL *" />
                                 <TextField fx:id="urlField" promptText="https://example.com/resource" />
+                                <Label fx:id="urlErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                             </children>
                         </VBox>
                         <VBox spacing="8.0">
