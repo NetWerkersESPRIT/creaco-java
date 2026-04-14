@@ -22,7 +22,7 @@ public class AddPostController {
     @FXML
     private TextArea contentArea;
 
-    private PostService postService = new PostService();
+    private final PostService postService = new PostService();
 
     @FXML
     private void savePost(ActionEvent event) {
@@ -35,19 +35,18 @@ public class AddPostController {
         }
 
         if (title.length() < 3) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must be at least 3 characters.");
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must be at least 3 characters long.");
             return;
         }
 
-        Post p = new Post();
-        p.setTitle(title);
-        p.setContent(content);
-        p.setStatus("Active");
-        p.setUserId(1);
+        Post post = new Post();
+        post.setTitle(title);
+        post.setContent(content);
+        post.setStatus("Active");
+        post.setUserId(1); 
 
         try {
-            postService.ajouter(p);
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Post added successfully!");
+            postService.ajouter(post);
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,8 +58,8 @@ public class AddPostController {
     private void goBack(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
-            StackPane parentContainer = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            parentContainer.getChildren().setAll(root);
+            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
+            contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -69,6 +68,7 @@ public class AddPostController {
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }

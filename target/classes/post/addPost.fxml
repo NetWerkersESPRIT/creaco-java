@@ -5,36 +5,50 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="700.0" prefWidth="800.0" spacing="20.0" style="-fx-background-color: #ecf0f1; -fx-padding: 30;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.post.AddPostController">
+<VBox alignment="TOP_CENTER" spacing="22.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.post.AddPostController">
+    <padding>
+        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+    </padding>
     <children>
-        <Label text="Add New Post" textFill="#2c3e50">
-            <font>
-                <Font name="System Bold" size="24.0" />
-            </font>
-        </Label>
-        
-        <VBox spacing="5.0">
-            <Label text="Title:" textFill="#34495e">
-                <font>
-                    <Font name="System Bold" size="14.0" />
-                </font>
-            </Label>
-            <TextField fx:id="titleField" promptText="Enter post title..." style="-fx-font-size: 14px; -fx-padding: 10;" />
+        <VBox maxWidth="980.0" spacing="22.0" style="-fx-background-color: white; -fx-background-radius: 18; -fx-border-color: #dbe4f0; -fx-border-radius: 18;">
+            <padding>
+                <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT">
+                    <children>
+                        <VBox spacing="6.0">
+                            <children>
+                                <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #243b63;" text="Add Post" />
+                                <Label style="-fx-font-size: 14px; -fx-text-fill: #64748b;" text="Create a new discussion post." />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#goBack" style="-fx-background-color: #e2e8f0; -fx-text-fill: #334155; -fx-background-radius: 12; -fx-font-weight: bold; -fx-padding: 10 16 10 16;" text="Cancel" />
+                    </children>
+                </HBox>
+                <VBox spacing="8.0">
+                    <children>
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Title" />
+                        <TextField fx:id="titleField" promptText="Post title" style="-fx-font-size: 14px; -fx-padding: 10;" />
+                    </children>
+                </VBox>
+                <VBox spacing="8.0">
+                    <children>
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Content" />
+                        <TextArea fx:id="contentArea" prefHeight="140.0" promptText="Write your post..." style="-fx-font-size: 14px; -fx-padding: 10;" wrapText="true" />
+                    </children>
+                </VBox>
+                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#savePost" style="-fx-background-color: #355388; -fx-text-fill: white; -fx-background-radius: 12; -fx-font-weight: bold; -fx-padding: 10 18 10 18;" text="Save post" />
+                    </children>
+                </HBox>
+            </children>
         </VBox>
-        
-        <VBox spacing="5.0">
-            <Label text="Content:" textFill="#34495e">
-                <font>
-                    <Font name="System Bold" size="14.0" />
-                </font>
-            </Label>
-            <TextArea fx:id="contentArea" prefHeight="200.0" promptText="Enter post content..." style="-fx-font-size: 14px; -fx-padding: 10;" wrapText="true" />
-        </VBox>
-        
-        <Button mnemonicParsing="false" onAction="#savePost" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 20;" text="Save Post" />
-        <Button mnemonicParsing="false" onAction="#goBack" style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 20;" text="Back to Posts" />
     </children>
 </VBox>
