@@ -117,4 +117,15 @@ public class CommentService implements ForumInterface<Comment> {
         }
         return comments;
     }
+
+    public int getCommentCountByPost(int postId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM comment WHERE post_id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, postId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+        return 0;
+    }
 }
