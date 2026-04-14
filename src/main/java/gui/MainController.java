@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,20 +35,37 @@ public class MainController {
     private final CourseService courseService = new CourseService();
     private List<Course> courses = Collections.emptyList();
     private Map<Integer, String> categoryNames = Collections.emptyMap();
+    private List<Node> allCourseCards = new ArrayList<>();
 
-    @FXML
-    private VBox coursesContainer;
-
-    @FXML
-    private Label pageTitleLabel;
-
-    @FXML
-    private Label statusLabel;
+    @FXML private VBox coursesContainer;
+    @FXML private TextField searchField;
+    @FXML private Label pageTitleLabel;
+    @FXML private Label statusLabel;
 
     @FXML
     private void initialize() {
         pageTitleLabel.setText("Courses");
         loadCourses();
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> filterCourses(newVal));
+    }
+
+    private void saveAllCards() {
+        allCourseCards = new ArrayList<>(coursesContainer.getChildren());
+    }
+
+    private void filterCourses(String keyword) {
+        coursesContainer.getChildren().clear();
+        if (keyword == null || keyword.trim().isEmpty()) {
+            coursesContainer.getChildren().addAll(allCourseCards);
+        } else {
+            for (Node card : allCourseCards) {
+                if (card.getUserData() != null &&
+                        card.getUserData().toString().toLowerCase()
+                                .contains(keyword.toLowerCase())) {
+                    coursesContainer.getChildren().add(card);
+                }
+            }
+        }
     }
 
     @FXML
@@ -74,6 +93,7 @@ public class MainController {
     }
 
     private void loadCourses() {
+        allCourseCards.clear();
         try {
             categoryNames = courseService.getCategoryNames();
             courses = courseService.afficher();
@@ -94,12 +114,17 @@ public class MainController {
             Label emptyState = new Label("No courses available.");
             emptyState.setStyle("-fx-font-size: 15px; -fx-text-fill: #6b7280;");
             coursesContainer.getChildren().add(emptyState);
+            saveAllCards();
             return;
         }
 
         for (Course course : courses) {
-            coursesContainer.getChildren().add(buildCourseCard(course));
+            Node card = buildCourseCard(course);
+            card.setUserData(course.getTitre());
+            coursesContainer.getChildren().add(card);
         }
+
+        saveAllCards();
     }
 
     private Node buildCourseCard(Course course) {
@@ -152,12 +177,13 @@ public class MainController {
         resourcesButton.setOnAction(event -> openRessources(course, row));
         editButton.setOnAction(event -> openEditForm(course, row));
         deleteButton.setOnAction(event -> {
-            if (!AlertHelper.confirmDelete("course")) {
-                return;
-            }
+            if (!AlertHelper.confirmDelete("course")) return;
             try {
                 courseService.supprimer(course.getId());
                 loadCourses();
+                if (searchField.getText() != null && !searchField.getText().isEmpty()) {
+                    filterCourses(searchField.getText());
+                }
                 statusLabel.setText("Course deleted successfully.");
                 AlertHelper.showInfo("Deleted", "Course deleted successfully.");
             } catch (SQLException exception) {
@@ -167,7 +193,6 @@ public class MainController {
         });
 
         actionsBox.getChildren().addAll(resourcesButton, editButton, deleteButton);
-
         row.getChildren().addAll(imagePlaceholder, titleBox, descriptionBox, viewsBox,
                 durationBox, statusBox, dateBox, spacer, actionsBox);
         return row;
@@ -176,14 +201,11 @@ public class MainController {
     private VBox buildInfoBox(String labelText, String valueText) {
         VBox box = new VBox(8);
         box.setMinWidth(105);
-
         Label label = new Label(labelText);
         label.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;");
-
         Label value = new Label(valueText);
         value.setWrapText(true);
         value.setStyle("-fx-font-size: 15px; -fx-text-fill: #334155; -fx-font-weight: bold;");
-
         box.getChildren().addAll(label, value);
         return box;
     }
@@ -205,10 +227,8 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
             Parent root = loader.load();
-
             CourseFormController controller = loader.getController();
             controller.setCourse(course);
-
             Stage stage = (Stage) sourceNode.getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 760));
         } catch (IOException exception) {
@@ -220,10 +240,8 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resource-list-view.fxml"));
             Parent root = loader.load();
-
             RessourceListController controller = loader.getController();
             controller.setCourse(course);
-
             Stage stage = (Stage) sourceNode.getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 760));
         } catch (IOException exception) {
@@ -236,16 +254,12 @@ public class MainController {
     }
 
     private String formatDuration(Integer duration) {
-        if (duration == null || duration <= 0) {
-            return "-";
-        }
+        if (duration == null || duration <= 0) return "-";
         return duration + " min";
     }
 
     private String formatDate(String date) {
-        if (date == null || date.isBlank()) {
-            return "-";
-        }
+        if (date == null || date.isBlank()) return "-";
         try {
             return LocalDateTime.parse(date).format(DISPLAY_DATE_FORMAT);
         } catch (Exception ignored) {
