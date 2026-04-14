@@ -4,8 +4,13 @@ C:\java\creaco-java\src\main\java\entities\CourseCategory.java
 C:\java\creaco-java\src\main\java\entities\Post.java
 C:\java\creaco-java\src\main\java\entities\Ressource.java
 C:\java\creaco-java\src\main\java\entities\Users.java
+C:\java\creaco-java\src\main\java\gui\CategoryCoursesController.java
+C:\java\creaco-java\src\main\java\gui\CourseCategoryFormController.java
+C:\java\creaco-java\src\main\java\gui\CourseCategoryListController.java
 C:\java\creaco-java\src\main\java\gui\CourseFormController.java
 C:\java\creaco-java\src\main\java\gui\MainController.java
+C:\java\creaco-java\src\main\java\gui\RessourceFormController.java
+C:\java\creaco-java\src\main\java\gui\RessourceListController.java
 C:\java\creaco-java\src\main\java\main\FxApplication.java
 C:\java\creaco-java\src\main\java\main\Main.java
 C:\java\creaco-java\src\main\java\services\CommentService.java
@@ -14,4 +19,5 @@ C:\java\creaco-java\src\main\java\services\CourseService.java
 C:\java\creaco-java\src\main\java\services\ForumInterface.java
 C:\java\creaco-java\src\main\java\services\ICourseCategoryService.java
 C:\java\creaco-java\src\main\java\services\PostService.java
+C:\java\creaco-java\src\main\java\services\RessourceService.java
 C:\java\creaco-java\src\main\java\utils\MyConnection.java

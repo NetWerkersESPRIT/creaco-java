@@ -1,10 +1,12 @@
 package gui;
 
 import entities.Course;
+import entities.CourseCategory;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -18,6 +20,12 @@ import java.util.Locale;
 public class CourseFormController {
 
     private final CourseService courseService = new CourseService();
+
+    @FXML
+    private Label titleLabel;
+
+    @FXML
+    private Label subtitleLabel;
 
     @FXML
     private TextField titleField;
@@ -41,49 +49,70 @@ public class CourseFormController {
     private TextArea descriptionArea;
 
     private Course course;
+    private CourseCategory returnCategory;
 
     public void setCourse(Course course) {
         this.course = course;
+        this.returnCategory = null;
+        updateModeTexts();
+        populateForm();
+    }
+
+    public void setCourse(Course course, CourseCategory returnCategory) {
+        this.course = course;
+        this.returnCategory = returnCategory;
+        updateModeTexts();
         populateForm();
     }
 
     @FXML
     private void onSave() {
-        if (course == null) {
-            return;
-        }
+        boolean creating = course == null;
+        Course target = creating ? new Course() : course;
 
-        course.setTitre(titleField.getText());
-        course.setDescription(descriptionArea.getText());
-        course.setStatut(statusField.getText());
-        course.setNiveau(levelField.getText());
-        course.setDateDeModification(LocalDateTime.now().toString());
+        target.setTitre(titleField.getText());
+        target.setDescription(descriptionArea.getText());
+        target.setStatut(statusField.getText());
+        target.setNiveau(levelField.getText());
+        target.setDateDeModification(LocalDateTime.now().toString());
+        target.setImage(target.getImage());
 
         try {
-            course.setCategorieId(Integer.parseInt(categoryField.getText().trim()));
+            target.setCategorieId(Integer.parseInt(categoryField.getText().trim()));
         } catch (NumberFormatException ignored) {
-            // Keep the previous category id when the field is invalid.
+            if (returnCategory != null) {
+                target.setCategorieId(returnCategory.getId());
+            }
         }
 
         try {
-            course.setDureeEstimee(Integer.parseInt(durationField.getText().trim()));
+            target.setDureeEstimee(Integer.parseInt(durationField.getText().trim()));
         } catch (NumberFormatException ignored) {
-            course.setDureeEstimee(null);
+            target.setDureeEstimee(null);
         }
 
         try {
-            course.setViews(Integer.parseInt(viewsField.getText().trim()));
+            target.setViews(Integer.parseInt(viewsField.getText().trim()));
         } catch (NumberFormatException ignored) {
-            course.setViews(0);
+            target.setViews(0);
         }
 
-        course.setSlug(toSlug(course.getTitre()));
+        target.setSlug(toSlug(target.getTitre()));
+        target.setImage(target.getImage() == null ? "" : target.getImage());
+        if (creating) {
+            target.setDateDeCreation(LocalDateTime.now().toString());
+            target.setDeletedAt(null);
+        }
 
         try {
-            courseService.modifier(course);
+            if (creating) {
+                courseService.ajouter(target);
+            } else {
+                courseService.modifier(target);
+            }
             openCoursesPage();
         } catch (SQLException exception) {
-            throw new IllegalStateException("Unable to save the course changes.", exception);
+            throw new IllegalStateException("Unable to save the course.", exception);
         }
     }
 
@@ -93,7 +122,14 @@ public class CourseFormController {
     }
 
     private void populateForm() {
+        if (returnCategory != null) {
+            categoryField.setText(String.valueOf(returnCategory.getId()));
+        }
+
         if (course == null) {
+            statusField.setText("Published");
+            levelField.setText("Intermediate");
+            viewsField.setText("0");
             return;
         }
 
@@ -108,12 +144,37 @@ public class CourseFormController {
 
     private void openCoursesPage() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
+            FXMLLoader loader;
+            if (returnCategory != null) {
+                loader = new FXMLLoader(getClass().getResource("/gui/category-courses-view.fxml"));
+            } else {
+                loader = new FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
+            }
             Parent root = loader.load();
+            if (returnCategory != null) {
+                CategoryCoursesController controller = loader.getController();
+                controller.setCategory(returnCategory);
+            }
             Stage stage = (Stage) titleField.getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 760));
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to return to the courses page.", exception);
+        }
+    }
+
+    private void updateModeTexts() {
+        if (titleLabel == null || subtitleLabel == null) {
+            return;
+        }
+
+        boolean creating = course == null;
+        titleLabel.setText(creating ? "Add Course" : "Edit Course");
+        if (creating && returnCategory != null) {
+            subtitleLabel.setText("Create a new course in " + returnCategory.getNom() + ".");
+        } else if (creating) {
+            subtitleLabel.setText("Create a new course.");
+        } else {
+            subtitleLabel.setText("Update the selected course.");
         }
     }
 

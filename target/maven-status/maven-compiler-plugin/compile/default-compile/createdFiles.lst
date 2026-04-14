@@ -1,8 +1,8 @@
 entities\Post.class
+entities\Comment.class
+entities\Course.class
 services\ForumInterface.class
 gui\MainController.class
-entities\Comment.class
 main\FxApplication.class
 services\CommentService.class
 services\PostService.class
-entities\Course.class

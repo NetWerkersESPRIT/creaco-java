@@ -21,6 +21,7 @@ public class CourseService {
     private final Connection con;
 
     public CourseService() {
+
         con = MyConnection.getInstance().getConnection();
     }
 
@@ -32,6 +33,23 @@ public class CourseService {
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 courses.add(mapCourse(rs));
+            }
+        }
+
+        return courses;
+    }
+
+    public List<Course> afficherParCategorie(int categoryId) throws SQLException {
+        List<Course> courses = new ArrayList<>();
+        String sql = "SELECT * FROM cours WHERE deleted_at IS NULL AND categorie_id = ? "
+                + "ORDER BY date_de_modification DESC, id DESC";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    courses.add(mapCourse(rs));
+                }
             }
         }
 
@@ -51,6 +69,36 @@ public class CourseService {
         }
 
         return null;
+    }
+
+    public void ajouter(Course course) throws SQLException {
+        String sql = "INSERT INTO cours (titre, description, image, date_de_creation, date_de_modification, "
+                + "categorie_id, slug, views, statut, niveau, duree_estimee, deleted_at) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, course.getTitre());
+            ps.setString(2, course.getDescription());
+            ps.setString(3, emptyToNull(course.getImage()));
+            ps.setTimestamp(4, toTimestamp(course.getDateDeCreation()));
+            ps.setTimestamp(5, toTimestamp(course.getDateDeModification()));
+            ps.setInt(6, course.getCategorieId());
+            ps.setString(7, course.getSlug());
+            if (course.getViews() == null) {
+                ps.setNull(8, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(8, course.getViews());
+            }
+            ps.setString(9, course.getStatut());
+            ps.setString(10, emptyToNull(course.getNiveau()));
+            if (course.getDureeEstimee() == null) {
+                ps.setNull(11, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(11, course.getDureeEstimee());
+            }
+            ps.setNull(12, java.sql.Types.TIMESTAMP);
+            ps.executeUpdate();
+        }
     }
 
     public void modifier(Course course) throws SQLException {

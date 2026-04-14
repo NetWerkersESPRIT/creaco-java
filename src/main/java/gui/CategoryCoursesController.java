@@ -1,6 +1,7 @@
 package gui;
 
 import entities.Course;
+import entities.CourseCategory;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -25,51 +26,63 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class MainController {
+public class CategoryCoursesController {
 
     private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final CourseService courseService = new CourseService();
+
+    private CourseCategory category;
     private List<Course> courses = Collections.emptyList();
     private Map<Integer, String> categoryNames = Collections.emptyMap();
 
     @FXML
-    private VBox coursesContainer;
-
-    @FXML
-    private Label pageTitleLabel;
+    private Label titleLabel;
 
     @FXML
     private Label statusLabel;
 
     @FXML
-    private void initialize() {
-        pageTitleLabel.setText("Courses");
+    private VBox coursesContainer;
+
+    public void setCategory(CourseCategory category) {
+        this.category = category;
+        titleLabel.setText("Courses in " + category.getNom());
         loadCourses();
     }
 
     @FXML
-    private void onManageCategories() {
+    private void onBackToCategories() {
+        openScene("/gui/category-list-view.fxml", null);
+    }
+
+    @FXML
+    private void onAddCourse() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/category-list-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) statusLabel.getScene().getWindow();
+            CourseFormController controller = loader.getController();
+            controller.setCourse(null, category);
+            Stage stage = (Stage) titleLabel.getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 760));
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to open the category list view.", exception);
+            throw new IllegalStateException("Unable to open the course creation view.", exception);
         }
     }
 
     private void loadCourses() {
+        if (category == null) {
+            return;
+        }
+
         try {
             categoryNames = courseService.getCategoryNames();
-            courses = courseService.afficher();
-            statusLabel.setText(courses.size() + " course(s) loaded from creaco.");
+            courses = courseService.afficherParCategorie(category.getId());
+            statusLabel.setText(courses.size() + " course(s) in this category.");
             renderCourses();
         } catch (SQLException exception) {
             courses = Collections.emptyList();
-            categoryNames = Collections.emptyMap();
             statusLabel.setText("Database error: " + exception.getMessage());
             renderCourses();
         }
@@ -79,65 +92,59 @@ public class MainController {
         coursesContainer.getChildren().clear();
 
         if (courses.isEmpty()) {
-            Label emptyState = new Label("No courses available.");
+            Label emptyState = new Label("No courses found for this category.");
             emptyState.setStyle("-fx-font-size: 15px; -fx-text-fill: #6b7280;");
             coursesContainer.getChildren().add(emptyState);
             return;
         }
 
         for (Course course : courses) {
-            coursesContainer.getChildren().add(buildCourseCard(course));
+            coursesContainer.getChildren().add(buildCourseRow(course));
         }
     }
 
-    private Node buildCourseCard(Course course) {
+    private Node buildCourseRow(Course course) {
         HBox row = new HBox(18);
         row.setPadding(new Insets(18, 20, 18, 20));
         row.setStyle("-fx-background-color: white; -fx-background-radius: 18; "
-                + "-fx-border-color: #dbe4f0; -fx-border-radius: 18;");
+                + "-fx-border-color: #e2e8f0; -fx-border-radius: 18;");
 
-        StackPane imagePlaceholder = new StackPane();
-        imagePlaceholder.setMinSize(58, 58);
-        imagePlaceholder.setPrefSize(58, 58);
-        imagePlaceholder.setMaxSize(58, 58);
-        imagePlaceholder.setStyle("-fx-background-color: #e8eef8; -fx-background-radius: 14;");
-        Label imageLabel = new Label("IMG");
-        imageLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #47638a;");
-        imagePlaceholder.getChildren().add(imageLabel);
+        StackPane iconBox = new StackPane();
+        iconBox.setMinSize(42, 42);
+        iconBox.setPrefSize(42, 42);
+        iconBox.setMaxSize(42, 42);
+        iconBox.setStyle("-fx-background-color: #e8eef8; -fx-background-radius: 12;");
+        Label iconLabel = new Label("C");
+        iconLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #47638a;");
+        iconBox.getChildren().add(iconLabel);
 
-        VBox titleBox = new VBox(8);
-        titleBox.setMinWidth(180);
-        Label titleLabel = new Label(course.getTitre());
-        titleLabel.setWrapText(true);
-        titleLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
-        Label categoryLabel = new Label(resolveCategoryName(course.getCategorieId()));
-        categoryLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #64748b;");
-        titleBox.getChildren().addAll(titleLabel, categoryLabel);
+        Label title = new Label(safeText(course.getTitre()));
+        title.setMinWidth(240);
+        title.setWrapText(true);
+        title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
 
-        VBox descriptionBox = new VBox(8);
-        descriptionBox.setMinWidth(270);
-        Label updatedLabel = new Label("Updated " + safeText(course.getDateDeModification()));
-        updatedLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
-        Label descriptionLabel = new Label(safeText(course.getDescription()));
-        descriptionLabel.setWrapText(true);
-        descriptionLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #475569;");
-        descriptionBox.getChildren().addAll(updatedLabel, descriptionLabel);
+        Label description = new Label(shorten(safeText(course.getDescription()), 95));
+        description.setMinWidth(430);
+        description.setWrapText(true);
+        description.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
 
-        VBox viewsBox = buildInfoBox("Views", String.valueOf(course.getViews() == null ? 0 : course.getViews()));
-        VBox durationBox = buildInfoBox("Duration", formatDuration(course.getDureeEstimee()));
-        VBox statusBox = buildInfoBox("Status", safeText(course.getStatut()));
-        VBox dateBox = buildInfoBox("Last update", formatDate(course.getDateDeModification()));
+        Label views = new Label(String.valueOf(course.getViews() == null ? 0 : course.getViews()));
+        views.setMinWidth(70);
+        views.setStyle("-fx-font-size: 15px; -fx-text-fill: #334155; -fx-font-weight: bold;");
+
+        Label createdAt = new Label(formatDate(course.getDateDeCreation()));
+        createdAt.setMinWidth(140);
+        createdAt.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b; -fx-font-weight: bold;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        VBox actionsBox = new VBox(10);
-        actionsBox.setMinWidth(120);
-        Button resourcesButton = createActionButton("Ressources", "#355388", "#e9f0fb");
+        HBox actions = new HBox(10);
+        Button resourcesButton = createActionButton("Resources", "#355388", "#e9f0fb");
         Button editButton = createActionButton("Edit", "#355388", "#eef3fb");
         Button deleteButton = createActionButton("Delete", "#c62828", "#fdecec");
 
-        resourcesButton.setOnAction(event -> openRessources(course, row));
+        resourcesButton.setOnAction(event -> openResources(course, row));
         editButton.setOnAction(event -> openEditForm(course, row));
         deleteButton.setOnAction(event -> {
             try {
@@ -148,31 +155,13 @@ public class MainController {
             }
         });
 
-        actionsBox.getChildren().addAll(resourcesButton, editButton, deleteButton);
-
-        row.getChildren().addAll(imagePlaceholder, titleBox, descriptionBox, viewsBox,
-                durationBox, statusBox, dateBox, spacer, actionsBox);
+        actions.getChildren().addAll(resourcesButton, editButton, deleteButton);
+        row.getChildren().addAll(iconBox, title, description, views, createdAt, spacer, actions);
         return row;
-    }
-
-    private VBox buildInfoBox(String labelText, String valueText) {
-        VBox box = new VBox(8);
-        box.setMinWidth(105);
-
-        Label label = new Label(labelText);
-        label.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;");
-
-        Label value = new Label(valueText);
-        value.setWrapText(true);
-        value.setStyle("-fx-font-size: 15px; -fx-text-fill: #334155; -fx-font-weight: bold;");
-
-        box.getChildren().addAll(label, value);
-        return box;
     }
 
     private Button createActionButton(String text, String textColor, String backgroundColor) {
         Button button = new Button(text);
-        button.setMaxWidth(Double.MAX_VALUE);
         button.setStyle(commonButtonStyle());
         return button;
     }
@@ -186,10 +175,8 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
             Parent root = loader.load();
-
             CourseFormController controller = loader.getController();
-            controller.setCourse(course);
-
+            controller.setCourse(course, category);
             Stage stage = (Stage) sourceNode.getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 760));
         } catch (IOException exception) {
@@ -197,14 +184,12 @@ public class MainController {
         }
     }
 
-    private void openRessources(Course course, Node sourceNode) {
+    private void openResources(Course course, Node sourceNode) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resource-list-view.fxml"));
             Parent root = loader.load();
-
             RessourceListController controller = loader.getController();
             controller.setCourse(course);
-
             Stage stage = (Stage) sourceNode.getScene().getWindow();
             stage.setScene(new Scene(root, 1280, 760));
         } catch (IOException exception) {
@@ -212,15 +197,18 @@ public class MainController {
         }
     }
 
-    private String resolveCategoryName(int categoryId) {
-        return categoryNames.getOrDefault(categoryId, "Unassigned");
-    }
-
-    private String formatDuration(Integer duration) {
-        if (duration == null || duration <= 0) {
-            return "-";
+    private void openScene(String resourcePath, ControllerInitializer initializer) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(resourcePath));
+            Parent root = loader.load();
+            if (initializer != null) {
+                initializer.initialize(loader.getController());
+            }
+            Stage stage = (Stage) titleLabel.getScene().getWindow();
+            stage.setScene(new Scene(root, 1280, 760));
+        } catch (IOException exception) {
+            throw new IllegalStateException("Unable to open view: " + resourcePath, exception);
         }
-        return duration + " min";
     }
 
     private String formatDate(String date) {
@@ -236,5 +224,17 @@ public class MainController {
 
     private String safeText(String value) {
         return value == null || value.isBlank() ? "-" : value;
+    }
+
+    private String shorten(String value, int maxLength) {
+        if (value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength - 3) + "...";
+    }
+
+    @FunctionalInterface
+    private interface ControllerInitializer {
+        void initialize(Object controller);
     }
 }

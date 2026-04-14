@@ -26,10 +26,11 @@
                     <children>
                         <VBox spacing="6.0">
                             <children>
-                                <Label style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;"
+                                <Label fx:id="titleLabel"
+                                       style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;"
                                        text="Edit Course" />
-                                <Label style="-fx-font-size: 14px; -fx-text-fill: #64748b;"
-                                       text="Update the selected course. Category management and resources will be added later." />
+                                <Label fx:id="subtitleLabel" style="-fx-font-size: 14px; -fx-text-fill: #64748b;"
+                                       text="Update the selected course." />
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
@@ -94,11 +95,11 @@
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">
                             <children>
                                 <Button mnemonicParsing="false" onAction="#onCancel"
-                                        style="-fx-background-color: #e2e8f0; -fx-text-fill: #334155; -fx-background-radius: 12; -fx-font-weight: bold;"
+                                        style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
                                         text="Cancel" />
                                 <Button mnemonicParsing="false" onAction="#onSave"
-                                        style="-fx-background-color: #355388; -fx-text-fill: white; -fx-background-radius: 12; -fx-font-weight: bold;"
-                                        text="Save changes" />
+                                        style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
+                                        text="Save course" />
                             </children>
                         </HBox>
                     </children>
