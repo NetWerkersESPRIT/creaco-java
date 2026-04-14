@@ -130,11 +130,17 @@ public class CourseCategoryListController {
             formController.setCategory(category);
         }));
         deleteButton.setOnAction(event -> {
+            if (!AlertHelper.confirmDelete("category")) {
+                return;
+            }
             try {
                 courseCategoryService.supprimer(category.getId());
                 loadCategories();
+                statusLabel.setText("Category deleted successfully.");
+                AlertHelper.showInfo("Deleted", "Category deleted successfully.");
             } catch (SQLException exception) {
                 statusLabel.setText("Delete failed: " + exception.getMessage());
+                AlertHelper.showError("Delete failed", exception.getMessage());
             }
         });
 

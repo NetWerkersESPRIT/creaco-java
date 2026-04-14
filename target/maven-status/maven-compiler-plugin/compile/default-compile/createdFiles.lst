@@ -6,3 +6,4 @@ gui\MainController.class
 main\FxApplication.class
 services\CommentService.class
 services\PostService.class
+gui\AlertHelper.class

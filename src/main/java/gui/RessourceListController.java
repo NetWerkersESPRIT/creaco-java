@@ -135,11 +135,17 @@ public class RessourceListController {
             formController.setContext(course, ressource);
         }));
         deleteButton.setOnAction(event -> {
+            if (!AlertHelper.confirmDelete("resource")) {
+                return;
+            }
             try {
                 ressourceService.supprimer(ressource.getId());
                 loadRessources();
+                statusLabel.setText("Resource deleted successfully.");
+                AlertHelper.showInfo("Deleted", "Resource deleted successfully.");
             } catch (SQLException exception) {
                 statusLabel.setText("Delete failed: " + exception.getMessage());
+                AlertHelper.showError("Delete failed", exception.getMessage());
             }
         });
         openButton.setOnAction(event -> openRessource(ressource));
