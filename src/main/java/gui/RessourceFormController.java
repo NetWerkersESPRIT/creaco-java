@@ -33,10 +33,19 @@ public class RessourceFormController {
     private TextField nameField;
 
     @FXML
+    private Label nameErrorLabel;
+
+    @FXML
     private TextField typeField;
 
     @FXML
+    private Label typeErrorLabel;
+
+    @FXML
     private TextField urlField;
+
+    @FXML
+    private Label urlErrorLabel;
 
     @FXML
     private TextArea contentArea;
@@ -65,12 +74,16 @@ public class RessourceFormController {
             return;
         }
 
+        if (!validateForm()) {
+            return;
+        }
+
         boolean editing = ressource != null;
         Ressource target = editing ? ressource : new Ressource();
 
-        target.setNom(nameField.getText());
-        target.setType(typeField.getText());
-        target.setUrl(urlField.getText());
+        target.setNom(nameField.getText().trim());
+        target.setType(typeField.getText().trim());
+        target.setUrl(urlField.getText().trim());
         target.setContenu(contentArea.getText());
         target.setCourseId(course.getId());
 
@@ -96,6 +109,61 @@ public class RessourceFormController {
         typeField.setText(ressource.getType());
         urlField.setText(ressource.getUrl());
         contentArea.setText(ressource.getContenu());
+    }
+
+    private boolean validateForm() {
+        clearValidationErrors();
+
+        boolean valid = true;
+
+        String name = nameField.getText();
+        String type = typeField.getText();
+        String url = urlField.getText();
+
+        if (name == null || name.isBlank()) {
+            nameErrorLabel.setText("Resource name is required.");
+            nameErrorLabel.setVisible(true);
+            nameErrorLabel.setManaged(true);
+            valid = false;
+        }
+
+        if (type == null || type.isBlank()) {
+            typeErrorLabel.setText("Resource type is required.");
+            typeErrorLabel.setVisible(true);
+            typeErrorLabel.setManaged(true);
+            valid = false;
+        }
+
+        if (url == null || url.isBlank()) {
+            urlErrorLabel.setText("Resource URL is required.");
+            urlErrorLabel.setVisible(true);
+            urlErrorLabel.setManaged(true);
+            valid = false;
+        } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            urlErrorLabel.setText("URL must start with http:// or https://.");
+            urlErrorLabel.setVisible(true);
+            urlErrorLabel.setManaged(true);
+            valid = false;
+        }
+
+        if (!valid) {
+            AlertHelper.showError("Validation error", "Please correct the highlighted fields before saving the resource.");
+        }
+        return valid;
+    }
+
+    private void clearValidationErrors() {
+        nameErrorLabel.setText("");
+        nameErrorLabel.setVisible(false);
+        nameErrorLabel.setManaged(false);
+
+        typeErrorLabel.setText("");
+        typeErrorLabel.setVisible(false);
+        typeErrorLabel.setManaged(false);
+
+        urlErrorLabel.setText("");
+        urlErrorLabel.setVisible(false);
+        urlErrorLabel.setManaged(false);
     }
 
     private void openRessourceList() {
