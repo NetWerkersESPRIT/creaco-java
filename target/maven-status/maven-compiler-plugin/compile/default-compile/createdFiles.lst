@@ -1,4 +1,3 @@
-main\TestFX.class
 gui\post\DisplayPostController.class
 services\forum\CommentService.class
 gui\post\UpdatePostController.class
