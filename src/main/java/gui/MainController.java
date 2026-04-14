@@ -61,6 +61,18 @@ public class MainController {
         }
     }
 
+    @FXML
+    private void onAddCourse() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) statusLabel.getScene().getWindow();
+            stage.setScene(new Scene(root, 1280, 760));
+        } catch (IOException exception) {
+            throw new IllegalStateException("Unable to open the course creation view.", exception);
+        }
+    }
+
     private void loadCourses() {
         try {
             categoryNames = courseService.getCategoryNames();
