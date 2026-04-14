@@ -35,6 +35,11 @@
                   <Font size="16.0" />
                </font>
             </Button>
+            <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#showPosts" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;" text="Posts">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
          </children>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -42,6 +47,6 @@
       </VBox>
    </left>
    <center>
-      <StackPane fx:id="contentArea" style="-fx-background-color: #ecf0f1;" BorderPane.alignment="CENTER" />
+      <StackPane fx:id="contentArea" id="contentArea" style="-fx-background-color: #ecf0f1;" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>

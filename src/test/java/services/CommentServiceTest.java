@@ -4,6 +4,8 @@ import entities.Comment;
 import entities.Post;
 import org.junit.jupiter.api.*;
 import utils.MyConnection;
+import services.forum.PostService;
+import services.forum.CommentService;
 
 import java.sql.Connection;
 import java.sql.SQLException;

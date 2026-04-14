@@ -3,6 +3,7 @@ package services;
 import entities.Post;
 import org.junit.jupiter.api.*;
 import utils.MyConnection;
+import services.forum.PostService;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

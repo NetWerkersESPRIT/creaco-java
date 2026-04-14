@@ -1,4 +1,4 @@
-package services;
+package services.forum;
 
 import entities.Comment;
 import utils.MyConnection;
@@ -88,5 +88,33 @@ public class CommentService implements ForumInterface<Comment> {
         ps.setInt(6, id);
         ps.executeUpdate();
         System.out.println("Commentaire modifié avec succès!");
+    }
+
+    public List<Comment> getCommentsByPost(int postId) throws SQLException {
+        List<Comment> comments = new ArrayList<>();
+        String sql = "SELECT * FROM comment WHERE post_id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, postId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Comment comment = new Comment();
+            comment.setId(rs.getInt("id"));
+            comment.setBody(rs.getString("body"));
+            comment.setStatus(rs.getString("status"));
+            comment.setLikes(rs.getInt("likes"));
+            comment.setPostId(rs.getInt("post_id"));
+            comment.setUserId(rs.getInt("user_id"));
+            int parentId = rs.getInt("parent_comment_id");
+            comment.setParentCommentId(rs.wasNull() ? null : parentId);
+            comment.setProfane(rs.getBoolean("is_profane"));
+            comment.setProfaneWords(rs.getInt("profane_words"));
+            comment.setGrammarErrors(rs.getInt("grammar_errors"));
+            Timestamp createdAt = rs.getTimestamp("created_at");
+            if (createdAt != null) comment.setCreatedAt(createdAt.toLocalDateTime());
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            if (updatedAt != null) comment.setUpdatedAt(updatedAt.toLocalDateTime());
+            comments.add(comment);
+        }
+        return comments;
     }
 }
