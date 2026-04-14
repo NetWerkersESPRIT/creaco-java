@@ -10,33 +10,46 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import services.forum.CommentService;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class DisplayCommentController {
 
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
     @FXML
     private VBox commentsContainer;
+    
     @FXML
     private Label postTitleLabel;
+    
     @FXML
     private Label postContentLabel;
+    
+    @FXML
+    private Label statusLabel;
 
-    private CommentService commentService = new CommentService();
+    private final CommentService commentService = new CommentService();
     private Post currentPost;
 
     public void setPost(Post post) {
         this.currentPost = post;
         if (post != null) {
-            postTitleLabel.setText(post.getTitle());
-            postContentLabel.setText(post.getContent());
+            postTitleLabel.setText(safeText(post.getTitle()));
+            postContentLabel.setText(safeText(post.getContent()));
             loadCommentsByPost();
         }
     }
@@ -47,10 +60,11 @@ public class DisplayCommentController {
         commentsContainer.getChildren().clear();
         try {
             List<Comment> comments = commentService.getCommentsByPost(currentPost.getId());
+            statusLabel.setText(comments.size() + " comment(s) found.");
             
             if (comments.isEmpty()) {
                 Label emptyLabel = new Label("No comments yet. Be the first to comment!");
-                emptyLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-style: italic;");
+                emptyLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-style: italic; -fx-font-size: 14px;");
                 commentsContainer.getChildren().add(emptyLabel);
                 return;
             }
@@ -61,33 +75,47 @@ public class DisplayCommentController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            statusLabel.setText("Database error: Could not load comments.");
             showAlert(Alert.AlertType.ERROR, "Database Error", "Could not load comments.");
         }
     }
 
     private VBox createCommentCard(Comment comment) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(10));
-        card.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 5; -fx-border-color: #e0e0e0; -fx-border-radius: 5;");
+        VBox card = new VBox(12);
+        card.setPadding(new Insets(16));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 14; "
+                + "-fx-border-color: #dbe4f0; -fx-border-radius: 14;");
 
-        Label bodyLabel = new Label(comment.getBody());
+        Label bodyLabel = new Label(safeText(comment.getBody()));
         bodyLabel.setWrapText(true);
-        bodyLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #2c3e50;");
+        bodyLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155;");
 
-        HBox buttonBox = new HBox(10);
+        HBox footer = new HBox(10);
         
-        Button editBtn = new Button("Edit");
-        editBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
-        editBtn.setOnAction(e -> openEdit(e, comment));
-
-        Button deleteBtn = new Button("Delete");
-        deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
-        deleteBtn.setOnAction(e -> deleteComment(comment));
-
-        buttonBox.getChildren().addAll(editBtn, deleteBtn);
+        // Display ONLY comment creation meta
+        String metaText = "Posted " + formatDate(comment.getCreatedAt());
+        Label meta = new Label(metaText);
+        meta.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
         
-        card.getChildren().addAll(bodyLabel, buttonBox);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button editButton = createActionButton("Edit", "#355388", "#eef3fb");
+        editButton.setOnAction(event -> openEdit(event, comment));
+        
+        Button deleteButton = createActionButton("Delete", "#c62828", "#fdecec");
+        deleteButton.setOnAction(event -> deleteComment(comment.getId()));
+
+        footer.getChildren().addAll(meta, spacer, editButton, deleteButton);
+        card.getChildren().addAll(bodyLabel, footer);
         return card;
+    }
+
+    private Button createActionButton(String text, String textColor, String backgroundColor) {
+        Button button = new Button(text);
+        button.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor
+                + "; -fx-background-radius: 12; -fx-padding: 8 14 8 14; -fx-font-weight: bold; -fx-font-size: 11px;");
+        return button;
     }
 
     @FXML
@@ -96,11 +124,12 @@ public class DisplayCommentController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/comment/addComment.fxml"));
             Parent root = loader.load();
+            
             AddCommentController controller = loader.getController();
             controller.setPost(currentPost);
             
-            StackPane parentContainer = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            parentContainer.getChildren().setAll(root);
+            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
+            contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -111,41 +140,59 @@ public class DisplayCommentController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/comment/updateComment.fxml"));
             Parent root = loader.load();
+            
             UpdateCommentController controller = loader.getController();
             controller.setData(currentPost, comment);
             
-            StackPane parentContainer = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            parentContainer.getChildren().setAll(root);
+            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
+            contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void deleteComment(Comment comment) {
-        try {
-            commentService.supprimer(comment.getId());
-            showAlert(Alert.AlertType.INFORMATION, "Deleted", "Comment deleted successfully.");
-            loadCommentsByPost(); // Refresh list
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not delete comment.");
-        }
+    private void deleteComment(int commentId) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirm Delete");
+        confirmAlert.setContentText("Are you sure you want to delete this comment?");
+
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    commentService.supprimer(commentId);
+                    loadCommentsByPost(); // Refresh list dynamically
+                } catch (SQLException exception) {
+                    exception.printStackTrace();
+                    showAlert(Alert.AlertType.ERROR, "Database Error", "Could not delete the comment.");
+                }
+            }
+        });
     }
 
     @FXML
     private void goBack(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
-            StackPane parentContainer = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            parentContainer.getChildren().setAll(root);
+            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
+            contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private String formatDate(LocalDateTime date) {
+        if (date == null) return "-";
+        return date.format(DISPLAY_DATE_FORMAT);
+    }
+    
+    private String safeText(String value) {
+        return value == null || value.isBlank() ? "-" : value;
+    }
+
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }

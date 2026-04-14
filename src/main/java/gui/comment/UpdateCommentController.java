@@ -20,7 +20,7 @@ public class UpdateCommentController {
     @FXML
     private TextArea bodyArea;
 
-    private CommentService commentService = new CommentService();
+    private final CommentService commentService = new CommentService();
     private Comment commentToUpdate;
     private Post currentPost;
 
@@ -52,7 +52,6 @@ public class UpdateCommentController {
 
         try {
             commentService.modifier(commentToUpdate.getId(), commentToUpdate);
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Comment updated successfully!");
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -65,11 +64,12 @@ public class UpdateCommentController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/comment/displayComment.fxml"));
             Parent root = loader.load();
+            
             DisplayCommentController controller = loader.getController();
             controller.setPost(currentPost);
             
-            StackPane parentContainer = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            parentContainer.getChildren().setAll(root);
+            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
+            contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,6 +78,7 @@ public class UpdateCommentController {
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }
