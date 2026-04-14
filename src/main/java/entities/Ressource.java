@@ -20,7 +20,7 @@ public class Ressource {
         this.cours_id = cours_id;
     }
 
-    public Ressource(int id, String nom, String url, String type, String contenu, String date_de_creation, String date_de_modification, int coursId) {
+    public Ressource(int id, String nom, String url, String type, String contenu, String date_de_creation, String date_de_modification, int cours_id) {
         this.id = id;
         this.nom = nom;
         this.url = url;
@@ -75,24 +75,24 @@ public class Ressource {
         return date_de_creation;
     }
 
-    public void setDateDeCreation(String dateDeCreation) {
+    public void setDateDeCreation(String date_de_creation) {
         this.date_de_creation = date_de_creation;
     }
 
-    public String getDate_de_modification() {
+    public String getDateDeModification() {
         return date_de_modification;
     }
 
-    public void setDate_de_modification(String date_de_modification) {
+    public void setDateDeModification(String date_de_modification) {
         this.date_de_modification = date_de_modification;
     }
 
-    public int getCourse_id() {
+    public int getCourseId() {
         return cours_id;
     }
 
-    public void setCourse_id(int course_id) {
-        this.cours_id = course_id;
+    public void setCourseId(int cours_id) {
+        this.cours_id = cours_id;
     }
 
     @Override
