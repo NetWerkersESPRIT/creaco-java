@@ -140,9 +140,9 @@ public class CategoryCoursesController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actions = new HBox(10);
-        Button resourcesButton = createActionButton("Resources", "#355388", "#e9f0fb");
-        Button editButton = createActionButton("Edit", "#355388", "#eef3fb");
-        Button deleteButton = createActionButton("Delete", "#c62828", "#fdecec");
+        Button resourcesButton = createActionButton("Resources", "#1d4ed8", "#dbeafe");
+        Button editButton = createActionButton("Edit", "#1d4ed8", "#dbeafe");
+        Button deleteButton = createActionButton("Delete", "#b91c1c", "#fee2e2");
 
         resourcesButton.setOnAction(event -> openResources(course, row));
         editButton.setOnAction(event -> openEditForm(course, row));
@@ -168,13 +168,15 @@ public class CategoryCoursesController {
 
     private Button createActionButton(String text, String textColor, String backgroundColor) {
         Button button = new Button(text);
-        button.setStyle(commonButtonStyle());
+        button.setStyle(commonButtonStyle(textColor, backgroundColor));
+        button.setMinWidth(90);
         return button;
     }
 
-    private String commonButtonStyle() {
-        return "-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; "
-                + "-fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;";
+    private String commonButtonStyle(String textColor, String backgroundColor) {
+        return "-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";"
+                + " -fx-background-radius: 22; -fx-padding: 10 20 10 20; -fx-font-size: 14px;"
+                + " -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);";
     }
 
     private void openEditForm(Course course, Node sourceNode) {
