@@ -147,11 +147,17 @@ public class CategoryCoursesController {
         resourcesButton.setOnAction(event -> openResources(course, row));
         editButton.setOnAction(event -> openEditForm(course, row));
         deleteButton.setOnAction(event -> {
+            if (!AlertHelper.confirmDelete("course")) {
+                return;
+            }
             try {
                 courseService.supprimer(course.getId());
                 loadCourses();
+                statusLabel.setText("Course deleted successfully.");
+                AlertHelper.showInfo("Deleted", "Course deleted successfully.");
             } catch (SQLException exception) {
                 statusLabel.setText("Delete failed: " + exception.getMessage());
+                AlertHelper.showError("Delete failed", exception.getMessage());
             }
         });
 
