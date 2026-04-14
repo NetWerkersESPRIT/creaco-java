@@ -1,4 +1,4 @@
-package services;
+package services.forum;
 
 import entities.Post;
 import utils.MyConnection;
