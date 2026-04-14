@@ -2,10 +2,8 @@ D:\pidev\creaco-java\src\main\java\entities\Collaborator.java
 D:\pidev\creaco-java\src\main\java\entities\CollabRequest.java
 D:\pidev\creaco-java\src\main\java\entities\Comment.java
 D:\pidev\creaco-java\src\main\java\entities\Contract.java
-D:\pidev\creaco-java\src\main\java\entities\Course.java
 D:\pidev\creaco-java\src\main\java\entities\CourseCategory.java
 D:\pidev\creaco-java\src\main\java\entities\Post.java
-D:\pidev\creaco-java\src\main\java\entities\Ressource.java
 D:\pidev\creaco-java\src\main\java\entities\Users.java
 D:\pidev\creaco-java\src\main\java\gui\collaborator\AddCollaboratorController.java
 D:\pidev\creaco-java\src\main\java\gui\collaborator\EditCollaboratorController.java
@@ -19,12 +17,12 @@ D:\pidev\creaco-java\src\main\java\gui\comment\UpdateCommentController.java
 D:\pidev\creaco-java\src\main\java\gui\contract\AddContractController.java
 D:\pidev\creaco-java\src\main\java\gui\contract\EditContractController.java
 D:\pidev\creaco-java\src\main\java\gui\contract\ListContractController.java
-D:\pidev\creaco-java\src\main\java\gui\DashboardController.java
+D:\pidev\creaco-java\src\main\java\gui\MainController.java
 D:\pidev\creaco-java\src\main\java\gui\post\AddPostController.java
 D:\pidev\creaco-java\src\main\java\gui\post\DisplayPostController.java
 D:\pidev\creaco-java\src\main\java\gui\post\UpdatePostController.java
+D:\pidev\creaco-java\src\main\java\main\FxApplication.java
 D:\pidev\creaco-java\src\main\java\main\Main.java
-D:\pidev\creaco-java\src\main\java\main\TestFX.java
 D:\pidev\creaco-java\src\main\java\services\CollaboratorService.java
 D:\pidev\creaco-java\src\main\java\services\CollabRequestService.java
 D:\pidev\creaco-java\src\main\java\services\ContractService.java
