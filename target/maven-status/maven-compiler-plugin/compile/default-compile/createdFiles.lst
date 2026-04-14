@@ -1,1 +1,10 @@
 main\TestFX.class
+gui\post\DisplayPostController.class
+services\forum\CommentService.class
+gui\post\UpdatePostController.class
+services\forum\PostService.class
+services\forum\ForumInterface.class
+gui\post\AddPostController.class
+gui\comment\UpdateCommentController.class
+gui\comment\DisplayCommentController.class
+gui\comment\AddCommentController.class

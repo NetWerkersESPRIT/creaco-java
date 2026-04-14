@@ -34,6 +34,11 @@ public class DashboardController {
         loadView("/contract/ListContract.fxml");
     }
 
+    @FXML
+    private void showPosts() {
+        loadView("/post/displayPost.fxml");
+    }
+
     private void loadView(String fxml) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxml));
