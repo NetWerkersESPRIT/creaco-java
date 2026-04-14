@@ -23,7 +23,7 @@ public class AddCommentController {
     @FXML
     private Label postTitleLabel;
 
-    private CommentService commentService = new CommentService();
+    private final CommentService commentService = new CommentService();
     private Post currentPost;
 
     public void setPost(Post post) {
@@ -56,11 +56,10 @@ public class AddCommentController {
         c.setBody(body);
         c.setStatus("Active");
         c.setPostId(currentPost.getId());
-        c.setUserId(1);
+        c.setUserId(1); // Default user
 
         try {
             commentService.ajouter(c);
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Comment added successfully!");
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -73,11 +72,12 @@ public class AddCommentController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/comment/displayComment.fxml"));
             Parent root = loader.load();
+            
             DisplayCommentController controller = loader.getController();
             controller.setPost(currentPost);
             
-            StackPane parentContainer = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            parentContainer.getChildren().setAll(root);
+            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
+            contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,6 +86,7 @@ public class AddCommentController {
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }

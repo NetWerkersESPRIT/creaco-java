@@ -22,7 +22,7 @@ public class UpdatePostController {
     @FXML
     private TextArea contentArea;
 
-    private PostService postService = new PostService();
+    private final PostService postService = new PostService();
     private Post postToUpdate;
 
     public void setPost(Post post) {
@@ -44,7 +44,7 @@ public class UpdatePostController {
         }
         
         if (title.length() < 3) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must be at least 3 characters.");
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must be at least 3 characters long.");
             return;
         }
 
@@ -53,7 +53,6 @@ public class UpdatePostController {
 
         try {
             postService.modifier(postToUpdate.getId(), postToUpdate);
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Post updated successfully!");
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -65,8 +64,8 @@ public class UpdatePostController {
     private void goBack(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
-            StackPane parentContainer = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            parentContainer.getChildren().setAll(root);
+            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
+            contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,6 +74,7 @@ public class UpdatePostController {
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }

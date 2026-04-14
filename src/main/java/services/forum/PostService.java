@@ -42,11 +42,21 @@ public class PostService implements ForumInterface<Post> {
 
     @Override
     public void supprimer(int id) throws SQLException {
+        // First delete all comments associated with this post
+        String deleteCommentsSQL = "DELETE FROM `comment` WHERE `post_id` = ?";
+        PreparedStatement psComments = con.prepareStatement(deleteCommentsSQL);
+        psComments.setInt(1, id);
+        psComments.executeUpdate();
+        psComments.close();
+
+        // Then delete the post
         String sql = "DELETE FROM `post` WHERE `id` = ?";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setInt(1, id);
         ps.executeUpdate();
-        System.out.println("Post supprimé avec succès!");
+        ps.close();
+
+        System.out.println("Post and its comments supprimé avec succès!");
     }
 
     @Override
