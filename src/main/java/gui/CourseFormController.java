@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -15,7 +16,9 @@ import services.CourseService;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class CourseFormController {
 
@@ -31,7 +34,7 @@ public class CourseFormController {
     private TextField titleField;
 
     @FXML
-    private TextField categoryField;
+    private ComboBox<String> categoryCombo;
 
     @FXML
     private TextField statusField;
@@ -50,6 +53,7 @@ public class CourseFormController {
 
     private Course course;
     private CourseCategory returnCategory;
+    private final Map<String, Integer> categoryNameToId = new LinkedHashMap<>();
 
     public void setCourse(Course course) {
         this.course = course;
@@ -67,23 +71,30 @@ public class CourseFormController {
 
     @FXML
     private void onSave() {
+        if (!validateForm()) {
+            return;
+        }
+
         boolean creating = course == null;
         Course target = creating ? new Course() : course;
 
-        target.setTitre(titleField.getText());
+        target.setTitre(titleField.getText().trim());
         target.setDescription(descriptionArea.getText());
         target.setStatut(statusField.getText());
         target.setNiveau(levelField.getText());
         target.setDateDeModification(LocalDateTime.now().toString());
         target.setImage(target.getImage());
 
-        try {
-            target.setCategorieId(Integer.parseInt(categoryField.getText().trim()));
-        } catch (NumberFormatException ignored) {
-            if (returnCategory != null) {
-                target.setCategorieId(returnCategory.getId());
-            }
+        String selectedCategory = categoryCombo.getValue();
+        if (selectedCategory == null || selectedCategory.isBlank()) {
+            selectedCategory = returnCategory != null ? returnCategory.getNom() : null;
         }
+
+        Integer categoryId = categoryNameToId.get(selectedCategory);
+        if (categoryId == null) {
+            categoryId = returnCategory != null ? returnCategory.getId() : null;
+        }
+        target.setCategorieId(categoryId);
 
         try {
             target.setDureeEstimee(Integer.parseInt(durationField.getText().trim()));
@@ -116,14 +127,51 @@ public class CourseFormController {
         }
     }
 
+    private boolean validateForm() {
+        String title = titleField.getText();
+        String selectedCategory = categoryCombo.getValue();
+
+        if (title == null || title.isBlank()) {
+            AlertHelper.showError("Validation error", "Please enter a course title before saving.");
+            return false;
+        }
+
+        if (selectedCategory == null || selectedCategory.isBlank()) {
+            AlertHelper.showError("Validation error", "Please select a category before saving.");
+            return false;
+        }
+
+        return true;
+    }
+
     @FXML
     private void onCancel() {
         openCoursesPage();
     }
 
+    @FXML
+    private void initialize() {
+        try {
+            loadCategories();
+        } catch (SQLException exception) {
+            // Ignore category loading errors here; the form can still open.
+        }
+    }
+
+    private void loadCategories() throws SQLException {
+        categoryNameToId.clear();
+        categoryCombo.getItems().clear();
+
+        Map<Integer, String> categories = courseService.getCategoryNames();
+        for (Map.Entry<Integer, String> entry : categories.entrySet()) {
+            categoryNameToId.put(entry.getValue(), entry.getKey());
+        }
+        categoryCombo.getItems().addAll(categoryNameToId.keySet());
+    }
+
     private void populateForm() {
         if (returnCategory != null) {
-            categoryField.setText(String.valueOf(returnCategory.getId()));
+            categoryCombo.setValue(returnCategory.getNom());
         }
 
         if (course == null) {
@@ -134,7 +182,12 @@ public class CourseFormController {
         }
 
         titleField.setText(course.getTitre());
-        categoryField.setText(String.valueOf(course.getCategorieId()));
+        String selectedCategory = categoryNameToId.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(course.getCategorieId()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+        categoryCombo.setValue(selectedCategory);
         statusField.setText(course.getStatut());
         levelField.setText(course.getNiveau());
         durationField.setText(course.getDureeEstimee() == null ? "" : String.valueOf(course.getDureeEstimee()));

@@ -46,6 +46,9 @@
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#onAddCourse" prefHeight="42.0"
+                                style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
+                                text="Add new course" />
                         <Button mnemonicParsing="false" onAction="#onManageCategories" prefHeight="42.0"
                                 style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
                                 text="Manage categories" />
