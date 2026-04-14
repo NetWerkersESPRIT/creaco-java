@@ -9,10 +9,20 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
 import services.forum.PostService;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 
 public class UpdatePostController {
@@ -22,6 +32,16 @@ public class UpdatePostController {
     @FXML
     private TextArea contentArea;
 
+    @FXML
+    private CheckBox pinnedCheckBox;
+    @FXML
+    private Label imageLabel;
+    @FXML
+    private Label pdfLabel;
+
+    private File imageFile;
+    private File pdfFile;
+
     private final PostService postService = new PostService();
     private Post postToUpdate;
 
@@ -29,6 +49,14 @@ public class UpdatePostController {
         this.postToUpdate = post;
         titleField.setText(post.getTitle());
         contentArea.setText(post.getContent());
+        pinnedCheckBox.setSelected(post.isPinned());
+        
+        if (post.getImageName() != null && !post.getImageName().isEmpty()) {
+            imageLabel.setText(post.getImageName());
+        }
+        if (post.getPdfName() != null && !post.getPdfName().isEmpty()) {
+            pdfLabel.setText(post.getPdfName());
+        }
     }
 
     @FXML
@@ -38,18 +66,25 @@ public class UpdatePostController {
         String title = titleField.getText().trim();
         String content = contentArea.getText().trim();
 
-        if (title.isEmpty() || content.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "All fields are required.");
-            return;
-        }
-        
-        if (title.length() < 3) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must be at least 3 characters long.");
+        if (!validateInputs(title, content)) {
             return;
         }
 
         postToUpdate.setTitle(title);
         postToUpdate.setContent(content);
+        postToUpdate.setPinned(pinnedCheckBox.isSelected());
+
+        // Handle Image
+        if (imageFile != null) {
+            String newImageName = saveFile(imageFile, "images");
+            postToUpdate.setImageName(newImageName);
+        }
+
+        // Handle PDF
+        if (pdfFile != null) {
+            String newPdfName = saveFile(pdfFile, "pdfs");
+            postToUpdate.setPdfName(newPdfName);
+        }
 
         try {
             postService.modifier(postToUpdate.getId(), postToUpdate);
@@ -57,6 +92,52 @@ public class UpdatePostController {
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Database Error", "Could not update the post.");
+        }
+    }
+
+    @FXML
+    private void chooseImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose Image");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+        );
+        File selectedFile = fileChooser.showOpenDialog(titleField.getScene().getWindow());
+        if (selectedFile != null) {
+            this.imageFile = selectedFile;
+            imageLabel.setText(selectedFile.getName());
+        }
+    }
+
+    @FXML
+    private void choosePDF() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose PDF");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
+        );
+        File selectedFile = fileChooser.showOpenDialog(titleField.getScene().getWindow());
+        if (selectedFile != null) {
+            this.pdfFile = selectedFile;
+            pdfLabel.setText(selectedFile.getName());
+        }
+    }
+
+    private String saveFile(File file, String subDir) {
+        try {
+            String uploadsDir = "src/main/resources/uploads/" + subDir + "/";
+            File directory = new File(uploadsDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            String fileName = System.currentTimeMillis() + "_" + file.getName();
+            Path targetPath = Paths.get(uploadsDir + fileName);
+            Files.copy(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            return fileName;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -69,6 +150,26 @@ public class UpdatePostController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean validateInputs(String title, String content) {
+        if (title.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title is required.");
+            return false;
+        }
+        if (content.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Content is required.");
+            return false;
+        }
+        if (!title.matches("^[a-zA-Z0-9 ]+$")) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title can only contain letters and numbers.");
+            return false;
+        }
+        if (title.matches("^[0-9]+$")) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title cannot contain only numbers.");
+            return false;
+        }
+        return true;
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
