@@ -13,6 +13,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -21,6 +23,8 @@ import javafx.scene.layout.VBox;
 import services.forum.CommentService;
 import services.forum.PostService;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -75,16 +79,28 @@ public class DisplayPostController {
 
     private void renderPosts(List<Post> postsToDisplay) {
         postsContainer.getChildren().clear();
-        statusLabel.setText(postsToDisplay.size() + " post(s) found.");
+        
+        // SORT: Pinned posts first, then newest ID first (descending)
+        List<Post> sortedPosts = postsToDisplay.stream()
+                .sorted((p1, p2) -> {
+                    if (p1.isPinned() != p2.isPinned()) {
+                        return Boolean.compare(p2.isPinned(), p1.isPinned());
+                    }
+                    return Integer.compare(p2.getId(), p1.getId());
+                })
+                .collect(Collectors.toList());
 
-        if (postsToDisplay.isEmpty()) {
+        statusLabel.setText(sortedPosts.size() + " post(s) found.");
+
+        if (sortedPosts.isEmpty()) {
             Label emptyState = new Label("No posts available matching your search.");
             emptyState.setStyle("-fx-font-size: 15px; -fx-text-fill: #64748b;");
             postsContainer.getChildren().add(emptyState);
             return;
         }
 
-        for (Post post : postsToDisplay) {
+        for (Post post : sortedPosts) {
+            System.out.println("Rendering post: " + post.getTitle() + " | Image: " + post.getImageName());
             VBox card = buildPostCard(post);
             postsContainer.getChildren().add(card);
         }
@@ -137,6 +153,76 @@ public class DisplayPostController {
         contentLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #475569;");
 
         card.getChildren().addAll(header, contentLabel);
+
+        // --- PINNED BADGE ---
+        if (post.isPinned()) {
+            Label pinnedBadge = new Label("📌 Pinned Post");
+            pinnedBadge.setStyle("-fx-background-color: #fef3c7; -fx-text-fill: #92400e; "
+                    + "-fx-padding: 4 10; -fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 12px;");
+            headerText.getChildren().add(1, pinnedBadge); // Add below title
+        }
+
+        // --- IMAGE DISPLAY ---
+        if (post.getImageName() != null && !post.getImageName().isEmpty()) {
+            try {
+                String imagePath = "src/main/resources/uploads/images/" + post.getImageName();
+                File file = new File(imagePath);
+                
+                if (file.exists()) {
+                    Image image = new Image(file.toURI().toString());
+                    ImageView imageView = new ImageView(image);
+                    imageView.setFitWidth(400);
+                    imageView.setPreserveRatio(true);
+                    
+                    // Simplified clip
+                    javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+                    clip.setArcWidth(20);
+                    clip.setArcHeight(20);
+                    
+                    // Bind width
+                    clip.widthProperty().bind(imageView.fitWidthProperty());
+                    
+                    // Instead of a listener that might not fire correctly, 
+                    // we use a binding or just set a large enough height/bind to layout bounds
+                    // Actually, let's just use the image's own height after it loads
+                    image.progressProperty().addListener((obs, oldVal, newVal) -> {
+                        if (newVal.doubleValue() == 1.0) {
+                            clip.setHeight(imageView.getBoundsInLocal().getHeight());
+                        }
+                    });
+                    
+                    // Also set an initial height based on expected ratio or just large enough
+                    clip.setHeight(300); 
+                    
+                    imageView.setClip(clip);
+                    card.getChildren().add(imageView);
+                    System.out.println("Image added to card: " + file.getAbsolutePath());
+                } else {
+                    System.out.println("Image file NOT found: " + file.getAbsolutePath());
+                }
+            } catch (Exception e) {
+                System.out.println("Exception while loading image: " + e.getMessage());
+            }
+        }
+
+        // --- PDF BUTTON ---
+        if (post.getPdfName() != null && !post.getPdfName().isEmpty()) {
+            Button openPdfButton = createActionButton("📄 Open Attachment (PDF)", "#1e293b", "#f1f5f9");
+            openPdfButton.setOnAction(event -> {
+                try {
+                    File file = new File("src/main/resources/uploads/pdfs/" + post.getPdfName());
+                    if (file.exists()) {
+                        Desktop.getDesktop().open(file);
+                    } else {
+                        showAlert(Alert.AlertType.WARNING, "File Not Found", "The PDF file could not be found locally.");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    showAlert(Alert.AlertType.ERROR, "Error", "Could not open the PDF file.");
+                }
+            });
+            card.getChildren().add(openPdfButton);
+        }
 
         return card;
     }
