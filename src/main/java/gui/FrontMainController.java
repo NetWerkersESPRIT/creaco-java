@@ -140,7 +140,7 @@ public class FrontMainController {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
@@ -159,7 +159,7 @@ public class FrontMainController {
             controller.setPreviewMode(isPrev);
             
             javafx.stage.Stage stage = (javafx.stage.Stage) coursesContainer.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (java.io.IOException e) {
             e.printStackTrace();
             System.err.println("Failed to load front-resource-view.fxml: " + e.getMessage());

@@ -121,7 +121,7 @@ public class FrontResourceController {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -137,7 +137,7 @@ public class FrontResourceController {
             controller.setPreviewMode(this.isPreview);
             
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
