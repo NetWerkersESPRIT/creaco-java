@@ -110,9 +110,6 @@ public class FrontMainController {
         desc.setWrapText(true);
         desc.setStyle("-fx-text-fill: #475569; -fx-font-size: 13px;");
 
-        Label status = new Label("Status: " + safe(course.getStatut()));
-        status.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
-
         Button openBtn = new Button("Open");
         openBtn.setStyle(
                 "-fx-background-color: #1d4ed8;" +
@@ -123,7 +120,7 @@ public class FrontMainController {
 
         openBtn.setOnAction(e -> openCourse(course));
 
-        card.getChildren().addAll(title, desc, status, openBtn);
+        card.getChildren().addAll(title, desc, openBtn);
 
         return card;
     }
