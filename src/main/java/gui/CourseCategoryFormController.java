@@ -134,7 +134,7 @@ public class CourseCategoryFormController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/category-list-view.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) nameField.getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to return to the category list.", exception);
         }

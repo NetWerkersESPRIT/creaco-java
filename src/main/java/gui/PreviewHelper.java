@@ -19,7 +19,7 @@ public class PreviewHelper {
             controller.setPreviewMode(true);
             
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
             AlertHelper.showError("Preview Error", "Could not load preview: " + e.getMessage());

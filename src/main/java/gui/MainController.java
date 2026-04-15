@@ -74,7 +74,7 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/category-list-view.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) statusLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to open the category list view.", exception);
         }
@@ -86,7 +86,7 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) statusLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to open the course creation view.", exception);
         }
@@ -230,7 +230,7 @@ public class MainController {
             CourseFormController controller = loader.getController();
             controller.setCourse(course);
             Stage stage = (Stage) sourceNode.getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to open the course edit view.", exception);
         }
@@ -243,7 +243,7 @@ public class MainController {
             RessourceListController controller = loader.getController();
             controller.setCourse(course);
             Stage stage = (Stage) sourceNode.getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to open the resource list view.", exception);
         }

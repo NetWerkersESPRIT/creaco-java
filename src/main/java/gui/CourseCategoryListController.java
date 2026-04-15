@@ -170,7 +170,7 @@ public class CourseCategoryListController {
                 initializer.initialize(loader.getController());
             }
             Stage stage = (Stage) titleLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 1280, 760));
+            stage.getScene().setRoot(root);
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to open view: " + resourcePath, exception);
         }

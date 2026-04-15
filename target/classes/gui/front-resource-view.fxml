@@ -25,7 +25,7 @@
                         prefHeight="48" prefWidth="180"
                         style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14; -fx-cursor: hand;" />
                 <Region VBox.vgrow="ALWAYS" />
-                <Button onAction="#logout" text="Logout" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #374151; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14; -fx-cursor: hand;" />
+                <Button onAction="#logout" text="Log Out" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;" />
             </children>
         </VBox>
     </left>

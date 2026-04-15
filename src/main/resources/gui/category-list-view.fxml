@@ -16,15 +16,14 @@
                 <Insets bottom="30.0" left="20.0" right="20.0" top="30.0" />
             </padding>
             <children>
-                <HBox alignment="CENTER_LEFT">
-                    <Label style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" text="Creaco" />
-                    <Region HBox.hgrow="ALWAYS" />
-                    <Button onAction="#goToPreview" text="Preview" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;" />
-                </HBox>
+                <Label style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" text="Creaco" />
                 <Label style="-fx-text-fill: #b8c7df; -fx-font-size: 13px;" text="Course management" />
                 <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #f59e0b; -fx-text-fill: #1f365c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;" text="Courses" />
                 <Region VBox.vgrow="ALWAYS" />
-                <Button onAction="#logout" text="Logout" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #374151; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14; -fx-cursor: hand;" />
+                <VBox spacing="12.0">
+                    <Button onAction="#goToPreview" text="Preview Mode" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: rgba(59, 130, 246, 0.15); -fx-text-fill: #93c5fd; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;" />
+                    <Button onAction="#logout" text="Log Out" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;" />
+                </VBox>
             </children>
         </VBox>
     </left>

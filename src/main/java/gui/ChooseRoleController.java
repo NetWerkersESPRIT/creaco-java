@@ -27,8 +27,7 @@ public class ChooseRoleController {
             Parent root = loader.load();
 
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
+            stage.getScene().setRoot(root);
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -15,7 +15,7 @@ public class SessionHelper {
             FXMLLoader loader = new FXMLLoader(SessionHelper.class.getResource("/gui/choose-role.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
             AlertHelper.showError("Logout Error", "Could not load choose-role: " + e.getMessage());
