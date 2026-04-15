@@ -7,6 +7,7 @@ services\ICourseCategoryService.class
 gui\CourseFormController.class
 gui\ChooseRoleController.class
 main\Main.class
+gui\FrontResourceController.class
 entities\Comment.class
 entities\Course.class
 gui\CategoryCoursesController$ControllerInitializer.class
