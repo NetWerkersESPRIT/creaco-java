@@ -30,7 +30,7 @@ public class CourseService {
         String sql = "SELECT * FROM cours WHERE deleted_at IS NULL ORDER BY date_de_modification DESC, id DESC";
 
         try (Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 courses.add(mapCourse(rs));
             }
@@ -153,7 +153,7 @@ public class CourseService {
         String sql = "SELECT id, nom FROM categorie_cours WHERE deleted_at IS NULL ORDER BY nom";
 
         try (Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 categories.put(rs.getInt("id"), rs.getString("nom"));
             }

@@ -131,7 +131,19 @@ public class FrontMainController {
     // ===================== ACTION =====================
     private void openCourse(Course course) {
         System.out.println("Opening course: " + course.getTitre());
-        // later: navigate to course details page
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
+            javafx.scene.Parent root = loader.load();
+            
+            FrontResourceController controller = loader.getController();
+            controller.setCourse(course);
+            
+            javafx.stage.Stage stage = (javafx.stage.Stage) coursesContainer.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root));
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to load front-resource-view.fxml: " + e.getMessage());
+        }
     }
 
     // ===================== UTIL =====================
