@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="760.0" prefWidth="1280.0" style="-fx-background-color: #edf3fb;"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="gui.post.BackofficeController">
+    <left>
+        <VBox prefWidth="250.0" spacing="18.0" style="-fx-background-color: #1f365c;" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="30.0" left="20.0" right="20.0" top="30.0" />
+            </padding>
+            <children>
+                <Label style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" text="Creaco" />
+                <Region prefHeight="20.0" />
+                <Label style="-fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-font-weight: bold;" text="ADMINISTRATION" />
+                
+                <Button fx:id="moderationNavButton" onAction="#showModeration" mnemonicParsing="false" prefHeight="48.0" prefWidth="210.0"
+                        text="🛡 Moderation" />
+                <Button fx:id="forumNavButton" onAction="#showForum" mnemonicParsing="false" prefHeight="48.0" prefWidth="210.0"
+                        text="💬 View Forum" />
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <StackPane fx:id="adminContentArea">
+            <children>
+                <VBox fx:id="moderationView" spacing="22.0" style="-fx-background-color: transparent;">
+                    <padding>
+                        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                    </padding>
+                    <children>
+                        <!-- ── Page Header ───────────────────────────────────────── -->
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                            <children>
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #1e3a5f;"
+                                               text="Moderation Dashboard" />
+                                        <Label style="-fx-font-size: 14px; -fx-text-fill: #64748b;"
+                                               text="Review and approve pending community posts." />
+                                        <Label fx:id="statusLabel"
+                                               style="-fx-font-size: 13px; -fx-text-fill: #355388;"
+                                               text="Loading pending posts..." />
+                                    </children>
+                                </VBox>
+                                <Region HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+
+                        <!-- ── Pending Posts List ────────────────────────────────── -->
+                        <ScrollPane VBox.vgrow="ALWAYS"
+                                    fitToWidth="true"
+                                    hbarPolicy="NEVER"
+                                    pannable="true"
+                                    style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;">
+                            <content>
+                                <VBox fx:id="postsContainer" spacing="18.0"
+                                      style="-fx-background-color: transparent;">
+                                    <padding>
+                                        <Insets bottom="12.0" left="0.0" right="0.0" top="0.0" />
+                                    </padding>
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+</BorderPane>

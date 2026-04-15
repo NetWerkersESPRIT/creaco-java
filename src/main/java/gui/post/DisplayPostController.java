@@ -22,6 +22,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import services.forum.CommentService;
 import services.forum.PostService;
+import main.FxApplication;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -54,12 +55,14 @@ public class DisplayPostController {
 
     @FXML
     public void initialize() {
+        // Register this instance so Backoffice can refresh it
+        FxApplication.registerForumController(this);
         loadPosts();
     }
 
-    private void loadPosts() {
+    public void loadPosts() {
         try {
-            allPosts = postService.afficher();
+            allPosts = postService.getAcceptedPosts();
             renderPosts(allPosts);
         } catch (SQLException e) {
             e.printStackTrace();
