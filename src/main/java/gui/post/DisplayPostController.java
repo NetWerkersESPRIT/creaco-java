@@ -22,6 +22,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import services.forum.CommentService;
 import services.forum.PostService;
+import services.UserService;
 import main.FxApplication;
 
 import java.awt.Desktop;
@@ -50,8 +51,15 @@ public class DisplayPostController {
 
     private final PostService postService = new PostService();
     private final CommentService commentService = new CommentService();
+    private final UserService userService = new UserService();
     
     private List<Post> allPosts = new ArrayList<>();
+    
+    private boolean isAdminMode = false;
+    
+    public void setAdminMode(boolean isAdminMode) {
+        this.isAdminMode = isAdminMode;
+    }
 
     @FXML
     public void initialize() {
@@ -115,6 +123,25 @@ public class DisplayPostController {
         card.setStyle("-fx-background-color: white; -fx-background-radius: 18; "
                 + "-fx-border-color: #dbe4f0; -fx-border-radius: 18;");
 
+        // ── Author row: avatar + username ─────────────────────────
+        entities.Users author = userService.getUserById(post.getUserId());
+        String username = (author != null) ? author.getUsername() : "Unknown";
+        HBox authorRow = new HBox(10);
+        authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        javafx.scene.layout.StackPane avatar = buildAvatar(username);
+        Label usernameLabel = new Label(username);
+        usernameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #355388;");
+        authorRow.getChildren().addAll(avatar, usernameLabel);
+
+        // Add (admin) tag if applicable
+        boolean isAdmin = (post.getUserId() == 5) || 
+                          (author != null && author.getRole() != null && author.getRole().toLowerCase().contains("admin"));
+        if (isAdmin) {
+            Label adminLabel = new Label("(admin)");
+            adminLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
+            authorRow.getChildren().add(adminLabel);
+        }
+
         HBox header = new HBox(16);
         VBox headerText = new VBox(8);
         
@@ -155,7 +182,7 @@ public class DisplayPostController {
         contentLabel.setWrapText(true);
         contentLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #475569;");
 
-        card.getChildren().addAll(header, contentLabel);
+        card.getChildren().addAll(authorRow, header, contentLabel);
 
         // --- PINNED BADGE ---
         if (post.isPinned()) {
@@ -230,6 +257,24 @@ public class DisplayPostController {
         return card;
     }
     
+    private javafx.scene.layout.StackPane buildAvatar(String username) {
+        // Generate a consistent color from the first letter
+        String[] colors = {"#355388", "#1e8a5e", "#7c3aed", "#c2410c", "#0369a1",
+                           "#047857", "#b45309", "#9d174d", "#1d4ed8", "#065f46"};
+        char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
+        String color = colors[Math.abs(initial) % colors.length];
+
+        Label initLabel = new Label(String.valueOf(initial));
+        initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;");
+
+        javafx.scene.layout.StackPane circle = new javafx.scene.layout.StackPane(initLabel);
+        circle.setPrefSize(36, 36);
+        circle.setMinSize(36, 36);
+        circle.setMaxSize(36, 36);
+        circle.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 50%;");
+        return circle;
+    }
+
     private Button createActionButton(String text, String textColor, String backgroundColor) {
         Button button = new Button(text);
         button.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor
@@ -240,7 +285,12 @@ public class DisplayPostController {
     @FXML
     private void goAddPost(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/post/addPost.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/addPost.fxml"));
+            Parent root = loader.load();
+            
+            AddPostController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
+            
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
             contentArea.getChildren().setAll(root);
         } catch (IOException e) {
@@ -268,6 +318,7 @@ public class DisplayPostController {
             Parent root = loader.load();
             
             DisplayCommentController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");

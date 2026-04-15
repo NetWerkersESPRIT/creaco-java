@@ -11,6 +11,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
+import main.FxApplication;
 import services.forum.CommentService;
 
 import java.io.IOException;
@@ -25,11 +26,26 @@ public class AddCommentController {
 
     private final CommentService commentService = new CommentService();
     private Post currentPost;
+    private Integer parentCommentId; // ID of the comment being replied to
+    private boolean isAdminMode = false;
+
+    public void setAdminMode(boolean isAdminMode) {
+        this.isAdminMode = isAdminMode;
+    }
 
     public void setPost(Post post) {
+        setPost(post, null);
+    }
+
+    public void setPost(Post post, Integer parentCommentId) {
         this.currentPost = post;
+        this.parentCommentId = parentCommentId;
         if (post != null) {
-            postTitleLabel.setText("Replying to: " + post.getTitle());
+            if (parentCommentId != null) {
+                postTitleLabel.setText("Replying to a comment on: " + post.getTitle());
+            } else {
+                postTitleLabel.setText("Adding a comment to: " + post.getTitle());
+            }
         }
     }
 
@@ -56,10 +72,23 @@ public class AddCommentController {
         c.setBody(body);
         c.setStatus("Active");
         c.setPostId(currentPost.getId());
-        c.setUserId(1); // Default user
+        
+        if (isAdminMode) {
+            c.setUserId(5); // Admin user
+        } else {
+            c.setUserId(1); // Default user
+        }
+        
+        c.setParentCommentId(parentCommentId);
 
         try {
             commentService.ajouter(c);
+            
+            // --- INSTANT SYNC: Notify FrontOffice Windows if it's an admin comment ---
+            if (isAdminMode) {
+                FxApplication.refreshAllForumWindows();
+            }
+            
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -72,10 +101,10 @@ public class AddCommentController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/comment/displayComment.fxml"));
             Parent root = loader.load();
-            
+
             DisplayCommentController controller = loader.getController();
             controller.setPost(currentPost);
-            
+
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
             contentArea.getChildren().setAll(root);
         } catch (IOException e) {

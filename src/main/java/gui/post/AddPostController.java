@@ -42,6 +42,11 @@ public class AddPostController {
     private File pdfFile;
 
     private final PostService postService = new PostService();
+    private boolean isAdminMode = false;
+
+    public void setAdminMode(boolean isAdminMode) {
+        this.isAdminMode = isAdminMode;
+    }
 
     @FXML
     private void savePost(ActionEvent event) {
@@ -55,8 +60,15 @@ public class AddPostController {
         Post post = new Post();
         post.setTitle(title);
         post.setContent(content);
-        post.setStatus("PENDING"); // Enforce PENDING status
-        post.setUserId(1); 
+        
+        if (isAdminMode) {
+            post.setStatus("ACCEPTED");
+            post.setUserId(5); // Admin user
+        } else {
+            post.setStatus("PENDING");
+            post.setUserId(1); // Default user
+        }
+        
         post.setPinned(pinnedCheckBox.isSelected());
 
         // Handle Image
@@ -78,6 +90,11 @@ public class AddPostController {
             BackofficeController bc = FxApplication.getBackofficeController();
             if (bc != null) {
                 bc.loadPendingPosts();
+            }
+
+            // --- INSTANT SYNC: Notify FrontOffice Windows if it's an admin post ---
+            if (isAdminMode) {
+                FxApplication.refreshAllForumWindows();
             }
             
             goBack(event);

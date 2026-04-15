@@ -22,12 +22,12 @@
                 <Button fx:id="moderationNavButton" onAction="#showModeration" mnemonicParsing="false" prefHeight="48.0" prefWidth="210.0"
                         text="🛡 Moderation" />
                 <Button fx:id="forumNavButton" onAction="#showForum" mnemonicParsing="false" prefHeight="48.0" prefWidth="210.0"
-                        text="💬 View Forum" />
+                        text="💬 Forum" />
             </children>
         </VBox>
     </left>
     <center>
-        <StackPane fx:id="adminContentArea">
+        <StackPane fx:id="contentArea">
             <children>
                 <VBox fx:id="moderationView" spacing="22.0" style="-fx-background-color: transparent;">
                     <padding>
