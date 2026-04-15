@@ -10,9 +10,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="760.0" prefWidth="1280.0" style="-fx-background-color: #edf3fb;"
-            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="gui.MainController">
+<BorderPane prefHeight="760.0" prefWidth="1280.0" style="-fx-background-color: #edf3fb;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MainController">
     <left>
         <VBox prefWidth="220.0" spacing="18.0" style="-fx-background-color: #1f365c;" BorderPane.alignment="CENTER">
             <padding>
@@ -21,9 +19,7 @@
             <children>
                 <Label style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" text="Creaco" />
                 <Label style="-fx-text-fill: #b8c7df; -fx-font-size: 13px;" text="Course management" />
-                <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="180.0"
-                        style="-fx-background-color: #f59e0b; -fx-text-fill: #1f365c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;"
-                        text="Courses" />
+                <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #f59e0b; -fx-text-fill: #1f365c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;" text="Courses" />
             </children>
         </VBox>
     </left>
@@ -34,38 +30,26 @@
             </padding>
             <children>
 
-                <!-- ── Header : titre + boutons ── -->
+                      <!-- ── Header : titre + boutons ── -->
                 <HBox alignment="CENTER_LEFT" spacing="12.0">
                     <children>
                         <VBox spacing="6.0">
                             <children>
-                                <Label fx:id="pageTitleLabel"
-                                       style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;"
-                                       text="Courses" />
-                                <Label style="-fx-font-size: 14px; -fx-text-fill: #64748b;"
-                                       text="Manage your courses, then open resources or edit a selected row." />
-                                <Label fx:id="statusLabel" style="-fx-font-size: 13px; -fx-text-fill: #355388;"
-                                       text="Loading courses from database..." />
+                                <Label fx:id="pageTitleLabel" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;" text="Courses" />
+                                <Label style="-fx-font-size: 14px; -fx-text-fill: #64748b;" text="Manage your courses, then open resources or edit a selected row." />
+                                <Label fx:id="statusLabel" style="-fx-font-size: 13px; -fx-text-fill: #355388;" text="Loading courses from database..." />
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#onAddCourse" prefHeight="42.0"
-                                style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
-                                text="Add new course" />
-                        <Button mnemonicParsing="false" onAction="#onManageCategories" prefHeight="42.0"
-                                style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
-                                text="Manage categories" />
+                        <Button mnemonicParsing="false" onAction="#onAddCourse" prefHeight="42.0" style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;" text="Add new course" />
+                        <Button mnemonicParsing="false" onAction="#onManageCategories" prefHeight="42.0" style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;" text="Manage categories" />
                     </children>
                 </HBox>
 
-                <!-- ── Barre de recherche ── -->
-                <TextField fx:id="searchField"
-                           promptText="🔍 Search a course..."
-                           prefHeight="44.0"
-                           maxWidth="Infinity"
-                           style="-fx-background-color: white; -fx-background-radius: 18; -fx-border-color: #c7d7f0; -fx-border-radius: 18; -fx-padding: 10 16 10 16; -fx-font-size: 14px;" />
+                      <!-- ── Barre de recherche ── -->
+                <TextField fx:id="searchField" maxWidth="Infinity" prefHeight="44.0" promptText="🔍 Search a course..." style="-fx-background-color: white; -fx-background-radius: 18; -fx-border-color: #c7d7f0; -fx-border-radius: 18; -fx-padding: 10 16 10 16; -fx-font-size: 14px;" />
 
-                <!-- ── En-têtes de colonnes ── -->
+                      <!-- ── En-têtes de colonnes ── -->
                 <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-padding: 0 20 0 20;">
                     <children>
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="Course" />
@@ -78,9 +62,8 @@
                     </children>
                 </HBox>
 
-                <!-- ── Liste des cours ── -->
-                <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" hbarPolicy="NEVER" pannable="true"
-                            style="-fx-background: transparent; -fx-background-color: transparent;">
+                      <!-- ── Liste des cours ── -->
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="true" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>
                         <VBox fx:id="coursesContainer" spacing="16.0">
                             <padding>
@@ -93,7 +76,7 @@
                     </VBox.margin>
                 </ScrollPane>
 
-            </children>
+                  </children>
         </VBox>
     </center>
 </BorderPane>

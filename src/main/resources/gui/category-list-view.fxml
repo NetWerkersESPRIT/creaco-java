@@ -9,9 +9,19 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="760.0" prefWidth="1280.0" style="-fx-background-color: #edf3fb;"
-            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="gui.CourseCategoryListController">
+<BorderPane prefHeight="760.0" prefWidth="1280.0" style="-fx-background-color: #edf3fb;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.CourseCategoryListController">
+    <left>
+        <VBox prefWidth="220.0" spacing="18.0" style="-fx-background-color: #1f365c;" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="30.0" left="20.0" right="20.0" top="30.0" />
+            </padding>
+            <children>
+                <Label style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" text="Creaco" />
+                <Label style="-fx-text-fill: #b8c7df; -fx-font-size: 13px;" text="Course management" />
+                <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #f59e0b; -fx-text-fill: #1f365c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;" text="Courses" />
+            </children>
+        </VBox>
+    </left>
     <center>
         <VBox spacing="22.0" BorderPane.alignment="CENTER">
             <padding>
@@ -20,22 +30,15 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="12.0">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#onBackToCourses"
-                                style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
-                                text="Back to courses" />
+                        <Button mnemonicParsing="false" onAction="#onBackToCourses" style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;" text="Back to courses" />
                         <VBox spacing="6.0">
                             <children>
-                                <Label fx:id="titleLabel"
-                                       style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;"
-                                       text="Course Categories" />
-                                <Label fx:id="statusLabel" style="-fx-font-size: 13px; -fx-text-fill: #355388;"
-                                       text="Loading categories from database..." />
+                                <Label fx:id="titleLabel" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;" text="Course Categories" />
+                                <Label fx:id="statusLabel" style="-fx-font-size: 13px; -fx-text-fill: #355388;" text="Loading categories from database..." />
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#onAddCategory" prefHeight="44.0"
-                                style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
-                                text="Add category" />
+                        <Button mnemonicParsing="false" onAction="#onAddCategory" prefHeight="44.0" style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;" text="Add category" />
                     </children>
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="22.0" style="-fx-padding: 0 20 0 20;">
@@ -49,8 +52,7 @@
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="ACTIONS" />
                     </children>
                 </HBox>
-                <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" hbarPolicy="NEVER"
-                            style="-fx-background: transparent; -fx-background-color: transparent;">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>
                         <VBox fx:id="categoriesContainer" spacing="14.0">
                             <padding>
