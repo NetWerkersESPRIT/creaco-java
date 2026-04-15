@@ -17,22 +17,28 @@ public class MainController {
     @FXML
     private StackPane contentArea;
 
+    private static final String NAV_ACTIVE   = "-fx-background-color: #f59e0b; -fx-text-fill: #1f365c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;";
+    private static final String NAV_INACTIVE = "-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;";
+
     @FXML
     private void initialize() {
         // Hide courses section button
         coursesNavButton.setVisible(false);
         coursesNavButton.setManaged(false);
 
-        // Apply active style to forum button
-        forumNavButton.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: #1f365c; "
-                + "-fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;");
-
+        setActiveNav(forumNavButton);
         showForum();
+    }
+
+    private void setActiveNav(Button active) {
+        forumNavButton.setStyle(NAV_INACTIVE);
+        active.setStyle(NAV_ACTIVE);
     }
 
     @FXML
     private void showForum() {
         try {
+            setActiveNav(forumNavButton);
             Parent root = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
             contentArea.getChildren().setAll(root);
         } catch (IOException e) {

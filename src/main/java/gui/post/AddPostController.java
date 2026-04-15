@@ -14,6 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import services.forum.PostService;
+import main.FxApplication;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class AddPostController {
         Post post = new Post();
         post.setTitle(title);
         post.setContent(content);
-        post.setStatus("Active");
+        post.setStatus("PENDING"); // Enforce PENDING status
         post.setUserId(1); 
         post.setPinned(pinnedCheckBox.isSelected());
 
@@ -72,6 +73,13 @@ public class AddPostController {
 
         try {
             postService.ajouter(post);
+            
+            // --- INSTANT SYNC: Notify Backoffice Window ---
+            BackofficeController bc = FxApplication.getBackofficeController();
+            if (bc != null) {
+                bc.loadPendingPosts();
+            }
+            
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
