@@ -38,7 +38,7 @@ public class BackofficeController {
     @FXML
     private Label statusLabel;
     @FXML
-    private StackPane adminContentArea;
+    private StackPane contentArea;
     @FXML
     private VBox moderationView;
     @FXML
@@ -281,7 +281,7 @@ public class BackofficeController {
     @FXML
     private void showModeration() {
         setActiveNav(moderationNavButton);
-        adminContentArea.getChildren().setAll(moderationView);
+        contentArea.getChildren().setAll(moderationView);
         loadPendingPosts();
     }
 
@@ -289,8 +289,13 @@ public class BackofficeController {
     private void showForum() {
         try {
             setActiveNav(forumNavButton);
-            Parent forumRoot = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
-            adminContentArea.getChildren().setAll(forumRoot);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
+            Parent forumRoot = loader.load();
+            
+            DisplayPostController controller = loader.getController();
+            controller.setAdminMode(true);
+            
+            contentArea.getChildren().setAll(forumRoot);
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Navigation Error", "Could not load forum view.");

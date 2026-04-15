@@ -22,7 +22,7 @@
             </padding>
             <children>
                 <Label style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" text="Creaco" />
-                <Button fx:id="forumNavButton" mnemonicParsing="false" onAction="#showForum" prefHeight="48.0" prefWidth="180.0" text="Forum" />
+                <Button fx:id="forumNavButton" mnemonicParsing="false" onAction="#showForum" prefHeight="48.0" prefWidth="180.0" text="💬 Forum" />
                 <Button fx:id="coursesNavButton" mnemonicParsing="false" onAction="#showCourses" prefHeight="48.0" prefWidth="180.0" text="Courses" visible="false" managed="false" />
             </children>
         </VBox>
