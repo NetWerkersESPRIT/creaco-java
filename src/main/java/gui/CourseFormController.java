@@ -354,4 +354,13 @@ public class CourseFormController {
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("(^-|-$)", "");
     }
+    @javafx.fxml.FXML
+    public void goToPreview(javafx.event.ActionEvent event) {
+        gui.PreviewHelper.goToPreview(event);
+    }
+
+    @javafx.fxml.FXML
+    public void logout(javafx.event.ActionEvent event) {
+        gui.SessionHelper.logout(event);
+    }
 }
