@@ -270,4 +270,13 @@ public class MainController {
     private String safeText(String value) {
         return value == null || value.isBlank() ? "-" : value;
     }
+    @javafx.fxml.FXML
+    public void goToPreview(javafx.event.ActionEvent event) {
+        gui.PreviewHelper.goToPreview(event);
+    }
+
+    @javafx.fxml.FXML
+    public void logout(javafx.event.ActionEvent event) {
+        gui.SessionHelper.logout(event);
+    }
 }

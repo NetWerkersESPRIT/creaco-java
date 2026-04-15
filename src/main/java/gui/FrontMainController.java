@@ -125,6 +125,27 @@ public class FrontMainController {
         return card;
     }
 
+    @FXML private javafx.scene.layout.HBox previewBanner;
+
+    public void setPreviewMode(boolean isPreview) {
+        if (previewBanner != null) {
+            previewBanner.setVisible(isPreview);
+            previewBanner.setManaged(isPreview);
+        }
+    }
+
+    @FXML
+    private void exitPreview(javafx.event.ActionEvent event) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root, 1280, 760));
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     // ===================== ACTION =====================
     private void openCourse(Course course) {
         System.out.println("Opening course: " + course.getTitre());
@@ -134,9 +155,11 @@ public class FrontMainController {
             
             FrontResourceController controller = loader.getController();
             controller.setCourse(course);
+            boolean isPrev = previewBanner != null && previewBanner.isVisible();
+            controller.setPreviewMode(isPrev);
             
             javafx.stage.Stage stage = (javafx.stage.Stage) coursesContainer.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root));
+            stage.setScene(new javafx.scene.Scene(root, 1280, 760));
         } catch (java.io.IOException e) {
             e.printStackTrace();
             System.err.println("Failed to load front-resource-view.fxml: " + e.getMessage());
@@ -146,5 +169,9 @@ public class FrontMainController {
     // ===================== UTIL =====================
     private String safe(String value) {
         return (value == null || value.isBlank()) ? "-" : value;
+    }
+    @javafx.fxml.FXML
+    public void logout(javafx.event.ActionEvent event) {
+        gui.SessionHelper.logout(event);
     }
 }

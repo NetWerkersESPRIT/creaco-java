@@ -14,19 +14,18 @@
 
     <!-- LEFT SIDEBAR -->
     <left>
-        <VBox prefWidth="220.0" spacing="18.0"
-              style="-fx-background-color: #1f365c;">
+        <VBox prefWidth="220.0" spacing="18.0" style="-fx-background-color: #1f365c;">
             <padding>
                 <Insets top="30" left="20" right="20" bottom="30"/>
             </padding>
             <children>
-                <Label text="Creaco"
-                       style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" />
-                <Label text="Course Resources"
-                       style="-fx-text-fill: #b8c7df; -fx-font-size: 13px;" />
+                <Label text="Creaco" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" />
+                <Label text="Course Resources" style="-fx-text-fill: #b8c7df; -fx-font-size: 13px;" />
                 <Button text="Back to Courses" onAction="#goBack"
                         prefHeight="48" prefWidth="180"
                         style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14; -fx-cursor: hand;" />
+                <Region VBox.vgrow="ALWAYS" />
+                <Button onAction="#logout" text="Logout" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #374151; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14; -fx-cursor: hand;" />
             </children>
         </VBox>
     </left>
@@ -38,15 +37,22 @@
                 <Insets top="24" left="24" right="24" bottom="24"/>
             </padding>
             <children>
+                <!-- PREVIEW BANNER -->
+                <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
+                      style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
+                    <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #854d0e; -fx-font-size: 14;" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button text="Exit Preview" onAction="#exitPreview"
+                            style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
+                </HBox>
+
                 <!-- HEADER -->
                 <HBox alignment="CENTER_LEFT" spacing="12">
                     <children>
                         <VBox spacing="6">
                             <children>
-                                <Label fx:id="courseTitleLabel" text="Resources"
-                                       style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;" />
-                                <Label text="View and download materials for this course"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #64748b;" />
+                                <Label fx:id="courseTitleLabel" text="Resources" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;" />
+                                <Label text="View and download materials for this course" style="-fx-font-size: 14px; -fx-text-fill: #64748b;" />
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS"/>
@@ -54,19 +60,9 @@
                 </HBox>
 
                 <!-- RESOURCES LIST -->
-                <ScrollPane fitToWidth="true"
-                            hbarPolicy="NEVER"
-                            style="-fx-background: transparent; -fx-background-color: transparent;"
-                            VBox.vgrow="ALWAYS">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>
-                        <TilePane fx:id="resourcesContainer"
-                                  hgap="20"
-                                  vgap="20"
-                                  prefColumns="3"
-                                  prefTileWidth="300"
-                                  tileAlignment="TOP_LEFT"
-                                  style="-fx-padding: 10;">
-                        </TilePane>
+                        <TilePane fx:id="resourcesContainer" hgap="20" vgap="20" prefColumns="3" prefTileWidth="300" tileAlignment="TOP_LEFT" style="-fx-padding: 10;" />
                     </content>
                 </ScrollPane>
             </children>

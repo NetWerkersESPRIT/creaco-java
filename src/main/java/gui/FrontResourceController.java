@@ -104,14 +104,47 @@ public class FrontResourceController {
         return card;
     }
 
+    @FXML private javafx.scene.layout.HBox previewBanner;
+    private boolean isPreview = false;
+
+    public void setPreviewMode(boolean isPreview) {
+        this.isPreview = isPreview;
+        if (previewBanner != null) {
+            previewBanner.setVisible(isPreview);
+            previewBanner.setManaged(isPreview);
+        }
+    }
+
     @FXML
-    private void goBack(javafx.event.ActionEvent event) {
+    private void exitPreview(javafx.event.ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = (javafx.stage.Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root, 1280, 760));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void goBack(javafx.event.ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-main-view.fxml"));
+            Parent root = loader.load();
+            
+            FrontMainController controller = loader.getController();
+            controller.setPreviewMode(this.isPreview);
+            
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root, 1280, 760));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @javafx.fxml.FXML
+    public void logout(javafx.event.ActionEvent event) {
+        gui.SessionHelper.logout(event);
     }
 }

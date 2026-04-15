@@ -2,6 +2,7 @@ entities\Post.class
 entities\CourseCategory.class
 gui\CategoryCoursesController.class
 services\CourseService.class
+gui\SessionHelper.class
 services\ICourseCategoryService.class
 gui\CourseFormController.class
 gui\ChooseRoleController.class
@@ -16,6 +17,7 @@ gui\CourseCategoryFormController.class
 gui\FrontMainController.class
 services\ForumInterface.class
 gui\MainController.class
+gui\PreviewHelper.class
 gui\RessourceListController.class
 entities\Users.class
 main\FxApplication.class
