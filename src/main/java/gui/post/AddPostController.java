@@ -82,17 +82,13 @@ public class AddPostController {
             String newPdfName = saveFile(pdfFile, "pdfs");
             post.setPdfName(newPdfName);
         }
-
+//hadoum ali save  post kan tzadit fil backoffice w  el front office
         try {
             postService.ajouter(post);
-            
-            // --- INSTANT SYNC: Notify Backoffice Window ---
             BackofficeController bc = FxApplication.getBackofficeController();
             if (bc != null) {
                 bc.loadPendingPosts();
             }
-
-            // --- INSTANT SYNC: Notify FrontOffice Windows if it's an admin post ---
             if (isAdminMode) {
                 FxApplication.refreshAllForumWindows();
             }
@@ -153,7 +149,12 @@ public class AddPostController {
     @FXML
     private void goBack(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
+            Parent root = loader.load();
+            
+            DisplayPostController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
+            
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
             contentArea.getChildren().setAll(root);
         } catch (IOException e) {
@@ -170,19 +171,19 @@ public class AddPostController {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Content is required.");
             return false;
         }
-        if (!title.matches("^[a-zA-Z0-9 ]+$")) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title can only contain letters and numbers.");
+        
+        // Ensure the title contains at least one letter (prevents numbers-only titles)
+        // Also allows letters, numbers, spaces, and common punctuation.
+        if (!title.matches(".*\\p{L}.*")) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must contain at least one letter. It cannot be numbers only.");
             return false;
         }
-        if (title.matches("^[0-9]+$")) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title cannot contain only numbers.");
-            return false;
-        }
+        
         return true;
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);

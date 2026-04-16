@@ -23,7 +23,7 @@
                     </children>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button mnemonicParsing="false" onAction="#goBack" style="-fx-background-color: #e2e8f0; -fx-text-fill: #334155; -fx-background-radius: 12; -fx-font-weight: bold; -fx-padding: 10 16 10 16;" text="Back to Posts" />
+                <Button mnemonicParsing="false" onAction="#goBackToPosts" style="-fx-background-color: #e2e8f0; -fx-text-fill: #334155; -fx-background-radius: 12; -fx-font-weight: bold; -fx-padding: 10 16 10 16;" text="Back to Posts" />
             </children>
         </HBox>
 

@@ -103,6 +103,7 @@ public class AddCommentController {
             Parent root = loader.load();
 
             DisplayCommentController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
             controller.setPost(currentPost);
 
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");

@@ -28,6 +28,6 @@
         </VBox>
     </left>
     <center>
-        <StackPane fx:id="contentArea" BorderPane.alignment="CENTER" />
+        <StackPane fx:id="contentArea" id="contentArea" BorderPane.alignment="CENTER" />
     </center>
 </BorderPane>

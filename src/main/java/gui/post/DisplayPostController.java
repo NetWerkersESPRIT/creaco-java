@@ -56,15 +56,20 @@ public class DisplayPostController {
     private List<Post> allPosts = new ArrayList<>();
     
     private boolean isAdminMode = false;
+    private boolean initialized = false;
     
     public void setAdminMode(boolean isAdminMode) {
         this.isAdminMode = isAdminMode;
+        if (initialized) {
+            loadPosts();
+        }
     }
 
     @FXML
     public void initialize() {
         // Register this instance so Backoffice can refresh it
         FxApplication.registerForumController(this);
+        initialized = true;
         loadPosts();
     }
 
@@ -91,7 +96,7 @@ public class DisplayPostController {
     private void renderPosts(List<Post> postsToDisplay) {
         postsContainer.getChildren().clear();
         
-        // SORT: Pinned posts first, then newest ID first (descending)
+        //Pinned posts first, then newest ID first (descending)
         List<Post> sortedPosts = postsToDisplay.stream()
                 .sorted((p1, p2) -> {
                     if (p1.isPinned() != p2.isPinned()) {
@@ -123,7 +128,7 @@ public class DisplayPostController {
         card.setStyle("-fx-background-color: white; -fx-background-radius: 18; "
                 + "-fx-border-color: #dbe4f0; -fx-border-radius: 18;");
 
-        // ── Author row: avatar + username ─────────────────────────
+        // avatar
         entities.Users author = userService.getUserById(post.getUserId());
         String username = (author != null) ? author.getUsername() : "Unknown";
         HBox authorRow = new HBox(10);
@@ -133,7 +138,7 @@ public class DisplayPostController {
         usernameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #355388;");
         authorRow.getChildren().addAll(avatar, usernameLabel);
 
-        // Add (admin) tag if applicable
+        // Add (admin)
         boolean isAdmin = (post.getUserId() == 5) || 
                           (author != null && author.getRole() != null && author.getRole().toLowerCase().contains("admin"));
         if (isAdmin) {
@@ -149,7 +154,7 @@ public class DisplayPostController {
         titleLabel.setWrapText(true);
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
 
-        // Display title, content, created_at and COMMENT COUNT
+        // comment counting
         int commentCount = 0;
         try {
             commentCount = commentService.getCommentCountByPost(post.getId());
@@ -175,7 +180,21 @@ public class DisplayPostController {
         Button deleteButton = createActionButton("Delete", "#c62828", "#fdecec");
         deleteButton.setOnAction(event -> deletePost(post.getId()));
 
-        actions.getChildren().addAll(commentsButton, editButton, deleteButton);
+        actions.getChildren().add(commentsButton);
+
+        int currentUserId = isAdminMode ? 5 : 1;
+        boolean isOwner = (post.getUserId() == currentUserId);
+
+        // Ownership-based Edit: Only author can edit
+        if (isOwner) {
+            actions.getChildren().add(editButton);
+        }
+
+        // Ownership or Admin-based Delete: Author or Admin can delete
+        if (isOwner || isAdminMode) {
+            actions.getChildren().add(deleteButton);
+        }
+
         header.getChildren().addAll(headerText, spacer, actions);
 
         Label contentLabel = new Label(safeText(post.getContent()));
@@ -184,7 +203,7 @@ public class DisplayPostController {
 
         card.getChildren().addAll(authorRow, header, contentLabel);
 
-        // --- PINNED BADGE ---
+
         if (post.isPinned()) {
             Label pinnedBadge = new Label("📌 Pinned Post");
             pinnedBadge.setStyle("-fx-background-color: #fef3c7; -fx-text-fill: #92400e; "
@@ -192,7 +211,7 @@ public class DisplayPostController {
             headerText.getChildren().add(1, pinnedBadge); // Add below title
         }
 
-        // --- IMAGE DISPLAY ---
+        // image
         if (post.getImageName() != null && !post.getImageName().isEmpty()) {
             try {
                 String imagePath = "src/main/resources/uploads/images/" + post.getImageName();
@@ -211,16 +230,11 @@ public class DisplayPostController {
                     
                     // Bind width
                     clip.widthProperty().bind(imageView.fitWidthProperty());
-                    
-                    // Instead of a listener that might not fire correctly, 
-                    // we use a binding or just set a large enough height/bind to layout bounds
-                    // Actually, let's just use the image's own height after it loads
                     image.progressProperty().addListener((obs, oldVal, newVal) -> {
                         if (newVal.doubleValue() == 1.0) {
                             clip.setHeight(imageView.getBoundsInLocal().getHeight());
                         }
                     });
-                    
                     // Also set an initial height based on expected ratio or just large enough
                     clip.setHeight(300); 
                     
@@ -235,7 +249,7 @@ public class DisplayPostController {
             }
         }
 
-        // --- PDF BUTTON ---
+        //pdf
         if (post.getPdfName() != null && !post.getPdfName().isEmpty()) {
             Button openPdfButton = createActionButton("📄 Open Attachment (PDF)", "#1e293b", "#f1f5f9");
             openPdfButton.setOnAction(event -> {
@@ -282,6 +296,22 @@ public class DisplayPostController {
         return button;
     }
 
+    /**
+     * Safely locates the #contentArea StackPane from any node in the scene.
+     */
+    private StackPane findContentArea(Node source) {
+        StackPane area = (StackPane) source.getScene().lookup("#contentArea");
+        if (area != null) return area;
+        javafx.scene.Node parent = source.getParent();
+        while (parent != null) {
+            if (parent instanceof StackPane && "contentArea".equals(parent.getId())) {
+                return (StackPane) parent;
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
+
     @FXML
     private void goAddPost(ActionEvent event) {
         try {
@@ -303,10 +333,11 @@ public class DisplayPostController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/updatePost.fxml"));
             Parent root = loader.load();
             UpdatePostController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            StackPane contentArea = findContentArea((Node) event.getSource());
+            if (contentArea != null) contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -321,8 +352,8 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            StackPane contentArea = findContentArea((Node) event.getSource());
+            if (contentArea != null) contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -337,7 +368,14 @@ public class DisplayPostController {
             if (response == ButtonType.OK) {
                 try {
                     postService.supprimer(id);
+                    // Refresh current view
                     loadPosts();
+                    
+                    // --- INSTANT SYNC: Notify Backoffice and other Forum windows ---
+                    if (main.FxApplication.getBackofficeController() != null) {
+                        main.FxApplication.getBackofficeController().loadPendingPosts();
+                    }
+                    main.FxApplication.refreshAllForumWindows();
                 } catch (SQLException exception) {
                     exception.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Database Error", "Could not delete the post.");
@@ -356,7 +394,7 @@ public class DisplayPostController {
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
