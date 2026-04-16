@@ -36,7 +36,7 @@ public class FrontMainController {
 
     private void loadCourses() {
         try {
-            courses = courseService.afficher();
+            courses = courseService.afficherPublie();
             renderCourses();
         } catch (SQLException e) {
             courses = Collections.emptyList();

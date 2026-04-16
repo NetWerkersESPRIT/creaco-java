@@ -23,12 +23,11 @@ public class ChooseRoleController {
 
     private void loadScene(ActionEvent event, String fxmlPath) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
+            FXMLLoader loader=new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root=loader.load();
 
-            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            Stage stage=(Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
