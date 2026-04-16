@@ -87,9 +87,8 @@
                         <TilePane fx:id="coursesContainer"
                                   hgap="20"
                                   vgap="20"
-                                  prefColumns="3"
-                                  prefTileWidth="300"
-                                  tileAlignment="TOP_LEFT"
+                                  prefTileWidth="340"
+                                  alignment="TOP_CENTER"
                                   style="-fx-padding: 10;">
                         </TilePane>
                     </content>

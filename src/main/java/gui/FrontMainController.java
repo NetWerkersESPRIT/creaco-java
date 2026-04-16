@@ -88,7 +88,7 @@ public class FrontMainController {
     private Node buildCourseCard(Course course) {
 
         VBox card = new VBox(10);
-        card.setPrefWidth(280);
+        card.setPrefWidth(330);
         card.setStyle(
                 "-fx-background-color: white;" +
                         "-fx-background-radius: 16;" +
