@@ -18,6 +18,10 @@ public class FxApplication extends Application {
         return backofficeControllerInstance;
     }
 
+    public static void setBackofficeController(BackofficeController instance) {
+        backofficeControllerInstance = instance;
+    }
+
     public static void registerForumController(DisplayPostController instance) {
         forumControllers.add(instance);
     }

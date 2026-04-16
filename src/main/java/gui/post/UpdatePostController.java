@@ -7,15 +7,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.CheckBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import services.forum.PostService;
+import main.FxApplication;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +43,11 @@ public class UpdatePostController {
 
     private final PostService postService = new PostService();
     private Post postToUpdate;
+    private boolean isAdminMode = false;
+
+    public void setAdminMode(boolean isAdminMode) {
+        this.isAdminMode = isAdminMode;
+    }
 
     public void setPost(Post post) {
         this.postToUpdate = post;
@@ -73,6 +77,11 @@ public class UpdatePostController {
         postToUpdate.setTitle(title);
         postToUpdate.setContent(content);
         postToUpdate.setPinned(pinnedCheckBox.isSelected());
+        
+        // If not admin, reset status to PENDING so it must be re-approved
+        if (!isAdminMode) {
+            postToUpdate.setStatus("PENDING");
+        }
 
         // Handle Image
         if (imageFile != null) {
@@ -88,6 +97,21 @@ public class UpdatePostController {
 
         try {
             postService.modifier(postToUpdate.getId(), postToUpdate);
+            
+            // --- SYNC LOGIC ---
+            // 1. Refresh Backoffice Moderation view if it's open
+            BackofficeController bc = FxApplication.getBackofficeController();
+            if (bc != null) {
+                bc.loadPendingPosts();
+            }
+            // 2. Refresh all Forum/FrontOffice windows
+            FxApplication.refreshAllForumWindows();
+
+            if (!isAdminMode) {
+                showAlert(Alert.AlertType.INFORMATION, "Post Updated", 
+                    "Your changes have been saved. The post will be visible again once an admin approves the edits.");
+            }
+            
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -144,7 +168,12 @@ public class UpdatePostController {
     @FXML
     private void goBack(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
+            Parent root = loader.load();
+            
+            DisplayPostController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
+            
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
             contentArea.getChildren().setAll(root);
         } catch (IOException e) {
@@ -161,19 +190,19 @@ public class UpdatePostController {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Content is required.");
             return false;
         }
-        if (!title.matches("^[a-zA-Z0-9 ]+$")) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title can only contain letters and numbers.");
+
+        // Ensure the title contains at least one letter (prevents numbers-only titles)
+        // Also allows letters, numbers, spaces, and common punctuation.
+        if (!title.matches(".*\\p{L}.*")) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must contain at least one letter. It cannot be numbers only.");
             return false;
         }
-        if (title.matches("^[0-9]+$")) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title cannot contain only numbers.");
-            return false;
-        }
+        
         return true;
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);

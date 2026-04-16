@@ -20,6 +20,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import services.forum.PostService;
 import main.FxApplication;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import java.awt.Desktop;
+import java.io.File;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -53,6 +57,7 @@ public class BackofficeController {
 
     @FXML
     public void initialize() {
+        FxApplication.setBackofficeController(this);
         setActiveNav(moderationNavButton);
         loadPendingPosts();
     }
@@ -62,11 +67,6 @@ public class BackofficeController {
         forumNavButton.setStyle(NAV_INACTIVE);
         active.setStyle(NAV_ACTIVE);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    //  Data loading
-    // ─────────────────────────────────────────────────────────────
-
     public void loadPendingPosts() {
         postsContainer.getChildren().clear();
         try {
@@ -92,12 +92,7 @@ public class BackofficeController {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  Card builder
-    // ─────────────────────────────────────────────────────────────
-
     private VBox buildPostCard(Post post) {
-        // Outer card
         VBox card = new VBox(14);
         card.setPadding(new Insets(22));
         card.setStyle(
@@ -127,24 +122,19 @@ public class BackofficeController {
         titleLabel.setWrapText(true);
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e3a5f;");
         HBox.setHgrow(titleLabel, Priority.ALWAYS);
-
+        //data
         header.getChildren().addAll(badge, titleLabel);
-
-        // ── Meta row ────────────────────────────────────────────
         Label metaLabel = new Label("Posted: " + formatDate(post.getCreatedAt()));
         metaLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8;");
-
-        // ── Content ─────────────────────────────────────────────
+        //content
         Label contentLabel = new Label(safeText(post.getContent()));
         contentLabel.setWrapText(true);
         contentLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #475569;");
-
-        // ── Separator line ───────────────────────────────────────
+        //seperator line
         Region separator = new Region();
         separator.setPrefHeight(1);
         separator.setStyle("-fx-background-color: #e2e8f0;");
 
-        // ── Action buttons ───────────────────────────────────────
         HBox actions = new HBox(12);
         actions.setAlignment(Pos.CENTER_LEFT);
 
@@ -172,14 +162,73 @@ public class BackofficeController {
 
         actions.getChildren().addAll(acceptBtn, refuseBtn);
 
-        card.getChildren().addAll(header, metaLabel, contentLabel, separator, actions);
+        card.getChildren().addAll(header, metaLabel, contentLabel);
+
+        // --- MEDIA RENDERING (IMAGE) ---
+        if (post.getImageName() != null && !post.getImageName().isEmpty()) {
+            try {
+                String imagePath = "src/main/resources/uploads/images/" + post.getImageName();
+                File file = new File(imagePath);
+                if (file.exists()) {
+                    Image image = new Image(file.toURI().toString());
+                    ImageView imageView = new ImageView(image);
+                    imageView.setFitWidth(300);
+                    imageView.setPreserveRatio(true);
+                    
+                    // Rounded corners for the image
+                    javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+                    clip.setArcWidth(15);
+                    clip.setArcHeight(15);
+                    clip.widthProperty().bind(imageView.fitWidthProperty());
+                    
+                    // We can't bind height easily before loading, so we use a listener or just a reasonable default
+                    image.progressProperty().addListener((obs, oldVal, newVal) -> {
+                        if (newVal.doubleValue() == 1.0) {
+                            clip.setHeight(imageView.getBoundsInLocal().getHeight());
+                        }
+                    });
+                    clip.setHeight(200); 
+
+                    imageView.setClip(clip);
+                    card.getChildren().add(imageView);
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading image in backoffice: " + e.getMessage());
+            }
+        }
+
+        // --- MEDIA RENDERING (PDF) ---
+        if (post.getPdfName() != null && !post.getPdfName().isEmpty()) {
+            Button openPdfBtn = new Button("📄 View Attachment (PDF)");
+            openPdfBtn.setStyle(
+                "-fx-background-color: #f1f5f9;" +
+                "-fx-text-fill: #1e293b;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 8;" +
+                "-fx-padding: 8 16;" +
+                "-fx-cursor: hand;"
+            );
+            openPdfBtn.setOnAction(e -> {
+                try {
+                    File file = new File("src/main/resources/uploads/pdfs/" + post.getPdfName());
+                    if (file.exists()) {
+                        Desktop.getDesktop().open(file);
+                    } else {
+                        showAlert(Alert.AlertType.WARNING, "File Not Found", "The PDF file could not be found locally.");
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    showAlert(Alert.AlertType.ERROR, "Error", "Could not open the PDF file.");
+                }
+            });
+            card.getChildren().add(openPdfBtn);
+        }
+
+        card.getChildren().addAll(separator, actions);
         return card;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  Moderation actions
-    // ─────────────────────────────────────────────────────────────
-
+    //moderation
     private void handleAccept(Post post, VBox card) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirm Accept");
@@ -195,8 +244,7 @@ public class BackofficeController {
                     // Remove card from view immediately
                     postsContainer.getChildren().remove(card);
                     refreshStatusLabel();
-                    
-                    // --- INSTANT SYNC: Refresh all active Forum/FrontOffice views ---
+                    //Refresh all active Forum/FrontOffice views
                     FxApplication.refreshAllForumWindows();
                     
                     showAlert(Alert.AlertType.INFORMATION, "Post Accepted",
@@ -264,6 +312,10 @@ public class BackofficeController {
                 // Remove card from view immediately
                 postsContainer.getChildren().remove(card);
                 refreshStatusLabel();
+                
+                // --- INSTANT SYNC: Notify Forum windows ---
+                FxApplication.refreshAllForumWindows();
+                
                 showAlert(Alert.AlertType.INFORMATION, "Post Refused",
                         "The post has been refused.\nReason: " + reason);
             } catch (SQLException ex) {
@@ -274,9 +326,6 @@ public class BackofficeController {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  Navigation
-    // ─────────────────────────────────────────────────────────────
 
     @FXML
     private void showModeration() {
@@ -308,9 +357,6 @@ public class BackofficeController {
         showForum();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  Helpers
-    // ─────────────────────────────────────────────────────────────
 
     private void refreshStatusLabel() {
         int remaining = postsContainer.getChildren().size();
@@ -334,7 +380,7 @@ public class BackofficeController {
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);

@@ -27,7 +27,7 @@
         </VBox>
     </left>
     <center>
-        <StackPane fx:id="contentArea">
+        <StackPane fx:id="contentArea" id="contentArea">
             <children>
                 <VBox fx:id="moderationView" spacing="22.0" style="-fx-background-color: transparent;">
                     <padding>

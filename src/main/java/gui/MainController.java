@@ -39,7 +39,10 @@ public class MainController {
     private void showForum() {
         try {
             setActiveNav(forumNavButton);
-            Parent root = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
+            Parent root = loader.load();
+            gui.post.DisplayPostController controller = loader.getController();
+            controller.setAdminMode(false);
             contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();

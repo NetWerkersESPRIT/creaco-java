@@ -2,6 +2,7 @@ package gui.comment;
 
 import entities.Comment;
 import entities.Post;
+import gui.post.DisplayPostController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -161,7 +162,22 @@ public class DisplayCommentController {
         Button deleteButton = createActionButton("Delete", "#94a3b8", "transparent");
         deleteButton.setOnAction(event -> deleteComment(comment.getId()));
 
-        footer.getChildren().addAll(meta, replyButton, editButton, deleteButton);
+        footer.getChildren().add(meta);
+        footer.getChildren().add(replyButton);
+
+        int currentUserId = isAdminMode ? 5 : 1;
+        boolean isOwner = (comment.getUserId() == currentUserId);
+
+        // Ownership-based Edit: Only author can edit
+        if (isOwner) {
+            footer.getChildren().add(editButton);
+        }
+
+        // Ownership or Admin-based Delete: Author or Admin can delete
+        if (isOwner || isAdminMode) {
+            footer.getChildren().add(deleteButton);
+        }
+
         card.getChildren().addAll(authorRow, bodyLabel, footer);
         return card;
     }
@@ -190,6 +206,26 @@ public class DisplayCommentController {
         return button;
     }
 
+    /** 
+     * Safely locates the #contentArea StackPane from any node in the scene.
+     * First tries scene-level lookup, then walks up the parent hierarchy as fallback.
+     */
+    private StackPane findContentArea(Node source) {
+        // Try scene-level lookup first (works when part of a full BorderPane scene)
+        StackPane area = (StackPane) source.getScene().lookup("#contentArea");
+        if (area != null) return area;
+        // Fallback: walk up the parent tree
+        javafx.scene.Node parent = source.getParent();
+        while (parent != null) {
+            if (parent instanceof StackPane && "contentArea".equals(parent.getId())) {
+                return (StackPane) parent;
+            }
+            parent = parent.getParent();
+        }
+        System.err.println("[NAV ERROR] #contentArea StackPane not found in scene.");
+        return null;
+    }
+
     @FXML
     private void handleReply(ActionEvent event, Comment parentComment) {
         if (currentPost == null) return;
@@ -201,8 +237,8 @@ public class DisplayCommentController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(currentPost, parentComment.getId());
             
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            StackPane contentArea = findContentArea((Node) event.getSource());
+            if (contentArea != null) contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -219,8 +255,8 @@ public class DisplayCommentController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(currentPost);
             
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            StackPane contentArea = findContentArea((Node) event.getSource());
+            if (contentArea != null) contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -233,10 +269,11 @@ public class DisplayCommentController {
             Parent root = loader.load();
             
             UpdateCommentController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
             controller.setData(currentPost, comment);
             
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            StackPane contentArea = findContentArea((Node) event.getSource());
+            if (contentArea != null) contentArea.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -261,13 +298,23 @@ public class DisplayCommentController {
     }
 
     @FXML
-    private void goBack(ActionEvent event) {
+    public void goBackToPosts(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/post/displayPost.fxml"));
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
+            Parent root = loader.load();
+
+            DisplayPostController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
+
+            StackPane contentArea = findContentArea((Node) event.getSource());
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(root);
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Navigation Error", "Could not find the main content area.");
+            }
         } catch (IOException e) {
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Could not load the posts view.");
         }
     }
 
