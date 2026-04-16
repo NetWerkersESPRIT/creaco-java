@@ -61,7 +61,7 @@ public class CourseCategoryListController {
     private void loadCategories() {
         try {
             categories = courseCategoryService.afficher();
-            statusLabel.setText(categories.size() + " category(ies) loaded from creaco.");
+            statusLabel.setText(categories.size() + " categories loaded from creaco.");
             renderCategories();
         } catch (SQLException exception) {
             categories = Collections.emptyList();

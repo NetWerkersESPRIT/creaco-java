@@ -34,7 +34,6 @@ public class FrontMainController {
         });
     }
 
-    // ===================== LOAD =====================
     private void loadCourses() {
         try {
             courses = courseService.afficher();
@@ -49,7 +48,6 @@ public class FrontMainController {
         }
     }
 
-    // ===================== RENDER =====================
     private void renderCourses() {
         coursesContainer.getChildren().clear();
         allCourseCards.clear();
@@ -69,7 +67,6 @@ public class FrontMainController {
         }
     }
 
-    // ===================== FILTER =====================
     private void filterCourses(String keyword) {
         coursesContainer.getChildren().clear();
 
@@ -88,7 +85,6 @@ public class FrontMainController {
         }
     }
 
-    // ===================== CARD UI =====================
     private Node buildCourseCard(Course course) {
 
         VBox card = new VBox(10);
@@ -146,7 +142,6 @@ public class FrontMainController {
         }
     }
 
-    // ===================== ACTION =====================
     private void openCourse(Course course) {
         System.out.println("Opening course: " + course.getTitre());
         try {
@@ -166,7 +161,6 @@ public class FrontMainController {
         }
     }
 
-    // ===================== UTIL =====================
     private String safe(String value) {
         return (value == null || value.isBlank()) ? "-" : value;
     }

@@ -12,7 +12,6 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="gui.FrontResourceController">
 
-    <!-- LEFT SIDEBAR -->
     <left>
         <VBox prefWidth="220.0" spacing="18.0" style="-fx-background-color: #1f365c;">
             <padding>
@@ -30,14 +29,12 @@
         </VBox>
     </left>
 
-    <!-- MAIN CONTENT -->
     <center>
         <VBox spacing="22.0">
             <padding>
                 <Insets top="24" left="24" right="24" bottom="24"/>
             </padding>
             <children>
-                <!-- PREVIEW BANNER -->
                 <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
                       style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
                     <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #854d0e; -fx-font-size: 14;" />
@@ -46,7 +43,6 @@
                             style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
                 </HBox>
 
-                <!-- HEADER -->
                 <HBox alignment="CENTER_LEFT" spacing="12">
                     <children>
                         <VBox spacing="6">
@@ -59,7 +55,6 @@
                     </children>
                 </HBox>
 
-                <!-- RESOURCES LIST -->
                 <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>
                         <TilePane fx:id="resourcesContainer" hgap="20" vgap="20" prefColumns="3" prefTileWidth="300" tileAlignment="TOP_LEFT" style="-fx-padding: 10;" />

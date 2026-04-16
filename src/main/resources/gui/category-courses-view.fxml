@@ -73,7 +73,7 @@
                 </HBox>
 
                 <TextField fx:id="searchField"
-                           promptText="🔍 Search a course..."
+                           promptText=" Search a course..."
                            style="-fx-background-radius: 18; -fx-padding: 10 16 10 16; -fx-font-size: 14px; -fx-background-color: white; -fx-border-color: #c7d7f0; -fx-border-radius: 18;"
                            prefHeight="40.0" />
 

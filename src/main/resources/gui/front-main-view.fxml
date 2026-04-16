@@ -13,7 +13,7 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="gui.FrontMainController">
 
-    <!-- LEFT SIDEBAR -->
+
     <left>
         <VBox prefWidth="220.0" spacing="18.0"
               style="-fx-background-color: #1f365c;">
@@ -37,7 +37,6 @@
         </VBox>
     </left>
 
-    <!-- MAIN CONTENT -->
     <center>
         <VBox spacing="22.0">
 
@@ -46,7 +45,7 @@
             </padding>
 
             <children>
-                <!-- PREVIEW BANNER -->
+
                 <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
                       style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
                     <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #854d0e; -fx-font-size: 14;" />
@@ -55,7 +54,6 @@
                             style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
                 </HBox>
 
-                <!-- HEADER -->
                 <HBox alignment="CENTER_LEFT" spacing="12">
 
                     <children>
@@ -72,7 +70,6 @@
 
                         <Region HBox.hgrow="ALWAYS"/>
 
-                        <!-- ✅ SEARCH FIELD ADDED -->
                         <TextField fx:id="searchField"
                                    promptText="Search courses..."
                                    prefWidth="280"
@@ -81,7 +78,6 @@
                     </children>
                 </HBox>
 
-                <!-- COURSES LIST -->
                 <ScrollPane fitToWidth="true"
                             hbarPolicy="NEVER"
                             style="-fx-background: transparent; -fx-background-color: transparent;"
