@@ -98,6 +98,7 @@ public class CourseFormController {
             // Ignore category loading errors; the form can still open
             System.err.println("Warning: Failed to load categories - " + exception.getMessage());
         }
+        updateModeTexts();
     }
 
     private void setupLevelCombo() {
@@ -147,7 +148,7 @@ public class CourseFormController {
             target.setDeletedAt(null);
         }
 
-        target.setSlug(toSlug(target.getTitre()));
+        target.setSlug(toSlug(target.getTitre()) + "-" + target.getCategorieId());
 
         try {
             if (creating) {
@@ -156,8 +157,9 @@ public class CourseFormController {
                 courseService.modifier(target);
             }
             openCoursesPage();
-        } catch (SQLException exception) {
-            throw new IllegalStateException("Unable to save the course.", exception);
+        } catch (Exception exception) {
+            AlertHelper.showError("Save Error", "Unable to save the course: " + exception.getMessage());
+            exception.printStackTrace();
         }
     }
 
@@ -180,6 +182,24 @@ public class CourseFormController {
             categoryErrorLabel.setVisible(true);
             categoryErrorLabel.setManaged(true);
             valid = false;
+        }
+
+        // Duplicate title in same category validation
+        if (valid) {
+            try {
+                String title = titleField.getText().trim();
+                String categoryName = categoryCombo.getValue();
+                Integer categoryId = categoryNameToId.get(categoryName);
+                
+                if (categoryId != null && courseService.existeDeja(title, categoryId, course != null ? course.getId() : null)) {
+                    titleErrorLabel.setText("A course with this name already exists in this category.");
+                    titleErrorLabel.setVisible(true);
+                    titleErrorLabel.setManaged(true);
+                    valid = false;
+                }
+            } catch (SQLException e) {
+                System.err.println("Error checking for duplicate course: " + e.getMessage());
+            }
         }
 
         // Status validation

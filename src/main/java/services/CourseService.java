@@ -206,4 +206,25 @@ public class CourseService {
             ps.executeUpdate();
         }
     }
+
+    public boolean existeDeja(String titre, int categoryId, Integer excludedId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM cours WHERE LOWER(titre) = LOWER(?) AND categorie_id = ? AND deleted_at IS NULL";
+        if (excludedId != null) {
+            sql += " AND id != ?";
+        }
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, titre);
+            ps.setInt(2, categoryId);
+            if (excludedId != null) {
+                ps.setInt(3, excludedId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
 }

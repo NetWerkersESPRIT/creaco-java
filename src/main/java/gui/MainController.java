@@ -85,6 +85,8 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
             Parent root = loader.load();
+            CourseFormController controller = loader.getController();
+            controller.setCourse(null);
             Stage stage = (Stage) statusLabel.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException exception) {

@@ -53,9 +53,9 @@
                             <children>
                                 <Label fx:id="titleLabel"
                                        style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;"
-                                       text="Edit Course" />
+                                       text="Add Course" />
                                 <Label fx:id="subtitleLabel" style="-fx-font-size: 14px; -fx-text-fill: #64748b;"
-                                       text="Update the selected course." />
+                                       text="Create a new course." />
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />

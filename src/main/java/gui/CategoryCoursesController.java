@@ -79,7 +79,7 @@ public class CategoryCoursesController {
         try {
             categoryNames = courseService.getCategoryNames();
             courses = courseService.afficherParCategorie(category.getId());
-            statusLabel.setText(courses.size() + " course(s) in this category.");
+            statusLabel.setText(courses.size() + " courses in this category.");
             renderCourses();
         } catch (SQLException exception) {
             courses = Collections.emptyList();
