@@ -50,7 +50,6 @@ public class CourseCategoryFormController {
             populateForm();
         }
     }
-
     @FXML
     private void onCancel() {
         openCategoryList();
@@ -66,7 +65,6 @@ public class CourseCategoryFormController {
         if (!validateForm(name)) {
             return;
         }
-
         LocalDate today = LocalDate.now();
         target.setNom(name);
         target.setDescription(description);

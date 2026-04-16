@@ -27,10 +27,26 @@ public class CourseService {
 
     public List<Course> afficher() throws SQLException {
         List<Course> courses = new ArrayList<>();
-        String sql = "SELECT * FROM cours WHERE deleted_at IS NULL ORDER BY date_de_modification DESC, id DESC";
+        String sql = "SELECT * FROM cours WHERE deleted_at IS NULL "
+                + "ORDER BY date_de_modification DESC, id DESC";
 
         try (Statement stmt = con.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                courses.add(mapCourse(rs));
+            }
+        }
+
+        return courses;
+    }
+
+    public List<Course> afficherPublie() throws SQLException {
+        List<Course> courses = new ArrayList<>();
+        String sql = "SELECT * FROM cours WHERE deleted_at IS NULL AND statut = 'Published' "
+                + "ORDER BY date_de_modification DESC, id DESC";
+
+        try (Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 courses.add(mapCourse(rs));
             }
