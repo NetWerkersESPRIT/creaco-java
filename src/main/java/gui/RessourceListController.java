@@ -96,38 +96,38 @@ public class RessourceListController {
 
     private Node buildRessourceRow(Ressource ressource) {
         HBox row = new HBox(18);
-        row.setPadding(new Insets(18, 20, 18, 20));
-        row.setStyle("-fx-background-color: white; -fx-background-radius: 18; "
-                + "-fx-border-color: #e2e8f0; -fx-border-radius: 18;");
+        row.getStyleClass().add("list-row");
 
         Label nameLabel = new Label(safeText(ressource.getNom()));
         nameLabel.setMinWidth(310);
         nameLabel.setWrapText(true);
-        nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
+        nameLabel.getStyleClass().add("card-title");
 
         Label typeLabel = new Label(formatType(ressource.getType()));
-        typeLabel.setMinWidth(100);
-        typeLabel.setStyle("-fx-background-color: #6c83a7; -fx-text-fill: white; "
-                + "-fx-padding: 6 12 6 12; -fx-background-radius: 12; -fx-font-weight: bold;");
+        typeLabel.getStyleClass().add("badge-pink");
 
         Button openLinkButton = new Button("Open");
-        openLinkButton.setStyle(commonButtonStyle());
+        openLinkButton.getStyleClass().add("btn-primary");
+        openLinkButton.setStyle("-fx-font-size: 13px; -fx-background-radius: 10;"); // Override for row buttons
+        openLinkButton.setPrefWidth(90);
+        openLinkButton.setPrefHeight(35);
         openLinkButton.setOnAction(event -> openRessource(ressource));
 
         VBox createdAtBox = new VBox(6);
         createdAtBox.setMinWidth(170);
         Label createdAtLabel = new Label(formatDate(ressource.getDateDeCreation()));
-        createdAtLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b; -fx-font-weight: bold;");
+        createdAtLabel.getStyleClass().add("card-title");
+        createdAtLabel.setStyle("-fx-font-size: 14px;");
         Label updatedAtLabel = new Label("Updated " + formatDate(ressource.getDateDeModification()));
-        updatedAtLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
+        updatedAtLabel.getStyleClass().add("card-subtitle");
         createdAtBox.getChildren().addAll(createdAtLabel, updatedAtLabel);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actionsBox = new HBox(10);
-        Button editButton = createActionButton("Edit", "#1d4ed8", "#dbeafe");
-        Button deleteButton = createActionButton("Delete", "#b91c1c", "#fee2e2");
+        Button editButton = createActionButton("Edit", "btn-action-dark");
+        Button deleteButton = createActionButton("Delete", "btn-action-light");
 
         editButton.setOnAction(event -> openScene("/gui/resource-form-view.fxml", controller -> {
             RessourceFormController formController = (RessourceFormController) controller;
@@ -153,24 +153,14 @@ public class RessourceListController {
         return row;
     }
 
-    private Button createActionButton(String text, String textColor, String backgroundColor) {
+    private Button createActionButton(String text, String colorClass) {
         Button button = new Button(text);
-        button.setStyle(commonButtonStyle(textColor, backgroundColor));
+        button.getStyleClass().addAll("btn-action", colorClass);
         button.setMinWidth(90);
         return button;
     }
 
-    private String commonButtonStyle() {
-        return "-fx-background-color: #3f5f98; -fx-text-fill: white;"
-                + " -fx-background-radius: 22; -fx-padding: 10 20 10 20; -fx-font-size: 14px;"
-                + " -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);";
-    }
 
-    private String commonButtonStyle(String textColor, String backgroundColor) {
-        return "-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";"
-                + " -fx-background-radius: 22; -fx-padding: 10 20 10 20; -fx-font-size: 14px;"
-                + " -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);";
-    }
 
     private void openRessource(Ressource ressource) {
         try {

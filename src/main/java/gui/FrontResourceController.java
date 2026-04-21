@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -66,36 +67,28 @@ public class FrontResourceController {
     }
 
     private Node buildResourceCard(Ressource ressource) {
-        VBox card = new VBox(10);
-        card.setPrefWidth(280);
-        card.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-background-radius: 16;" +
-                "-fx-padding: 16;" +
-                "-fx-border-color: #dbe4f0;" +
-                "-fx-border-radius: 16;"
-        );
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+        card.setPrefWidth(300);
+        card.setMinWidth(300);
 
         Label name = new Label(ressource.getNom());
-        name.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
+        name.getStyleClass().add("card-title");
 
         Label type = new Label("Type: " + (ressource.getType() == null ? "-" : ressource.getType()));
-        type.setStyle("-fx-text-fill: #10b981; -fx-font-size: 13px; -fx-font-weight: bold;");
+        type.getStyleClass().add("badge-pink"); // Using badge style for the type
+        type.setMaxWidth(Region.USE_PREF_SIZE);
 
         Label desc = new Label(ressource.getContenu() == null ? "-" : ressource.getContenu());
         desc.setWrapText(true);
-        desc.setStyle("-fx-text-fill: #475569; -fx-font-size: 13px;");
+        desc.setPrefHeight(60);
+        desc.getStyleClass().add("card-subtitle");
 
         Button downloadBtn = new Button("View / Download");
-        downloadBtn.setStyle(
-                "-fx-background-color: #f59e0b;" +
-                "-fx-text-fill: #1f365c;" +
-                "-fx-font-weight: bold;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 6 12;"
-        );
+        downloadBtn.getStyleClass().add("btn-primary");
+        downloadBtn.setPrefWidth(160);
+        downloadBtn.setPrefHeight(40);
         
-        // Optional action for downloading/viewing the resource url
         downloadBtn.setOnAction(e -> {
             System.out.println("Viewing resource URL: " + ressource.getUrl());
         });

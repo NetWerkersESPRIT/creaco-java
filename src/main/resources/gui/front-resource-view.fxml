@@ -6,25 +6,49 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="760.0" prefWidth="1280.0"
-            style="-fx-background-color: #edf3fb;"
-            xmlns="http://javafx.com/javafx/25"
-            xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
+            xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="gui.FrontResourceController">
 
     <left>
-        <VBox prefWidth="220.0" spacing="18.0" style="-fx-background-color: #1f365c;">
+        <VBox prefWidth="240.0" spacing="25.0" styleClass="sidebar" BorderPane.alignment="CENTER">
             <padding>
-                <Insets top="30" left="20" right="20" bottom="30"/>
+                <Insets bottom="30.0" left="24.0" right="24.0" top="30.0" />
             </padding>
             <children>
-                <Label text="Creaco" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" />
-                <Label text="Course Resources" style="-fx-text-fill: #b8c7df; -fx-font-size: 13px;" />
-                <Button text="Back to Courses" onAction="#goBack"
-                        prefHeight="48" prefWidth="180"
-                        style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14; -fx-cursor: hand;" />
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label styleClass="sidebar-brand" text="CreaCo" />
+                </HBox>
+                
+                <VBox spacing="12.0">
+                    <Button mnemonicParsing="false" onAction="#goBack" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🏠" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Dashboard" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <Label styleClass="section-header" text="WORKFLOW MANAGEMENT" />
+                <VBox spacing="10.0">
+                    <Button mnemonicParsing="false" onAction="#goBack" prefWidth="210.0" styleClass="sidebar-item, sidebar-item-active">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🎓" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Courses" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
                 <Region VBox.vgrow="ALWAYS" />
-                <Button onAction="#logout" text="Log Out" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;" />
+                <Button onAction="#logout" text="Log Out" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" />
             </children>
         </VBox>
     </left>
@@ -43,15 +67,18 @@
                             style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
                 </HBox>
 
-                <HBox alignment="CENTER_LEFT" spacing="12">
+                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <VBox spacing="6">
-                            <children>
-                                <Label fx:id="courseTitleLabel" text="Resources" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;" />
-                                <Label text="View and download materials for this course" style="-fx-font-size: 14px; -fx-text-fill: #64748b;" />
-                            </children>
+                        <VBox>
+                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Resources" />
+                            <Label fx:id="courseTitleLabel" styleClass="title-label" text="Resources" />
                         </VBox>
-                        <Region HBox.hgrow="ALWAYS"/>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#logout" styleClass="btn-logout">
+                            <graphic>
+                                <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                            </graphic>
+                        </Button>
                     </children>
                 </HBox>
 
