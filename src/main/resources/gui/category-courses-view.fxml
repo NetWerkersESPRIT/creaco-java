@@ -7,28 +7,66 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.control.TextField?>
-<BorderPane prefHeight="760.0" prefWidth="1280.0" style="-fx-background-color: #edf3fb;"
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="gui.CategoryCoursesController">
     <left>
-        <VBox prefWidth="220.0" spacing="18.0" style="-fx-background-color: #1f365c;" BorderPane.alignment="CENTER">
+        <VBox prefWidth="240.0" spacing="25.0" styleClass="sidebar" BorderPane.alignment="CENTER">
             <padding>
-                <Insets bottom="30.0" left="20.0" right="20.0" top="30.0" />
+                <Insets bottom="30.0" left="24.0" right="24.0" top="30.0" />
             </padding>
             <children>
-                <Label style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" text="Creaco" />
-                <Label style="-fx-text-fill: #b8c7df; -fx-font-size: 13px;" text="Course management" />
-                <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="180.0"
-                        style="-fx-background-color: #f59e0b; -fx-text-fill: #1f365c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;"
-                        text="Courses" />
-                <Region VBox.vgrow="ALWAYS" />
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label styleClass="sidebar-brand" text="CreaCo" />
+                </HBox>
+                
                 <VBox spacing="12.0">
-                    <Button onAction="#goToPreview" text="Preview Mode" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: rgba(59, 130, 246, 0.15); -fx-text-fill: #93c5fd; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;" />
-                    <Button onAction="#logout" text="Log Out" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;" />
+                    <Button mnemonicParsing="false" onAction="#onBackToCategories" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🏠" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Dashboard" />
+                            </HBox>
+                        </graphic>
+                    </Button>
                 </VBox>
+
+                <Label styleClass="section-header" text="WORKFLOW MANAGEMENT" />
+                <VBox spacing="10.0">
+                    <Button mnemonicParsing="false" onAction="#onBackToCategories" prefWidth="210.0" styleClass="sidebar-item, sidebar-item-active">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🎓" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Courses" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <Label styleClass="section-header" text="USER EXPERIENCE" />
+                <VBox spacing="10.0">
+                    <Button mnemonicParsing="false" onAction="#goToPreview" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="👀" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Preview Mode" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+                <Button onAction="#logout" text="Log Out" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" />
             </children>
         </VBox>
     </left>
@@ -38,24 +76,21 @@
                 <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
             </padding>
             <children>
-                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#onBackToCategories"
-                                style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
-                                text="Back to categories" />
-                        <VBox spacing="6.0">
-                            <children>
-                                <Label fx:id="titleLabel"
-                                       style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;"
-                                       text="Courses in category" />
-                                <Label fx:id="statusLabel" style="-fx-font-size: 13px; -fx-text-fill: #355388;"
-                                       text="Loading courses from database..." />
-                            </children>
+                        <VBox>
+                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories / Courses" />
+                            <Label fx:id="titleLabel" styleClass="title-label" text="Courses in category" />
+                            <Label fx:id="statusLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Ready" />
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#onAddCourse" prefHeight="44.0"
-                                style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
-                                text="+ Add course" />
+                        <TextField fx:id="searchField" promptText=" Search a course..." styleClass="search-bar" prefWidth="240.0" />
+                        <Button mnemonicParsing="false" onAction="#onAddCourse" prefHeight="44.0" styleClass="btn-primary" text="+ Add course" />
+                        <Button onAction="#logout" styleClass="btn-logout">
+                            <graphic>
+                                <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                            </graphic>
+                        </Button>
                     </children>
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-padding: 0 20 0 20;">
@@ -72,10 +107,7 @@
                     </children>
                 </HBox>
 
-                <TextField fx:id="searchField"
-                           promptText=" Search a course..."
-                           style="-fx-background-radius: 18; -fx-padding: 10 16 10 16; -fx-font-size: 14px; -fx-background-color: white; -fx-border-color: #c7d7f0; -fx-border-radius: 18;"
-                           prefHeight="40.0" />
+
 
                 <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" hbarPolicy="NEVER"
                             style="-fx-background: transparent; -fx-background-color: transparent;">

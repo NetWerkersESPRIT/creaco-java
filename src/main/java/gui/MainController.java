@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -37,7 +38,7 @@ public class MainController {
     private Map<Integer, String> categoryNames = Collections.emptyMap();
     private List<Node> allCourseCards = new ArrayList<>();
 
-    @FXML private VBox coursesContainer;
+    @FXML private FlowPane coursesContainer;
     @FXML private TextField searchField;
     @FXML private Label pageTitleLabel;
     @FXML private Label statusLabel;
@@ -73,11 +74,17 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/category-list-view.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) statusLabel.getScene().getWindow();
+            Stage stage = (Stage) pageTitleLabel.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to open the category list view.", exception);
+            System.err.println("Navigation error: " + exception.getMessage());
         }
+    }
+
+    @FXML
+    private void onGoToDashboard() {
+        // Already here, but could refresh
+        loadCourses();
     }
 
     @FXML
@@ -87,10 +94,10 @@ public class MainController {
             Parent root = loader.load();
             CourseFormController controller = loader.getController();
             controller.setCourse(null);
-            Stage stage = (Stage) statusLabel.getScene().getWindow();
+            Stage stage = (Stage) pageTitleLabel.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to open the course creation view.", exception);
+            System.err.println("Navigation error: " + exception.getMessage());
         }
     }
 
@@ -99,12 +106,12 @@ public class MainController {
         try {
             categoryNames = courseService.getCategoryNames();
             courses = courseService.afficher();
-            statusLabel.setText(courses.size() + " course(s) loaded from creaco.");
+            if (statusLabel != null) statusLabel.setText(courses.size() + " course(s) loaded.");
             renderCourses();
         } catch (SQLException exception) {
             courses = Collections.emptyList();
             categoryNames = Collections.emptyMap();
-            statusLabel.setText("Database error: " + exception.getMessage());
+            if (statusLabel != null) statusLabel.setText("Database error.");
             renderCourses();
         }
     }
@@ -130,100 +137,81 @@ public class MainController {
     }
 
     private Node buildCourseCard(Course course) {
-        HBox row = new HBox(18);
-        row.setPadding(new Insets(18, 20, 18, 20));
-        row.setStyle("-fx-background-color: white; -fx-background-radius: 18; "
-                + "-fx-border-color: #dbe4f0; -fx-border-radius: 18;");
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+        card.setPrefWidth(320);
+        card.setMinWidth(320);
 
-        StackPane imagePlaceholder = new StackPane();
-        imagePlaceholder.setMinSize(58, 58);
-        imagePlaceholder.setPrefSize(58, 58);
-        imagePlaceholder.setMaxSize(58, 58);
-        imagePlaceholder.setStyle("-fx-background-color: #e8eef8; -fx-background-radius: 14;");
-        Label imageLabel = new Label("IMG");
-        imageLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #47638a;");
-        imagePlaceholder.getChildren().add(imageLabel);
+        // Top Row: Icon and Title
+        HBox header = new HBox(15);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        VBox titleBox = new VBox(8);
-        titleBox.setMinWidth(180);
+        StackPane iconContainer = new StackPane();
+        iconContainer.getStyleClass().add("card-icon-container");
+        Label iconLabel = new Label("📦"); // Using an emoji for now to match the image icon look
+        iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
+        iconContainer.getChildren().add(iconLabel);
+
+        VBox titleBox = new VBox(2);
         Label titleLabel = new Label(course.getTitre());
+        titleLabel.getStyleClass().add("card-title");
         titleLabel.setWrapText(true);
-        titleLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
-        Label categoryLabel = new Label(resolveCategoryName(course.getCategorieId()));
-        categoryLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #64748b;");
+        
+        Label categoryLabel = new Label(resolveCategoryName(course.getCategorieId()).toUpperCase());
+        categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 10px;");
+        
         titleBox.getChildren().addAll(titleLabel, categoryLabel);
+        HBox.setHgrow(titleBox, Priority.ALWAYS);
 
-        VBox descriptionBox = new VBox(8);
-        descriptionBox.setMinWidth(270);
+        header.getChildren().addAll(iconContainer, titleBox);
+
+        // Middle: Description
+        VBox contentBox = new VBox(6);
         Label updatedLabel = new Label("Updated " + safeText(course.getDateDeModification()));
-        updatedLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
+        updatedLabel.getStyleClass().add("card-subtitle");
+        
         Label descriptionLabel = new Label(safeText(course.getDescription()));
         descriptionLabel.setWrapText(true);
-        descriptionLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #475569;");
-        descriptionBox.getChildren().addAll(updatedLabel, descriptionLabel);
+        descriptionLabel.setMinHeight(60);
+        descriptionLabel.getStyleClass().add("subtitle-label");
+        
+        contentBox.getChildren().addAll(updatedLabel, descriptionLabel);
 
-        VBox viewsBox = buildInfoBox("Views", String.valueOf(course.getViews() == null ? 0 : course.getViews()));
-        VBox durationBox = buildInfoBox("Duration", formatDuration(course.getDureeEstimee()));
-        VBox statusBox = buildInfoBox("Status", safeText(course.getStatut()));
-        VBox dateBox = buildInfoBox("Last update", formatDate(course.getDateDeModification()));
-
+        // Bottom: Footer Link
+        HBox footer = new HBox();
+        footer.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        
+        Label exploreLink = new Label("EXPLORE RESOURCES →");
+        exploreLink.getStyleClass().add("card-action-link");
+        exploreLink.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand;");
+        
+        // Ensure the link also triggers the navigation
+        exploreLink.setOnMouseClicked(event -> {
+            openRessources(course, card);
+            event.consume(); // Prevent double trigger if card also has it
+        });
+        
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
+        
+        footer.getChildren().addAll(exploreLink, spacer);
 
-        VBox actionsBox = new VBox(10);
-        actionsBox.setMinWidth(120);
-        Button resourcesButton = createActionButton("Ressources", "#1d4ed8", "#dbeafe");
-        Button editButton = createActionButton("Edit", "#1d4ed8", "#dbeafe");
-        Button deleteButton = createActionButton("Delete", "#b91c1c", "#fee2e2");
+        // Click actions
+        card.setOnMouseClicked(event -> openRessources(course, card));
+        card.setCursor(javafx.scene.Cursor.HAND);
 
-        resourcesButton.setOnAction(event -> openRessources(course, row));
-        editButton.setOnAction(event -> openEditForm(course, row));
-        deleteButton.setOnAction(event -> {
-            if (!AlertHelper.confirmDelete("course")) return;
-            try {
-                courseService.supprimer(course.getId());
-                loadCourses();
-                if (searchField.getText() != null && !searchField.getText().isEmpty()) {
-                    filterCourses(searchField.getText());
-                }
-                statusLabel.setText("Course deleted successfully.");
-                AlertHelper.showInfo("Deleted", "Course deleted successfully.");
-            } catch (SQLException exception) {
-                statusLabel.setText("Delete failed: " + exception.getMessage());
-                AlertHelper.showError("Delete failed", exception.getMessage());
-            }
-        });
-
-        actionsBox.getChildren().addAll(resourcesButton, editButton, deleteButton);
-        row.getChildren().addAll(imagePlaceholder, titleBox, descriptionBox, viewsBox,
-                durationBox, statusBox, dateBox, spacer, actionsBox);
-        return row;
+        card.getChildren().addAll(header, contentBox, footer);
+        return card;
     }
 
-    private VBox buildInfoBox(String labelText, String valueText) {
-        VBox box = new VBox(8);
-        box.setMinWidth(105);
-        Label label = new Label(labelText);
-        label.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;");
-        Label value = new Label(valueText);
-        value.setWrapText(true);
-        value.setStyle("-fx-font-size: 15px; -fx-text-fill: #334155; -fx-font-weight: bold;");
-        box.getChildren().addAll(label, value);
-        return box;
-    }
-
-    private Button createActionButton(String text, String textColor, String backgroundColor) {
+    private Button createActionButton(String text, String colorClass) {
         Button button = new Button(text);
         button.setMaxWidth(Double.MAX_VALUE);
-        button.setStyle(commonButtonStyle(textColor, backgroundColor));
+        button.getStyleClass().addAll("btn-action", colorClass);
         return button;
     }
 
-    private String commonButtonStyle(String textColor, String backgroundColor) {
-        return "-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";"
-                + " -fx-background-radius: 22; -fx-padding: 10 20 10 20; -fx-font-size: 14px;"
-                + " -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);";
-    }
+
 
     private void openEditForm(Course course, Node sourceNode) {
         try {

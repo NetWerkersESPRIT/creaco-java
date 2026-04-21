@@ -105,44 +105,40 @@ public class CategoryCoursesController {
 
     private Node buildCourseRow(Course course) {
         HBox row = new HBox(18);
-        row.setPadding(new Insets(18, 20, 18, 20));
-        row.setStyle("-fx-background-color: white; -fx-background-radius: 18; "
-                + "-fx-border-color: #e2e8f0; -fx-border-radius: 18;");
+        row.getStyleClass().add("list-row");
 
         StackPane iconBox = new StackPane();
-        iconBox.setMinSize(42, 42);
-        iconBox.setPrefSize(42, 42);
-        iconBox.setMaxSize(42, 42);
-        iconBox.setStyle("-fx-background-color: #e8eef8; -fx-background-radius: 12;");
+        iconBox.getStyleClass().add("sidebar-icon-box");
         Label iconLabel = new Label("C");
-        iconLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #47638a;");
         iconBox.getChildren().add(iconLabel);
 
         Label title = new Label(safeText(course.getTitre()));
         title.setMinWidth(240);
         title.setWrapText(true);
-        title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
+        title.getStyleClass().add("card-title");
 
         Label description = new Label(shorten(safeText(course.getDescription()), 95));
         description.setMinWidth(430);
         description.setWrapText(true);
-        description.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
+        description.getStyleClass().add("card-subtitle");
 
         Label views = new Label(String.valueOf(course.getViews() == null ? 0 : course.getViews()));
         views.setMinWidth(70);
-        views.setStyle("-fx-font-size: 15px; -fx-text-fill: #334155; -fx-font-weight: bold;");
+        views.getStyleClass().add("card-title");
+        views.setStyle("-fx-font-size: 15px;");
 
         Label createdAt = new Label(formatDate(course.getDateDeCreation()));
         createdAt.setMinWidth(140);
-        createdAt.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b; -fx-font-weight: bold;");
+        createdAt.getStyleClass().add("card-subtitle");
+        createdAt.setStyle("-fx-font-weight: bold;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actions = new HBox(10);
-        Button resourcesButton = createActionButton("Resources", "#1d4ed8", "#dbeafe");
-        Button editButton = createActionButton("Edit", "#1d4ed8", "#dbeafe");
-        Button deleteButton = createActionButton("Delete", "#b91c1c", "#fee2e2");
+        Button resourcesButton = createActionButton("Resources", "btn-action-dark");
+        Button editButton = createActionButton("Edit", "btn-action-dark");
+        Button deleteButton = createActionButton("Delete", "btn-action-light");
 
         resourcesButton.setOnAction(event -> openResources(course, row));
         editButton.setOnAction(event -> openEditForm(course, row));
@@ -166,18 +162,14 @@ public class CategoryCoursesController {
         return row;
     }
 
-    private Button createActionButton(String text, String textColor, String backgroundColor) {
+    private Button createActionButton(String text, String colorClass) {
         Button button = new Button(text);
-        button.setStyle(commonButtonStyle(textColor, backgroundColor));
+        button.getStyleClass().addAll("btn-action", colorClass);
         button.setMinWidth(90);
         return button;
     }
 
-    private String commonButtonStyle(String textColor, String backgroundColor) {
-        return "-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";"
-                + " -fx-background-radius: 22; -fx-padding: 10 20 10 20; -fx-font-size: 14px;"
-                + " -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);";
-    }
+
 
     private void openEditForm(Course course, Node sourceNode) {
         try {

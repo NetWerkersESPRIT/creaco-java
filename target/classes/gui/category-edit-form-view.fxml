@@ -8,27 +8,51 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="760.0" prefWidth="1280.0" style="-fx-background-color: #edf3fb;"
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="gui.CourseCategoryFormController">
     <left>
-        <VBox prefWidth="220.0" spacing="18.0" style="-fx-background-color: #1f365c;" BorderPane.alignment="CENTER">
+        <VBox prefWidth="240.0" spacing="25.0" styleClass="sidebar" BorderPane.alignment="CENTER">
             <padding>
-                <Insets bottom="30.0" left="20.0" right="20.0" top="30.0" />
+                <Insets bottom="30.0" left="24.0" right="24.0" top="30.0" />
             </padding>
             <children>
-                <Label style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" text="Creaco" />
-                <Label style="-fx-text-fill: #b8c7df; -fx-font-size: 13px;" text="Course management" />
-                <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="180.0"
-                        style="-fx-background-color: #f59e0b; -fx-text-fill: #1f365c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 14;"
-                        text="Courses" />
-                <Region VBox.vgrow="ALWAYS" />
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label styleClass="sidebar-brand" text="CreaCo" />
+                </HBox>
+                
                 <VBox spacing="12.0">
-                    <Button onAction="#goToPreview" text="Preview Mode" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: rgba(59, 130, 246, 0.15); -fx-text-fill: #93c5fd; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;" />
-                    <Button onAction="#logout" text="Log Out" prefHeight="48.0" prefWidth="180.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;" />
+                    <Button mnemonicParsing="false" onAction="#onCancel" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🏠" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Dashboard" />
+                            </HBox>
+                        </graphic>
+                    </Button>
                 </VBox>
+
+                <Label styleClass="section-header" text="WORKFLOW MANAGEMENT" />
+                <VBox spacing="10.0">
+                    <Button mnemonicParsing="false" onAction="#onCancel" prefWidth="210.0" styleClass="sidebar-item, sidebar-item-active">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🎓" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Courses" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+                <Button onAction="#logout" text="Log Out" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" />
             </children>
         </VBox>
     </left>
@@ -38,25 +62,24 @@
                 <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
             </padding>
             <children>
-                <HBox alignment="CENTER_LEFT">
+                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <VBox spacing="6.0">
-                            <children>
-                                <Label fx:id="titleLabel"
-                                       style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #243b63;"
-                                       text="Add Category" />
-                                <Label fx:id="subtitleLabel"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #64748b;"
-                                       text="Create a new course category." />
-                            </children>
+                        <VBox>
+                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories / Edit" />
+                            <Label fx:id="titleLabel" styleClass="title-label" text="Add Category" />
+                            <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a new course category." />
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#logout" styleClass="btn-logout">
+                            <graphic>
+                                <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                            </graphic>
+                        </Button>
                     </children>
                 </HBox>
-                <VBox maxWidth="860.0" spacing="20.0"
-                      style="-fx-background-color: white; -fx-background-radius: 18; -fx-border-color: #dbe4f0; -fx-border-radius: 18;">
+                <VBox maxWidth="860.0" spacing="20.0" styleClass="card">
                     <padding>
-                        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
                     </padding>
                     <children>
                         <VBox spacing="4.0">
@@ -81,10 +104,10 @@
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">
                             <children>
                                 <Button mnemonicParsing="false" onAction="#onCancel"
-                                        style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
+                                        styleClass="btn-secondary" prefWidth="120" prefHeight="40"
                                         text="Cancel" />
                                 <Button mnemonicParsing="false" onAction="#onSave"
-                                        style="-fx-background-color: #3f5f98; -fx-text-fill: white; -fx-background-radius: 18; -fx-padding: 10 18 10 18; -fx-font-size: 14px; -fx-font-weight: bold;"
+                                        styleClass="btn-primary" prefWidth="150" prefHeight="40"
                                         text="Save category" />
                             </children>
                         </HBox>

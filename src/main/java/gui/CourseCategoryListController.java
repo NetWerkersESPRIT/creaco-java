@@ -87,39 +87,38 @@ public class CourseCategoryListController {
 
     private Node buildCategoryRow(CourseCategory category) {
         HBox row = new HBox(18);
-        row.setPadding(new Insets(18, 20, 18, 20));
-        row.setStyle("-fx-background-color: white; -fx-background-radius: 18; "
-                + "-fx-border-color: #e2e8f0; -fx-border-radius: 18;");
+        row.getStyleClass().add("list-row");
 
         VBox nameBox = new VBox(8);
         nameBox.setMinWidth(260);
         Label nameLabel = new Label(safeText(category.getNom()));
         nameLabel.setWrapText(true);
-        nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
+        nameLabel.getStyleClass().add("card-title");
         Label slugLabel = new Label("Slug: " + safeText(category.getSlug()));
-        slugLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
+        slugLabel.getStyleClass().add("card-subtitle");
         nameBox.getChildren().addAll(nameLabel, slugLabel);
 
         Label descriptionLabel = new Label(safeText(category.getDescription()));
         descriptionLabel.setWrapText(true);
         descriptionLabel.setMinWidth(360);
-        descriptionLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #475569;");
+        descriptionLabel.getStyleClass().add("card-subtitle");
 
         VBox dateBox = new VBox(8);
         dateBox.setMinWidth(150);
         Label createdLabel = new Label(formatDate(category.getDateDeCreation()));
-        createdLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155; -fx-font-weight: bold;");
+        createdLabel.getStyleClass().add("card-title");
+        createdLabel.setStyle("-fx-font-size: 14px;"); // Slight override for date font size
         Label updatedLabel = new Label("Updated " + formatDate(category.getDateDeModification()));
-        updatedLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
+        updatedLabel.getStyleClass().add("card-subtitle");
         dateBox.getChildren().addAll(createdLabel, updatedLabel);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actionsBox = new HBox(10);
-        Button coursesButton = createActionButton("Courses", "#1d4ed8", "#dbeafe");
-        Button editButton = createActionButton("Edit", "#1d4ed8", "#dbeafe");
-        Button deleteButton = createActionButton("Delete", "#b91c1c", "#fee2e2");
+        Button coursesButton = createActionButton("Courses", "btn-action-dark");
+        Button editButton = createActionButton("Edit", "btn-action-dark");
+        Button deleteButton = createActionButton("Delete", "btn-action-light");
 
         coursesButton.setOnAction(event -> openScene("/gui/category-courses-view.fxml", controller -> {
             CategoryCoursesController coursesController = (CategoryCoursesController) controller;
@@ -149,18 +148,14 @@ public class CourseCategoryListController {
         return row;
     }
 
-    private Button createActionButton(String text, String textColor, String backgroundColor) {
+    private Button createActionButton(String text, String colorClass) {
         Button button = new Button(text);
-        button.setStyle(commonButtonStyle(textColor, backgroundColor));
+        button.getStyleClass().addAll("btn-action", colorClass);
         button.setMinWidth(90);
         return button;
     }
 
-    private String commonButtonStyle(String textColor, String backgroundColor) {
-        return "-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";"
-                + " -fx-background-radius: 22; -fx-padding: 10 20 10 20; -fx-font-size: 14px;"
-                + " -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);";
-    }
+
 
     private void openScene(String resourcePath, ControllerInitializer initializer) {
         try {

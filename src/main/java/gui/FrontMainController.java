@@ -86,33 +86,25 @@ public class FrontMainController {
     }
 
     private Node buildCourseCard(Course course) {
-
-        VBox card = new VBox(10);
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
         card.setPrefWidth(330);
-        card.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-background-radius: 16;" +
-                        "-fx-padding: 16;" +
-                        "-fx-border-color: #dbe4f0;" +
-                        "-fx-border-radius: 16;"
-        );
+        card.setMinWidth(330);
 
         Label title = new Label(course.getTitre());
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
+        title.getStyleClass().add("card-title");
 
         Label desc = new Label(
                 course.getDescription() == null ? "-" : course.getDescription()
         );
         desc.setWrapText(true);
-        desc.setStyle("-fx-text-fill: #475569; -fx-font-size: 13px;");
+        desc.setPrefHeight(60);
+        desc.getStyleClass().add("card-subtitle");
 
         Button openBtn = new Button("Open");
-        openBtn.setStyle(
-                "-fx-background-color: #1d4ed8;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-background-radius: 10;" +
-                        "-fx-padding: 6 12;"
-        );
+        openBtn.getStyleClass().add("btn-primary");
+        openBtn.setPrefWidth(120);
+        openBtn.setPrefHeight(40);
 
         openBtn.setOnAction(e -> openCourse(course));
 
