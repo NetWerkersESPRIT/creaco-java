@@ -23,6 +23,11 @@ public class UpdateCommentController {
     private final CommentService commentService = new CommentService();
     private Comment commentToUpdate;
     private Post currentPost;
+    private boolean isAdminMode = false;
+
+    public void setAdminMode(boolean isAdminMode) {
+        this.isAdminMode = isAdminMode;
+    }
 
     public void setData(Post post, Comment comment) {
         this.currentPost = post;
@@ -66,6 +71,7 @@ public class UpdateCommentController {
             Parent root = loader.load();
             
             DisplayCommentController controller = loader.getController();
+            controller.setAdminMode(this.isAdminMode);
             controller.setPost(currentPost);
             
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");

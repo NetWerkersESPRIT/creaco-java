@@ -90,6 +90,89 @@ public class PostService implements ForumInterface<Post> {
         return posts;
     }
 
+    /**
+     * Returns only posts whose status is "PENDING" (awaiting moderation).
+     */
+    public List<Post> getPendingPosts() throws SQLException {
+        List<Post> posts = new ArrayList<>();
+        String sql = "SELECT * FROM post WHERE status = 'PENDING' ORDER BY created_at ASC";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Post post = new Post();
+            post.setId(rs.getInt("id"));
+            post.setTitle(rs.getString("title"));
+            post.setContent(rs.getString("content"));
+            post.setStatus(rs.getString("status"));
+            post.setUserId(rs.getInt("user_id"));
+            post.setImageName(rs.getString("image_name"));
+            post.setPdfName(rs.getString("pdf_name"));
+            post.setLikes(rs.getInt("likes"));
+            post.setPinned(rs.getBoolean("pinned"));
+            post.setCommentLocked(rs.getBoolean("is_comment_locked"));
+            post.setProfane(rs.getBoolean("is_profane"));
+            post.setSpam(rs.getBoolean("is_spam"));
+            post.setSpamScore(rs.getInt("spam_score"));
+            post.setProfaneWords(rs.getInt("profane_words"));
+            post.setGrammarErrors(rs.getInt("grammar_errors"));
+            post.setRefusalReason(rs.getString("refusal_reason"));
+            Timestamp ts = rs.getTimestamp("created_at");
+            if (ts != null) post.setCreatedAt(ts.toLocalDateTime());
+            posts.add(post);
+        }
+        return posts;
+    }
+
+    /**
+     * Returns only posts whose status is "ACCEPTED" (visible on forum).
+     */
+    public List<Post> getAcceptedPosts() throws SQLException {
+        List<Post> posts = new ArrayList<>();
+        String sql = "SELECT * FROM post WHERE status = 'ACCEPTED' ORDER BY pinned DESC, created_at DESC";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Post post = new Post();
+            post.setId(rs.getInt("id"));
+            post.setTitle(rs.getString("title"));
+            post.setContent(rs.getString("content"));
+            post.setStatus(rs.getString("status"));
+            post.setUserId(rs.getInt("user_id"));
+            post.setImageName(rs.getString("image_name"));
+            post.setPdfName(rs.getString("pdf_name"));
+            post.setLikes(rs.getInt("likes"));
+            post.setPinned(rs.getBoolean("pinned"));
+            post.setCommentLocked(rs.getBoolean("is_comment_locked"));
+            post.setProfane(rs.getBoolean("is_profane"));
+            post.setSpam(rs.getBoolean("is_spam"));
+            post.setSpamScore(rs.getInt("spam_score"));
+            post.setProfaneWords(rs.getInt("profane_words"));
+            post.setGrammarErrors(rs.getInt("grammar_errors"));
+            post.setRefusalReason(rs.getString("refusal_reason"));
+            Timestamp ts = rs.getTimestamp("created_at");
+            if (ts != null) post.setCreatedAt(ts.toLocalDateTime());
+            posts.add(post);
+        }
+        return posts;
+    }
+
+    /**
+     * Updates only the status and refusal_reason of a post (used by backoffice moderation).
+     */
+    public void updatePostStatus(Post post) throws SQLException {
+        String sql = "UPDATE `post` SET `status` = ?, `refusal_reason` = ? WHERE `id` = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, post.getStatus());
+        if (post.getRefusalReason() == null) {
+            ps.setNull(2, java.sql.Types.VARCHAR);
+        } else {
+            ps.setString(2, post.getRefusalReason());
+        }
+        ps.setInt(3, post.getId());
+        ps.executeUpdate();
+        System.out.println("Post status updated: id=" + post.getId() + " -> " + post.getStatus());
+    }
+
     @Override
     public void modifier(int id, Post post) throws SQLException {
         String sql = "UPDATE `post` SET `title`=?, `content`=?, `status`=?, `user_id`=?, `image_name`=?, `pdf_name`=?, `pinned`=?, `is_comment_locked`=?, `updated_at`=? WHERE `id`=?";
@@ -106,5 +189,13 @@ public class PostService implements ForumInterface<Post> {
         ps.setInt(10, id);
         ps.executeUpdate();
         System.out.println("Post modifié avec succès!");
+    }
+    public void likePost(int id, int newLikes) throws SQLException {
+        String sql = "UPDATE `post` SET `likes` = ? WHERE `id` = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, newLikes);
+        ps.setInt(2, id);
+        ps.executeUpdate();
+        ps.close();
     }
 }
