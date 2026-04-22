@@ -48,6 +48,9 @@ public class DisplayPostController {
     @FXML
     private TextField searchField;
 
+    @FXML private Label lblUsername;
+    @FXML private Label lblUserRole;
+
     private final PostService postService = new PostService();
     private final CommentService commentService = new CommentService();
     private final UserService userService = new UserService();
@@ -69,6 +72,21 @@ public class DisplayPostController {
     public void initialize() {
         initialized = true;
         loadPosts();
+        
+        // Populate User Profile
+        entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
+        if (user != null && lblUsername != null) {
+            String displayName = user.getUsername() != null ? user.getUsername() : "User";
+            lblUsername.setText(displayName);
+            
+            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+            lblUserRole.setText(role);
+            
+            // Special styling for ADMIN
+            if ("ADMIN".equals(role)) {
+                lblUserRole.setStyle("-fx-background-color: #434a75;");
+            }
+        }
     }
 
     public void loadPosts() {

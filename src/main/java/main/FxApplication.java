@@ -14,16 +14,17 @@ public class FxApplication extends Application {
     public void start(Stage stage) throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader(
-                FxApplication.class.getResource("/gui/choose-role.fxml")
+                FxApplication.class.getResource("/Users/SignIn.fxml")
         );
 
         Parent root = fxmlLoader.load();
 
-        Scene scene = new Scene(root, 900, 600);
+        Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("/gui/styles.css").toExternalForm());
 
         stage.setTitle("Creaco JavaFX");
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
     }
 

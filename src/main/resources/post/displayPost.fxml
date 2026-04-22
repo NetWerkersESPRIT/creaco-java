@@ -38,10 +38,10 @@
                                 <VBox alignment="CENTER_RIGHT">
                                     <children>
                                         <Label style="-fx-font-size: 10px; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" text="Welcome" />
-                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Admin User" />
+                                        <Label fx:id="lblUsername" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Admin User" />
                                     </children>
                                 </VBox>
-                                <Label styleClass="badge-pink" text="ADMIN" />
+                                <Label fx:id="lblUserRole" styleClass="badge-pink" text="ADMIN" />
                             </children>
                         </HBox>
                         <Button onAction="#logout" styleClass="btn-logout">
