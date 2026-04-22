@@ -97,15 +97,30 @@ public class CourseCategoryService {
     // DELETE
     // =========================
     public void supprimer(int id) throws SQLException {
+        boolean previousAutoCommit = con.getAutoCommit();
 
-        String sql = "DELETE FROM categorie_cours WHERE id = ?";
+        try {
+            con.setAutoCommit(false);
 
-        PreparedStatement ps = con.prepareStatement(sql);
-        ps.setInt(1, id);
+            for (Integer courseId : findCourseIdsByCategory(id)) {
+                deleteCourseDependents(courseId);
+                deleteCourse(courseId);
+            }
 
-        ps.executeUpdate();
+            String sql = "DELETE FROM categorie_cours WHERE id = ?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, id);
+                ps.executeUpdate();
+            }
 
-        System.out.println("CourseCategory deleted successfully!");
+            con.commit();
+            System.out.println("CourseCategory deleted successfully!");
+        } catch (SQLException exception) {
+            con.rollback();
+            throw exception;
+        } finally {
+            con.setAutoCommit(previousAutoCommit);
+        }
     }
 
 
@@ -120,6 +135,19 @@ public class CourseCategoryService {
 
         if (rs.next()) {
             return rs.getInt(1) > 0;
+        }
+        return false;
+    }
+
+    public boolean hasCourses(int categoryId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM cours WHERE categorie_id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
         }
         return false;
     }
@@ -154,5 +182,38 @@ public class CourseCategoryService {
         }
 
         return null;
+    }
+
+    private List<Integer> findCourseIdsByCategory(int categoryId) throws SQLException {
+        List<Integer> courseIds = new ArrayList<>();
+        String sql = "SELECT id FROM cours WHERE categorie_id = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    courseIds.add(rs.getInt("id"));
+                }
+            }
+        }
+
+        return courseIds;
+    }
+
+    private void deleteCourseDependents(int courseId) throws SQLException {
+        deleteByCourseId("DELETE FROM ressource WHERE cours_id = ?", courseId);
+        deleteByCourseId("DELETE FROM cours_rating WHERE cours_id = ?", courseId);
+        deleteByCourseId("DELETE FROM user_cours_progress WHERE cours_id = ?", courseId);
+    }
+
+    private void deleteCourse(int courseId) throws SQLException {
+        deleteByCourseId("DELETE FROM cours WHERE id = ?", courseId);
+    }
+
+    private void deleteByCourseId(String sql, int courseId) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            ps.executeUpdate();
+        }
     }
 }

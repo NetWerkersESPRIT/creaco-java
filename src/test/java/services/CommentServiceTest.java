@@ -62,7 +62,7 @@ public class CommentServiceTest {
 
     @AfterEach
     public void cleanUp() {
-        System.out.println("End of execution of a test CommentServiceTest.");
+        System.out.println("End of execution of a test services.CommentServiceTest.");
     }
 
     @Test
