@@ -12,6 +12,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import services.CourseService;
+import utils.SessionManager;
+import entities.Users;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -31,6 +33,12 @@ public class FrontMainController {
     @FXML private StackPane contentArea;
     @FXML private VBox dashboardView;
     @FXML private javafx.scene.layout.HBox previewBanner;
+    @FXML private Label txtWelcome;
+
+    // Sidebar items
+    @FXML private Label lblAdminHeader;
+    @FXML private VBox boxAdmin;
+    @FXML private Button btnAdmin;
 
     @FXML
     private void initialize() {
@@ -41,6 +49,23 @@ public class FrontMainController {
                 filterCourses(newVal);
             });
         }
+
+        // Role-based visibility and Personalization
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null) {
+            String displayName = user.getUsername() != null ? user.getUsername() : "User";
+            txtWelcome.setText("Welcome back, " + displayName + "! 👋");
+
+            boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+            lblAdminHeader.setVisible(isAdmin);
+            lblAdminHeader.setManaged(isAdmin);
+            boxAdmin.setVisible(isAdmin);
+            boxAdmin.setManaged(isAdmin);
+
+            if (isAdmin) {
+                onShowAdmin();
+            }
+        }
     }
 
     @FXML
@@ -50,22 +75,27 @@ public class FrontMainController {
 
     @FXML
     private void onShowIdeas() {
-        System.out.println("Ideas section - Coming soon");
+        loadSubView("/TSK/Idea.fxml");
     }
 
     @FXML
     private void onShowMissions() {
-        System.out.println("Missions section - Coming soon");
+        loadSubView("/TSK/Mission.fxml");
     }
 
     @FXML
     private void onShowTasks() {
-        System.out.println("Tasks section - Coming soon");
+        loadSubView("/TSK/Tasks.fxml");
     }
 
     @FXML
     private void onShowEvents() {
         System.out.println("Events section - Coming soon");
+    }
+
+    @FXML
+    private void onShowAdmin() {
+        loadSubView("/Users/Admin.fxml");
     }
 
     @FXML
@@ -83,12 +113,30 @@ public class FrontMainController {
 
     @FXML
     private void onShowCollaborations() {
+        loadSubView("/collaborator/ListCollaborator.fxml");
+    }
+
+    private void loadSubView(String fxmlPath) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/collaborator/ListCollaborator.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            contentArea.getChildren().setAll(root);
+            
+            // If the loaded FXML is a BorderPane (like our modernized TSK pages),
+            // extract only the center content to avoid double sidebars.
+            if (root instanceof javafx.scene.layout.BorderPane) {
+                Node center = ((javafx.scene.layout.BorderPane) root).getCenter();
+                // We need to ensure the center node fills the content area
+                if (center instanceof VBox) {
+                    ((VBox) center).setPrefWidth(Double.MAX_VALUE);
+                    ((VBox) center).setPrefHeight(Double.MAX_VALUE);
+                }
+                contentArea.getChildren().setAll(center);
+            } else {
+                contentArea.getChildren().setAll(root);
+            }
         } catch (IOException e) {
-            System.err.println("Error loading collaborations: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("Failed to load sub-view: " + fxmlPath);
         }
     }
 
