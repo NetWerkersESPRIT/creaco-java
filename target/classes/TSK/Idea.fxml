@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.TSKControllers.IdeaController" stylesheets="@../gui/styles.css">
+    <left>
+        <VBox prefWidth="260.0" spacing="20.0" styleClass="sidebar">
+            <padding>
+                <Insets bottom="30.0" left="24.0" right="24.0" top="30.0" />
+            </padding>
+            <children>
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label styleClass="sidebar-brand" text="CreaCo" />
+                </HBox>
+                
+                <Label styleClass="section-header" text="WORKFLOW" />
+                <VBox spacing="10.0">
+                    <Button mnemonicParsing="false" onAction="#goBack" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🏠" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Dashboard" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                    <Button mnemonicParsing="false" prefWidth="210.0" styleClass="sidebar-item, sidebar-item-active">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box" style="-fx-background-color: -fx-primary-pink;">
+                                    <Label text="💡" style="-fx-font-size: 16px; -fx-text-fill: white;" />
+                                </StackPane>
+                                <Label text="Ideas" style="-fx-text-fill: -fx-primary-pink;"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+                <Button onAction="#goBack" text="← Back" prefHeight="45.0" prefWidth="210.0" styleClass="btn-primary" style="-fx-background-color: #2d3748;"/>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <VBox spacing="22.0">
+            <padding>
+                <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+            </padding>
+            <children>
+                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <VBox>
+                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Innovation" />
+                            <Label styleClass="title-label" text="Ideas Shelf" />
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#handleAddIdea" prefHeight="44.0" styleClass="btn-primary" text="＋ Add Idea" />
+                        <Button fx:id="btnAdmin" mnemonicParsing="false" onAction="#goToAdmin" prefHeight="44.0" styleClass="btn-primary" style="-fx-background-color: #2d3748;" text="🛠 Admin" />
+                    </children>
+                </HBox>
+
+                <VBox VBox.vgrow="ALWAYS" styleClass="card" spacing="15">
+                    <children>
+                        <VBox spacing="5">
+                            <Label text="Ideas Table" styleClass="card-title" />
+                            <Label text="Browse through community submissions" styleClass="card-subtitle" />
+                        </VBox>
+                        <Separator />
+                        <TableView fx:id="ideaTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 12; -fx-border-radius: 12;">
+                            <columns>
+                                <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
+                                <TableColumn fx:id="colTitle" prefWidth="200.0" text="TITLE" />
+                                <TableColumn fx:id="colDescription" prefWidth="350.0" text="DESCRIPTION" />
+                                <TableColumn fx:id="colCategory" prefWidth="150.0" text="CATEGORY" />
+                                <TableColumn fx:id="colActions" prefWidth="150.0" text="ACTIONS" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>
