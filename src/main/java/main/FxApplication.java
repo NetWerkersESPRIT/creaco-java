@@ -4,6 +4,7 @@ import gui.post.BackofficeController;
 import gui.post.DisplayPostController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -55,11 +56,11 @@ public class FxApplication extends Application {
         
         adminStage.setTitle("Creaco - Admin Moderation Panel");
         adminStage.setScene(adminScene);
-        adminStage.setX(stage.getX() + 920); // Positon it to the right
+        adminStage.setX(stage.getX() + 920); // Position it to the right
         adminStage.show();
     }
 
     public static void main(String[] args) {
-        launch(args);
+        launch();
     }
 }

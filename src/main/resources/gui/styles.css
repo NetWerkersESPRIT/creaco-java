@@ -1,0 +1,205 @@
+/* 
+    Centralized Stylesheet for Creaco App
+    Inspired by modern Dashboard UI (Vibrant Pink theme)
+*/
+
+.root {
+    /* Define colors as looked up colors */
+    -fx-primary-pink: #ce2d7c;
+    -fx-primary-purple: #6c2db1;
+    -fx-primary-gradient: linear-gradient(to bottom right, #ce2d7c, #6c2db1);
+
+    -fx-background: #f4f7fe;
+    -fx-sidebar: #ffffff;
+    -fx-card: #ffffff;
+    -fx-text-main: #2d3748;
+    -fx-text-muted: #a0aec0;
+    -fx-sidebar-text: #718096;
+    
+    -fx-font-family: "Segoe UI", "Open Sans", Helvetica, Arial, sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* Page Backgrounds */
+.main-container {
+    -fx-background-color: -fx-background;
+}
+
+.sidebar {
+    -fx-background-color: -fx-background; /* Matching the image light background */
+    -fx-border-color: transparent #e2e8f0 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+/* Typography */
+.title-label {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-main;
+}
+
+.subtitle-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-muted;
+}
+
+.section-header {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94a3b8;
+    -fx-padding: 20 0 5 0;
+}
+
+.sidebar-brand {
+    -fx-text-fill: -fx-text-main;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+/* Sidebar Items */
+.sidebar-item {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #2d3748;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 5 0 5 0; /* Minimal padding since HBox handles spacing */
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+}
+
+.sidebar-icon-box {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-min-width: 36;
+    -fx-max-width: 36;
+    -fx-min-height: 36;
+    -fx-max-height: 36;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);
+}
+
+.sidebar-item:hover .sidebar-icon-box {
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.15), 10, 0, 0, 4);
+}
+
+.sidebar-item-active .sidebar-icon-box {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.12), 12, 0, 0, 5);
+}
+
+/* Buttons */
+.btn {
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+}
+
+.btn-primary {
+    -fx-background-color: -fx-primary-gradient;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+}
+
+.btn-logout {
+    -fx-background-color: -fx-primary-gradient;
+    -fx-background-radius: 12;
+    -fx-padding: 8;
+}
+
+/* Cards */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 15, 0, 0, 8);
+    -fx-border-color: #f1f5f9;
+    -fx-border-radius: 20;
+    -fx-spacing: 15;
+}
+
+.card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(216, 27, 96, 0.12), 20, 0, 0, 5);
+}
+
+.card-icon-container {
+    -fx-background-color: -fx-primary-gradient;
+    -fx-background-radius: 12;
+    -fx-min-width: 42;
+    -fx-max-width: 42;
+    -fx-min-height: 42;
+    -fx-max-height: 42;
+    -fx-alignment: CENTER;
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-main;
+}
+
+.card-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-muted;
+}
+
+.list-row {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-padding: 18 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 10, 0, 0, 2);
+    -fx-border-color: #f1f5f9;
+    -fx-border-radius: 15;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.list-row:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 4);
+    -fx-background-color: #fafbfc;
+}
+
+.btn-action {
+    -fx-background-radius: 10;
+    -fx-padding: 6 12;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+}
+
+.btn-action-dark {
+    -fx-background-color: #2d3748;
+    -fx-text-fill: white;
+}
+
+.btn-action-light {
+    -fx-background-color: #edf2f7;
+    -fx-text-fill: #4a5568;
+}
+
+/* Inputs */
+.search-bar {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 15;
+    -fx-padding: 12 16 12 16;
+}
+
+/* Navbar / Top Header */
+.top-nav {
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-background-radius: 20;
+    -fx-padding: 10 20 10 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(216, 27, 96, 0.05), 10, 0, 0, 2);
+}
+
+.badge-pink {
+    -fx-background-color: -fx-primary-gradient;
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 50;
+    -fx-padding: 3 8 3 8;
+}
+
+
