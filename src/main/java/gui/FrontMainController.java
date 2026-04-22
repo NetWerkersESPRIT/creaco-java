@@ -145,6 +145,11 @@ public class FrontMainController {
         onGoToDashboard();
     }
 
+    @FXML
+    private void onShowProfile() {
+        loadSubView("/Users/Profile.fxml");
+    }
+
     private void loadCourses() {
         if (coursesContainer == null) return;
         try {

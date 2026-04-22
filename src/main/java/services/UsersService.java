@@ -92,9 +92,14 @@ public class UsersService implements services.UsersInterface<Users> {
         ps.setString(1, users.getUsername());
         ps.setString(2, users.getEmail());
 
-        // ✅ Only hash if password was changed
         String pwd = users.getPassword();
-        ps.setString(3, (pwd != null && !pwd.isBlank()) ? bcryptHash(pwd) : pwd);
+        if (pwd != null && !pwd.isBlank() && !pwd.startsWith("$2")) {
+            // It's a plain text password, hash it
+            ps.setString(3, bcryptHash(pwd));
+        } else {
+            // Either null/blank or already hashed
+            ps.setString(3, pwd);
+        }
 
         ps.setString(4, users.getRole());
         ps.setString(5, users.getNumtel());
