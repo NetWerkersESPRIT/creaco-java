@@ -11,7 +11,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
-import main.FxApplication;
 import services.forum.CommentService;
 
 import java.io.IOException;
@@ -83,12 +82,6 @@ public class AddCommentController {
 
         try {
             commentService.ajouter(c);
-            
-            // --- INSTANT SYNC: Notify FrontOffice Windows if it's an admin comment ---
-            if (isAdminMode) {
-                FxApplication.refreshAllForumWindows();
-            }
-            
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();

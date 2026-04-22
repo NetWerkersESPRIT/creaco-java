@@ -1,6 +1,7 @@
 package gui.post;
 
 import entities.Post;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,11 +11,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.CheckBox;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import services.forum.PostService;
-import main.FxApplication;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class UpdatePostController {
     private TextArea contentArea;
 
     @FXML
-    private CheckBox pinnedCheckBox;
+    private ToggleButton pinToggle;
     @FXML
     private Label imageLabel;
     @FXML
@@ -53,7 +53,7 @@ public class UpdatePostController {
         this.postToUpdate = post;
         titleField.setText(post.getTitle());
         contentArea.setText(post.getContent());
-        pinnedCheckBox.setSelected(post.isPinned());
+        pinToggle.setSelected(post.isPinned());
         
         if (post.getImageName() != null && !post.getImageName().isEmpty()) {
             imageLabel.setText(post.getImageName());
@@ -76,20 +76,17 @@ public class UpdatePostController {
 
         postToUpdate.setTitle(title);
         postToUpdate.setContent(content);
-        postToUpdate.setPinned(pinnedCheckBox.isSelected());
+        postToUpdate.setPinned(pinToggle.isSelected());
         
-        // If not admin, reset status to PENDING so it must be re-approved
         if (!isAdminMode) {
             postToUpdate.setStatus("PENDING");
         }
 
-        // Handle Image
         if (imageFile != null) {
             String newImageName = saveFile(imageFile, "images");
             postToUpdate.setImageName(newImageName);
         }
 
-        // Handle PDF
         if (pdfFile != null) {
             String newPdfName = saveFile(pdfFile, "pdfs");
             postToUpdate.setPdfName(newPdfName);
@@ -98,15 +95,6 @@ public class UpdatePostController {
         try {
             postService.modifier(postToUpdate.getId(), postToUpdate);
             
-            // --- SYNC LOGIC ---
-            // 1. Refresh Backoffice Moderation view if it's open
-            BackofficeController bc = FxApplication.getBackofficeController();
-            if (bc != null) {
-                bc.loadPendingPosts();
-            }
-            // 2. Refresh all Forum/FrontOffice windows
-            FxApplication.refreshAllForumWindows();
-
             if (!isAdminMode) {
                 showAlert(Alert.AlertType.INFORMATION, "Post Updated", 
                     "Your changes have been saved. The post will be visible again once an admin approves the edits.");
@@ -123,9 +111,7 @@ public class UpdatePostController {
     private void chooseImage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose Image");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
-        );
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg"));
         File selectedFile = fileChooser.showOpenDialog(titleField.getScene().getWindow());
         if (selectedFile != null) {
             this.imageFile = selectedFile;
@@ -137,9 +123,7 @@ public class UpdatePostController {
     private void choosePDF() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose PDF");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
-        );
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
         File selectedFile = fileChooser.showOpenDialog(titleField.getScene().getWindow());
         if (selectedFile != null) {
             this.pdfFile = selectedFile;
@@ -151,18 +135,12 @@ public class UpdatePostController {
         try {
             String uploadsDir = "src/main/resources/uploads/" + subDir + "/";
             File directory = new File(uploadsDir);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
+            if (!directory.exists()) directory.mkdirs();
 
             String fileName = System.currentTimeMillis() + "_" + file.getName();
-            Path targetPath = Paths.get(uploadsDir + fileName);
-            Files.copy(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(file.toPath(), Paths.get(uploadsDir + fileName), StandardCopyOption.REPLACE_EXISTING);
             return fileName;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        } catch (IOException e) { return null; }
     }
 
     @FXML
@@ -170,42 +148,42 @@ public class UpdatePostController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
             Parent root = loader.load();
-            
             DisplayPostController controller = loader.getController();
             controller.setAdminMode(this.isAdminMode);
-            
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
             contentArea.getChildren().setAll(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     private boolean validateInputs(String title, String content) {
-        if (title.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title is required.");
-            return false;
-        }
-        if (content.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Content is required.");
-            return false;
-        }
-
-        // Ensure the title contains at least one letter (prevents numbers-only titles)
-        // Also allows letters, numbers, spaces, and common punctuation.
-        if (!title.matches(".*\\p{L}.*")) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must contain at least one letter. It cannot be numbers only.");
-            return false;
-        }
-        
+        if (title.isEmpty()) { showAlert(Alert.AlertType.ERROR, "Error", "Title is required."); return false; }
+        if (content.isEmpty()) { showAlert(Alert.AlertType.ERROR, "Error", "Content is required."); return false; }
+        if (!title.matches(".*\\p{L}.*")) { showAlert(Alert.AlertType.ERROR, "Error", "Title cannot be numbers only."); return false; }
         return true;
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        gui.util.AlertHelper.AlertType ct = (type == Alert.AlertType.ERROR) ? gui.util.AlertHelper.AlertType.ERROR : gui.util.AlertHelper.AlertType.INFORMATION;
+        gui.util.AlertHelper.showCustomAlert(title, content, ct);
     }
+
+    @FXML
+    private void onDictateTitle() { startDictation(titleField); }
+    @FXML
+    private void onDictateContent() { startDictation(contentArea); }
+
+    private void startDictation(javafx.scene.control.TextInputControl target) {
+        new Thread(() -> {
+            try {
+                String script = "$code = '[DllImport(\"user32.dll\")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);'; "
+                        + "$type = Add-Type -MemberDefinition $code -Name 'Win32' -Namespace 'External' -PassThru; "
+                        + "$type::keybd_event(0x5B, 0, 0, 0); $type::keybd_event(0x48, 0, 0, 0); "
+                        + "$type::keybd_event(0x48, 0, 2, 0); $type::keybd_event(0x5B, 0, 2, 0);";
+                new ProcessBuilder("powershell.exe", "-Command", script).start();
+            } catch (Exception e) { e.printStackTrace(); }
+        }).start();
+    }
+
+    @FXML
+    public void logout(ActionEvent event) { gui.SessionHelper.logout(event); }
 }

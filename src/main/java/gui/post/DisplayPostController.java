@@ -23,7 +23,6 @@ import javafx.scene.layout.VBox;
 import services.forum.CommentService;
 import services.forum.PostService;
 import services.UserService;
-import main.FxApplication;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -57,6 +56,7 @@ public class DisplayPostController {
     
     private boolean isAdminMode = false;
     private boolean initialized = false;
+    private final java.util.Set<Integer> likedPosts = new java.util.HashSet<>();
     
     public void setAdminMode(boolean isAdminMode) {
         this.isAdminMode = isAdminMode;
@@ -67,8 +67,6 @@ public class DisplayPostController {
 
     @FXML
     public void initialize() {
-        // Register this instance so Backoffice can refresh it
-        FxApplication.registerForumController(this);
         initialized = true;
         loadPosts();
     }
@@ -96,7 +94,6 @@ public class DisplayPostController {
     private void renderPosts(List<Post> postsToDisplay) {
         postsContainer.getChildren().clear();
         
-        //Pinned posts first, then newest ID first (descending)
         List<Post> sortedPosts = postsToDisplay.stream()
                 .sorted((p1, p2) -> {
                     if (p1.isPinned() != p2.isPinned()) {
@@ -109,223 +106,288 @@ public class DisplayPostController {
         statusLabel.setText(sortedPosts.size() + " post(s) found.");
 
         if (sortedPosts.isEmpty()) {
-            Label emptyState = new Label("No posts available matching your search.");
-            emptyState.setStyle("-fx-font-size: 15px; -fx-text-fill: #64748b;");
+            VBox emptyState = new VBox(15);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new Insets(100, 0, 100, 0));
+            emptyState.getStyleClass().add("card");
+            
+            StackPane iconCircle = new StackPane();
+            iconCircle.setPrefSize(60, 60);
+            iconCircle.setMaxSize(60, 60);
+            iconCircle.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 50;");
+            Label icon = new Label("🔍");
+            icon.setStyle("-fx-font-size: 24px;");
+            iconCircle.getChildren().add(icon);
+            
+            Label mainMsg = new Label("Nothing here yet");
+            mainMsg.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;");
+            
+            Label subMsg = new Label("Start the discussion and be the first to post!");
+            subMsg.setStyle("-fx-font-size: 14px; -fx-text-fill: #718096;");
+            
+            emptyState.getChildren().addAll(iconCircle, mainMsg, subMsg);
             postsContainer.getChildren().add(emptyState);
             return;
         }
 
         for (Post post : sortedPosts) {
-            System.out.println("Rendering post: " + post.getTitle() + " | Image: " + post.getImageName());
             VBox card = buildPostCard(post);
             postsContainer.getChildren().add(card);
         }
     }
 
     private VBox buildPostCard(Post post) {
-        VBox card = new VBox(18);
-        card.setPadding(new Insets(24));
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 18; "
-                + "-fx-border-color: #dbe4f0; -fx-border-radius: 18;");
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+        card.setPadding(new Insets(25));
+        card.setAlignment(javafx.geometry.Pos.TOP_LEFT);
 
-        // avatar
+        // --- Author Row ---
         entities.Users author = userService.getUserById(post.getUserId());
         String username = (author != null) ? author.getUsername() : "Unknown";
-        HBox authorRow = new HBox(10);
+        HBox authorRow = new HBox(12);
         authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        javafx.scene.layout.StackPane avatar = buildAvatar(username);
+        
+        StackPane avatar = buildAvatar(username);
         Label usernameLabel = new Label(username);
-        usernameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #355388;");
+        usernameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;");
         authorRow.getChildren().addAll(avatar, usernameLabel);
 
-        // Add (admin)
-        boolean isAdmin = (post.getUserId() == 5) || 
-                          (author != null && author.getRole() != null && author.getRole().toLowerCase().contains("admin"));
-        if (isAdmin) {
-            Label adminLabel = new Label("(admin)");
-            adminLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
-            authorRow.getChildren().add(adminLabel);
+        if (post.isPinned()) {
+            Label pinnedBadge = new Label("📌 PINNED");
+            pinnedBadge.setStyle("-fx-font-size: 11px; -fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+            authorRow.getChildren().add(pinnedBadge);
         }
 
-        HBox header = new HBox(16);
-        VBox headerText = new VBox(8);
-        
+        // --- Title & Content ---
+        VBox body = new VBox(8);
         Label titleLabel = new Label(safeText(post.getTitle()));
-        titleLabel.setWrapText(true);
-        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #243b63;");
+        titleLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3748;");
+        
+        Label contentLabel = new Label(safeText(post.getContent()));
+        contentLabel.setWrapText(true);
+        contentLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #718096; -fx-line-spacing: 4;");
+        body.getChildren().addAll(titleLabel, contentLabel);
 
-        // comment counting
-        int commentCount = 0;
-        try {
-            commentCount = commentService.getCommentCountByPost(post.getId());
-        } catch (SQLException e) {
-            e.printStackTrace();
+        card.getChildren().addAll(authorRow, body);
+
+        // Handle Image
+        if (post.getImageName() != null && !post.getImageName().isEmpty()) {
+            ImageView imageView = buildImageView(post.getImageName());
+            if (imageView != null) {
+                card.getChildren().add(card.getChildren().size(), imageView);
+            }
         }
 
-        String metaText = "Created " + formatDate(post.getCreatedAt()) + "  |  Comments: " + commentCount;
-        Label metaLabel = new Label(metaText);
-        metaLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
-        headerText.getChildren().addAll(titleLabel, metaLabel);
+        // --- Actions Row ---
+        HBox actionsRow = new HBox(25);
+        actionsRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        actionsRow.setPadding(new Insets(10, 0, 0, 0));
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox actions = new HBox(10);
-        Button commentsButton = createActionButton("View comments", "#355388", "#eef3fb");
-        commentsButton.setOnAction(event -> openComments(event, post));
-
-        Button editButton = createActionButton("Edit", "#355388", "#eef3fb");
-        editButton.setOnAction(event -> openEdit(event, post));
-
-        Button deleteButton = createActionButton("Delete", "#c62828", "#fdecec");
-        deleteButton.setOnAction(event -> deletePost(post.getId()));
-
-        actions.getChildren().add(commentsButton);
+        actionsRow.getChildren().addAll(
+            createLikeAction(post),
+            createCommentAction(post),
+            createReadAction(post)
+        );
 
         int currentUserId = isAdminMode ? 5 : 1;
         boolean isOwner = (post.getUserId() == currentUserId);
 
-        // Ownership-based Edit: Only author can edit
         if (isOwner) {
-            actions.getChildren().add(editButton);
+            HBox editBtn = createSimpleAction("📝 Edit", "");
+            editBtn.setOnMouseClicked(e -> openEdit(new ActionEvent(editBtn, null), post));
+            editBtn.setStyle("-fx-cursor: hand;");
+            actionsRow.getChildren().add(editBtn);
         }
 
-        // Ownership or Admin-based Delete: Author or Admin can delete
         if (isOwner || isAdminMode) {
-            actions.getChildren().add(deleteButton);
+            HBox deleteBtn = createSimpleAction("🗑 Delete", "");
+            deleteBtn.setOnMouseClicked(e -> deletePost(post.getId()));
+            deleteBtn.setStyle("-fx-cursor: hand;");
+            actionsRow.getChildren().add(deleteBtn);
         }
 
-        header.getChildren().addAll(headerText, spacer, actions);
+        actionsRow.getChildren().addAll(
+            createPinAction(post),
+            createSimpleAction("↪ Share", "")
+        );
 
-        Label contentLabel = new Label(safeText(post.getContent()));
-        contentLabel.setWrapText(true);
-        contentLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #475569;");
+        card.getChildren().add(actionsRow);
 
-        card.getChildren().addAll(authorRow, header, contentLabel);
-
-
-        if (post.isPinned()) {
-            Label pinnedBadge = new Label("📌 Pinned Post");
-            pinnedBadge.setStyle("-fx-background-color: #fef3c7; -fx-text-fill: #92400e; "
-                    + "-fx-padding: 4 10; -fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 12px;");
-            headerText.getChildren().add(1, pinnedBadge); // Add below title
-        }
-
-        // image
-        if (post.getImageName() != null && !post.getImageName().isEmpty()) {
-            try {
-                String imagePath = "src/main/resources/uploads/images/" + post.getImageName();
-                File file = new File(imagePath);
-                
-                if (file.exists()) {
-                    Image image = new Image(file.toURI().toString());
-                    ImageView imageView = new ImageView(image);
-                    imageView.setFitWidth(400);
-                    imageView.setPreserveRatio(true);
-                    
-                    // Simplified clip
-                    javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
-                    clip.setArcWidth(20);
-                    clip.setArcHeight(20);
-                    
-                    // Bind width
-                    clip.widthProperty().bind(imageView.fitWidthProperty());
-                    image.progressProperty().addListener((obs, oldVal, newVal) -> {
-                        if (newVal.doubleValue() == 1.0) {
-                            clip.setHeight(imageView.getBoundsInLocal().getHeight());
-                        }
-                    });
-                    // Also set an initial height based on expected ratio or just large enough
-                    clip.setHeight(300); 
-                    
-                    imageView.setClip(clip);
-                    card.getChildren().add(imageView);
-                    System.out.println("Image added to card: " + file.getAbsolutePath());
-                } else {
-                    System.out.println("Image file NOT found: " + file.getAbsolutePath());
-                }
-            } catch (Exception e) {
-                System.out.println("Exception while loading image: " + e.getMessage());
-            }
-        }
-
-        //pdf
+        // PDF Attachment
         if (post.getPdfName() != null && !post.getPdfName().isEmpty()) {
-            Button openPdfButton = createActionButton("📄 Open Attachment (PDF)", "#1e293b", "#f1f5f9");
-            openPdfButton.setOnAction(event -> {
-                try {
-                    File file = new File("src/main/resources/uploads/pdfs/" + post.getPdfName());
-                    if (file.exists()) {
-                        Desktop.getDesktop().open(file);
-                    } else {
-                        showAlert(Alert.AlertType.WARNING, "File Not Found", "The PDF file could not be found locally.");
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    showAlert(Alert.AlertType.ERROR, "Error", "Could not open the PDF file.");
-                }
-            });
-            card.getChildren().add(openPdfButton);
+            Button pdfBtn = createActionButton("📄 Open PDF", "#1e293b", "#f1f5f9");
+            pdfBtn.setOnAction(e -> openPdf(post.getPdfName()));
+            card.getChildren().add(pdfBtn);
         }
 
         return card;
     }
-    
-    private javafx.scene.layout.StackPane buildAvatar(String username) {
-        // Generate a consistent color from the first letter
-        String[] colors = {"#355388", "#1e8a5e", "#7c3aed", "#c2410c", "#0369a1",
-                           "#047857", "#b45309", "#9d174d", "#1d4ed8", "#065f46"};
+
+    private HBox createSimpleAction(String icon, String text) {
+        HBox box = new HBox(6);
+        box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        Label iconL = new Label(icon);
+        iconL.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
+        Label textL = new Label(text);
+        textL.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748b;");
+        box.getChildren().addAll(iconL, textL);
+        return box;
+    }
+
+    private HBox createLikeAction(Post post) {
+        HBox box = createSimpleAction("👍 Like", String.valueOf(post.getLikes()));
+        Label iconLabel = (Label) box.getChildren().get(0);
+        Label countLabel = (Label) box.getChildren().get(1);
+
+        if (likedPosts.contains(post.getId())) {
+            iconLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+            countLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+        }
+
+        box.setOnMouseClicked(e -> {
+            try {
+                if (likedPosts.contains(post.getId())) {
+                    likedPosts.remove(post.getId());
+                    post.setLikes(post.getLikes() - 1);
+                    iconLabel.setStyle("-fx-text-fill: #64748b;");
+                    countLabel.setStyle("-fx-text-fill: #64748b;");
+                } else {
+                    likedPosts.add(post.getId());
+                    post.setLikes(post.getLikes() + 1);
+                    iconLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+                    countLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+                }
+                postService.likePost(post.getId(), post.getLikes());
+                countLabel.setText(String.valueOf(post.getLikes()));
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+        box.setStyle("-fx-cursor: hand;");
+        return box;
+    }
+
+    private HBox createCommentAction(Post post) {
+        int count = 0;
+        try { count = commentService.getCommentCountByPost(post.getId()); } catch (SQLException e) {}
+        HBox box = createSimpleAction("💬", count + " Comments");
+        box.setOnMouseClicked(e -> openComments(new ActionEvent(box, null), post));
+        box.setStyle("-fx-cursor: hand;");
+        return box;
+    }
+
+    private HBox createReadAction(Post post) {
+        HBox box = createSimpleAction("📢 Read", "");
+        box.setOnMouseClicked(e -> {
+            String textToSpeak = "Post Title: " + post.getTitle() + ". Content: " + post.getContent();
+            speak(textToSpeak);
+        });
+        box.setStyle("-fx-cursor: hand;");
+        return box;
+    }
+
+    private void speak(String text) {
+        new Thread(() -> {
+            try {
+                // Escape single quotes for PowerShell
+                String escapedText = text.replace("'", "''").replace("\"", "");
+                String script = "Add-Type -AssemblyName System.Speech; "
+                        + "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
+                        + "$speak.Speak('" + escapedText + "')";
+                new ProcessBuilder("powershell.exe", "-Command", script).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private HBox createPinAction(Post post) {
+        HBox box = createSimpleAction("📌 Pin", "");
+        box.setOnMouseClicked(e -> togglePin(post));
+        box.setStyle("-fx-cursor: hand;");
+        return box;
+    }
+
+    private void togglePin(Post post) {
+        try {
+            post.setPinned(!post.isPinned());
+            postService.modifier(post.getId(), post);
+            loadPosts(); // Refresh list to show pinned at top
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not pin post.");
+        }
+    }
+
+    private ImageView buildImageView(String imageName) {
+        try {
+            File file = new File("src/main/resources/uploads/images/" + imageName);
+            if (file.exists()) {
+                Image image = new Image(file.toURI().toString());
+                ImageView imageView = new ImageView(image);
+                imageView.setFitWidth(500);
+                imageView.setPreserveRatio(true);
+                javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+                clip.setArcWidth(20); clip.setArcHeight(20);
+                clip.widthProperty().bind(imageView.fitWidthProperty());
+                image.progressProperty().addListener((obs, old, val) -> {
+                    if (val.doubleValue() == 1.0) clip.setHeight(imageView.getBoundsInLocal().getHeight());
+                });
+                imageView.setClip(clip);
+                return imageView;
+            }
+        } catch (Exception e) {}
+        return null;
+    }
+
+    private StackPane buildAvatar(String username) {
         char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
-        String color = colors[Math.abs(initial) % colors.length];
-
         Label initLabel = new Label(String.valueOf(initial));
-        initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;");
-
-        javafx.scene.layout.StackPane circle = new javafx.scene.layout.StackPane(initLabel);
-        circle.setPrefSize(36, 36);
-        circle.setMinSize(36, 36);
-        circle.setMaxSize(36, 36);
-        circle.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 50%;");
+        initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
+        StackPane circle = new StackPane(initLabel);
+        circle.setPrefSize(35, 35); circle.setMinSize(35, 35); circle.setMaxSize(35, 35);
+        circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
         return circle;
+    }
+
+    private void openPdf(String pdfName) {
+        try {
+            File file = new File("src/main/resources/uploads/pdfs/" + pdfName);
+            if (file.exists()) Desktop.getDesktop().open(file);
+            else showAlert(Alert.AlertType.WARNING, "Not Found", "PDF not found.");
+        } catch (IOException e) { showAlert(Alert.AlertType.ERROR, "Error", "Could not open PDF."); }
     }
 
     private Button createActionButton(String text, String textColor, String backgroundColor) {
         Button button = new Button(text);
         button.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor
-                + "; -fx-background-radius: 12; -fx-padding: 10 16 10 16; -fx-font-weight: bold;");
+                + "; -fx-background-radius: 10; -fx-padding: 8 16; -fx-font-weight: bold; -fx-font-size: 11px;");
+        button.setCursor(javafx.scene.Cursor.HAND);
         return button;
     }
 
-    /**
-     * Safely locates the #contentArea StackPane from any node in the scene.
-     */
     private StackPane findContentArea(Node source) {
         StackPane area = (StackPane) source.getScene().lookup("#contentArea");
         if (area != null) return area;
-        javafx.scene.Node parent = source.getParent();
+        Node parent = source.getParent();
         while (parent != null) {
-            if (parent instanceof StackPane && "contentArea".equals(parent.getId())) {
-                return (StackPane) parent;
-            }
+            if (parent instanceof StackPane && "contentArea".equals(parent.getId())) return (StackPane) parent;
             parent = parent.getParent();
         }
         return null;
     }
 
     @FXML
-    private void goAddPost(ActionEvent event) {
+    public void goAddPost(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/addPost.fxml"));
             Parent root = loader.load();
-            
             AddPostController controller = loader.getController();
-            controller.setAdminMode(this.isAdminMode);
-            
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            if (controller != null) controller.setAdminMode(this.isAdminMode);
+            StackPane contentArea = findContentArea((Node) event.getSource());
+            if (contentArea != null) contentArea.getChildren().setAll(root);
+        } catch (Exception e) { e.printStackTrace(); showAlert(Alert.AlertType.ERROR, "Error", "Could not load Add Post."); }
     }
 
     private void openEdit(ActionEvent event, Post post) {
@@ -335,69 +397,35 @@ public class DisplayPostController {
             UpdatePostController controller = loader.getController();
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
-            
             StackPane contentArea = findContentArea((Node) event.getSource());
             if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     private void openComments(ActionEvent event, Post post) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/comment/displayComment.fxml"));
             Parent root = loader.load();
-            
             DisplayCommentController controller = loader.getController();
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
-            
             StackPane contentArea = findContentArea((Node) event.getSource());
             if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     private void deletePost(int id) {
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Confirm Delete");
-        confirmAlert.setContentText("Are you sure you want to delete this post?");
-
-        confirmAlert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                try {
-                    postService.supprimer(id);
-                    // Refresh current view
-                    loadPosts();
-                    
-                    // --- INSTANT SYNC: Notify Backoffice and other Forum windows ---
-                    if (main.FxApplication.getBackofficeController() != null) {
-                        main.FxApplication.getBackofficeController().loadPendingPosts();
-                    }
-                    main.FxApplication.refreshAllForumWindows();
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
-                    showAlert(Alert.AlertType.ERROR, "Database Error", "Could not delete the post.");
-                }
-            }
-        });
+        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Are you sure?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+            try { postService.supprimer(id); loadPosts(); } 
+            catch (SQLException e) { showAlert(Alert.AlertType.ERROR, "Error", "Could not delete."); }
+        }
     }
 
-    private String formatDate(LocalDateTime date) {
-        if (date == null) return "-";
-        return date.format(DISPLAY_DATE_FORMAT);
-    }
-
-    private String safeText(String value) {
-        return value == null || value.isBlank() ? "-" : value;
-    }
-
+    private String formatDate(LocalDateTime date) { return (date == null) ? "-" : date.format(DISPLAY_DATE_FORMAT); }
+    private String safeText(String value) { return (value == null || value.isBlank()) ? "-" : value; }
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        gui.util.AlertHelper.AlertType ct = (type == Alert.AlertType.ERROR) ? gui.util.AlertHelper.AlertType.ERROR : gui.util.AlertHelper.AlertType.INFORMATION;
+        gui.util.AlertHelper.showCustomAlert(title, content, ct);
     }
+    @FXML public void logout(ActionEvent event) { gui.SessionHelper.logout(event); }
 }
