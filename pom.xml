@@ -34,18 +34,6 @@
             <artifactId>javafx-controls</artifactId>
             <version>21.0.2</version>
         </dependency>
-<<<<<<< HEAD
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.10.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-=======
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -68,8 +56,6 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
-
->>>>>>> 1b353f6955a2d68fdb8d2fbc9142ddb609c14bbd
         <plugins>
 
             <plugin>

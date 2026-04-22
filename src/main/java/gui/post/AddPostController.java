@@ -2,27 +2,25 @@ package gui.post;
 
 import entities.Post;
 import javafx.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import services.forum.PostService;
-import main.FxApplication;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
+import java.util.UUID;
+import java.util.Scanner;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class AddPostController {
 
@@ -32,11 +30,15 @@ public class AddPostController {
     private TextArea contentArea;
 
     @FXML
-    private CheckBox pinnedCheckBox;
+    private ToggleButton pinToggle;
     @FXML
     private Label imageLabel;
     @FXML
     private Label pdfLabel;
+    @FXML
+    private Label titleErrorLabel;
+    @FXML
+    private Label contentErrorLabel;
 
     private File imageFile;
     private File pdfFile;
@@ -69,7 +71,9 @@ public class AddPostController {
             post.setUserId(1); // Default user
         }
         
-        post.setPinned(pinnedCheckBox.isSelected());
+        post.setPinned(pinToggle.isSelected());
+        post.setCreatedAt(java.time.LocalDateTime.now());
+        post.setUserId(5); // Temporarily hardcoded for Admin, will be dynamic based on login state
 
         // Handle Image
         if (imageFile != null) {
@@ -85,14 +89,6 @@ public class AddPostController {
 //hadoum ali save  post kan tzadit fil backoffice w  el front office
         try {
             postService.ajouter(post);
-            BackofficeController bc = FxApplication.getBackofficeController();
-            if (bc != null) {
-                bc.loadPendingPosts();
-            }
-            if (isAdminMode) {
-                FxApplication.refreshAllForumWindows();
-            }
-            
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -163,30 +159,105 @@ public class AddPostController {
     }
 
     private boolean validateInputs(String title, String content) {
+        boolean isValid = true;
+
+        // Reset styles
+        titleErrorLabel.setVisible(false);
+        titleErrorLabel.setManaged(false);
+        contentErrorLabel.setVisible(false);
+        contentErrorLabel.setManaged(false);
+        titleField.setStyle(""); 
+        contentArea.setStyle("-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 10;");
+
+        // Title Validation
         if (title.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title is required.");
-            return false;
+            showTitleError("Title is required.");
+            isValid = false;
+        } else if (title.length() < 5) {
+            showTitleError("Title must be more than 4 characters.");
+            isValid = false;
+        } else if (!title.matches(".*\\p{L}.*")) {
+            showTitleError("Title must contain at least one letter (it cannot be numbers only).");
+            isValid = false;
         }
+
+        // Content Validation
         if (content.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Content is required.");
-            return false;
+            showContentError("Content is required.");
+            isValid = false;
+        } else if (content.length() < 11) {
+            showContentError("Content must be more than 10 characters.");
+            isValid = false;
         }
         
-        // Ensure the title contains at least one letter (prevents numbers-only titles)
-        // Also allows letters, numbers, spaces, and common punctuation.
-        if (!title.matches(".*\\p{L}.*")) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Title must contain at least one letter. It cannot be numbers only.");
-            return false;
-        }
-        
-        return true;
+        return isValid;
+    }
+
+    private void showTitleError(String message) {
+        titleErrorLabel.setText(message);
+        titleErrorLabel.setVisible(true);
+        titleErrorLabel.setManaged(true);
+        titleField.setStyle("-fx-border-color: #e53e3e; -fx-border-radius: 12; -fx-background-radius: 12;");
+    }
+
+    private void showContentError(String message) {
+        contentErrorLabel.setText(message);
+        contentErrorLabel.setVisible(true);
+        contentErrorLabel.setManaged(true);
+        contentArea.setStyle("-fx-background-color: white; -fx-border-color: #e53e3e; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 10;");
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        gui.util.AlertHelper.AlertType customType = gui.util.AlertHelper.AlertType.INFORMATION;
+        if (type == Alert.AlertType.ERROR) customType = gui.util.AlertHelper.AlertType.ERROR;
+        if (type == Alert.AlertType.WARNING) customType = gui.util.AlertHelper.AlertType.WARNING;
+        
+        gui.util.AlertHelper.showCustomAlert(title, content, customType);
+    }
+    @FXML
+    private void onDictateTitle() {
+        startDictation(titleField);
+    }
+
+    @FXML
+    private void onDictateContent() {
+        startDictation(contentArea);
+    }
+
+    private void startDictation(Object target) {
+        new Thread(() -> {
+            try {
+                String command = "Add-Type -AssemblyName System.Speech; " +
+                               "$sim = New-Object System.Speech.Recognition.SpeechRecognitionEngine; " +
+                               "$sim.SetInputToDefaultAudioDevice(); " +
+                               "$sim.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar)); " +
+                               "$result = $sim.Recognize(); " +
+                               "if ($result -ne $null) { $result.Text }";
+                
+                ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-Command", command);
+                Process p = pb.start();
+                
+                try (Scanner s = new Scanner(p.getInputStream()).useDelimiter("\\A")) {
+                    String result = s.hasNext() ? s.next().trim() : "";
+                    
+                    if (!result.isEmpty()) {
+                        Platform.runLater(() -> {
+                            if (target instanceof TextField) {
+                                ((TextField) target).setText(result);
+                            } else if (target instanceof TextArea) {
+                                ((TextArea) target).setText(result);
+                            }
+                        });
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Speech recognition error: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    @FXML
+    public void logout(javafx.event.ActionEvent event) {
+        gui.SessionHelper.logout(event);
     }
 }

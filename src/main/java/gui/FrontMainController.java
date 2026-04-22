@@ -2,14 +2,18 @@ package gui;
 
 import entities.Course;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import services.CourseService;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,17 +28,77 @@ public class FrontMainController {
 
     @FXML private TilePane coursesContainer;
     @FXML private TextField searchField;
+    @FXML private StackPane contentArea;
+    @FXML private VBox dashboardView;
+    @FXML private javafx.scene.layout.HBox previewBanner;
 
     @FXML
     private void initialize() {
         loadCourses();
 
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            filterCourses(newVal);
-        });
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+                filterCourses(newVal);
+            });
+        }
+    }
+
+    @FXML
+    private void onGoToDashboard() {
+        contentArea.getChildren().setAll(dashboardView);
+    }
+
+    @FXML
+    private void onShowIdeas() {
+        System.out.println("Ideas section - Coming soon");
+    }
+
+    @FXML
+    private void onShowMissions() {
+        System.out.println("Missions section - Coming soon");
+    }
+
+    @FXML
+    private void onShowTasks() {
+        System.out.println("Tasks section - Coming soon");
+    }
+
+    @FXML
+    private void onShowEvents() {
+        System.out.println("Events section - Coming soon");
+    }
+
+    @FXML
+    private void showForum() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
+            Parent root = loader.load();
+            gui.post.DisplayPostController controller = loader.getController();
+            controller.setAdminMode(false);
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onShowCollaborations() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/collaborator/ListCollaborator.fxml"));
+            Parent root = loader.load();
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            System.err.println("Error loading collaborations: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onShowCourses() {
+        onGoToDashboard();
     }
 
     private void loadCourses() {
+        if (coursesContainer == null) return;
         try {
             courses = courseService.afficherPublie();
             renderCourses();
@@ -49,6 +113,7 @@ public class FrontMainController {
     }
 
     private void renderCourses() {
+        if (coursesContainer == null) return;
         coursesContainer.getChildren().clear();
         allCourseCards.clear();
 
@@ -68,6 +133,7 @@ public class FrontMainController {
     }
 
     private void filterCourses(String keyword) {
+        if (coursesContainer == null) return;
         coursesContainer.getChildren().clear();
 
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -113,8 +179,6 @@ public class FrontMainController {
         return card;
     }
 
-    @FXML private javafx.scene.layout.HBox previewBanner;
-
     public void setPreviewMode(boolean isPreview) {
         if (previewBanner != null) {
             previewBanner.setVisible(isPreview);
@@ -135,7 +199,6 @@ public class FrontMainController {
     }
 
     private void openCourse(Course course) {
-        System.out.println("Opening course: " + course.getTitre());
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
             javafx.scene.Parent root = loader.load();
@@ -145,17 +208,13 @@ public class FrontMainController {
             boolean isPrev = previewBanner != null && previewBanner.isVisible();
             controller.setPreviewMode(isPrev);
             
-            javafx.stage.Stage stage = (javafx.stage.Stage) coursesContainer.getScene().getWindow();
+            javafx.stage.Stage stage = (javafx.stage.Stage) contentArea.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (java.io.IOException e) {
             e.printStackTrace();
-            System.err.println("Failed to load front-resource-view.fxml: " + e.getMessage());
         }
     }
 
-    private String safe(String value) {
-        return (value == null || value.isBlank()) ? "-" : value;
-    }
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);

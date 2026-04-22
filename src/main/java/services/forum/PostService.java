@@ -190,4 +190,12 @@ public class PostService implements ForumInterface<Post> {
         ps.executeUpdate();
         System.out.println("Post modifié avec succès!");
     }
+    public void likePost(int id, int newLikes) throws SQLException {
+        String sql = "UPDATE `post` SET `likes` = ? WHERE `id` = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, newLikes);
+        ps.setInt(2, id);
+        ps.executeUpdate();
+        ps.close();
+    }
 }
