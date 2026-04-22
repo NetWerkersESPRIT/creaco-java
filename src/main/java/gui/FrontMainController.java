@@ -71,6 +71,18 @@ public class FrontMainController {
     }
 
     @FXML
+    private void handleDeleteTicket(HelpTicket t) {
+        if (AlertHelper.showConfirmation("Delete Request", "Are you sure you want to delete this assistance request?")) {
+            try {
+                ticketService.deleteTicket(t.getId());
+                loadTickets(); // Refresh list
+            } catch (SQLException e) {
+                AlertHelper.showError("Database Error", "Unable to delete request: " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
     private void filterAllTickets() {
         btnFilterAll.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 6 20;");
         btnFilterPending.setStyle("-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 6 20; -fx-text-fill: #4a5568;");
@@ -172,6 +184,7 @@ public class FrontMainController {
         
         Button deleteBtn = new Button("Delete");
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 6 20; -fx-font-weight: bold; -fx-cursor: hand;");
+        deleteBtn.setOnAction(e -> handleDeleteTicket(t));
         
         actions.getChildren().add(deleteBtn);
         card.getChildren().add(actions);

@@ -99,6 +99,14 @@ public class HelpTicketService {
         }
     }
 
+    public void deleteTicket(int id) throws SQLException {
+        String sql = "DELETE FROM help_ticket WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
     private HelpTicket mapTicket(ResultSet rs) throws SQLException {
         HelpTicket ticket = new HelpTicket();
         ticket.setId(rs.getInt("id"));

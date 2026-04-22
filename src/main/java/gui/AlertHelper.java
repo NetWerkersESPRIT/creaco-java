@@ -8,10 +8,14 @@ import java.util.Optional;
 public class AlertHelper {
 
     public static boolean confirmDelete(String itemType) {
+        return showConfirmation("Confirm delete", "Delete " + itemType + "?\nThis action cannot be undone.");
+    }
+
+    public static boolean showConfirmation(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirm delete");
-        alert.setHeaderText("Delete " + itemType + "?");
-        alert.setContentText("This action cannot be undone.");
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
     }
