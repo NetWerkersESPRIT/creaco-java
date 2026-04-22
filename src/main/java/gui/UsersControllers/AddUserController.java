@@ -2,7 +2,6 @@ package gui.UsersControllers;
 
 import entities.Users;
 import services.UsersService;
-import utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -101,13 +100,6 @@ public class AddUserController {
             lblMessage.setStyle("-fx-text-fill: red;");
             lblMessage.setText("❌ Error: " + e.getMessage());
         }
-    }
-
-    private void clearFields() {
-        txtUsername.clear();
-        txtEmail.clear();
-        txtPassword.clear();
-        txtNumtel.clear();
     }
 
     @FXML
