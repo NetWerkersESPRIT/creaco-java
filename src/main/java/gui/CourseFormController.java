@@ -383,4 +383,25 @@ public class CourseFormController {
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
     }
+
+    @FXML
+    private void onRequestHelp() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/help-request-dialog.fxml"));
+            Parent root = loader.load();
+            
+            HelpRequestController controller = loader.getController();
+            if (course != null) {
+                controller.setCourseId(course.getId());
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Help-Desk Mentorat");
+            stage.setScene(new Scene(root));
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (IOException e) {
+            AlertHelper.showError("UI Error", "Impossible d'ouvrir le Help-Desk: " + e.getMessage());
+        }
+    }
 }

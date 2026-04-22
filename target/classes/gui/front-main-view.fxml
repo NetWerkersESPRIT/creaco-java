@@ -47,6 +47,16 @@
                             </HBox>
                         </graphic>
                     </Button>
+                    <Button onAction="#onRequestHelp" mnemonicParsing="false" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="❓" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Help-Desk" />
+                            </HBox>
+                        </graphic>
+                    </Button>
                 </VBox>
 
                 <Region VBox.vgrow="ALWAYS" />

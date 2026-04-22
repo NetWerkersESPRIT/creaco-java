@@ -116,6 +116,18 @@
 
                 <Label styleClass="section-header" text="USER EXPERIENCE" />
                 <VBox spacing="10.0">
+                    <Button mnemonicParsing="false" onAction="#onGoToHelpDesk" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🤝" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Help-Desk (Mentor)" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label fx:id="helpNotificationLabel" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 8; -fx-font-size: 10px;" text="3" visible="false" managed="false" />
+                            </HBox>
+                        </graphic>
+                    </Button>
                     <Button mnemonicParsing="false" onAction="#goToPreview" prefWidth="210.0" styleClass="sidebar-item">
                         <graphic>
                             <HBox spacing="15.0" alignment="CENTER_LEFT">
@@ -170,19 +182,33 @@
                     </children>
                 </HBox>
 
-                <VBox spacing="15.0" styleClass="card">
+                <HBox spacing="20.0">
                     <children>
-                        <VBox spacing="5.0">
-                            <Label text="Discover our workshops" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" />
-                            <Label text="Choose a category to explore available courses and resources." styleClass="subtitle-label" />
+                        <VBox spacing="15.0" styleClass="card" HBox.hgrow="ALWAYS">
+                            <children>
+                                <VBox spacing="5.0">
+                                    <Label text="Discover our workshops" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" />
+                                    <Label text="Choose a category to explore available courses and resources." styleClass="subtitle-label" />
+                                </VBox>
+                                <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                    <TextField fx:id="searchField" promptText="Rechercher" styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                                    <Button text="Manage Categories" onAction="#onManageCategories" styleClass="btn-primary" prefHeight="45.0" />
+                                    <Button text="+ Add Course" onAction="#onAddCourse" styleClass="btn-primary" prefHeight="45.0" style="-fx-background-color: #2d3748; -fx-text-fill: white;" />
+                                </HBox>
+                            </children>
                         </VBox>
-                        <HBox spacing="15.0" alignment="CENTER_LEFT">
-                            <TextField fx:id="searchField" promptText="Rechercher" styleClass="search-bar" HBox.hgrow="ALWAYS" />
-                            <Button text="Manage Categories" onAction="#onManageCategories" styleClass="btn-primary" prefHeight="45.0" />
-                            <Button text="+ Add Course" onAction="#onAddCourse" styleClass="btn-primary" prefHeight="45.0" style="-fx-background-color: #2d3748; -fx-text-fill: white;" />
-                        </HBox>
+                        <VBox fx:id="helpQuickAccessCard" spacing="15.0" styleClass="card" prefWidth="300" style="-fx-background-color: #f0f9ff; -fx-border-color: #bae6fd;">
+                             <children>
+                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                     <Label text="🤝" style="-fx-font-size: 20px;" />
+                                     <Label text="Mentoring Support" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
+                                 </HBox>
+                                 <Label text="You have pending questions from creators." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #0369a1;" />
+                                 <Button text="View Questions" onAction="#onGoToHelpDesk" styleClass="btn-primary" style="-fx-background-color: #0ea5e9;" maxWidth="Infinity" />
+                             </children>
+                        </VBox>
                     </children>
-                </VBox>
+                </HBox>
 
                 <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="true" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>

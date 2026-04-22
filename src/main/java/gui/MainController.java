@@ -38,16 +38,38 @@ public class MainController {
     private Map<Integer, String> categoryNames = Collections.emptyMap();
     private List<Node> allCourseCards = new ArrayList<>();
 
+    private final services.HelpTicketService ticketService = new services.HelpTicketService();
     @FXML private FlowPane coursesContainer;
     @FXML private TextField searchField;
     @FXML private Label pageTitleLabel;
     @FXML private Label statusLabel;
+    @FXML private Label helpNotificationLabel;
+    @FXML private VBox helpQuickAccessCard;
 
     @FXML
     private void initialize() {
-        pageTitleLabel.setText("Courses");
+        pageTitleLabel.setText("Admin Dashboard");
         loadCourses();
+        checkPendingTickets();
         searchField.textProperty().addListener((obs, oldVal, newVal) -> filterCourses(newVal));
+    }
+
+    private void checkPendingTickets() {
+        try {
+            int count = ticketService.getPendingTicketsCount();
+            boolean hasTickets = count > 0;
+            
+            if (helpNotificationLabel != null) {
+                helpNotificationLabel.setText(String.valueOf(count));
+                helpNotificationLabel.setVisible(hasTickets);
+                helpNotificationLabel.setManaged(hasTickets);
+            }
+            
+            if (helpQuickAccessCard != null) {
+                helpQuickAccessCard.setVisible(hasTickets);
+                helpQuickAccessCard.setManaged(hasTickets);
+            }
+        } catch (SQLException ignored) {}
     }
 
     private void saveAllCards() {
@@ -268,5 +290,16 @@ public class MainController {
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
+    }
+
+    @FXML
+    private void onGoToHelpDesk() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/gui/help-desk-view.fxml"));
+            Stage stage = (Stage) coursesContainer.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            AlertHelper.showError("Navigation Error", "Impossible de charger le Help-Desk: " + e.getMessage());
+        }
     }
 }

@@ -2,7 +2,11 @@ package gui;
 
 import entities.Course;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -159,5 +163,21 @@ public class FrontMainController {
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
+    }
+
+    @FXML
+    private void onRequestHelp() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/help-request-dialog.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.setTitle("Mentoring Help-Desk");
+            stage.setScene(new Scene(root));
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (java.io.IOException e) {
+            AlertHelper.showError("UI Error", "Could not open Help-Desk: " + e.getMessage());
+        }
     }
 }

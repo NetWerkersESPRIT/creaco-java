@@ -176,30 +176,33 @@
     -fx-text-fill: #4a5568;
 }
 
-/* Inputs */
-.search-bar {
-    -fx-background-color: white;
-    -fx-background-radius: 15;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 15;
-    -fx-padding: 12 16 12 16;
-}
-
-/* Navbar / Top Header */
-.top-nav {
-    -fx-background-color: rgba(255, 255, 255, 0.8);
-    -fx-background-radius: 20;
-    -fx-padding: 10 20 10 20;
-    -fx-effect: dropshadow(three-pass-box, rgba(216, 27, 96, 0.05), 10, 0, 0, 2);
-}
-
-.badge-pink {
-    -fx-background-color: -fx-primary-gradient;
-    -fx-text-fill: white;
-    -fx-font-size: 10px;
+.btn-secondary {
+    -fx-background-color: #edf2f7;
+    -fx-text-fill: #4a5568;
+    -fx-background-radius: 10;
     -fx-font-weight: bold;
-    -fx-background-radius: 50;
-    -fx-padding: 3 8 3 8;
+    -fx-cursor: hand;
 }
 
+.btn-secondary:hover {
+    -fx-background-color: #e2e8f0;
+}
+
+/* Inputs & Forms */
+.text-field, .text-area, .combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+}
+
+.text-field:focused, .text-area:focused, .combo-box:focused {
+    -fx-border-color: -fx-primary-pink;
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.1), 5, 0, 0, 0);
+}
+
+.combo-box .list-cell {
+    -fx-padding: 8;
+}
 
