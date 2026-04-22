@@ -85,6 +85,20 @@ public class HelpTicketService {
         return 0;
     }
 
+    public void updateTicket(HelpTicket ticket) throws SQLException {
+        String sql = "UPDATE help_ticket SET course_id = ?, subject = ?, message = ?, priority = ?, updated_at = ? WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            if (ticket.getCourseId() != null) ps.setInt(1, ticket.getCourseId());
+            else ps.setNull(1, Types.INTEGER);
+            ps.setString(2, ticket.getSubject());
+            ps.setString(3, ticket.getMessage());
+            ps.setString(4, ticket.getPriority());
+            ps.setString(5, LocalDateTime.now().toString());
+            ps.setInt(6, ticket.getId());
+            ps.executeUpdate();
+        }
+    }
+
     private HelpTicket mapTicket(ResultSet rs) throws SQLException {
         HelpTicket ticket = new HelpTicket();
         ticket.setId(rs.getInt("id"));

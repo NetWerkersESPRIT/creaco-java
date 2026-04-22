@@ -6,8 +6,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
 
 <VBox spacing="15.0" styleClass="card" stylesheets="@styles.css" 
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
@@ -16,29 +18,53 @@
         <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
     </padding>
     <children>
-        <VBox spacing="5.0">
-            <Label styleClass="title-label" style="-fx-font-size: 18px;" text="Request Mentor Assistance" />
-            <Label style="-fx-text-fill: #64748b;" text="Explain your technical or pedagogical difficulty." />
-        </VBox>
+        <HBox spacing="20.0" alignment="CENTER_LEFT">
+            <children>
+                <StackPane styleClass="card-icon-container">
+                    <Label text="✉" style="-fx-font-size: 24px; -fx-text-fill: white;" />
+                </StackPane>
+                <VBox spacing="5.0">
+                    <Label fx:id="titleLabel" styleClass="title-label" style="-fx-font-size: 20px;" text="Request Mentor Assistance" />
+                    <Label styleClass="subtitle-label" text="Explain your technical or pedagogical difficulty." />
+                </VBox>
+            </children>
+            <padding>
+                <Insets bottom="10.0" />
+            </padding>
+        </HBox>
         
-        <VBox spacing="8.0">
-            <Label style="-fx-font-weight: bold;" text="Subject *" />
-            <TextField fx:id="subjectField" promptText="e.g., Upload issue, JavaFX question..." />
+        <Separator style="-fx-opacity: 0.5;" />
+
+        <VBox spacing="15.0">
+            <children>
+                <VBox spacing="8.0">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #475569;" text="Subject *" />
+                    <TextField fx:id="subjectField" promptText="e.g., Upload issue, JavaFX question..." />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #475569;" text="Related Course (Optional)" />
+                    <ComboBox fx:id="courseCombo" editable="true" prefWidth="450.0" promptText="Select or search course..." />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #475569;" text="Priority *" />
+                    <ComboBox fx:id="priorityCombo" prefWidth="450.0" promptText="Select priority" />
+                </VBox>
+
+                <VBox spacing="8.0">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #475569;" text="Message / Details *" />
+                    <TextArea fx:id="messageArea" prefHeight="120.0" promptText="Describe your problem here..." wrapText="true" />
+                </VBox>
+            </children>
         </VBox>
 
-        <VBox spacing="8.0">
-            <Label style="-fx-font-weight: bold;" text="Priority *" />
-            <ComboBox fx:id="priorityCombo" prefWidth="400.0" promptText="Select priority" />
-        </VBox>
-
-        <VBox spacing="8.0">
-            <Label style="-fx-font-weight: bold;" text="Message / Details *" />
-            <TextArea fx:id="messageArea" prefHeight="150.0" promptText="Describe your problem here..." wrapText="true" />
-        </VBox>
-
-        <HBox alignment="CENTER_RIGHT" spacing="12.0">
-            <Button onAction="#onCancel" styleClass="btn-secondary" text="Cancel" />
-            <Button onAction="#onSubmit" styleClass="btn-primary" text="Send Request" />
+        <HBox alignment="CENTER_RIGHT" spacing="15.0">
+            <padding>
+                <Insets top="10.0" />
+            </padding>
+            <Button onAction="#onCancel" styleClass="btn-secondary" text="Cancel" prefWidth="100.0" />
+            <Button onAction="#onSubmit" styleClass="btn-primary" text="Send Request" prefWidth="150.0" prefHeight="40.0" />
         </HBox>
     </children>
 </VBox>

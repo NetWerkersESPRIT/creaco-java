@@ -192,17 +192,58 @@
 .text-field, .text-area, .combo-box {
     -fx-background-color: white;
     -fx-border-color: #e2e8f0;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
     -fx-padding: 10;
+    -fx-font-size: 13px;
+    -fx-text-fill: #4a5568;
 }
 
 .text-field:focused, .text-area:focused, .combo-box:focused {
     -fx-border-color: -fx-primary-pink;
-    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.1), 5, 0, 0, 0);
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.1), 8, 0, 0, 0);
 }
 
-.combo-box .list-cell {
-    -fx-padding: 8;
+/* ComboBox specific premium styles */
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 15 0 0;
+}
+
+.combo-box .arrow {
+    -fx-background-color: -fx-primary-pink;
+    -fx-shape: "M 0 0 L 4 4 L 8 0 Z"; /* Modern small arrow */
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-radius: 8;
+    -fx-padding: 10 15;
+    -fx-text-fill: #4a5568;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #f8fafc;
+    -fx-text-fill: -fx-primary-pink;
+}
+
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: -fx-primary-gradient;
+    -fx-text-fill: white;
+}
+
+.combo-box .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
 }
 

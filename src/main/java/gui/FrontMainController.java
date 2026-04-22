@@ -12,6 +12,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.geometry.Insets;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import entities.HelpTicket;
+import services.HelpTicketService;
 import services.CourseService;
 
 import java.sql.SQLException;
@@ -26,16 +32,151 @@ public class FrontMainController {
     private List<Course> courses = Collections.emptyList();
     private List<Node> allCourseCards = new ArrayList<>();
 
-    @FXML private TilePane coursesContainer;
+    @FXML private HBox coursesContainer;
+    @FXML private VBox ticketsContainer;
     @FXML private TextField searchField;
+    @FXML private Button btnFilterAll;
+    @FXML private Button btnFilterPending;
+    private final HelpTicketService ticketService = new HelpTicketService();
 
     @FXML
     private void initialize() {
         loadCourses();
+        loadTickets();
 
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             filterCourses(newVal);
         });
+    }
+
+    @FXML
+    private void handleEditTicket(HelpTicket t) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/help-request-dialog.fxml"));
+            Parent root = loader.load();
+            
+            HelpRequestController controller = loader.getController();
+            controller.setTicket(t);
+            
+            Stage stage = new Stage();
+            stage.setTitle("Edit Assistance Request");
+            stage.setScene(new Scene(root));
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            
+            loadTickets(); // Refresh list
+        } catch (java.io.IOException e) {
+            AlertHelper.showError("UI Error", "Could not open edit dialog: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void filterAllTickets() {
+        btnFilterAll.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 6 20;");
+        btnFilterPending.setStyle("-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 6 20; -fx-text-fill: #4a5568;");
+        loadTickets();
+    }
+
+    @FXML
+    private void filterPendingTickets() {
+        btnFilterPending.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 6 20;");
+        btnFilterAll.setStyle("-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 6 20; -fx-text-fill: #4a5568;");
+        try {
+            List<HelpTicket> tickets = ticketService.getTicketsByCreator(1); // Placeholder
+            ticketsContainer.getChildren().clear();
+            for (HelpTicket t : tickets) {
+                if (t.getStatus().equalsIgnoreCase("Pending")) {
+                    ticketsContainer.getChildren().add(buildTicketCard(t));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadTickets() {
+        try {
+            List<HelpTicket> tickets = ticketService.getTicketsByCreator(1); // Placeholder: use SessionHelper.getUserId()
+            ticketsContainer.getChildren().clear();
+            for (HelpTicket t : tickets) {
+                ticketsContainer.getChildren().add(buildTicketCard(t));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Node buildTicketCard(HelpTicket t) {
+        VBox card = new VBox(15);
+        card.setPadding(new Insets(20));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 1;");
+
+        // Header: Subject + Status Badges
+        HBox header = new HBox(10);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        
+        Label subject = new Label(t.getSubject());
+        subject.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1a1a1a;");
+        
+        Region hSpacer = new Region();
+        HBox.setHgrow(hSpacer, Priority.ALWAYS);
+        
+        Label statusBadge = new Label(t.getStatus());
+        statusBadge.setStyle("-fx-background-color: #eff6ff; -fx-text-fill: #3b82f6; -fx-padding: 4 12; -fx-background-radius: 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+        
+        Label replyBadge = new Label(t.getAdminResponse() != null ? "Replied" : "Awaiting reply");
+        String replyBg = t.getAdminResponse() != null ? "#f0fdf4" : "#fff7ed";
+        String replyText = t.getAdminResponse() != null ? "#16a34a" : "#c2410c";
+        replyBadge.setStyle("-fx-background-color: " + replyBg + "; -fx-text-fill: " + replyText + "; -fx-padding: 4 12; -fx-background-radius: 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+        
+        header.getChildren().addAll(subject, hSpacer, statusBadge, replyBadge);
+
+        Label date = new Label("Sent on " + t.getCreatedAt().substring(0, 10));
+        date.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
+
+        // User Message Box
+        Label message = new Label(t.getMessage());
+        message.setWrapText(true);
+        message.setMaxWidth(800);
+        message.setStyle("-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 8; -fx-text-fill: #334155; -fx-font-size: 14px;");
+
+        card.getChildren().addAll(header, date, message);
+
+        // Admin Reply Section
+        if (t.getAdminResponse() != null) {
+            VBox replyBox = new VBox(8);
+            Label replyHeader = new Label("ADMIN REPLY");
+            replyHeader.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #16a34a;");
+            
+            Label replyContent = new Label(t.getAdminResponse());
+            replyContent.setWrapText(true);
+            replyContent.setStyle("-fx-background-color: #f0fdf4; -fx-padding: 15; -fx-background-radius: 8; -fx-text-fill: #166534; -fx-font-size: 14px;");
+            
+            replyBox.getChildren().addAll(replyHeader, replyContent);
+            card.getChildren().add(replyBox);
+        } else {
+            Label noReply = new Label("No admin reply yet — we'll notify you when they respond.");
+            noReply.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-style: italic;");
+            card.getChildren().add(noReply);
+        }
+
+        // Action Buttons
+        HBox actions = new HBox(10);
+        
+        if (t.getStatus().equalsIgnoreCase("Pending")) {
+            Button editBtn = new Button("Edit");
+            editBtn.setStyle("-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 6 20; -fx-font-weight: bold; -fx-cursor: hand;");
+            editBtn.setOnAction(e -> handleEditTicket(t));
+            actions.getChildren().add(editBtn);
+        }
+        
+        Button deleteBtn = new Button("Delete");
+        deleteBtn.setStyle("-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 6 20; -fx-font-weight: bold; -fx-cursor: hand;");
+        
+        actions.getChildren().add(deleteBtn);
+        card.getChildren().add(actions);
+
+        return card;
     }
 
     private void loadCourses() {
@@ -91,28 +232,51 @@ public class FrontMainController {
 
     private Node buildCourseCard(Course course) {
         VBox card = new VBox(15);
-        card.getStyleClass().add("card");
-        card.setPrefWidth(330);
-        card.setMinWidth(330);
+        card.setPadding(new Insets(24));
+        card.setPrefWidth(280);
+        card.setMinHeight(380);
+        // Match project background color and add a subtle border/shadow
+        card.setStyle("-fx-background-color: #f4f7fe; -fx-background-radius: 20; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);");
 
+        // Category Tag
+        Label tag = new Label("Course"); 
+        tag.setStyle("-fx-background-color: white; -fx-text-fill: #4f46e5; -fx-padding: 4 15; -fx-background-radius: 12; -fx-font-size: 11px; -fx-font-weight: bold; -fx-border-color: #e2e8f0; -fx-border-radius: 12;");
+        
         Label title = new Label(course.getTitre());
-        title.getStyleClass().add("card-title");
+        title.setWrapText(true);
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"); // Dark text
+        title.setMinHeight(50);
 
-        Label desc = new Label(
-                course.getDescription() == null ? "-" : course.getDescription()
-        );
+        Label desc = new Label(course.getDescription() == null ? "-" : course.getDescription());
         desc.setWrapText(true);
-        desc.setPrefHeight(60);
-        desc.getStyleClass().add("card-subtitle");
+        VBox.setVgrow(desc, Priority.ALWAYS);
+        desc.setStyle("-fx-text-fill: #718096; -fx-font-size: 13px; -fx-line-spacing: 3;"); // Muted dark text
+        desc.setMaxHeight(100);
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
 
         Button openBtn = new Button("Open");
-        openBtn.getStyleClass().add("btn-primary");
-        openBtn.setPrefWidth(120);
-        openBtn.setPrefHeight(40);
-
+        openBtn.setMaxWidth(Double.MAX_VALUE);
+        openBtn.setPrefHeight(45);
+        // Applying the vibrant gradient from the image
+        openBtn.setStyle("-fx-background-color: linear-gradient(to right, #ce2d7c, #6c2db1); " +
+                        "-fx-background-radius: 15; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-cursor: hand; " +
+                        "-fx-font-size: 14px;");
+        
         openBtn.setOnAction(e -> openCourse(course));
+        
+        // Hover effects with slightly brighter gradient
+        openBtn.setOnMouseEntered(e -> openBtn.setStyle("-fx-background-color: linear-gradient(to right, #e13a8c, #7d35ce); " +
+                                                        "-fx-background-radius: 15; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14px;"));
+        openBtn.setOnMouseExited(e -> openBtn.setStyle("-fx-background-color: linear-gradient(to right, #ce2d7c, #6c2db1); " +
+                                                       "-fx-background-radius: 15; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14px;"));
 
-        card.getChildren().addAll(title, desc, openBtn);
+        card.getChildren().addAll(tag, title, desc, spacer, openBtn);
+        card.setUserData(course.getTitre().toLowerCase());
 
         return card;
     }
@@ -175,7 +339,8 @@ public class FrontMainController {
             stage.setTitle("Mentoring Help-Desk");
             stage.setScene(new Scene(root));
             stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
-            stage.show();
+            stage.showAndWait();
+            loadTickets(); // Refresh the list after the dialog is closed
         } catch (java.io.IOException e) {
             AlertHelper.showError("UI Error", "Could not open Help-Desk: " + e.getMessage());
         }
