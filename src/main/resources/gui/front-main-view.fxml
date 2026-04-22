@@ -92,8 +92,6 @@
                             <children>
                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <Label text="Featured courses" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" />
-                                    <Region HBox.hgrow="ALWAYS" />
-                                    <Button text="See all →" style="-fx-background-color: #2d3748; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16; -fx-font-weight: bold;" />
                                 </HBox>
 
                                 <ScrollPane fitToHeight="true" vbarPolicy="NEVER" hbarPolicy="AS_NEEDED" style="-fx-background: transparent; -fx-background-color: transparent;">
