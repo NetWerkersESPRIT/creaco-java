@@ -29,6 +29,9 @@ public class PostModerationController {
     @FXML private Label detailStatusLabel;
     @FXML private Label detailContentLabel;
 
+    @FXML private Label lblUsername;
+    @FXML private Label lblUserRole;
+
     private final PostService postService = new PostService();
     private final UserService userService = new UserService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -39,6 +42,21 @@ public class PostModerationController {
     @FXML
     public void initialize() {
         loadPendingPosts();
+        
+        // Populate User Profile
+        entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
+        if (user != null && lblUsername != null) {
+            String displayName = user.getUsername() != null ? user.getUsername() : "User";
+            lblUsername.setText(displayName);
+            
+            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+            lblUserRole.setText(role);
+            
+            // Special styling for ADMIN
+            if ("ADMIN".equals(role)) {
+                lblUserRole.setStyle("-fx-background-color: #434a75;");
+            }
+        }
     }
 
     private void loadPendingPosts() {

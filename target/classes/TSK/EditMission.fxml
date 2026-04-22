@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="main-container" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.TSKControllers.EditMissionController" stylesheets="@../gui/styles.css">
+    <left>
+        <VBox prefWidth="240.0" spacing="20.0" styleClass="sidebar">
+            <padding>
+                <Insets bottom="30.0" left="24.0" right="24.0" top="30.0" />
+            </padding>
+            <children>
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label styleClass="sidebar-brand" text="CreaCo" />
+                </HBox>
+                
+                <Label styleClass="section-header" text="NAVIGATION" />
+                <VBox spacing="10.0">
+                    <Button mnemonicParsing="false" onAction="#goBack" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🏠" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Dashboard" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                    <Button mnemonicParsing="false" prefWidth="210.0" styleClass="sidebar-item, sidebar-item-active">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box" style="-fx-background-color: -fx-primary-pink;">
+                                    <Label text="🎯" style="-fx-font-size: 16px; -fx-text-fill: white;" />
+                                </StackPane>
+                                <Label text="Missions" style="-fx-text-fill: -fx-primary-pink;"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+                <Button onAction="#goBack" text="← Back" prefHeight="45.0" prefWidth="210.0" styleClass="btn-primary" style="-fx-background-color: #2d3748;"/>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <VBox spacing="20.0" alignment="TOP_CENTER">
+            <padding>
+                <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+            </padding>
+            <children>
+                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <VBox>
+                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Missions / Management" />
+                            <Label styleClass="title-label" text="Edit Mission" />
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <VBox maxWidth="550" spacing="20" styleClass="card">
+                    <children>
+                        <VBox spacing="5">
+                            <Label text="Update Mission" styleClass="card-title" />
+                            <Label text="Modify mission title and status" styleClass="card-subtitle" />
+                        </VBox>
+                        
+                        <Separator />
+
+                        <VBox spacing="8">
+                            <Label text="MISSION TITLE" styleClass="section-header" style="-fx-padding: 0;"/>
+                            <TextField fx:id="txtTitle" promptText="Mission name" styleClass="search-bar" />
+                        </VBox>
+
+                        <VBox spacing="8">
+                            <Label text="STATE" styleClass="section-header" style="-fx-padding: 0;"/>
+                            <ComboBox fx:id="comboState" promptText="Select state" maxWidth="Infinity" styleClass="search-bar" style="-fx-background-radius: 12;"/>
+                        </VBox>
+                        
+                        <VBox spacing="8">
+                            <Label text="DESCRIPTION" styleClass="section-header" style="-fx-padding: 0;"/>
+                            <TextArea fx:id="txtDescription" promptText="Mission details..." prefHeight="150" wrapText="true" styleClass="search-bar" style="-fx-background-radius: 12;"/>
+                        </VBox>
+
+                        <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                            <Button text="Cancel" onAction="#goBack" prefWidth="100" prefHeight="40" style="-fx-background-color: transparent; -fx-text-fill: #718096;"/>
+                            <Button text="💾 Update Mission" onAction="#updateMission" prefWidth="180" prefHeight="45" styleClass="btn-primary" />
+                        </HBox>
+                        
+                        <Label fx:id="lblMessage" style="-fx-font-weight: bold; -fx-text-fill: -fx-primary-pink;" />
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

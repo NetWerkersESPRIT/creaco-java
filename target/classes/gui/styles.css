@@ -76,23 +76,29 @@
 }
 
 .sidebar-icon-box {
-    -fx-background-color: #f8fafc; /* Slightly off-white to distinguish from white sidebar */
-    -fx-background-radius: 10;
-    -fx-min-width: 36;
-    -fx-max-width: 36;
-    -fx-min-height: 36;
-    -fx-max-height: 36;
+    -fx-background-color: white; 
+    -fx-background-radius: 12;
+    -fx-min-width: 38;
+    -fx-max-width: 38;
+    -fx-min-height: 38;
+    -fx-max-height: 38;
     -fx-alignment: CENTER;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1);
+}
+
+.sidebar-icon-box-active {
+    -fx-background-color: -fx-primary-gradient;
+    -fx-background-radius: 12;
+    -fx-min-width: 38;
+    -fx-max-width: 38;
+    -fx-min-height: 38;
+    -fx-max-height: 38;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.2), 8, 0, 0, 3);
 }
 
 .sidebar-item:hover .sidebar-icon-box {
     -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.15), 10, 0, 0, 4);
-}
-
-.sidebar-item-active .sidebar-icon-box {
-    -fx-background-color: white;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.12), 12, 0, 0, 5);
 }
 
 /* Buttons */
@@ -139,6 +145,18 @@
     -fx-alignment: CENTER;
 }
 
+.card-icon-pink {
+    -fx-background-color: -fx-primary-gradient;
+}
+
+.card-icon-purple {
+    -fx-background-color: linear-gradient(to bottom right, #6c2db1, #4c1d95);
+}
+
+.card-icon-blue {
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #1d4ed8);
+}
+
 .card-title {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
@@ -146,8 +164,20 @@
 }
 
 .card-subtitle {
-    -fx-font-size: 13px;
+    -fx-font-size: 11px;
     -fx-text-fill: -fx-text-muted;
+}
+
+.card-action-link {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primary-pink;
+    -fx-cursor: hand;
+}
+
+.card-action-link:hover {
+    -fx-underline: true;
+    -fx-text-fill: -fx-primary-purple;
 }
 
 .list-row {
@@ -258,4 +288,63 @@
 
 .toggle-switch:selected .thumb {
     -fx-translate-x: 12; /* On position */
+}
+
+/* Premium Button Hover */
+.btn-primary:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.3), 15, 0, 0, 5);
+    -fx-translate-y: -1;
+}
+
+.btn-primary:pressed {
+    -fx-translate-y: 1;
+}
+
+/* Form Footer Link */
+.footer-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-primary-pink;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-underline: true;
+}
+
+.footer-link:hover {
+    -fx-text-fill: -fx-primary-purple;
+}
+
+/* Mentoring Card */
+.mentoring-card {
+    -fx-background-color: #f0f9ff;
+    -fx-background-radius: 20;
+    -fx-padding: 20;
+    -fx-border-color: #e0f2fe;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(14, 165, 233, 0.05), 10, 0, 0, 4);
+}
+
+.mentoring-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0c4a6e;
+}
+
+.mentoring-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #0369a1;
+}
+
+.btn-mentoring {
+    -fx-background-color: #0ea5e9;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+}
+
+.btn-mentoring:hover {
+    -fx-background-color: #0284c7;
+    -fx-effect: dropshadow(three-pass-box, rgba(14, 165, 233, 0.3), 10, 0, 0, 3);
 }

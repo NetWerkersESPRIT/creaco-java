@@ -12,7 +12,7 @@ import java.io.IOException;
 public class SessionHelper {
     public static void logout(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(SessionHelper.class.getResource("/gui/choose-role.fxml"));
+            FXMLLoader loader = new FXMLLoader(SessionHelper.class.getResource("/Users/SignIn.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
