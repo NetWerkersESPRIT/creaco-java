@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="22.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.post.UpdatePostController">
+    <padding>
+        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+    </padding>
+    <children>
+        <!-- Header Section (Dashboard Style) -->
+        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="top-nav">
+            <children>
+                <VBox>
+                    <children>
+                        <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Forum / Post" />
+                        <Label styleClass="title-label" text="Edit Discussion" />
+                    </children>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="10.0">
+                    <children>
+                        <Button style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 8;">
+                            <graphic>
+                                <Label style="-fx-font-size: 16px;" text="🔔" />
+                            </graphic>
+                        </Button>
+                        <HBox alignment="CENTER" spacing="10.0" onMouseClicked="#onOpenProfile" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15 5 15; -fx-cursor: hand;">
+                            <children>
+                                <VBox alignment="CENTER_RIGHT">
+                                    <children>
+                                        <Label style="-fx-font-size: 10px; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" text="Welcome" />
+                                        <Label fx:id="lblUsername" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Admin User" />
+                                    </children>
+                                </VBox>
+                                <Label fx:id="lblUserRole" styleClass="badge-pink" text="ADMIN" />
+                            </children>
+                        </HBox>
+                        <Button onAction="#logout" styleClass="btn-logout">
+                            <graphic>
+                                <Label style="-fx-text-fill: white; -fx-font-size: 16px;" text="🏃" />
+                            </graphic>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+
+        <!-- Centered Main Form Card -->
+        <StackPane VBox.vgrow="ALWAYS">
+            <children>
+                <VBox maxWidth="980.0" spacing="25.0" styleClass="card" alignment="TOP_CENTER">
+                    <padding>
+                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                    </padding>
+                    <children>
+                        <VBox alignment="CENTER" spacing="8.0">
+                            <children>
+                                <Label text="Update Your Discussion" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                                <Label text="Modify your thoughts and share them with the community" styleClass="subtitle-label" />
+                            </children>
+                        </VBox>
+                        
+                        <VBox spacing="15.0" alignment="TOP_LEFT">
+                            <children>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Title" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
+                                    <HBox spacing="5" alignment="CENTER_LEFT" onMouseClicked="#onDictateTitle" style="-fx-cursor: hand;">
+                                        <Label text="🎤" style="-fx-font-size: 14px;" />
+                                        <Label text="Click to dictate" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
+                                    </HBox>
+                                </HBox>
+                                <TextField fx:id="titleField" promptText="Enter title..." 
+                                           style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12;" />
+                            </children>
+                        </VBox>
+                        
+                        <VBox spacing="15.0" alignment="TOP_LEFT">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                     <Label text="Content" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
+                                     <HBox spacing="5" alignment="CENTER_LEFT" onMouseClicked="#onDictateContent" style="-fx-cursor: hand;">
+                                         <Label text="🎤" style="-fx-font-size: 14px;" />
+                                         <Label text="Click to dictate" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
+                                     </HBox>
+                                     <Region HBox.hgrow="ALWAYS" />
+                                     <Button text="✎ SWITCH TO ADVANCED EDITOR" style="-fx-background-color: white; -fx-border-color: #4a5568; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-padding: 5 12;" />
+                                </HBox>
+                                <TextArea fx:id="contentArea" prefHeight="180.0" promptText="Write something..." 
+                                          style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;" wrapText="true" />
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="30.0">
+                            <children>
+                                <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Cover Image" style="-fx-font-weight: bold; -fx-text-fill: #4a5568;" />
+                                        <HBox alignment="CENTER_LEFT" style="-fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 2;">
+                                            <children>
+                                                <Button onAction="#chooseImage" text="Choose File" 
+                                                        style="-fx-background-color: transparent; -fx-border-color: #dbe4f0; -fx-border-width: 0 1 0 0; -fx-padding: 10 15; -fx-text-fill: #4a5568; -fx-font-weight: bold;" />
+                                                <Label fx:id="imageLabel" text="No file chosen" style="-fx-padding: 0 15; -fx-text-fill: #718096;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="PDF Document" style="-fx-font-weight: bold; -fx-text-fill: #4a5568;" />
+                                        <HBox alignment="CENTER_LEFT" style="-fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 2;">
+                                            <children>
+                                                <Button onAction="#choosePDF" text="Choose File" 
+                                                        style="-fx-background-color: transparent; -fx-border-color: #dbe4f0; -fx-border-width: 0 1 0 0; -fx-padding: 10 15; -fx-text-fill: #4a5568; -fx-font-weight: bold;" />
+                                                <Label fx:id="pdfLabel" text="No file chosen" style="-fx-padding: 0 15; -fx-text-fill: #718096;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <HBox spacing="12.0" alignment="CENTER_LEFT">
+                            <children>
+                                <ToggleButton fx:id="pinToggle" styleClass="toggle-switch">
+                                    <graphic>
+                                        <Region styleClass="thumb" />
+                                    </graphic>
+                                </ToggleButton>
+                                <Label text="Pin this post" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 13px;" />
+                            </children>
+                        </HBox>
+
+                        <VBox spacing="15.0" alignment="CENTER" maxWidth="Infinity">
+                            <children>
+                                <Button mnemonicParsing="false" onAction="#updatePost" styleClass="btn-primary" 
+                                        prefHeight="50.0" maxWidth="Infinity" text="SAVE CHANGES" />
+                                <Button mnemonicParsing="false" onAction="#goBack" 
+                                        style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-text-fill: #4a5568; -fx-font-weight: bold;" 
+                                        prefHeight="50.0" maxWidth="Infinity" text="CANCEL" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </children>
+</VBox>

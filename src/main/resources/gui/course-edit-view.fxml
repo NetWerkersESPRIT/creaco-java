@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="gui.CourseFormController">
+    <left>
+        <VBox prefWidth="240.0" spacing="25.0" styleClass="sidebar" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="30.0" left="24.0" right="24.0" top="30.0" />
+            </padding>
+            <children>
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label styleClass="sidebar-brand" text="CreaCo" />
+                </HBox>
+                
+                <VBox spacing="12.0">
+                    <Button mnemonicParsing="false" onAction="#onCancel" prefWidth="210.0" styleClass="sidebar-item">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🏠" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Dashboard" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <Label styleClass="section-header" text="WORKFLOW MANAGEMENT" />
+                <VBox spacing="10.0">
+                    <Button mnemonicParsing="false" onAction="#onCancel" prefWidth="210.0" styleClass="sidebar-item, sidebar-item-active">
+                        <graphic>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane styleClass="sidebar-icon-box">
+                                    <Label text="🎓" style="-fx-font-size: 16px;" />
+                                </StackPane>
+                                <Label text="Courses" />
+                            </HBox>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+                <Button onAction="#logout" text="Log Out" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" />
+            </children>
+        </VBox>
+    </left>
+    <fx:define>
+        <ToggleGroup fx:id="statusToggleGroup" />
+    </fx:define>
+    <center>
+        <VBox alignment="TOP_CENTER" spacing="24.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+            </padding>
+            <children>
+                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <VBox>
+                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Edit" />
+                            <Label fx:id="titleLabel" styleClass="title-label" text="Add Course" />
+                            <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a new course." />
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER" spacing="10.0">
+                             <Button onAction="#logout" styleClass="btn-logout">
+                                <graphic>
+                                    <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                                </graphic>
+                             </Button>
+                        </HBox>
+                    </children>
+                </HBox>
+                <VBox maxWidth="860.0" spacing="22.0" styleClass="card">
+                    <padding>
+                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                    </padding>
+                    <children>
+                        <GridPane hgap="18.0" vgap="18.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+                            </columnConstraints>
+                            <children>
+                                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Title *" />
+                                        <TextField fx:id="titleField" promptText="Course title" />
+                                        <Label fx:id="titleErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Category *" />
+                                        <ComboBox fx:id="categoryCombo" promptText="Select category" />
+                                        <Label fx:id="categoryErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Status *" />
+                                        <HBox spacing="12.0">
+                                            <children>
+                                                <RadioButton fx:id="publishedRadio" toggleGroup="$statusToggleGroup" selected="true" text="Published" />
+                                                <RadioButton fx:id="draftRadio" toggleGroup="$statusToggleGroup" text="Draft" />
+                                            </children>
+                                        </HBox>
+                                        <Label fx:id="statusErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Level *" />
+                                        <ComboBox fx:id="levelCombo" promptText="Select level" />
+                                        <Label fx:id="levelErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Estimated duration (min)" />
+                                        <TextField fx:id="durationField" promptText="25" />
+                                        <Label fx:id="durationErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </GridPane>
+                        <VBox spacing="8.0">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Description" />
+                                <TextArea fx:id="descriptionArea" prefHeight="220.0" promptText="Describe this course..." wrapText="true" />
+                            </children>
+                        </VBox>
+                        <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                            <children>
+                                <Button mnemonicParsing="false" onAction="#onCancel"
+                                        styleClass="btn-secondary" prefWidth="120" prefHeight="40"
+                                        text="Cancel" />
+                                <Button mnemonicParsing="false" onAction="#onSave"
+                                        styleClass="btn-primary" prefWidth="150" prefHeight="40"
+                                        text="Save course" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

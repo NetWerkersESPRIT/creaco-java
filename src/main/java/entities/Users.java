@@ -99,12 +99,12 @@ public class Users {
 
     @Override
     public String toString() {
-        return "USER{" +
+        return '\n'+
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", password=" + password + '\''+
-                ", Role=" + role + '\''+
-                '}';
+                ", Role=" + role + '\''
+                ;
     }
 }
