@@ -1,7 +1,7 @@
 package services;
 
 import entities.Tasks;
-import utils.MyConnection;
+import database.MyConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,12 @@ public class TskService {
 
         ps.setString(1, task.getTitle());
         ps.setString(2, task.getDescription());
-        ps.setString(3, "new"); // Default state
-        ps.setString(4, now);   // current timestamp
+        ps.setString(3, task.getState() != null ? task.getState() : "new");
+        ps.setString(4, now);
         ps.setString(5, task.getTime_limit());
-        ps.setInt(6, 1);        // issued_by_id is always 1
-        ps.setInt(7, 1);        // assumed_by_id is always 1
-        ps.setInt(8, 1);        // belong_to_id is always 1
+        ps.setInt(6, 1); // Defaulting to 1 if not specified
+        ps.setInt(7, 1); // Defaulting to 1 if not specified
+        ps.setInt(8, task.getBelong_to_id());
         
         ps.executeUpdate();
     }

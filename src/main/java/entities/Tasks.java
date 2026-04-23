@@ -27,6 +27,13 @@ public class Tasks {
         this.belong_to_id = belong_to_id;
     }
 
+    public Tasks(String title, String description, String state, int belong_to_id) {
+        this.title = title;
+        this.description = description;
+        this.state = state;
+        this.belong_to_id = belong_to_id;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

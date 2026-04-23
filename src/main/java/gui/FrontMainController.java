@@ -11,7 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import services.CourseService;
-import utils.SessionManager;
+import database.SessionManager;
 import entities.Users;
 
 import java.io.IOException;
@@ -35,6 +35,16 @@ public class FrontMainController {
     @FXML private VBox dashboardView;
     @FXML private javafx.scene.layout.HBox previewBanner;
     @FXML private Label txtWelcome;
+
+    private boolean isPreview = false;
+
+    public void setPreviewMode(boolean isPreview) {
+        this.isPreview = isPreview;
+        if (previewBanner != null) {
+            previewBanner.setVisible(isPreview);
+            previewBanner.setManaged(isPreview);
+        }
+    }
 
     // Sidebar items
     @FXML private Label lblAdminHeader;
@@ -291,8 +301,7 @@ public class FrontMainController {
             Parent root = loader.load();
             FrontResourceController controller = loader.getController();
             controller.setCourse(course);
-            boolean isPrev = previewBanner != null && previewBanner.isVisible();
-            controller.setPreviewMode(isPrev);
+            controller.setPreviewMode(this.isPreview);
             javafx.stage.Stage stage = (javafx.stage.Stage) contentArea.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) { e.printStackTrace(); }

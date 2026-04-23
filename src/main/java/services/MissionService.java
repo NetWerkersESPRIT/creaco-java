@@ -1,7 +1,7 @@
 package services;
 
 import entities.Mission;
-import utils.MyConnection;
+import database.MyConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

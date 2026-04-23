@@ -1,7 +1,7 @@
 package gui.TSKControllers;
 
 import services.IdeaService;
-import utils.SessionManager;
+import database.SessionManager;
 import entities.Idea;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

@@ -1,7 +1,7 @@
 package services.forum;
 
 import entities.Post;
-import utils.MyConnection;
+import database.MyConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;

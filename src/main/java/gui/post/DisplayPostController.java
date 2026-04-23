@@ -74,7 +74,7 @@ public class DisplayPostController {
         loadPosts();
         
         // Populate User Profile
-        entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
+        entities.Users user = database.SessionManager.getInstance().getCurrentUser();
         if (user != null && lblUsername != null) {
             String displayName = user.getUsername() != null ? user.getUsername() : "User";
             lblUsername.setText(displayName);

@@ -23,7 +23,7 @@ public class AdminController {
         loadUsers();
         
         // Populate Navbar Profile
-        entities.Users current = utils.SessionManager.getInstance().getCurrentUser();
+        entities.Users current = database.SessionManager.getInstance().getCurrentUser();
         if (current != null && lblNavUsername != null) {
             String displayName = current.getUsername() != null ? current.getUsername() : "User";
             lblNavUsername.setText(displayName);
@@ -147,7 +147,8 @@ public class AdminController {
         javafx.scene.layout.StackPane contentArea = (javafx.scene.layout.StackPane) usersList.getScene().lookup("#contentArea");
         if (contentArea != null) {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/AddUser.fxml"));
-            contentArea.getChildren().setAll(loader.load());
+            javafx.scene.Node root = loader.load();
+            contentArea.getChildren().setAll(root);
         }
     }
 

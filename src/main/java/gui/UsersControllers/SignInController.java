@@ -2,7 +2,7 @@ package gui.UsersControllers;
 
 import entities.Users;
 import services.UsersService;
-import utils.SessionManager;
+import database.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

@@ -23,7 +23,7 @@ public class EditUserController {
     @FXML
     public void initialize() {
         // Populate Navbar Profile
-        entities.Users current = utils.SessionManager.getInstance().getCurrentUser();
+        entities.Users current = database.SessionManager.getInstance().getCurrentUser();
         if (current != null && lblNavUsername != null) {
             String displayName = current.getUsername() != null ? current.getUsername() : "User";
             lblNavUsername.setText(displayName);

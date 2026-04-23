@@ -1,4 +1,8 @@
-package utils;
+package database;
+
+/**
+ * Singleton class for managing database connections.
+ */
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,7 +1,7 @@
 package services;
 
 import entities.Course;
-import utils.MyConnection;
+import database.MyConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
