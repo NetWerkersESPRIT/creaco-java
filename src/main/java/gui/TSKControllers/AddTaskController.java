@@ -1,6 +1,8 @@
 package gui.TSKControllers;
 
+import entities.Mission;
 import entities.Tasks;
+import services.MissionService;
 import services.TskService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,11 +14,45 @@ import javafx.stage.Stage;
 import java.sql.SQLException;
 
 public class AddTaskController {
-    @FXML private TextField txtTitle, txtState, txtTimeLimit;
+    @FXML private TextField txtTitle;
     @FXML private TextArea txtDescription;
+    @FXML private ComboBox<String> comboState;
+    @FXML private DatePicker dateLimit;
+    @FXML private ComboBox<Mission> comboMission;
     @FXML private Label lblMessage;
 
     private final TskService tskService = new TskService();
+    private final MissionService missionService = new MissionService();
+
+    @FXML
+    public void initialize() {
+        try {
+            if (comboState != null) {
+                comboState.setItems(javafx.collections.FXCollections.observableArrayList("to do", "doing", "done"));
+                comboState.getSelectionModel().selectFirst();
+            }
+
+            if (comboMission != null) {
+                comboMission.setItems(javafx.collections.FXCollections.observableArrayList(missionService.afficher()));
+                comboMission.setCellFactory(lv -> new ListCell<Mission>() {
+                    @Override
+                    protected void updateItem(Mission item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(empty ? "" : item.getTitle());
+                    }
+                });
+                comboMission.setButtonCell(new ListCell<Mission>() {
+                    @Override
+                    protected void updateItem(Mission item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(empty ? "" : item.getTitle());
+                    }
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     @FXML public void goToIdea()    throws Exception { switchScene("/TSK/Idea.fxml"); }
     @FXML public void goToMission() throws Exception { switchScene("/TSK/Mission.fxml"); }
@@ -53,10 +89,19 @@ public class AddTaskController {
             Tasks task = new Tasks();
             task.setTitle(txtTitle.getText().trim());
             task.setDescription(txtDescription != null ? txtDescription.getText().trim() : "");
-            task.setState(txtState != null ? txtState.getText().trim() : "TODO");
+            task.setState(comboState != null && comboState.getValue() != null ? comboState.getValue() : "to do");
             
-            String limit = txtTimeLimit != null ? txtTimeLimit.getText().trim() : "0";
-            task.setTime_limit(limit);
+            if (dateLimit != null && dateLimit.getValue() != null) {
+                task.setTime_limit(dateLimit.getValue().toString());
+            } else {
+                task.setTime_limit("0");
+            }
+            
+            if (comboMission != null && comboMission.getValue() != null) {
+                task.setBelong_to_id(comboMission.getValue().getId());
+            } else {
+                task.setBelong_to_id(0); // Or handle as required
+            }
 
             tskService.ajouter(task);
             lblMessage.setText("✅ Task added successfully!");
@@ -71,8 +116,9 @@ public class AddTaskController {
     private void clearFields() {
         txtTitle.clear();
         if (txtDescription != null) txtDescription.clear();
-        if (txtState != null) txtState.clear();
-        if (txtTimeLimit != null) txtTimeLimit.clear();
+        if (comboState != null) comboState.getSelectionModel().selectFirst();
+        if (dateLimit != null) dateLimit.setValue(null);
+        if (comboMission != null) comboMission.getSelectionModel().clearSelection();
     }
 
     @FXML

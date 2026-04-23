@@ -17,6 +17,7 @@ public class TasksController {
     @FXML private Label lblNavUserRole;
 
     private final TskService tskService = new TskService();
+    private final services.MissionService missionService = new services.MissionService();
 
     @FXML
     public void initialize() {
@@ -82,7 +83,11 @@ public class TasksController {
         taskInfo.setPrefWidth(300);
         Label lblTitle = new Label(t.getTitle());
         lblTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 14px;");
-        Label lblId = new Label("#" + t.getId());
+        
+        entities.Mission associatedMission = (t.getBelong_to_id() > 0) ? missionService.getMissionById(t.getBelong_to_id()) : null;
+        String missionStr = (associatedMission != null) ? "Mission: " + associatedMission.getTitle() : "No Mission associated";
+        
+        Label lblId = new Label("#" + t.getId() + " | " + missionStr);
         lblId.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
         taskInfo.getChildren().addAll(lblTitle, lblId);
 
@@ -92,9 +97,9 @@ public class TasksController {
         // Status Badge
         Label lblStatus = new Label(t.getState() != null ? t.getState().toUpperCase() : "PENDING");
         String statusColor = "#94a3b8"; // Default gray
-        if ("COMPLETED".equalsIgnoreCase(t.getState())) statusColor = "#10b981";
-        else if ("IN_PROGRESS".equalsIgnoreCase(t.getState())) statusColor = "#3b82f6";
-        else if ("TODO".equalsIgnoreCase(t.getState())) statusColor = "#f59e0b";
+        if ("done".equalsIgnoreCase(t.getState()) || "COMPLETED".equalsIgnoreCase(t.getState())) statusColor = "#10b981";
+        else if ("doing".equalsIgnoreCase(t.getState()) || "IN_PROGRESS".equalsIgnoreCase(t.getState())) statusColor = "#3b82f6";
+        else if ("to do".equalsIgnoreCase(t.getState()) || "TODO".equalsIgnoreCase(t.getState()) || "new".equalsIgnoreCase(t.getState())) statusColor = "#f59e0b";
         
         lblStatus.setStyle("-fx-background-color: " + statusColor + "15; -fx-text-fill: " + statusColor + "; -fx-padding: 5 12; -fx-background-radius: 10; -fx-font-weight: bold; -fx-font-size: 10px;");
         lblStatus.setMinWidth(120);

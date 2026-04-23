@@ -2,15 +2,15 @@ services\CollabRequestService.class
 entities\CourseCategory.class
 gui\SessionHelper.class
 entities\Collaborator.class
-main\Main.class
 entities\Contract.class
+gui\post\DisplayPostController.class
 entities\CollabRequest.class
 gui\collaborator\AddCollaboratorController.class
-main\FxApplication.class
+gui\contract\AddContractController.class
 entities\Comment.class
 gui\collabrequest\EditCollabRequestController.class
+gui\post\AddPostController.class
 gui\MainController.class
-utils\MyConnection.class
 services\CollaboratorService.class
 gui\collaborator\EditCollaboratorController.class
 gui\collabrequest\AddCollabRequestController.class
@@ -18,6 +18,7 @@ gui\collabrequest\ListCollabRequestController.class
 gui\collaborator\ListCollaboratorController.class
 entities\Users.class
 entities\Post.class
-services\ICourseCategoryService.class
+gui\comment\UpdateCommentController.class
+gui\comment\AddCommentController.class
 services\CourseCategoryService.class
 gui\AlertHelper.class

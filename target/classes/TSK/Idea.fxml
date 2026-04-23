@@ -12,44 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.TSKControllers.IdeaController" stylesheets="@../gui/styles.css">
-    <left>
-        <VBox prefWidth="260.0" spacing="20.0" styleClass="sidebar">
-            <padding>
-                <Insets bottom="30.0" left="24.0" right="24.0" top="30.0" />
-            </padding>
-            <children>
-                <HBox spacing="10.0" alignment="CENTER_LEFT">
-                    <Label styleClass="sidebar-brand" text="CreaCo" />
-                </HBox>
-                
-                <Label styleClass="section-header" text="WORKFLOW" />
-                <VBox spacing="10.0">
-                    <Button mnemonicParsing="false" onAction="#goBack" prefWidth="210.0" styleClass="sidebar-item">
-                        <graphic>
-                            <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                <StackPane styleClass="sidebar-icon-box">
-                                    <Label text="🏠" style="-fx-font-size: 16px;" />
-                                </StackPane>
-                                <Label text="Dashboard" />
-                            </HBox>
-                        </graphic>
-                    </Button>
-                    <Button mnemonicParsing="false" prefWidth="210.0" styleClass="sidebar-item, sidebar-item-active">
-                        <graphic>
-                            <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                <StackPane styleClass="sidebar-icon-box" style="-fx-background-color: -fx-primary-pink;">
-                                    <Label text="💡" style="-fx-font-size: 16px; -fx-text-fill: white;" />
-                                </StackPane>
-                                <Label text="Ideas" style="-fx-text-fill: -fx-primary-pink;"/>
-                            </HBox>
-                        </graphic>
-                    </Button>
-                </VBox>
 
-                <Region VBox.vgrow="ALWAYS" />
-            </children>
-        </VBox>
-    </left>
     <center>
         <VBox spacing="22.0">
             <padding>

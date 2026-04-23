@@ -22,7 +22,7 @@ public class PostModerationController {
     @FXML private VBox moderationList;
     @FXML private VBox listViewContainer;
     @FXML private VBox detailViewContainer;
-    
+
     @FXML private Label detailTitleLabel;
     @FXML private Label detailAuthorLabel;
     @FXML private Label detailDateLabel;
@@ -42,16 +42,16 @@ public class PostModerationController {
     @FXML
     public void initialize() {
         loadPendingPosts();
-        
+
         // Populate User Profile
         entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
         if (user != null && lblUsername != null) {
             String displayName = user.getUsername() != null ? user.getUsername() : "User";
             lblUsername.setText(displayName);
-            
+
             String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
             lblUserRole.setText(role);
-            
+
             // Special styling for ADMIN
             if ("ADMIN".equals(role)) {
                 lblUserRole.setStyle("-fx-background-color: #434a75;");
@@ -83,63 +83,63 @@ public class PostModerationController {
         HBox row = new HBox(10);
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         row.setStyle("-fx-padding: 20 15; -fx-background-color: white; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;");
-        
+
         // Title
         Label titleLabel = new Label(post.getTitle());
         titleLabel.setPrefWidth(300);
         titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 15px;");
-        
+
         // Author
         Users user = userService.getUserById(post.getUserId());
         Label authorLabel = new Label(user != null ? user.getUsername() : "Unknown");
         authorLabel.setPrefWidth(150);
         authorLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-font-size: 14px;");
-        
+
         // Spam Score
         Label spamLabel = new Label(post.getSpamScore() + "/100");
         spamLabel.setPrefWidth(120);
         spamLabel.setStyle("-fx-text-fill: #718096; -fx-font-weight: bold;");
-        
+
         // Date
         String dateStr = (post.getCreatedAt() != null) ? post.getCreatedAt().format(formatter) : "-";
         Label dateLabel = new Label(dateStr);
         dateLabel.setPrefWidth(200);
         dateLabel.setStyle("-fx-text-fill: #718096; -fx-font-weight: bold;");
-        
+
         javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
         javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
-        
+
         // View Button
         Button viewBtn = new Button("👁 VIEW");
         viewBtn.setStyle("-fx-background-color: linear-gradient(to right, #ce2d7c, #9124b8); " +
                 "-fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand; -fx-padding: 10 25;");
         viewBtn.setOnAction(e -> showDetail(post));
-        
+
         HBox btnContainer = new HBox(viewBtn);
         btnContainer.setPrefWidth(150);
         btnContainer.setAlignment(javafx.geometry.Pos.CENTER);
 
         row.getChildren().addAll(titleLabel, authorLabel, spamLabel, dateLabel, spacer, btnContainer);
-        
+
         row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 20 15; -fx-background-color: #f8fafc; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
         row.setOnMouseExited(e -> row.setStyle("-fx-padding: 20 15; -fx-background-color: white; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
-        
+
         return row;
     }
 
     private void showDetail(Post post) {
         this.selectedPost = post;
         detailTitleLabel.setText(post.getTitle());
-        
+
         Users user = userService.getUserById(post.getUserId());
         detailAuthorLabel.setText((user != null) ? user.getUsername().toUpperCase() : "UNKNOWN");
-        
+
         String date = (post.getCreatedAt() != null) ? post.getCreatedAt().format(metaFormatter).toUpperCase() : "-";
         detailDateLabel.setText(date);
-        
+
         detailStatusLabel.setText("PENDING");
         detailContentLabel.setText(post.getContent());
-        
+
         listViewContainer.setVisible(false);
         detailViewContainer.setVisible(true);
     }
@@ -154,7 +154,7 @@ public class PostModerationController {
     @FXML
     private void handleApprove() {
         if (selectedPost == null) return;
-        
+
         if (gui.util.AlertHelper.showCustomAlert("Approve?", "Make this post public?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
             try {
                 selectedPost.setStatus("ACCEPTED");
@@ -197,7 +197,7 @@ public class PostModerationController {
         // Styling dialog buttons
         Button refuseBtn = (Button) dialog.getDialogPane().lookupButton(refuseButtonType);
         refuseBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;");
-        
+
         Button cancelBtn = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelBtn.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;");
 
@@ -225,10 +225,10 @@ public class PostModerationController {
     public void onOpenProfile(javafx.scene.input.MouseEvent event) {
         try {
             javafx.scene.layout.StackPane contentArea =
-                (javafx.scene.layout.StackPane) postsList.getScene().lookup("#contentArea");
+                    (javafx.scene.layout.StackPane) moderationList.getScene().lookup("#contentArea");
             if (contentArea != null) {
                 javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
-                    getClass().getResource("/Users/Profile.fxml"));
+                        getClass().getResource("/Users/Profile.fxml"));
                 contentArea.getChildren().setAll((javafx.scene.Node) loader.load());
             }
         } catch (Exception e) { e.printStackTrace(); }

@@ -19,6 +19,8 @@ public class AddMissionController {
     @FXML private TextArea txtDescription;
     @FXML private DatePicker dateMission;
     @FXML private ComboBox<Idea> comboIdea;
+    @FXML private Label lblNavUsername;
+    @FXML private Label lblNavUserRole;
     @FXML private Label lblMessage;
 
     private final MissionService missionService = new MissionService();
@@ -46,6 +48,14 @@ public class AddMissionController {
                         setText(empty ? "" : item.getTitle());
                     }
                 });
+            }
+
+            // Populate Navbar Profile
+            entities.Users current = utils.SessionManager.getInstance().getCurrentUser();
+            if (current != null && lblNavUsername != null) {
+                lblNavUsername.setText(current.getUsername());
+                String role = current.getRole() != null ? current.getRole().replace("ROLE_", "") : "USER";
+                lblNavUserRole.setText(role);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -105,6 +115,16 @@ public class AddMissionController {
         txtDescription.clear();
         if (dateMission != null) dateMission.setValue(null);
         if (comboIdea != null) comboIdea.getSelectionModel().clearSelection();
+    }
+
+    @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try { switchScene("/Users/Profile.fxml"); } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
+    public void logout(javafx.event.ActionEvent event) {
+        gui.SessionHelper.logout(event);
     }
 
     @FXML

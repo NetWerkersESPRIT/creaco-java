@@ -77,4 +77,28 @@ public class MissionService {
         
         ps.executeUpdate();
     }
+
+    public Mission getMissionById(int id) {
+        try {
+            String sql = "SELECT * FROM mission WHERE id = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Mission m = new Mission();
+                m.setId(rs.getInt("id"));
+                m.setTitle(rs.getString("title"));
+                m.setDescription(rs.getString("description"));
+                m.setState(rs.getString("state"));
+                m.setCreated_at(rs.getString("created_at"));
+                m.setLast_update(rs.getString("last_update"));
+                m.setMission_date(rs.getString("mission_date"));
+                m.setCompleted_at(rs.getString("completed_at"));
+                m.setImplement_idea_id(rs.getInt("implement_idea_id"));
+                m.setAssigned_by_id(rs.getInt("assigned_by_id"));
+                return m;
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
 }
