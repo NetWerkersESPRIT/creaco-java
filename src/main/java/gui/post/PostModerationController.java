@@ -222,6 +222,19 @@ public class PostModerationController {
     }
 
     @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try {
+            javafx.scene.layout.StackPane contentArea =
+                (javafx.scene.layout.StackPane) postsList.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/Users/Profile.fxml"));
+                contentArea.getChildren().setAll((javafx.scene.Node) loader.load());
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
     public void logout(ActionEvent event) {
         gui.SessionHelper.logout(event);
     }

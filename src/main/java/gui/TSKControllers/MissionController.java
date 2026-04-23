@@ -164,6 +164,11 @@ public class MissionController {
     }
 
     @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try { switchScene("/Users/Profile.fxml"); } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
     }

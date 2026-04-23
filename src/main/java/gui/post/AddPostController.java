@@ -11,6 +11,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import services.forum.PostService;
+import utils.SessionManager;
+import entities.Users;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +41,11 @@ public class AddPostController {
     private Label titleErrorLabel;
     @FXML
     private Label contentErrorLabel;
+    
+    @FXML
+    private Label lblUsername;
+    @FXML
+    private Label lblUserRole;
 
     private File imageFile;
     private File pdfFile;
@@ -48,6 +55,18 @@ public class AddPostController {
 
     public void setAdminMode(boolean isAdminMode) {
         this.isAdminMode = isAdminMode;
+    }
+
+    @FXML
+    private void initialize() {
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null) {
+            String displayName = user.getUsername() != null ? user.getUsername() : "User";
+            if (lblUsername != null) lblUsername.setText(displayName);
+            
+            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+            if (lblUserRole != null) lblUserRole.setText(role);
+        }
     }
 
     @FXML
@@ -65,15 +84,19 @@ public class AddPostController {
         
         if (isAdminMode) {
             post.setStatus("ACCEPTED");
-            post.setUserId(5); // Admin user
         } else {
             post.setStatus("PENDING");
-            post.setUserId(1); // Default user
         }
         
         post.setPinned(pinToggle.isSelected());
         post.setCreatedAt(java.time.LocalDateTime.now());
-        post.setUserId(5); // Temporarily hardcoded for Admin, will be dynamic based on login state
+        
+        Users currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            post.setUserId(currentUser.getId());
+        } else {
+            post.setUserId(5); // Fallback to Admin ID if session is null for some reason
+        }
 
         // Handle Image
         if (imageFile != null) {
@@ -254,6 +277,28 @@ public class AddPostController {
                 System.err.println("Speech recognition error: " + e.getMessage());
             }
         }).start();
+    }
+
+    @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try {
+            StackPane area = findContentArea((Node) event.getSource());
+            if (area != null) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Profile.fxml"));
+                area.getChildren().setAll((Node) loader.load());
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private StackPane findContentArea(Node source) {
+        StackPane area = (StackPane) source.getScene().lookup("#contentArea");
+        if (area != null) return area;
+        Node parent = source.getParent();
+        while (parent != null) {
+            if (parent instanceof StackPane && "contentArea".equals(parent.getId())) return (StackPane) parent;
+            parent = parent.getParent();
+        }
+        return null;
     }
 
     @FXML

@@ -15,6 +15,8 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import services.forum.PostService;
+import utils.SessionManager;
+import entities.Users;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +40,11 @@ public class UpdatePostController {
     @FXML
     private Label pdfLabel;
 
+    @FXML
+    private Label lblUsername;
+    @FXML
+    private Label lblUserRole;
+
     private File imageFile;
     private File pdfFile;
 
@@ -47,6 +54,18 @@ public class UpdatePostController {
 
     public void setAdminMode(boolean isAdminMode) {
         this.isAdminMode = isAdminMode;
+    }
+
+    @FXML
+    private void initialize() {
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null) {
+            String displayName = user.getUsername() != null ? user.getUsername() : "User";
+            if (lblUsername != null) lblUsername.setText(displayName);
+            
+            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+            if (lblUserRole != null) lblUserRole.setText(role);
+        }
     }
 
     public void setPost(Post post) {
@@ -182,6 +201,28 @@ public class UpdatePostController {
                 new ProcessBuilder("powershell.exe", "-Command", script).start();
             } catch (Exception e) { e.printStackTrace(); }
         }).start();
+    }
+
+    @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try {
+            StackPane area = findContentArea((Node) event.getSource());
+            if (area != null) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Profile.fxml"));
+                area.getChildren().setAll((Node) loader.load());
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private StackPane findContentArea(Node source) {
+        StackPane area = (StackPane) source.getScene().lookup("#contentArea");
+        if (area != null) return area;
+        Node parent = source.getParent();
+        while (parent != null) {
+            if (parent instanceof StackPane && "contentArea".equals(parent.getId())) return (StackPane) parent;
+            parent = parent.getParent();
+        }
+        return null;
     }
 
     @FXML

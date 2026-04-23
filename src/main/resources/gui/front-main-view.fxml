@@ -109,7 +109,7 @@
                                     </HBox>
                                 </graphic>
                             </Button>
-                            <Button fx:id="btnForum" mnemonicParsing="false" onAction="#showForum" prefWidth="210.0" styleClass="sidebar-item">
+                            <Button fx:id="btnForum" mnemonicParsing="false" onAction="#onShowForum" prefWidth="210.0" styleClass="sidebar-item">
                                 <graphic>
                                     <HBox spacing="15.0" alignment="CENTER_LEFT">
                                         <StackPane styleClass="sidebar-icon-box">
@@ -179,7 +179,7 @@
                                     </graphic>
                                 </Button>
 
-                                <HBox alignment="CENTER" spacing="12" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                                <HBox alignment="CENTER" spacing="12" onMouseClicked="#onOpenProfile" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4); -fx-cursor: hand;">
                                     <children>
                                         <VBox alignment="CENTER_RIGHT">
                                             <Label text="Welcome" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 10px; -fx-font-weight: bold;" />

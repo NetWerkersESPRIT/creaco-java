@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import services.CourseService;
+import gui.post.DisplayPostController;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -87,16 +88,19 @@ public class MainController {
     }
 
     @FXML
-    private void showForum() {
+    public void onShowForum() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
             Parent root = loader.load();
             gui.post.DisplayPostController controller = loader.getController();
-            controller.setAdminMode(true);
+            if (controller != null) {
+                controller.setAdminMode(true);
+            }
             contentArea.getChildren().setAll(root);
             if (pageTitleLabel != null) pageTitleLabel.setText("Forum");
         } catch (IOException e) {
             e.printStackTrace();
+            System.err.println("Failed to load forum: " + e.getMessage());
         }
     }
 

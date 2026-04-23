@@ -13,6 +13,7 @@ import javafx.scene.layout.*;
 import services.CourseService;
 import utils.SessionManager;
 import entities.Users;
+import gui.post.DisplayPostController;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -84,45 +85,50 @@ public class FrontMainController {
         }
     }
 
+    public void setPreviewMode(boolean isPreview) {
+        if (previewBanner != null) {
+            previewBanner.setVisible(isPreview);
+            previewBanner.setManaged(isPreview);
+        }
+    }
+
     @FXML
     private void onGoToDashboard() {
         contentArea.getChildren().setAll(dashboardView);
     }
 
-    @FXML
-    private void onShowIdeas() { loadSubView("/TSK/Idea.fxml"); }
+    @FXML public void onShowIdeas() { loadSubView("/TSK/Idea.fxml"); }
+
+    @FXML public void onShowMissions() { loadSubView("/TSK/Mission.fxml"); }
+
+    @FXML public void onShowTasks() { loadSubView("/TSK/Tasks.fxml"); }
+
+    @FXML public void onShowEvents() { System.out.println("Events section - Coming soon"); }
+
+    @FXML public void onShowConnectedUsers() { loadSubView("/Users/Admin.fxml"); }
+
+    @FXML public void onShowPostModeration() { loadSubView("/post/postModeration.fxml"); }
 
     @FXML
-    private void onShowMissions() { loadSubView("/TSK/Mission.fxml"); }
-
-    @FXML
-    private void onShowTasks() { loadSubView("/TSK/Tasks.fxml"); }
-
-    @FXML
-    private void onShowEvents() { System.out.println("Events section - Coming soon"); }
-
-    @FXML
-    private void onShowConnectedUsers() { loadSubView("/Users/Admin.fxml"); }
-
-    @FXML
-    private void onShowPostModeration() { loadSubView("/post/postModeration.fxml"); }
-
-    @FXML
-    private void showForum() {
+    public void onShowForum() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
             Parent root = loader.load();
             gui.post.DisplayPostController controller = loader.getController();
-            controller.setAdminMode(false);
+            if (controller != null) {
+                controller.setAdminMode(false);
+            }
             contentArea.getChildren().setAll(root);
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to load forum: " + e.getMessage());
+        }
     }
 
-    @FXML
-    private void onShowCollaborations() { loadSubView("/collaborator/ListCollaborator.fxml"); }
+    @FXML public void onShowCollaborations() { loadSubView("/collaborator/ListCollaborator.fxml"); }
 
     @FXML
-    private void onShowCourses() { onGoToDashboard(); }
+    public void onShowCourses() { onGoToDashboard(); }
 
     @FXML
     private void onManageCategories() {
@@ -299,6 +305,18 @@ public class FrontMainController {
     }
 
     @FXML public void logout(javafx.event.ActionEvent event) { gui.SessionHelper.logout(event); }
+
+    @FXML
+    private void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Profile.fxml"));
+            Parent root = loader.load();
+            contentArea.getChildren().setAll((javafx.scene.Node) root);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Could not load Profile view: " + e.getMessage());
+        }
+    }
 
     @FXML
     private void exitPreview(javafx.event.ActionEvent event) {

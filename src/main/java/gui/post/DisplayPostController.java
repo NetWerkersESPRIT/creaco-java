@@ -208,7 +208,8 @@ public class DisplayPostController {
             createReadAction(post)
         );
 
-        int currentUserId = isAdminMode ? 5 : 1;
+        entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+        int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
         boolean isOwner = (post.getUserId() == currentUserId);
 
         if (isOwner) {
@@ -445,5 +446,16 @@ public class DisplayPostController {
         gui.util.AlertHelper.AlertType ct = (type == Alert.AlertType.ERROR) ? gui.util.AlertHelper.AlertType.ERROR : gui.util.AlertHelper.AlertType.INFORMATION;
         gui.util.AlertHelper.showCustomAlert(title, content, ct);
     }
+    @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try {
+            StackPane area = findContentArea((Node) event.getSource());
+            if (area != null) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Profile.fxml"));
+                area.getChildren().setAll((Node) loader.load());
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
     @FXML public void logout(ActionEvent event) { gui.SessionHelper.logout(event); }
 }

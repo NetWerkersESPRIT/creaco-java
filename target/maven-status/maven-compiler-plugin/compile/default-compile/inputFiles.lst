@@ -49,7 +49,9 @@ D:\pidev\creaco-java\src\main\java\gui\TSKControllers\MissionController.java
 D:\pidev\creaco-java\src\main\java\gui\TSKControllers\TasksController.java
 D:\pidev\creaco-java\src\main\java\gui\UsersControllers\AddUserController.java
 D:\pidev\creaco-java\src\main\java\gui\UsersControllers\AdminController.java
+D:\pidev\creaco-java\src\main\java\gui\UsersControllers\EditProfileController.java
 D:\pidev\creaco-java\src\main\java\gui\UsersControllers\EditUserController.java
+D:\pidev\creaco-java\src\main\java\gui\UsersControllers\ProfileController.java
 D:\pidev\creaco-java\src\main\java\gui\UsersControllers\RegistrationController.java
 D:\pidev\creaco-java\src\main\java\gui\UsersControllers\SignInController.java
 D:\pidev\creaco-java\src\main\java\gui\util\AlertHelper.java

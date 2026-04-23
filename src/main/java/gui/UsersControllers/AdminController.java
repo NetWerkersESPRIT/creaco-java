@@ -147,8 +147,20 @@ public class AdminController {
         javafx.scene.layout.StackPane contentArea = (javafx.scene.layout.StackPane) usersList.getScene().lookup("#contentArea");
         if (contentArea != null) {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/AddUser.fxml"));
-            contentArea.getChildren().setAll(loader.load());
+            contentArea.getChildren().setAll((javafx.scene.Node) loader.load());
         }
+    }
+
+    @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try {
+            javafx.scene.layout.StackPane contentArea =
+                (javafx.scene.layout.StackPane) usersList.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Profile.fxml"));
+                contentArea.getChildren().setAll((javafx.scene.Node) loader.load());
+            }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     @FXML
