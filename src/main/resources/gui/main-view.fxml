@@ -108,7 +108,7 @@
                                     </HBox>
                                 </graphic>
                             </Button>
-                            <Button mnemonicParsing="false" onAction="#showForum" prefWidth="210.0" styleClass="sidebar-item">
+                            <Button mnemonicParsing="false" onAction="#onShowForum" prefWidth="210.0" styleClass="sidebar-item">
                                 <graphic>
                                     <HBox spacing="15.0" alignment="CENTER_LEFT">
                                         <StackPane styleClass="sidebar-icon-box">
