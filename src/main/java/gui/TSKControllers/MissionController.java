@@ -17,6 +17,7 @@ public class MissionController {
     @FXML private Label lblNavUserRole;
 
     private final MissionService missionService = new MissionService();
+    private final services.IdeaService ideaService = new services.IdeaService();
 
     @FXML
     public void initialize() {
@@ -82,7 +83,11 @@ public class MissionController {
         missionInfo.setPrefWidth(300);
         Label lblTitle = new Label(m.getTitle());
         lblTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 14px;");
-        Label lblId = new Label("#" + m.getId());
+        
+        entities.Idea associatedIdea = (m.getImplement_idea_id() > 0) ? ideaService.getIdeaById(m.getImplement_idea_id()) : null;
+        String ideaStr = (associatedIdea != null) ? "Idea: " + associatedIdea.getTitle() : "No Idea associated";
+        
+        Label lblId = new Label("#" + m.getId() + " | " + ideaStr);
         lblId.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
         missionInfo.getChildren().addAll(lblTitle, lblId);
 

@@ -23,7 +23,7 @@ public class EditTaskController {
 
     @FXML
     public void initialize() {
-        comboState.setItems(FXCollections.observableArrayList("new", "in_progress", "completed"));
+        comboState.setItems(FXCollections.observableArrayList("to do", "doing", "done"));
     }
 
     public void setTask(Tasks task) {
