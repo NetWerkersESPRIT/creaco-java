@@ -9,17 +9,6 @@
         <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
     </padding>
     <children>
-        <!-- Navbar -->
-        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
-            <children>
-                <VBox>
-                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Admin / Users" />
-                    <Label styleClass="title-label" text="Add New User" style="-fx-font-size: 20px;"/>
-                </VBox>
-                <Region HBox.hgrow="ALWAYS" />
-                <Button onAction="#goBack" text="← Back to List" styleClass="btn-action-light" />
-            </children>
-        </HBox>
 
         <!-- Main Form Container -->
         <StackPane VBox.vgrow="ALWAYS">

@@ -149,11 +149,12 @@
     </left>
 
     <center>
-        <StackPane fx:id="contentArea">
+        <VBox spacing="0">
             <children>
-                <VBox fx:id="dashboardView" spacing="22.0">
+                <!-- Persistent Top Navigation -->
+                <VBox style="-fx-background-color: transparent;" spacing="10">
                     <padding>
-                        <Insets top="24" left="24" right="24" bottom="24"/>
+                        <Insets top="24" left="24" right="24" bottom="0"/>
                     </padding>
                     <children>
                         <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
@@ -167,7 +168,7 @@
                         <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
                             <children>
                                 <VBox>
-                                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Dashboard" />
+                                    <Label fx:id="lblBreadcrumb" style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Dashboard" />
                                     <Label fx:id="txtWelcome" styleClass="title-label" text="Explore" style="-fx-font-size: 20px;"/>
                                 </VBox>
                                 
@@ -200,8 +201,18 @@
                                 </Button>
                             </children>
                         </HBox>
+                    </children>
+                </VBox>
 
-                        <!-- Dashboard Header Section -->
+                <!-- Dynamic Content Area -->
+                <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox fx:id="dashboardView" spacing="22.0">
+                            <padding>
+                                <Insets top="24" left="24" right="24" bottom="24"/>
+                            </padding>
+                            <children>
+                                <!-- Dashboard Header Section -->
                         <GridPane hgap="22.0">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="ALWAYS" percentWidth="72.0" />
@@ -259,6 +270,8 @@
                 </VBox>
             </children>
         </StackPane>
+            </children>
+        </VBox>
     </center>
 
 </BorderPane>

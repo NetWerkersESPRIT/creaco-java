@@ -11,82 +11,15 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.CourseCategoryListController">
-    <left>
-        <VBox prefWidth="240.0" spacing="25.0" styleClass="sidebar" BorderPane.alignment="CENTER">
-            <padding>
-                <Insets bottom="30.0" left="24.0" right="24.0" top="30.0" />
-            </padding>
-            <children>
-                <HBox spacing="10.0" alignment="CENTER_LEFT">
-                    <Label styleClass="sidebar-brand" text="CreaCo" />
-                </HBox>
-                
-                <VBox spacing="12.0">
-                    <Button mnemonicParsing="false" onAction="#onBackToCourses" prefWidth="210.0" styleClass="sidebar-item">
-                        <graphic>
-                            <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                <StackPane styleClass="sidebar-icon-box">
-                                    <Label text="🏠" style="-fx-font-size: 16px;" />
-                                </StackPane>
-                                <Label text="Dashboard" />
-                            </HBox>
-                        </graphic>
-                    </Button>
-                </VBox>
-
-                <Label styleClass="section-header" text="WORKFLOW MANAGEMENT" />
-                <VBox spacing="10.0">
-                    <Button mnemonicParsing="false" onAction="#onBackToCourses" prefWidth="210.0" styleClass="sidebar-item, sidebar-item-active">
-                        <graphic>
-                            <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                <StackPane styleClass="sidebar-icon-box">
-                                    <Label text="🎓" style="-fx-font-size: 16px;" />
-                                </StackPane>
-                                <Label text="Courses" />
-                            </HBox>
-                        </graphic>
-                    </Button>
-                </VBox>
-
-                <Label styleClass="section-header" text="USER EXPERIENCE" />
-                <VBox spacing="10.0">
-                    <Button mnemonicParsing="false" onAction="#goToPreview" prefWidth="210.0" styleClass="sidebar-item">
-                        <graphic>
-                            <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                <StackPane styleClass="sidebar-icon-box">
-                                    <Label text="👀" style="-fx-font-size: 16px;" />
-                                </StackPane>
-                                <Label text="Preview Mode" />
-                            </HBox>
-                        </graphic>
-                    </Button>
-                </VBox>
-
-                <Region VBox.vgrow="ALWAYS" />
-                <Button onAction="#logout" text="Log Out" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" />
-            </children>
-        </VBox>
-    </left>
     <center>
         <VBox spacing="22.0" BorderPane.alignment="CENTER">
             <padding>
                 <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
             </padding>
             <children>
-                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
+                <HBox alignment="CENTER_RIGHT" spacing="15.0">
                     <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories" />
-                            <Label fx:id="titleLabel" styleClass="title-label" text="Course Categories" />
-                            <Label fx:id="statusLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Ready" />
-                        </VBox>
-                        <Region HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#onAddCategory" prefHeight="44.0" styleClass="btn-primary" text="Add category" />
-                        <Button onAction="#logout" styleClass="btn-logout">
-                            <graphic>
-                                <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
-                            </graphic>
-                        </Button>
                     </children>
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="22.0" style="-fx-padding: 0 20 0 20;">

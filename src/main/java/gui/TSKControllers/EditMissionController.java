@@ -21,6 +21,7 @@ public class EditMissionController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Edit Mission", "Missions / Management");
         comboState.setItems(FXCollections.observableArrayList("new", "in_progress", "completed"));
     }
 

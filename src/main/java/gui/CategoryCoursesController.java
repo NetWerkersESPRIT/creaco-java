@@ -46,6 +46,11 @@ public class CategoryCoursesController {
     @FXML
     private VBox coursesContainer;
 
+    @FXML
+    public void initialize() {
+        gui.FrontMainController.setNavbarText("Courses in Category", "Pages / Categories / Courses");
+    }
+
     public void setCategory(CourseCategory category) {
         this.category = category;
         titleLabel.setText("Courses in " + category.getNom());
