@@ -168,6 +168,12 @@ public class FrontMainController {
         loadSubView("/post/postModeration.fxml"); 
     }
 
+    @FXML public void onShowForumStats() {
+        if (txtWelcome != null) txtWelcome.setText("Forum Analytics");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Admin / Analytics");
+        loadSubView("/post/forumStats.fxml");
+    }
+
     @FXML
     public void onShowForum() {
         if (txtWelcome != null) txtWelcome.setText("Forum");

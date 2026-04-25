@@ -25,6 +25,7 @@
                                 <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="Pending Posts" />
                                 <Region HBox.hgrow="ALWAYS" />
                                 <Label style="-fx-text-fill: #718096; -fx-font-size: 13px;" text="Pending" />
+                                <Button onAction="#onShowAnalytics" style="-fx-background-color: #f0f9ff; -fx-border-color: #bae6fd; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 8 15; -fx-text-fill: #0369a1; -fx-font-weight: bold; -fx-cursor: hand;" text="📊 Analytics" />
                                 <Button style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 8 15; -fx-text-fill: #4a5568; -fx-font-weight: bold;" text="🤖 Spam Filter" />
                             </children>
                         </HBox>
