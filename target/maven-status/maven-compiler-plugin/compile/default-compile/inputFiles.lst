@@ -7,6 +7,8 @@ D:\pidev\creaco-java\src\main\java\entities\CourseCategory.java
 D:\pidev\creaco-java\src\main\java\entities\Idea.java
 D:\pidev\creaco-java\src\main\java\entities\Mission.java
 D:\pidev\creaco-java\src\main\java\entities\Post.java
+D:\pidev\creaco-java\src\main\java\entities\PostReaction.java
+D:\pidev\creaco-java\src\main\java\entities\ReactionType.java
 D:\pidev\creaco-java\src\main\java\entities\Ressource.java
 D:\pidev\creaco-java\src\main\java\entities\Tasks.java
 D:\pidev\creaco-java\src\main\java\entities\Tsk.java
@@ -65,6 +67,7 @@ D:\pidev\creaco-java\src\main\java\services\CourseService.java
 D:\pidev\creaco-java\src\main\java\services\forum\CommentService.java
 D:\pidev\creaco-java\src\main\java\services\forum\ForumInterface.java
 D:\pidev\creaco-java\src\main\java\services\forum\PostService.java
+D:\pidev\creaco-java\src\main\java\services\forum\ReactionDAO.java
 D:\pidev\creaco-java\src\main\java\services\ICourseCategoryService.java
 D:\pidev\creaco-java\src\main\java\services\IdeaService.java
 D:\pidev\creaco-java\src\main\java\services\MissionService.java

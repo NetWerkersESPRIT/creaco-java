@@ -1,15 +1,17 @@
 package services.forum;
 
 import entities.Post;
+import entities.PostReaction;
+import entities.ReactionType;
 import utils.MyConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.EnumMap;
 
 public class PostService implements ForumInterface<Post> {
     Connection con;
@@ -17,8 +19,52 @@ public class PostService implements ForumInterface<Post> {
     // Simulated in-memory list for pending pin requests: requesterUserId -> postId
     private static final Map<Integer, Integer> pendingPinRequests = new HashMap<>();
 
+    private final ReactionDAO reactionDAO = new ReactionDAO();
+
     public PostService() {
         con = MyConnection.getInstance().getConnection();
+    }
+
+    // -----------------------------------------------------------------------
+    // Reaction System
+    // -----------------------------------------------------------------------
+
+    /**
+     * Toggle / switch reaction for a user on a post.
+     * <ul>
+     *   <li>No existing reaction  → INSERT new reaction</li>
+     *   <li>Same type clicked     → DELETE (toggle off)</li>
+     *   <li>Different type        → UPDATE existing row</li>
+     * </ul>
+     *
+     * @return the active ReactionType after the operation, or {@code null} if removed.
+     */
+    public ReactionType handleReaction(int userId, int postId, ReactionType chosen) throws SQLException {
+        PostReaction existing = reactionDAO.findByUserAndPost(userId, postId);
+        if (existing == null) {
+            // No reaction yet — insert
+            reactionDAO.addReaction(userId, postId, chosen);
+            return chosen;
+        } else if (existing.getType() == chosen) {
+            // Same emoji clicked again — remove (toggle off)
+            reactionDAO.removeReaction(userId, postId);
+            return null;
+        } else {
+            // Different emoji — update
+            reactionDAO.updateReaction(userId, postId, chosen);
+            return chosen;
+        }
+    }
+
+    /** Returns the current reaction for this user+post, or null if none. */
+    public ReactionType getUserReaction(int userId, int postId) throws SQLException {
+        PostReaction r = reactionDAO.findByUserAndPost(userId, postId);
+        return (r != null) ? r.getType() : null;
+    }
+
+    /** Returns a map of reaction type → count for the given post. */
+    public Map<ReactionType, Integer> getReactionCounts(int postId) throws SQLException {
+        return reactionDAO.getReactionCounts(postId);
     }
 
     public void checkUserCanPin(int userId) throws Exception {
