@@ -18,13 +18,19 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.util.Duration;
 import services.forum.CommentService;
 import services.forum.PostService;
@@ -44,8 +50,7 @@ import java.util.stream.Collectors;
 
 public class DisplayPostController {
 
-    private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML
     private VBox postsContainer;
@@ -56,21 +61,26 @@ public class DisplayPostController {
     @FXML
     private TextField searchField;
 
-    @FXML private Label lblUsername;
-    @FXML private Label lblUserRole;
+    @FXML
+    private Label lblUsername;
+    @FXML
+    private Label lblUserRole;
 
     private final PostService postService = new PostService();
     private final CommentService commentService = new CommentService();
     private final UserService userService = new UserService();
-    
+
     private List<Post> allPosts = new ArrayList<>();
 
     private boolean isAdminMode = false;
     private boolean initialized = false;
 
-    /** Tracks the current user's active reaction per post (postId → ReactionType or null). */
+    /**
+     * Tracks the current user's active reaction per post (postId → ReactionType or
+     * null).
+     */
     private final Map<Integer, ReactionType> userReactions = new HashMap<>();
-    
+
     public void setAdminMode(boolean isAdminMode) {
         // The session now strictly controls admin mode
         // this.isAdminMode = isAdminMode;
@@ -85,16 +95,16 @@ public class DisplayPostController {
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         initialized = true;
         loadPosts();
-        
+
         // Populate User Profile
         entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
         if (user != null && lblUsername != null) {
             String displayName = user.getUsername() != null ? user.getUsername() : "User";
             lblUsername.setText(displayName);
-            
+
             String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
             lblUserRole.setText(role);
-            
+
             // Special styling for ADMIN
             if ("ADMIN".equals(role)) {
                 lblUserRole.setStyle("-fx-background-color: #434a75;");
@@ -133,7 +143,7 @@ public class DisplayPostController {
 
     private void renderPosts(List<Post> postsToDisplay) {
         postsContainer.getChildren().clear();
-        
+
         List<Post> sortedPosts = postsToDisplay.stream()
                 .sorted((p1, p2) -> {
                     if (p1.isPinned() != p2.isPinned()) {
@@ -150,7 +160,7 @@ public class DisplayPostController {
             emptyState.setAlignment(javafx.geometry.Pos.CENTER);
             emptyState.setPadding(new Insets(100, 0, 100, 0));
             emptyState.getStyleClass().add("card");
-            
+
             StackPane iconCircle = new StackPane();
             iconCircle.setPrefSize(60, 60);
             iconCircle.setMaxSize(60, 60);
@@ -158,13 +168,13 @@ public class DisplayPostController {
             Label icon = new Label("🔍");
             icon.setStyle("-fx-font-size: 24px;");
             iconCircle.getChildren().add(icon);
-            
+
             Label mainMsg = new Label("Nothing here yet");
             mainMsg.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;");
-            
+
             Label subMsg = new Label("Start the discussion and be the first to post!");
             subMsg.setStyle("-fx-font-size: 14px; -fx-text-fill: #718096;");
-            
+
             emptyState.getChildren().addAll(iconCircle, mainMsg, subMsg);
             postsContainer.getChildren().add(emptyState);
             return;
@@ -187,7 +197,7 @@ public class DisplayPostController {
         String username = (author != null) ? author.getUsername() : "Unknown";
         HBox authorRow = new HBox(12);
         authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        
+
         StackPane avatar = buildAvatar(author);
         Label usernameLabel = new Label(username);
         usernameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;");
@@ -195,15 +205,29 @@ public class DisplayPostController {
 
         if (post.isPinned()) {
             Label pinnedBadge = new Label("📌 PINNED");
-            pinnedBadge.setStyle("-fx-font-size: 11px; -fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+            pinnedBadge.setStyle(
+                    "-fx-font-size: 11px; -fx-text-fill: #ce2d7c; -fx-font-weight: bold; -fx-padding: 0 0 0 8;");
             authorRow.getChildren().add(pinnedBadge);
         }
+
+        // --- Spacer to push AI Actions to the right ---
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        authorRow.getChildren().add(spacer);
+
+        // --- AI Actions (Moved to Right) ---
+        HBox aiTopBox = new HBox(8);
+        aiTopBox.setAlignment(Pos.CENTER_RIGHT);
+        aiTopBox.getChildren().addAll(
+                createAIAction("💡 Explain", "explain", post),
+                createAIAction("🔍 Solution", "solution", post));
+        authorRow.getChildren().add(aiTopBox);
 
         // --- Title & Content ---
         VBox body = new VBox(8);
         Label titleLabel = new Label(safeText(post.getTitle()));
         titleLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3748;");
-        
+
         Label contentLabel = new Label(safeText(post.getContent()));
         contentLabel.setWrapText(true);
         contentLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #718096; -fx-line-spacing: 4;");
@@ -225,10 +249,9 @@ public class DisplayPostController {
         actionsRow.setPadding(new Insets(10, 0, 0, 0));
 
         actionsRow.getChildren().addAll(
-            createReactionBar(post),
-            createCommentAction(post),
-            createReadAction(post)
-        );
+                createReactionBar(post),
+                createCommentAction(post),
+                createReadAction(post));
 
         entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
         int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
@@ -303,27 +326,32 @@ public class DisplayPostController {
 
         // Click to Like/Unlike directly
         triggerBtn.setOnMouseClicked(ev -> {
-            if (currentUserId < 1) return;
+            if (currentUserId < 1)
+                return;
             try {
                 // If already reacted, clicking the main button toggles it off.
                 // If not reacted, clicking the main button defaults to LIKE.
                 ReactionType current = userReactions.get(postId);
                 ReactionType typeToApply = (current != null) ? current : ReactionType.LIKE;
-                
+
                 ReactionType result = postService.handleReaction(currentUserId, postId, typeToApply);
                 userReactions.put(postId, result);
-                
+
                 triggerBtn.setText(buildMainLabel(result));
                 triggerBtn.setStyle(buildMainBtnStyle(result));
                 refreshCountSummary(countSummary, postId);
 
                 // Bounce animation
                 ScaleTransition up = new ScaleTransition(Duration.millis(100), triggerBtn);
-                up.setToX(1.2); up.setToY(1.2);
+                up.setToX(1.2);
+                up.setToY(1.2);
                 ScaleTransition down = new ScaleTransition(Duration.millis(100), triggerBtn);
-                down.setToX(1.0); down.setToY(1.0);
+                down.setToX(1.0);
+                down.setToY(1.0);
                 new SequentialTransition(up, down).play();
-            } catch (SQLException ex) { ex.printStackTrace(); }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         });
 
         HBox triggerRow = new HBox(8, triggerBtn, countSummary);
@@ -333,47 +361,56 @@ public class DisplayPostController {
         HBox emojiPill = new HBox(8);
         emojiPill.setAlignment(Pos.CENTER);
         emojiPill.setStyle(
-            "-fx-background-color: white; " +
-            "-fx-background-radius: 30; " +
-            "-fx-padding: 8 16 8 16; " +
-            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 5);"
-        );
+                "-fx-background-color: white; " +
+                        "-fx-background-radius: 30; " +
+                        "-fx-padding: 8 16 8 16; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 5);");
 
         for (ReactionType rt : ReactionType.values()) {
             Label emoji = new Label(rt.getEmoji());
             emoji.setCursor(javafx.scene.Cursor.HAND);
             emoji.setFont(javafx.scene.text.Font.font(26));
-            // Force native color emoji rendering by specifying emoji fonts and NOT overriding text-fill
+            // Force native color emoji rendering by specifying emoji fonts and NOT
+            // overriding text-fill
             emoji.setStyle("-fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji';");
-            
+
             // Hover animation
             emoji.setOnMouseEntered(ev -> {
                 ScaleTransition s = new ScaleTransition(Duration.millis(150), emoji);
-                s.setToX(1.4); s.setToY(1.4); s.play();
+                s.setToX(1.4);
+                s.setToY(1.4);
+                s.play();
             });
             emoji.setOnMouseExited(ev -> {
                 ScaleTransition s = new ScaleTransition(Duration.millis(150), emoji);
-                s.setToX(1.0); s.setToY(1.0); s.play();
+                s.setToX(1.0);
+                s.setToY(1.0);
+                s.play();
             });
 
             // Click handling
             emoji.setOnMouseClicked(ev -> {
-                if (currentUserId < 1) return;
+                if (currentUserId < 1)
+                    return;
                 try {
                     ReactionType result = postService.handleReaction(currentUserId, postId, rt);
                     userReactions.put(postId, result);
-                    
+
                     triggerBtn.setText(buildMainLabel(result));
                     triggerBtn.setStyle(buildMainBtnStyle(result));
                     refreshCountSummary(countSummary, postId);
 
                     // Bounce trigger btn
                     ScaleTransition up = new ScaleTransition(Duration.millis(100), triggerBtn);
-                    up.setToX(1.2); up.setToY(1.2);
+                    up.setToX(1.2);
+                    up.setToY(1.2);
                     ScaleTransition down = new ScaleTransition(Duration.millis(100), triggerBtn);
-                    down.setToX(1.0); down.setToY(1.0);
+                    down.setToX(1.0);
+                    down.setToY(1.0);
                     new SequentialTransition(up, down).play();
-                } catch (SQLException ex) { ex.printStackTrace(); }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             });
 
             emojiPill.getChildren().add(emoji);
@@ -393,9 +430,11 @@ public class DisplayPostController {
                     emojiPill.setTranslateY(10);
                     // Sped up from 200ms to 100ms for a snappier feel
                     FadeTransition ft = new FadeTransition(Duration.millis(100), emojiPill);
-                    ft.setToValue(1); ft.play();
+                    ft.setToValue(1);
+                    ft.play();
                     TranslateTransition tt = new TranslateTransition(Duration.millis(100), emojiPill);
-                    tt.setToY(0); tt.play();
+                    tt.setToY(0);
+                    tt.play();
                 }
             }
         });
@@ -403,7 +442,10 @@ public class DisplayPostController {
         triggerBtn.setOnMouseExited(ev -> {
             new Thread(() -> {
                 // Reduced delay from 250ms to 100ms
-                try { Thread.sleep(100); } catch (Exception ignored) {}
+                try {
+                    Thread.sleep(100);
+                } catch (Exception ignored) {
+                }
                 javafx.application.Platform.runLater(() -> {
                     if (!emojiPill.isHover()) {
                         FadeTransition ft = new FadeTransition(Duration.millis(100), emojiPill);
@@ -428,7 +470,8 @@ public class DisplayPostController {
     // ---- Helpers ----
 
     private String buildMainLabel(ReactionType rt) {
-        if (rt == null) return "👍 Like";
+        if (rt == null)
+            return "👍 Like";
         return rt.getEmoji() + " " + capitalize(rt.name());
     }
 
@@ -442,12 +485,16 @@ public class DisplayPostController {
 
     private String getEmojiColor(ReactionType rt) {
         switch (rt) {
-            case LIKE: return "#1877f2"; // Blue
-            case LOVE: return "#f33e58"; // Red
-            case HAHA: 
-            case WOW: 
-            case SAD: return "#f7b125"; // Yellow
-            default: return "#64748b";
+            case LIKE:
+                return "#1877f2"; // Blue
+            case LOVE:
+                return "#f33e58"; // Red
+            case HAHA:
+            case WOW:
+            case SAD:
+                return "#f7b125"; // Yellow
+            default:
+                return "#64748b";
         }
     }
 
@@ -466,13 +513,17 @@ public class DisplayPostController {
     }
 
     private String capitalize(String s) {
-        if (s == null || s.isEmpty()) return s;
+        if (s == null || s.isEmpty())
+            return s;
         return s.charAt(0) + s.substring(1).toLowerCase();
     }
 
     private HBox createCommentAction(Post post) {
         int count = 0;
-        try { count = commentService.getCommentCountByPost(post.getId()); } catch (SQLException e) {}
+        try {
+            count = commentService.getCommentCountByPost(post.getId());
+        } catch (SQLException e) {
+        }
         HBox box = createSimpleAction("💬", count + " Comments");
         box.setOnMouseClicked(e -> openComments(new ActionEvent(box, null), post));
         box.setStyle("-fx-cursor: hand;");
@@ -504,6 +555,188 @@ public class DisplayPostController {
         }).start();
     }
 
+    private HBox createAIAction(String label, String actionType, Post post) {
+        HBox box = createSimpleAction(label, "");
+        box.setStyle("-fx-cursor: hand; -fx-background-color: #f8fafc; -fx-padding: 4 8; -fx-background-radius: 8;");
+        box.setOnMouseEntered(e -> box.setStyle(
+                "-fx-cursor: hand; -fx-background-color: #f1f5f9; -fx-padding: 4 8; -fx-background-radius: 8;"));
+        box.setOnMouseExited(e -> box.setStyle(
+                "-fx-cursor: hand; -fx-background-color: #f8fafc; -fx-padding: 4 8; -fx-background-radius: 8;"));
+
+        box.setOnMouseClicked(e -> runAIAction(post, actionType, label));
+        return box;
+    }
+
+    private void runAIAction(Post post, String actionType, String label) {
+        // Show loading indicator
+        statusLabel.setText("AI is thinking... 🧠");
+
+        new Thread(() -> {
+            String response = utils.OpenRouterService.getAIResponse(post.getContent(), actionType);
+            javafx.application.Platform.runLater(() -> {
+                statusLabel.setText("AI finished processing.");
+                showAIDialog(label, response, post);
+            });
+        }).start();
+    }
+
+    private void showAIDialog(String title, String content, Post post) {
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+
+        VBox mainRoot = new VBox();
+        mainRoot.setStyle(
+                "-fx-background-color: white; " +
+                "-fx-background-radius: 20; " +
+                "-fx-border-color: #e2e8f0; " +
+                "-fx-border-width: 1; " +
+                "-fx-border-radius: 20; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 50, 0, 0, 15);"); // Strong Black Shadow
+        mainRoot.setMaxWidth(450);
+        mainRoot.setPrefWidth(450);
+        mainRoot.setAlignment(Pos.TOP_CENTER);
+
+        // --- Top Bar (Platform Pink) ---
+        HBox topBar = new HBox();
+        topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.setPadding(new Insets(10, 15, 10, 15));
+        topBar.setStyle("-fx-background-color: #ce2d7c; -fx-background-radius: 20 20 0 0;");
+
+        Label forumLabel = new Label("FORUM AI");
+        forumLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        Region spacerHeader = new Region();
+        HBox.setHgrow(spacerHeader, Priority.ALWAYS);
+
+        Label xClose = new Label("✕");
+        xClose.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;");
+        xClose.setOnMouseClicked(e -> stage.close());
+
+        topBar.getChildren().addAll(forumLabel, spacerHeader, xClose);
+
+        // --- Content Area ---
+        VBox contentArea = new VBox(15);
+        contentArea.setPadding(new Insets(20));
+        contentArea.setAlignment(Pos.TOP_LEFT);
+
+        // Title Row
+        HBox titleRow = new HBox(10);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
+        Label iconLabel = new Label(title.contains("Solution") ? "🔍" : "💡");
+        iconLabel.setStyle("-fx-font-size: 18px;");
+        Label mainTitle = new Label(title.toUpperCase());
+        mainTitle.setStyle(
+                "-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #1a202c; -fx-font-family: 'Segoe UI';");
+        titleRow.getChildren().addAll(iconLabel, mainTitle);
+
+        javafx.scene.control.Separator sep1 = new javafx.scene.control.Separator();
+        sep1.setStyle("-fx-background-color: #edf2f7; -fx-opacity: 0.5;");
+
+        // --- AI Text Container with ScrollPane ---
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefHeight(200); // Fixed height
+        scrollPane.setMaxHeight(200);
+        scrollPane.setStyle(
+                "-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;");
+
+        VBox textContainer = new VBox();
+        textContainer.setPadding(new Insets(15));
+        textContainer.setStyle(
+                "-fx-background-color: #f8fafc; -fx-background-radius: 15; -fx-border-color: #f1f5f9; -fx-border-radius: 15;");
+
+        Label textDisplay = new Label(content);
+        textDisplay.setWrapText(true);
+        textDisplay.setStyle(
+                "-fx-font-size: 13px; -fx-text-fill: #475569; -fx-line-spacing: 2; -fx-font-family: 'Segoe UI';");
+        textDisplay.setMaxWidth(380);
+        textContainer.getChildren().add(textDisplay);
+
+        scrollPane.setContent(textContainer);
+
+        javafx.scene.control.Separator sep2 = new javafx.scene.control.Separator();
+        sep2.setStyle("-fx-background-color: #edf2f7; -fx-opacity: 0.5;");
+
+        // Footer Button (Aligned Right)
+        HBox footer = new HBox(15);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+
+        Button postBtn = createForumStyleButton("Post as Comment", "#ce2d7c", true);
+        postBtn.setOnAction(e -> {
+            postAIComment(post, content);
+            stage.close();
+        });
+
+        if (title.contains("Solution")) {
+            footer.getChildren().add(postBtn);
+        } else {
+            Button okBtn = createForumStyleButton("Close", "#64748b", false);
+            okBtn.setOnAction(e -> stage.close());
+            footer.getChildren().add(okBtn);
+        }
+
+        contentArea.getChildren().addAll(titleRow, sep1, scrollPane, sep2, footer);
+        mainRoot.getChildren().addAll(topBar, contentArea);
+
+        Scene scene = new Scene(mainRoot);
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        stage.setScene(scene);
+        stage.sizeToScene();
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    private Button createForumStyleButton(String text, String color, boolean filled) {
+        Button btn = new Button(text);
+        String baseStyle = "-fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 10 25; -fx-font-size: 13px; -fx-cursor: hand; ";
+        if (filled) {
+            btn.setStyle(baseStyle + "-fx-background-color: " + color + "; -fx-text-fill: white;");
+        } else {
+            btn.setStyle(baseStyle
+                    + "-fx-background-color: white; -fx-text-fill: #4a5568; -fx-border-color: #e2e8f0; -fx-border-radius: 25; -fx-border-width: 1;");
+        }
+
+        btn.setOnMouseEntered(e -> {
+            if (!filled)
+                btn.setStyle(btn.getStyle().replace("#white", "#f8fafc"));
+            btn.setOpacity(0.8);
+        });
+        btn.setOnMouseExited(e -> {
+            btn.setOpacity(1.0);
+        });
+
+        return btn;
+    }
+
+    private void postAIComment(Post post, String aiContent) {
+        try {
+            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                showAlert(Alert.AlertType.WARNING, "Not Logged In", "You must be logged in to post comments.");
+                return;
+            }
+
+            entities.Comment aiComment = new entities.Comment();
+            aiComment.setBody("🤖 AI Generated Solution:\n\n" + aiContent);
+            aiComment.setPostId(post.getId());
+            aiComment.setUserId(currentUser.getId());
+            aiComment.setStatus("ACCEPTED");
+            aiComment.setLikes(0);
+            aiComment.setProfane(false);
+            aiComment.setProfaneWords(0);
+            aiComment.setGrammarErrors(0);
+
+            commentService.ajouter(aiComment);
+
+            statusLabel.setText("AI solution posted as comment!");
+            loadPosts(); // Refresh UI to update comment count
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Could not save AI comment.");
+        }
+    }
+
     private HBox createPinAction(Post post) {
         HBox box = createSimpleAction("📌 Pin", "");
         box.setOnMouseClicked(e -> togglePin(post));
@@ -515,11 +748,11 @@ public class DisplayPostController {
         try {
             int userId = utils.SessionManager.getInstance().getCurrentUser().getId();
             String alertMessage = postService.handleTogglePin(post, isAdminMode, userId);
-            
+
             if (alertMessage != null) {
                 showAlert(Alert.AlertType.INFORMATION, "Pin Action", alertMessage);
             }
-            
+
             loadPosts(); // Refresh list to show pinned at top
         } catch (Exception e) {
             showAlert(Alert.AlertType.WARNING, "Pin Denied", e.getMessage());
@@ -535,15 +768,18 @@ public class DisplayPostController {
                 imageView.setFitWidth(500);
                 imageView.setPreserveRatio(true);
                 javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
-                clip.setArcWidth(20); clip.setArcHeight(20);
+                clip.setArcWidth(20);
+                clip.setArcHeight(20);
                 clip.widthProperty().bind(imageView.fitWidthProperty());
                 image.progressProperty().addListener((obs, old, val) -> {
-                    if (val.doubleValue() == 1.0) clip.setHeight(imageView.getBoundsInLocal().getHeight());
+                    if (val.doubleValue() == 1.0)
+                        clip.setHeight(imageView.getBoundsInLocal().getHeight());
                 });
                 imageView.setClip(clip);
                 return imageView;
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         return null;
     }
 
@@ -552,8 +788,8 @@ public class DisplayPostController {
         String imageUrl = (user != null) ? user.getImage() : null;
 
         StackPane circle = new StackPane();
-        circle.setPrefSize(35, 35); 
-        circle.setMinSize(35, 35); 
+        circle.setPrefSize(35, 35);
+        circle.setMinSize(35, 35);
         circle.setMaxSize(35, 35);
         circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
 
@@ -576,11 +812,11 @@ public class DisplayPostController {
                     imageView.setFitWidth(35);
                     imageView.setFitHeight(35);
                     imageView.setPreserveRatio(true);
-                    
+
                     // Clip to circle
                     javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(17.5, 17.5, 17.5);
                     imageView.setClip(clip);
-                    
+
                     circle.getChildren().add(imageView);
                     return circle;
                 }
@@ -594,16 +830,20 @@ public class DisplayPostController {
         Label initLabel = new Label(String.valueOf(initial));
         initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
         circle.getChildren().add(initLabel);
-        
+
         return circle;
     }
 
     private void openPdf(String pdfName) {
         try {
             File file = new File("src/main/resources/uploads/pdfs/" + pdfName);
-            if (file.exists()) Desktop.getDesktop().open(file);
-            else showAlert(Alert.AlertType.WARNING, "Not Found", "PDF not found.");
-        } catch (IOException e) { showAlert(Alert.AlertType.ERROR, "Error", "Could not open PDF."); }
+            if (file.exists())
+                Desktop.getDesktop().open(file);
+            else
+                showAlert(Alert.AlertType.WARNING, "Not Found", "PDF not found.");
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open PDF.");
+        }
     }
 
     private Button createActionButton(String text, String textColor, String backgroundColor) {
@@ -616,10 +856,12 @@ public class DisplayPostController {
 
     private StackPane findContentArea(Node source) {
         StackPane area = (StackPane) source.getScene().lookup("#contentArea");
-        if (area != null) return area;
+        if (area != null)
+            return area;
         Node parent = source.getParent();
         while (parent != null) {
-            if (parent instanceof StackPane && "contentArea".equals(parent.getId())) return (StackPane) parent;
+            if (parent instanceof StackPane && "contentArea".equals(parent.getId()))
+                return (StackPane) parent;
             parent = parent.getParent();
         }
         return null;
@@ -631,10 +873,15 @@ public class DisplayPostController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/addPost.fxml"));
             Parent root = loader.load();
             AddPostController controller = loader.getController();
-            if (controller != null) controller.setAdminMode(this.isAdminMode);
+            if (controller != null)
+                controller.setAdminMode(this.isAdminMode);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (Exception e) { e.printStackTrace(); showAlert(Alert.AlertType.ERROR, "Error", "Could not load Add Post."); }
+            if (contentArea != null)
+                contentArea.getChildren().setAll(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load Add Post.");
+        }
     }
 
     private void openEdit(ActionEvent event, Post post) {
@@ -645,8 +892,11 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (IOException e) { e.printStackTrace(); }
+            if (contentArea != null)
+                contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void openComments(ActionEvent event, Post post) {
@@ -657,23 +907,39 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (IOException e) { e.printStackTrace(); }
-    }
-
-    private void deletePost(int id) {
-        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Are you sure?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
-            try { postService.supprimer(id); loadPosts(); } 
-            catch (SQLException e) { showAlert(Alert.AlertType.ERROR, "Error", "Could not delete."); }
+            if (contentArea != null)
+                contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private String formatDate(LocalDateTime date) { return (date == null) ? "-" : date.format(DISPLAY_DATE_FORMAT); }
-    private String safeText(String value) { return (value == null || value.isBlank()) ? "-" : value; }
+    private void deletePost(int id) {
+        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Are you sure?",
+                gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+            try {
+                postService.supprimer(id);
+                loadPosts();
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Could not delete.");
+            }
+        }
+    }
+
+    private String formatDate(LocalDateTime date) {
+        return (date == null) ? "-" : date.format(DISPLAY_DATE_FORMAT);
+    }
+
+    private String safeText(String value) {
+        return (value == null || value.isBlank()) ? "-" : value;
+    }
+
     private void showAlert(Alert.AlertType type, String title, String content) {
-        gui.util.AlertHelper.AlertType ct = (type == Alert.AlertType.ERROR) ? gui.util.AlertHelper.AlertType.ERROR : gui.util.AlertHelper.AlertType.INFORMATION;
+        gui.util.AlertHelper.AlertType ct = (type == Alert.AlertType.ERROR) ? gui.util.AlertHelper.AlertType.ERROR
+                : gui.util.AlertHelper.AlertType.INFORMATION;
         gui.util.AlertHelper.showCustomAlert(title, content, ct);
     }
+
     @FXML
     public void onOpenProfile(javafx.scene.input.MouseEvent event) {
         try {
@@ -682,8 +948,13 @@ public class DisplayPostController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Profile.fxml"));
                 area.getChildren().setAll((Node) loader.load());
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    @FXML public void logout(ActionEvent event) { gui.SessionHelper.logout(event); }
+    @FXML
+    public void logout(ActionEvent event) {
+        gui.SessionHelper.logout(event);
+    }
 }
