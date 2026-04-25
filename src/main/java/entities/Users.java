@@ -9,6 +9,8 @@ public class Users {
     private String created_at;
     private int id;
     private int points;
+    private boolean isBanned;
+    private String image;
 
     public Users(){}
 
@@ -19,7 +21,6 @@ public class Users {
         this.role = role;
         this.numtel = numtel;
         this.created_at = created_at;
-        this.id = id;
         this.points = points;
     }
     public Users(String username, String email, String password, String role, String numtel, String created_at, int id, int points) {
@@ -95,6 +96,22 @@ public class Users {
 
     public void setPoints(int points) {
         this.points = points;
+    }
+
+    public boolean isBanned() {
+        return isBanned;
+    }
+
+    public void setBanned(boolean banned) {
+        isBanned = banned;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     @Override

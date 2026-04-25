@@ -45,6 +45,7 @@ public class FrontMainController {
     // User Profile in Navbar
     @FXML private Label lblUsername;
     @FXML private Label lblUserRole;
+    @FXML private javafx.scene.image.ImageView imgNavAvatar;
 
     @FXML
     private void initialize() {
@@ -70,6 +71,15 @@ public class FrontMainController {
             // Update badge color based on role
             if ("ADMIN".equals(role)) {
                 lblUserRole.setStyle("-fx-background-color: #434a75;"); // Dark theme for admin
+            }
+
+            // Navbar Avatar
+            if (imgNavAvatar != null) {
+                String avatarUrl = user.getImage();
+                if (avatarUrl == null || avatarUrl.isEmpty()) {
+                    avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + user.getUsername();
+                }
+                imgNavAvatar.setImage(new javafx.scene.image.Image(avatarUrl, true));
             }
 
             boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
