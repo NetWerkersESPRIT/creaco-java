@@ -4,20 +4,20 @@ import services.MissionService;
 import utils.SessionManager;
 import entities.Mission;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.*;
+import javafx.scene.control.*;
+import javafx.geometry.Pos;
+import java.sql.SQLException;
 
 public class MissionController {
-    @FXML private javafx.scene.control.Button btnAdmin;
-    @FXML private TableView<Mission> missionTable;
-    @FXML private TableColumn<Mission, Integer> colId;
-    @FXML private TableColumn<Mission, String> colTitle;
-    @FXML private TableColumn<Mission, String> colState;
-    @FXML private TableColumn<Mission, String> colDate;
-    @FXML private TableColumn<Mission, Void> colActions;
+    @FXML private Button btnAdmin;
+    @FXML private VBox missionsList;
+    @FXML private Label lblNavUsername;
+    @FXML private Label lblNavUserRole;
 
     private final MissionService missionService = new MissionService();
+    private final services.IdeaService ideaService = new services.IdeaService();
 
     @FXML
     public void initialize() {
@@ -28,12 +28,14 @@ public class MissionController {
             btnAdmin.setManaged(isAdmin);
         }
 
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
-        colState.setCellValueFactory(new PropertyValueFactory<>("state"));
-        colDate.setCellValueFactory(new PropertyValueFactory<>("mission_date"));
-        
-        addActionButtons();
+        // Populate Navbar Profile
+        entities.Users current = SessionManager.getInstance().getCurrentUser();
+        if (current != null && lblNavUsername != null) {
+            lblNavUsername.setText(current.getUsername());
+            String role = current.getRole() != null ? current.getRole().replace("ROLE_", "") : "USER";
+            lblNavUserRole.setText(role);
+        }
+
         loadMissions();
     }
 
@@ -43,60 +45,136 @@ public class MissionController {
     @FXML public void goToTasks()   throws Exception { switchScene("/TSK/Tasks.fxml"); }
 
     private void switchScene(String fxml) throws Exception {
-        javafx.stage.Stage stage = (javafx.stage.Stage) missionTable.getScene().getWindow();
-        stage.setScene(new javafx.scene.Scene(javafx.fxml.FXMLLoader.load(getClass().getResource(fxml))));
-    }
+        StackPane contentArea = (StackPane) missionsList.getScene().lookup("#contentArea");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+        javafx.scene.Parent root = loader.load();
+        javafx.scene.Node view = root;
 
-    private void addActionButtons() {
-        colActions.setCellFactory(col -> new javafx.scene.control.TableCell<>() {
-            private final javafx.scene.control.Button btnEdit = new javafx.scene.control.Button("✏");
-            private final javafx.scene.control.Button btnDelete = new javafx.scene.control.Button("🗑");
-            private final javafx.scene.layout.HBox buttons = new javafx.scene.layout.HBox(5, btnEdit, btnDelete);
-            {
-                btnEdit.setOnAction(e -> {
-                    Mission m = getTableView().getItems().get(getIndex());
-                    try {
-                        javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/TSK/EditMission.fxml"));
-                        javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
-                        EditMissionController ctrl = loader.getController();
-                        ctrl.setMission(m);
-                        ((javafx.stage.Stage) getTableView().getScene().getWindow()).setScene(scene);
-                    } catch (Exception ex) { ex.printStackTrace(); }
-                });
-                btnDelete.setOnAction(e -> {
-                    Mission m = getTableView().getItems().get(getIndex());
-                    try {
-                        missionService.supprimer(m.getId());
-                        loadMissions();
-                    } catch (Exception ex) { ex.printStackTrace(); }
-                });
-            }
+        if (root instanceof BorderPane) {
+            view = ((BorderPane) root).getCenter();
+        }
 
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : buttons);
-            }
-        });
+        if (contentArea != null) {
+            contentArea.getChildren().setAll(view);
+        } else {
+            javafx.stage.Stage stage = (javafx.stage.Stage) missionsList.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        }
     }
 
     private void loadMissions() {
         try {
-            missionTable.setItems(javafx.collections.FXCollections.observableArrayList(missionService.afficher()));
-        } catch (java.sql.SQLException e) {
+            missionsList.getChildren().clear();
+            for (Mission m : missionService.afficher()) {
+                missionsList.getChildren().add(buildMissionRow(m));
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    private HBox buildMissionRow(Mission m) {
+        HBox row = new HBox(15);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setStyle("-fx-padding: 15; -fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 10, 0, 0, 2); -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;");
+        
+        // Mission Info
+        VBox missionInfo = new VBox(5);
+        missionInfo.setPrefWidth(300);
+        Label lblTitle = new Label(m.getTitle());
+        lblTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 14px;");
+        
+        entities.Idea associatedIdea = (m.getImplement_idea_id() > 0) ? ideaService.getIdeaById(m.getImplement_idea_id()) : null;
+        String ideaStr = (associatedIdea != null) ? "Idea: " + associatedIdea.getTitle() : "No Idea associated";
+        
+        Label lblId = new Label("#" + m.getId() + " | " + ideaStr);
+        lblId.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        missionInfo.getChildren().addAll(lblTitle, lblId);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        // Status Badge
+        Label lblStatus = new Label(m.getState() != null ? m.getState().toUpperCase() : "OPEN");
+        String statusColor = "#94a3b8"; // Default gray
+        if ("ACTIVE".equalsIgnoreCase(m.getState())) statusColor = "#10b981";
+        else if ("PAUSED".equalsIgnoreCase(m.getState())) statusColor = "#f59e0b";
+        else if ("CLOSED".equalsIgnoreCase(m.getState())) statusColor = "#ef4444";
+        
+        lblStatus.setStyle("-fx-background-color: " + statusColor + "15; -fx-text-fill: " + statusColor + "; -fx-padding: 5 12; -fx-background-radius: 10; -fx-font-weight: bold; -fx-font-size: 10px;");
+        lblStatus.setMinWidth(120);
+        lblStatus.setAlignment(Pos.CENTER);
+
+        // Date
+        Label lblDate = new Label(m.getMission_date() != null ? m.getMission_date() : "N/A");
+        lblDate.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+        lblDate.setMinWidth(150);
+        lblDate.setAlignment(Pos.CENTER);
+
+        // Actions
+        HBox actions = new HBox(10);
+        actions.setPrefWidth(180);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        
+        Button btnEdit = new Button("✎");
+        btnEdit.setStyle("-fx-background-color: #3b82f615; -fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;");
+        btnEdit.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/TSK/EditMission.fxml"));
+                javafx.scene.Node root = loader.load();
+                EditMissionController ctrl = loader.getController();
+                ctrl.setMission(m);
+                
+                StackPane contentArea = (StackPane) missionsList.getScene().lookup("#contentArea");
+                if (contentArea != null) contentArea.getChildren().setAll(root);
+            } catch (Exception ex) { ex.printStackTrace(); }
+        });
+        
+        Button btnDelete = new Button("🗑");
+        btnDelete.setStyle("-fx-background-color: #ef444415; -fx-text-fill: #ef4444; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;");
+        btnDelete.setOnAction(e -> {
+            if (gui.util.AlertHelper.showCustomAlert("Delete Mission?", "Are you sure you want to delete this mission?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+                try {
+                    missionService.supprimer(m.getId());
+                    loadMissions();
+                } catch (Exception ex) { ex.printStackTrace(); }
+            }
+        });
+        
+        actions.getChildren().addAll(btnEdit, btnDelete);
+
+        row.getChildren().addAll(missionInfo, spacer, lblStatus, lblDate, actions);
+
+        row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 15; -fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"));
+        row.setOnMouseExited(e -> row.setStyle("-fx-padding: 15; -fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
+
+        return row;
+    }
+
     @FXML
     public void handleAddMission() throws Exception {
-        javafx.stage.Stage stage = (javafx.stage.Stage) missionTable.getScene().getWindow();
-        stage.setScene(new javafx.scene.Scene(javafx.fxml.FXMLLoader.load(getClass().getResource("/TSK/AddMission.fxml"))));
+        StackPane contentArea = (StackPane) missionsList.getScene().lookup("#contentArea");
+        if (contentArea != null) {
+            contentArea.getChildren().setAll((javafx.scene.Node) FXMLLoader.load(getClass().getResource("/TSK/AddMission.fxml")));
+        } else {
+            javafx.stage.Stage stage = (javafx.stage.Stage) missionsList.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(FXMLLoader.load(getClass().getResource("/TSK/AddMission.fxml"))));
+        }
     }
 
     @FXML
     public void goBack() throws Exception {
-        javafx.stage.Stage stage = (javafx.stage.Stage) missionTable.getScene().getWindow();
-        stage.setScene(new javafx.scene.Scene(javafx.fxml.FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml"))));
+        javafx.stage.Stage stage = (javafx.stage.Stage) missionsList.getScene().getWindow();
+        stage.setScene(new javafx.scene.Scene(FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml"))));
+    }
+
+    @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try { switchScene("/Users/Profile.fxml"); } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
+    public void logout(javafx.event.ActionEvent event) {
+        gui.SessionHelper.logout(event);
     }
 }

@@ -2,6 +2,7 @@ package gui;
 
 import entities.Course;
 import entities.Ressource;
+import entities.Users;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -14,6 +15,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import services.RessourceService;
+import utils.SessionManager;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -28,6 +30,28 @@ public class FrontResourceController {
 
     @FXML private Label courseTitleLabel;
     @FXML private TilePane resourcesContainer;
+
+    // Profile Navbar labels
+    @FXML private Label lblNavUsername;
+    @FXML private Label lblNavUserRole;
+
+    @FXML
+    public void initialize() {
+        // Initialize User Profile in Navbar
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null) {
+            String displayName = user.getUsername() != null ? user.getUsername() : "User";
+            if (lblNavUsername != null) lblNavUsername.setText(displayName);
+            
+            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+            if (lblNavUserRole != null) {
+                lblNavUserRole.setText(role);
+                if ("ADMIN".equals(role)) {
+                    lblNavUserRole.setStyle("-fx-background-color: #434a75;");
+                }
+            }
+        }
+    }
 
     public void setCourse(Course course) {
         this.currentCourse = course;

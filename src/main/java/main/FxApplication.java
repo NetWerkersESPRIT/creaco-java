@@ -19,11 +19,12 @@ public class FxApplication extends Application {
 
         Parent root = fxmlLoader.load();
 
-        Scene scene = new Scene(root, 900, 600);
+        Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("/gui/styles.css").toExternalForm());
 
         stage.setTitle("Creaco JavaFX");
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
     }
 

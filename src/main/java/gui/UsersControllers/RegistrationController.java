@@ -79,7 +79,7 @@ public class RegistrationController {
     @FXML
     public void goBack() throws Exception {
         Stage stage = (Stage) txtUsername.getScene().getWindow();
-        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/Users/SignIn.fxml"))));
+        stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/SignIn.fxml")));
         stage.setTitle("CreaCo - Sign In");
     }
 }
