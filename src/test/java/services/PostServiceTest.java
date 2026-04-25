@@ -2,11 +2,8 @@ package services;
 
 import entities.Post;
 import org.junit.jupiter.api.*;
-import utils.MyConnection;
 import services.forum.PostService;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -16,14 +13,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PostServiceTest {
 
     private static PostService postService;
-    private static Connection connection;
     // Utilisé pour garder l'identifiant du post tout au long du cycle CRUD
     private static int createdPostId = -1;
 
     @BeforeAll
     public static void setUpAll() {
         postService = new PostService();
-        connection = MyConnection.getInstance().getConnection();
     }
 
     @AfterEach

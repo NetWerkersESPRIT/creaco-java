@@ -1,7 +1,6 @@
 package services;
 
 import entities.Users;
-import services.UsersService;
 import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
