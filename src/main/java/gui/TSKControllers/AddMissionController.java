@@ -28,6 +28,7 @@ public class AddMissionController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Create Mission", "Missions / New");
         try {
             if (comboIdea != null) {
                 // Load ideas into the combo box

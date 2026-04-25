@@ -59,6 +59,7 @@ public class UpdatePostController {
 
     @FXML
     private void initialize() {
+        gui.FrontMainController.setNavbarText("Edit Discussion", "Pages / Forum / Edit");
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         Users user = SessionManager.getInstance().getCurrentUser();
         if (user != null) {

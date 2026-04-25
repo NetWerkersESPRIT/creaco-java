@@ -81,6 +81,7 @@ public class DisplayPostController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Forum", "Pages / Forum");
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         initialized = true;
         loadPosts();
@@ -187,7 +188,7 @@ public class DisplayPostController {
         HBox authorRow = new HBox(12);
         authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         
-        StackPane avatar = buildAvatar(username);
+        StackPane avatar = buildAvatar(author);
         Label usernameLabel = new Label(username);
         usernameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;");
         authorRow.getChildren().addAll(avatar, usernameLabel);
@@ -546,13 +547,54 @@ public class DisplayPostController {
         return null;
     }
 
-    private StackPane buildAvatar(String username) {
+    private StackPane buildAvatar(entities.Users user) {
+        String username = (user != null) ? user.getUsername() : "Unknown";
+        String imageUrl = (user != null) ? user.getImage() : null;
+
+        StackPane circle = new StackPane();
+        circle.setPrefSize(35, 35); 
+        circle.setMinSize(35, 35); 
+        circle.setMaxSize(35, 35);
+        circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                Image img;
+                if (imageUrl.startsWith("http")) {
+                    img = new Image(imageUrl, true);
+                } else {
+                    File file = new File("src/main/resources/uploads/images/" + imageUrl);
+                    if (file.exists()) {
+                        img = new Image(file.toURI().toString());
+                    } else {
+                        img = null;
+                    }
+                }
+
+                if (img != null) {
+                    ImageView imageView = new ImageView(img);
+                    imageView.setFitWidth(35);
+                    imageView.setFitHeight(35);
+                    imageView.setPreserveRatio(true);
+                    
+                    // Clip to circle
+                    javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(17.5, 17.5, 17.5);
+                    imageView.setClip(clip);
+                    
+                    circle.getChildren().add(imageView);
+                    return circle;
+                }
+            } catch (Exception e) {
+                // Fallback to initials on error
+            }
+        }
+
+        // Fallback: Initials
         char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
         Label initLabel = new Label(String.valueOf(initial));
         initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
-        StackPane circle = new StackPane(initLabel);
-        circle.setPrefSize(35, 35); circle.setMinSize(35, 35); circle.setMaxSize(35, 35);
-        circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
+        circle.getChildren().add(initLabel);
+        
         return circle;
     }
 

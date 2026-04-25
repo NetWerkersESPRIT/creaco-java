@@ -18,39 +18,6 @@
         <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
     </padding>
     <children>
-        <!-- Header Section -->
-        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="top-nav">
-            <children>
-                <VBox>
-                    <children>
-                        <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Administration" />
-                        <Label styleClass="title-label" text="User Management" />
-                    </children>
-                </VBox>
-                <Region HBox.hgrow="ALWAYS" />
-                
-                <HBox alignment="CENTER" onMouseClicked="#onOpenProfile" spacing="12" style="-fx-background-color: white; -fx-background-radius: 18; -fx-padding: 8 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4); -fx-cursor: hand;">
-                    <children>
-                        <ImageView fx:id="imgNavAvatar" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                            <clip>
-                                <Circle centerX="20" centerY="20" radius="20" />
-                            </clip>
-                        </ImageView>
-                        <VBox alignment="CENTER_RIGHT">
-                            <Label style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 10px; -fx-font-weight: bold;" text="Welcome" />
-                            <Label fx:id="lblNavUsername" style="-fx-text-fill: -fx-text-main; -fx-font-weight: bold; -fx-font-size: 14px;" text="Admin User" />
-                        </VBox>
-                        <Label fx:id="lblNavUserRole" style="-fx-font-size: 9px; -fx-padding: 2 8;" styleClass="badge-pink" text="ADMIN" />
-                    </children>
-                </HBox>
-
-                <Button onAction="#logout" styleClass="btn-logout" text="🏃">
-                    <HBox.margin>
-                        <Insets left="10.0" />
-                    </HBox.margin>
-                </Button>
-            </children>
-        </HBox>
 
         <!-- Stats & Bot Section -->
         <VBox spacing="20.0" VBox.vgrow="ALWAYS">

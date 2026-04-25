@@ -19,33 +19,6 @@
                 <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
             </padding>
             <children>
-                <!-- Navbar -->
-                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
-                    <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Innovation / Ideas" />
-                            <Label styleClass="title-label" text="Ideas Shelf" style="-fx-font-size: 20px;"/>
-                        </VBox>
-                        
-                        <Region HBox.hgrow="ALWAYS" />
-                        
-                        <HBox alignment="CENTER" spacing="12" onMouseClicked="#onOpenProfile" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4); -fx-cursor: hand;">
-                            <children>
-                                <VBox alignment="CENTER_RIGHT">
-                                    <Label text="Welcome" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 10px; -fx-font-weight: bold;" />
-                                    <Label fx:id="lblNavUsername" text="User" style="-fx-text-fill: -fx-text-main; -fx-font-weight: bold; -fx-font-size: 14px;" />
-                                </VBox>
-                                <Label fx:id="lblNavUserRole" text="USER" styleClass="badge-pink" style="-fx-font-size: 9px; -fx-padding: 2 8;"/>
-                            </children>
-                        </HBox>
-
-                        <Button onAction="#logout" styleClass="btn-logout" prefHeight="40" prefWidth="40">
-                            <graphic>
-                                <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
-                            </graphic>
-                        </Button>
-                    </children>
-                </HBox>
 
                 <!-- Ideas Card -->
                 <VBox VBox.vgrow="ALWAYS" styleClass="card" spacing="15">

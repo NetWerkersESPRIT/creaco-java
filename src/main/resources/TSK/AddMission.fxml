@@ -22,38 +22,6 @@
                 <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
             </padding>
             <children>
-                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
-                    <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Missions / New" />
-                            <Label styleClass="title-label" text="Create Mission" />
-                        </VBox>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <HBox alignment="CENTER" spacing="10.0">
-                            <children>
-                                <Button style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 8;">
-                                    <graphic>
-                                        <Label text="🔔" style="-fx-font-size: 16px;" />
-                                    </graphic>
-                                </Button>
-                                <HBox style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15 5 15; -fx-cursor: hand;" alignment="CENTER" spacing="10.0" onMouseClicked="#onOpenProfile">
-                                    <children>
-                                        <VBox alignment="CENTER_RIGHT">
-                                            <Label text="Welcome" style="-fx-font-size: 10px; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" />
-                                            <Label fx:id="lblNavUsername" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="User" />
-                                        </VBox>
-                                        <Label fx:id="lblNavUserRole" text="USER" styleClass="badge-pink" />
-                                    </children>
-                                </HBox>
-                                <Button onAction="#logout" styleClass="btn-logout">
-                                    <graphic>
-                                        <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
-                                    </graphic>
-                                </Button>
-                            </children>
-                        </HBox>
-                    </children>
-                </HBox>
 
                 <VBox maxWidth="650" spacing="30" styleClass="card">
                     <children>

@@ -25,6 +25,7 @@ public class AdminController {
 
     @FXML
     public void initialize() throws Exception {
+        gui.FrontMainController.setNavbarText("User Management", "Pages / Administration");
         loadUsers();
         
         // Populate Navbar Profile

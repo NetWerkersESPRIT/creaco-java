@@ -30,6 +30,7 @@ public class EditProfileController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Edit Profile", "Account / Settings / Edit");
         currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser != null) {
             txtUsername.setText(currentUser.getUsername() != null ? currentUser.getUsername() : "");
@@ -98,6 +99,7 @@ public class EditProfileController {
 
             // Update session with new info
             SessionManager.getInstance().setCurrentUser(currentUser);
+            gui.FrontMainController.refreshNavbar();
 
             showSuccess("✅ Profile updated successfully!");
 

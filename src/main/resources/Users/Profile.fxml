@@ -16,17 +16,6 @@
         <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
     </padding>
     <children>
-        <!-- Header Section -->
-        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="top-nav">
-            <children>
-                <VBox>
-                    <children>
-                        <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Account / Settings" />
-                        <Label styleClass="title-label" text="My Profile" />
-                    </children>
-                </VBox>
-            </children>
-        </HBox>
 
         <!-- Profile Card -->
         <StackPane VBox.vgrow="ALWAYS">

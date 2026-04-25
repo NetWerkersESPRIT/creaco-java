@@ -22,6 +22,7 @@ public class EditUserController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Edit User", "Pages / Administration / Users");
         // Populate Navbar Profile
         entities.Users current = utils.SessionManager.getInstance().getCurrentUser();
         if (current != null && lblNavUsername != null) {

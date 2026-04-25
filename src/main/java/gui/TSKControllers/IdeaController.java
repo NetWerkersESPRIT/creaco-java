@@ -20,6 +20,7 @@ public class IdeaController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Ideas Shelf", "Pages / Innovation / Ideas");
         // Hide Admin button if not admin
         boolean isAdmin = SessionManager.getInstance().isAdmin();
         if (btnAdmin != null) {

@@ -17,6 +17,11 @@ public class AddIdeaController {
     @FXML private Label lblMessage;
 
     private final IdeaService ideaService = new IdeaService();
+    
+    @FXML
+    public void initialize() {
+        gui.FrontMainController.setNavbarText("Share Your Idea", "Innovation / New");
+    }
 
     @FXML public void goToIdea()    throws Exception { switchScene("/TSK/Idea.fxml"); }
     @FXML public void goToMission() throws Exception { switchScene("/TSK/Mission.fxml"); }

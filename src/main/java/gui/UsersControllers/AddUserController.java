@@ -25,6 +25,11 @@ public class AddUserController {
 
     private final UsersService usersService = new UsersService();
 
+    @FXML
+    public void initialize() {
+        gui.FrontMainController.setNavbarText("Add New User", "Pages / Admin / Users");
+    }
+
     private String validate() {
         String username  = txtUsername.getText().trim();
         String email     = txtEmail.getText().trim();

@@ -42,6 +42,7 @@ public class PostModerationController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Post Moderation", "Pages / Forum / Moderation");
         loadPendingPosts();
 
         // Populate User Profile

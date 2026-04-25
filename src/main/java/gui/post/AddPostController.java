@@ -60,6 +60,7 @@ public class AddPostController {
 
     @FXML
     private void initialize() {
+        gui.FrontMainController.setNavbarText("Create New Discussion", "Pages / Forum / Post");
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         Users user = SessionManager.getInstance().getCurrentUser();
         if (user != null) {

@@ -19,6 +19,7 @@ public class ProfileController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("My Profile", "Account / Settings");
         currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser != null) {
             String name = currentUser.getUsername() != null ? currentUser.getUsername() : "Unknown";
