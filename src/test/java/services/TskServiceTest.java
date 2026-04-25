@@ -20,7 +20,7 @@ public class TskServiceTest {
     @Test
     @Order(1)
     void testAjouterTask() throws SQLException {
-        Tasks task = new Tasks("Test Task", "Description of test task", "TODO", 1);
+        Tasks task = new Tasks();
         tskService.ajouter(task);
         List<Tasks> tasksList = tskService.afficher();
         assertFalse(tasksList.isEmpty());

@@ -20,17 +20,6 @@
                 <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
             </padding>
             <children>
-                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
-                    <padding>
-                        <Insets left="20" right="20" top="10" bottom="10"/>
-                    </padding>
-                    <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Innovation / New" />
-                            <Label styleClass="title-label" text="Share Your Idea" />
-                        </VBox>
-                    </children>
-                </HBox>
 
                 <VBox maxWidth="600" spacing="20" styleClass="card">
                     <children>

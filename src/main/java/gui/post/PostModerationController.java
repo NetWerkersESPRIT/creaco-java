@@ -31,6 +31,7 @@ public class PostModerationController {
 
     @FXML private Label lblUsername;
     @FXML private Label lblUserRole;
+    @FXML private Label pinRequestLabel;
 
     private final PostService postService = new PostService();
     private final UserService userService = new UserService();
@@ -41,6 +42,7 @@ public class PostModerationController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Post Moderation", "Pages / Forum / Moderation");
         loadPendingPosts();
 
         // Populate User Profile
@@ -86,8 +88,26 @@ public class PostModerationController {
 
         // Title
         Label titleLabel = new Label(post.getTitle());
-        titleLabel.setPrefWidth(300);
+        titleLabel.setPrefWidth(220);
         titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 15px;");
+
+        HBox titleBox = new HBox(8);
+        titleBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        titleBox.setPrefWidth(300);
+        titleBox.getChildren().add(titleLabel);
+
+        boolean isNew = post.getCreatedAt() != null && post.getCreatedAt().isAfter(java.time.LocalDateTime.now().minusDays(2));
+        if (isNew) {
+            Label newBadge = new Label("✨ NEW");
+            newBadge.setStyle("-fx-background-color: #f43f5e; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 3 6; -fx-background-radius: 10;");
+            titleBox.getChildren().add(newBadge);
+        }
+
+        if (postService.isPinRequested(post.getId())) {
+            Label pinBadge = new Label("📌 PIN REQ");
+            pinBadge.setStyle("-fx-background-color: #ce2d7c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 3 6; -fx-background-radius: 10;");
+            titleBox.getChildren().add(pinBadge);
+        }
 
         // Author
         Users user = userService.getUserById(post.getUserId());
@@ -119,10 +139,15 @@ public class PostModerationController {
         btnContainer.setPrefWidth(150);
         btnContainer.setAlignment(javafx.geometry.Pos.CENTER);
 
-        row.getChildren().addAll(titleLabel, authorLabel, spamLabel, dateLabel, spacer, btnContainer);
+        row.getChildren().addAll(titleBox, authorLabel, spamLabel, dateLabel, spacer, btnContainer);
 
-        row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 20 15; -fx-background-color: #f8fafc; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
-        row.setOnMouseExited(e -> row.setStyle("-fx-padding: 20 15; -fx-background-color: white; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
+        String defaultBg = isNew ? "#fff1f2" : "white";
+        String hoverBg = isNew ? "#ffe4e6" : "#f8fafc";
+        String borderColor = isNew ? "#fecdd3" : "#f1f5f9";
+
+        row.setStyle("-fx-padding: 20 15; -fx-background-color: " + defaultBg + "; -fx-border-color: " + borderColor + "; -fx-border-width: 0 0 1 0;");
+        row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 20 15; -fx-background-color: " + hoverBg + "; -fx-border-color: " + borderColor + "; -fx-border-width: 0 0 1 0;"));
+        row.setOnMouseExited(e -> row.setStyle("-fx-padding: 20 15; -fx-background-color: " + defaultBg + "; -fx-border-color: " + borderColor + "; -fx-border-width: 0 0 1 0;"));
 
         return row;
     }
@@ -140,6 +165,12 @@ public class PostModerationController {
         detailStatusLabel.setText("PENDING");
         detailContentLabel.setText(post.getContent());
 
+        boolean hasPinReq = postService.isPinRequested(post.getId());
+        if (pinRequestLabel != null) {
+            pinRequestLabel.setVisible(hasPinReq);
+            pinRequestLabel.setManaged(hasPinReq);
+        }
+
         listViewContainer.setVisible(false);
         detailViewContainer.setVisible(true);
     }
@@ -155,13 +186,33 @@ public class PostModerationController {
     private void handleApprove() {
         if (selectedPost == null) return;
 
-        if (gui.util.AlertHelper.showCustomAlert("Approve?", "Make this post public?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+        boolean hasPinReq = postService.isPinRequested(selectedPost.getId());
+
+        if (hasPinReq) {
+            boolean confirm = gui.util.AlertHelper.showCustomAlert("Pin Request", "This user requested to pin this post. Do you want to pin it?", gui.util.AlertHelper.AlertType.CONFIRMATION);
             try {
+                if (confirm) {
+                    postService.acceptPinRequest(selectedPost.getId());
+                } else {
+                    postService.rejectPinRequest(selectedPost.getId());
+                }
                 selectedPost.setStatus("ACCEPTED");
                 postService.updatePostStatus(selectedPost);
+                
                 gui.util.AlertHelper.showCustomAlert("Success", "Post approved!", gui.util.AlertHelper.AlertType.INFORMATION);
                 showList();
-            } catch (SQLException e) { e.printStackTrace(); }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            if (gui.util.AlertHelper.showCustomAlert("Approve?", "Make this post public?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+                try {
+                    selectedPost.setStatus("ACCEPTED");
+                    postService.updatePostStatus(selectedPost);
+                    gui.util.AlertHelper.showCustomAlert("Success", "Post approved!", gui.util.AlertHelper.AlertType.INFORMATION);
+                    showList();
+                } catch (SQLException e) { e.printStackTrace(); }
+            }
         }
     }
 

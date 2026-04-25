@@ -24,7 +24,7 @@
             <children>
                 <HBox spacing="15.0" alignment="CENTER_LEFT">
                     <children>
-                        <StackPane style="-fx-background-color: -fx-primary-gradient; -fx-background-radius: 12; -fx-min-width: 45; -fx-max-width: 45; -fx-min-height: 45; -fx-max-height: 45;">
+                        <StackPane fx:id="postAuthorAvatarContainer" style="-fx-background-color: -fx-primary-gradient; -fx-background-radius: 12; -fx-min-width: 45; -fx-max-width: 45; -fx-min-height: 45; -fx-max-height: 45;">
                             <children>
                                 <Label text="“" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold; -fx-padding: 5 0 0 0;" />
                             </children>
@@ -41,10 +41,10 @@
 
                 <HBox alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <Button style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 12px;" text="↪ Share" />
+                        <Button onAction="#onSharePost" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;" text="↪ Share" />
                         <HBox alignment="CENTER" spacing="5.0" style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 20; -fx-padding: 6 15 6 15;">
                             <children>
-                                <Label text="👍 LIKE 0" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" />
+                                <Label fx:id="likesBadge" text="👍 LIKE 0" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" />
                             </children>
                         </HBox>
                         <HBox alignment="CENTER" spacing="5.0" style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 20; -fx-padding: 6 15 6 15;">
@@ -55,10 +55,10 @@
                         <Region HBox.hgrow="ALWAYS" />
                         <HBox spacing="10.0" alignment="CENTER_RIGHT">
                             <children>
-                                <Button style="-fx-background-color: #f8fafc; -fx-background-radius: 50; -fx-min-width: 35; -fx-max-width: 35; -fx-min-height: 35; -fx-max-height: 35;" text="📌" />
-                                <Button style="-fx-background-color: #f8fafc; -fx-background-radius: 50; -fx-min-width: 35; -fx-max-width: 35; -fx-min-height: 35; -fx-max-height: 35;" text="🔒" />
-                                <Button style="-fx-background-color: #f8fafc; -fx-background-radius: 50; -fx-min-width: 35; -fx-max-width: 35; -fx-min-height: 35; -fx-max-height: 35;" text="📝" />
-                                <Button style="-fx-background-color: #f8fafc; -fx-background-radius: 50; -fx-min-width: 35; -fx-max-width: 35; -fx-min-height: 35; -fx-max-height: 35;" text="🗑" />
+                                <Button onAction="#onPinPost" style="-fx-background-color: #f8fafc; -fx-background-radius: 50; -fx-min-width: 35; -fx-max-width: 35; -fx-min-height: 35; -fx-max-height: 35; -fx-cursor: hand;" text="📌" />
+                                <Button onAction="#onLockPost" style="-fx-background-color: #f8fafc; -fx-background-radius: 50; -fx-min-width: 35; -fx-max-width: 35; -fx-min-height: 35; -fx-max-height: 35; -fx-cursor: hand;" text="🔒" />
+                                <Button fx:id="btnEditPost" onAction="#onEditPost" style="-fx-background-color: #f8fafc; -fx-background-radius: 50; -fx-min-width: 35; -fx-max-width: 35; -fx-min-height: 35; -fx-max-height: 35; -fx-cursor: hand;" text="📝" />
+                                <Button fx:id="btnDeletePost" onAction="#onDeletePost" style="-fx-background-color: #f8fafc; -fx-background-radius: 50; -fx-min-width: 35; -fx-max-width: 35; -fx-min-height: 35; -fx-max-height: 35; -fx-cursor: hand;" text="🗑" />
                             </children>
                         </HBox>
                     </children>

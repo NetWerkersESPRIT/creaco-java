@@ -15,11 +15,17 @@ public class AdminController {
     @FXML private VBox usersList;
     @FXML private Label lblNavUsername;
     @FXML private Label lblNavUserRole;
+    @FXML private javafx.scene.image.ImageView imgNavAvatar;
+    @FXML private Label lblGeminiResponse;
+    @FXML private VBox geminiResponseContainer;
+    @FXML private Button btnAskGemini;
+    @FXML private TextField txtGeminiQuery;
 
     private final UsersService usersService = new UsersService();
 
     @FXML
     public void initialize() throws Exception {
+        gui.FrontMainController.setNavbarText("User Management", "Pages / Administration");
         loadUsers();
         
         // Populate Navbar Profile
@@ -30,7 +36,111 @@ public class AdminController {
             String role = current.getRole() != null ? current.getRole().replace("ROLE_", "") : "USER";
             lblNavUserRole.setText(role);
             if ("ADMIN".equals(role)) lblNavUserRole.setStyle("-fx-background-color: #434a75;");
+
+            // Navbar Avatar
+            if (imgNavAvatar != null) {
+                String avatarUrl = current.getImage();
+                if (avatarUrl == null || avatarUrl.isEmpty()) {
+                    avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + current.getUsername();
+                }
+                imgNavAvatar.setImage(new javafx.scene.image.Image(avatarUrl, true));
+            }
         }
+    }
+
+    @FXML
+    private void onAskGemini() {
+        btnAskGemini.setDisable(true);
+        btnAskGemini.setText("🤖 Thinking...");
+        geminiResponseContainer.setVisible(true);
+        geminiResponseContainer.setManaged(true);
+        lblGeminiResponse.setText("Gemini is analyzing your application data...");
+
+        javafx.concurrent.Task<String> task = new javafx.concurrent.Task<>() {
+            @Override
+            protected String call() throws Exception {
+                // Collect statistics
+                int userCount = usersService.afficher().size();
+                int courseCount = new services.CourseService().afficher().size();
+                int postCount = new services.forum.PostService().afficher().size();
+                int commentCount = new services.forum.CommentService().afficher().size();
+                int ideaCount = new services.IdeaService().afficher().size();
+                int missionCount = new services.MissionService().afficher().size();
+
+                String prompt = String.format(
+                    "You are the AI Admin Assistant for the 'CreaCo' application. " +
+                    "Here is the current status of the application:\\n" +
+                    "- Total Users: %d\\n" +
+                    "- Total Courses: %d\\n" +
+                    "- Total Forum Posts: %d\\n" +
+                    "- Total Comments: %d\\n" +
+                    "- Total Innovation Ideas: %d\\n" +
+                    "- Total Missions: %d\\n\\n" +
+                    "Please provide a short, professional summary of the app's health and a small motivational tip for the admin. Use bullet points if needed.",
+                    userCount, courseCount, postCount, commentCount, ideaCount, missionCount
+                );
+
+                return utils.GeminiService.getGeminiResponse(prompt);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            lblGeminiResponse.setText(task.getValue());
+            btnAskGemini.setDisable(false);
+            btnAskGemini.setText("📊 Get Status Report");
+        });
+
+        task.setOnFailed(e -> {
+            lblGeminiResponse.setText("❌ Error: " + task.getException().getMessage());
+            btnAskGemini.setDisable(false);
+            btnAskGemini.setText("📊 Get Status Report");
+        });
+
+        new Thread(task).start();
+    }
+
+    @FXML
+    private void onGeminiDiscuss() {
+        String query = txtGeminiQuery.getText().trim();
+        if (query.isEmpty()) return;
+
+        txtGeminiQuery.setDisable(true);
+        geminiResponseContainer.setVisible(true);
+        geminiResponseContainer.setManaged(true);
+        lblGeminiResponse.setText("Gemini is typing...");
+
+        javafx.concurrent.Task<String> task = new javafx.concurrent.Task<>() {
+            @Override
+            protected String call() throws Exception {
+                // Collect statistics to provide context even for manual questions
+                int userCount = usersService.afficher().size();
+                int courseCount = new services.CourseService().afficher().size();
+                int postCount = new services.forum.PostService().afficher().size();
+                int commentCount = new services.forum.CommentService().afficher().size();
+                int ideaCount = new services.IdeaService().afficher().size();
+                int missionCount = new services.MissionService().afficher().size();
+
+                String context = String.format(
+                    "Context: Application 'CreaCo', Users: %d, Courses: %d, Posts: %d, Ideas: %d.\nQuestion: ",
+                    userCount, courseCount, postCount, ideaCount
+                );
+
+                return utils.GeminiService.getGeminiResponse(context + query);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            lblGeminiResponse.setText(task.getValue());
+            txtGeminiQuery.setDisable(false);
+            txtGeminiQuery.clear();
+        });
+
+        task.setOnFailed(e -> {
+            lblGeminiResponse.setText("❌ Error: " + task.getException().getMessage());
+            txtGeminiQuery.setDisable(false);
+        });
+
+        new Thread(task).start();
     }
 
     private void loadUsers() throws Exception {
@@ -43,20 +153,36 @@ public class AdminController {
     private javafx.scene.layout.HBox buildUserRow(Users u) {
         javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(10);
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        row.setStyle("-fx-padding: 15; -fx-background-color: white; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;");
+        // Use the same padding as the header (10 15 10 15) for perfect alignment
+        row.setStyle("-fx-padding: 10 15 10 15; -fx-background-color: white; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;");
         
-        // User Info (Avatar + Name + Email)
+        // User Info (Avatar + Name + Email) - Width: 300
         javafx.scene.layout.HBox userInfo = new javafx.scene.layout.HBox(15);
         userInfo.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         userInfo.setPrefWidth(300);
         
-        // Avatar Placeholder
         javafx.scene.layout.StackPane avatar = new javafx.scene.layout.StackPane();
         avatar.setPrefSize(40, 40);
         avatar.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 10;");
-        Label avatarLabel = new Label(String.valueOf(u.getUsername().charAt(0)).toUpperCase());
-        avatarLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: -fx-primary-pink;");
-        avatar.getChildren().add(avatarLabel);
+        
+        javafx.scene.image.ImageView avatarView = new javafx.scene.image.ImageView();
+        avatarView.setFitHeight(40);
+        avatarView.setFitWidth(40);
+        avatarView.setPreserveRatio(true);
+        
+        String avatarUrl = u.getImage();
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
+            avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + u.getUsername();
+        }
+        avatarView.setImage(new javafx.scene.image.Image(avatarUrl, true));
+        
+        // Clip to rounded corners
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(40, 40);
+        clip.setArcWidth(10);
+        clip.setArcHeight(10);
+        avatarView.setClip(clip);
+        
+        avatar.getChildren().add(avatarView);
         
         javafx.scene.layout.VBox nameEmail = new javafx.scene.layout.VBox(2);
         Label nameLabel = new Label(u.getUsername());
@@ -66,7 +192,7 @@ public class AdminController {
         nameEmail.getChildren().addAll(nameLabel, emailLabel);
         userInfo.getChildren().addAll(avatar, nameEmail);
         
-        // Role Badge
+        // Role Badge - Width: 180 (Centered)
         javafx.scene.layout.StackPane rolePane = new javafx.scene.layout.StackPane();
         rolePane.setPrefWidth(180);
         String roleText = u.getRole() != null ? u.getRole().replace("ROLE_", "") : "USER";
@@ -74,41 +200,47 @@ public class AdminController {
         roleBadge.setStyle("-fx-background-color: -fx-primary-gradient; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 4 12; -fx-background-radius: 8;");
         rolePane.getChildren().add(roleBadge);
         
-        // Phone
+        // Phone - Width: 180 (Centered)
         Label phoneLabel = new Label(u.getNumtel() != null && !u.getNumtel().isEmpty() ? u.getNumtel() : "N/A");
         phoneLabel.setPrefWidth(180);
         phoneLabel.setAlignment(javafx.geometry.Pos.CENTER);
         phoneLabel.setStyle("-fx-text-fill: #718096; -fx-font-weight: bold;");
         
-        // Actions
+        // Actions - Width: 200 (Matches Header)
         javafx.scene.layout.HBox actions = new javafx.scene.layout.HBox(10);
-        actions.setPrefWidth(220);
-        actions.setMinWidth(220);
-        actions.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        actions.setPrefWidth(200);
+        actions.setAlignment(javafx.geometry.Pos.CENTER);
         
-        Button btnEdit = new Button("✎ EDIT");
-        btnEdit.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 8; -fx-padding: 8 15; -fx-cursor: hand;");
-        btnEdit.setOnAction(e -> {
-            System.out.println("Edit clicked for: " + u.getUsername());
-            handleEdit(u);
-        });
+        Button btnEdit = new Button("✎");
+        btnEdit.setTooltip(new Tooltip("Edit User"));
+        btnEdit.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;");
+        btnEdit.setOnAction(e -> handleEdit(u));
         
-        Button btnDelete = new Button("🗑 DELETE");
-        btnDelete.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 8; -fx-padding: 8 15; -fx-cursor: hand;");
-        btnDelete.setOnAction(e -> {
-            System.out.println("Delete clicked for: " + u.getUsername());
-            handleDelete(u);
-        });
-        
-        actions.getChildren().addAll(btnEdit, btnDelete);
-        
-        javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
-        javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        Button btnBan = new Button(u.isBanned() ? "🔓" : "🚫");
+        btnBan.setTooltip(new Tooltip(u.isBanned() ? "Unban User" : "Ban User"));
+        String banColor = u.isBanned() ? "#10b981" : "#f59e0b";
+        btnBan.setStyle("-fx-background-color: " + banColor + "; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;");
+        btnBan.setOnAction(e -> handleToggleBan(u));
 
-        row.getChildren().addAll(userInfo, rolePane, phoneLabel, spacer, actions);
+        Button btnDelete = new Button("🗑");
+        btnDelete.setTooltip(new Tooltip("Delete User"));
+        btnDelete.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;");
+        btnDelete.setOnAction(e -> handleDelete(u));
         
-        row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 15; -fx-background-color: #f8fafc; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
-        row.setOnMouseExited(e -> row.setStyle("-fx-padding: 15; -fx-background-color: white; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
+        actions.getChildren().addAll(btnEdit, btnBan, btnDelete);
+        
+        // Create spacers to match the header's Region hgrow="ALWAYS"
+        javafx.scene.layout.Region spacer1 = new javafx.scene.layout.Region();
+        javafx.scene.layout.HBox.setHgrow(spacer1, javafx.scene.layout.Priority.ALWAYS);
+        javafx.scene.layout.Region spacer2 = new javafx.scene.layout.Region();
+        javafx.scene.layout.HBox.setHgrow(spacer2, javafx.scene.layout.Priority.ALWAYS);
+        javafx.scene.layout.Region spacer3 = new javafx.scene.layout.Region();
+        javafx.scene.layout.HBox.setHgrow(spacer3, javafx.scene.layout.Priority.ALWAYS);
+
+        row.getChildren().addAll(userInfo, spacer1, rolePane, spacer2, phoneLabel, spacer3, actions);
+        
+        row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 10 15 10 15; -fx-background-color: #f8fafc; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
+        row.setOnMouseExited(e -> row.setStyle("-fx-padding: 10 15 10 15; -fx-background-color: white; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
         
         return row;
     }
@@ -141,6 +273,26 @@ public class AdminController {
         }
     }
 
+
+    private void handleToggleBan(Users u) {
+        boolean newStatus = !u.isBanned();
+        String actionText = newStatus ? "ban" : "unban";
+        
+        if (gui.util.AlertHelper.showCustomAlert(newStatus ? "Ban User?" : "Unban User?", 
+                "Are you sure you want to " + actionText + " " + u.getUsername() + "?", 
+                gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+            try {
+                usersService.modifierBan(u.getId(), newStatus);
+                loadUsers(); // Refresh the list
+                gui.util.AlertHelper.showCustomAlert("Success", "User " + actionText + "ned successfully.", 
+                        gui.util.AlertHelper.AlertType.INFORMATION);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                gui.util.AlertHelper.showCustomAlert("Error", "Could not " + actionText + " user: " + ex.getMessage(), 
+                        gui.util.AlertHelper.AlertType.ERROR);
+            }
+        }
+    }
 
     @FXML
     public void handleAddUser() throws Exception {

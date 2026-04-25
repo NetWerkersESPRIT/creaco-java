@@ -9,17 +9,6 @@
         <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
     </padding>
     <children>
-        <!-- Navbar -->
-        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
-            <children>
-                <VBox>
-                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Admin / Users" />
-                    <Label styleClass="title-label" text="Add New User" style="-fx-font-size: 20px;"/>
-                </VBox>
-                <Region HBox.hgrow="ALWAYS" />
-                <Button onAction="#goBack" text="← Back to List" styleClass="btn-action-light" />
-            </children>
-        </HBox>
 
         <!-- Main Form Container -->
         <StackPane VBox.vgrow="ALWAYS">
@@ -63,7 +52,13 @@
                                 <VBox spacing="8.0">
                                     <children>
                                         <Label text="Password" style="-fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-font-size: 12px;" />
-                                        <PasswordField fx:id="txtPassword" promptText="••••••••" styleClass="search-bar" prefHeight="45" />
+                                        <HBox alignment="CENTER_LEFT" spacing="10">
+                                            <StackPane HBox.hgrow="ALWAYS">
+                                                <PasswordField fx:id="txtPassword" promptText="••••••••" styleClass="search-bar" prefHeight="45" />
+                                                <TextField fx:id="txtPasswordVisible" promptText="••••••••" styleClass="search-bar" prefHeight="45" visible="false" />
+                                            </StackPane>
+                                            <Button fx:id="btnTogglePassword" onAction="#togglePassword" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #718096; -fx-font-size: 18px;" text="👁" />
+                                        </HBox>
                                     </children>
                                 </VBox>
                             </children>

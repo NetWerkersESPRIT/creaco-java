@@ -53,11 +53,14 @@ public class UpdatePostController {
     private boolean isAdminMode = false;
 
     public void setAdminMode(boolean isAdminMode) {
-        this.isAdminMode = isAdminMode;
+        // Admin mode is now session-based
+        // this.isAdminMode = isAdminMode;
     }
 
     @FXML
     private void initialize() {
+        gui.FrontMainController.setNavbarText("Edit Discussion", "Pages / Forum / Edit");
+        this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         Users user = SessionManager.getInstance().getCurrentUser();
         if (user != null) {
             String displayName = user.getUsername() != null ? user.getUsername() : "User";
@@ -95,10 +98,13 @@ public class UpdatePostController {
 
         postToUpdate.setTitle(title);
         postToUpdate.setContent(content);
-        postToUpdate.setPinned(pinToggle.isSelected());
+        boolean requestPin = pinToggle.isSelected();
         
         if (!isAdminMode) {
             postToUpdate.setStatus("PENDING");
+            postToUpdate.setPinned(false);
+        } else {
+            postToUpdate.setPinned(requestPin);
         }
 
         if (imageFile != null) {
@@ -114,9 +120,20 @@ public class UpdatePostController {
         try {
             postService.modifier(postToUpdate.getId(), postToUpdate);
             
+            if (requestPin) {
+                if (isAdminMode) {
+                    postService.acceptPinRequest(postToUpdate.getId());
+                } else {
+                    postService.requestPin(postToUpdate.getUserId(), postToUpdate.getId());
+                }
+            }
+            
             if (!isAdminMode) {
-                showAlert(Alert.AlertType.INFORMATION, "Post Updated", 
-                    "Your changes have been saved. The post will be visible again once an admin approves the edits.");
+                if (requestPin) {
+                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your edits and pin request have been submitted and are awaiting admin approval.");
+                } else {
+                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your edits have been submitted and are awaiting admin approval.");
+                }
             }
             
             goBack(event);

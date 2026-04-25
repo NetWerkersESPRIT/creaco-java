@@ -31,6 +31,7 @@ public class UserService {
                 user.setId(rs.getInt("id"));
                 user.setUsername(rs.getString("username"));
                 user.setEmail(rs.getString("email"));
+                user.setImage(rs.getString("image"));
                 try {
                     // Try to fetch 'role' or 'roles' depending on schema
                     user.setRole(rs.getString("roles"));
