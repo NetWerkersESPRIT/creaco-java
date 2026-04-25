@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
 
@@ -27,13 +28,39 @@
                             <Button mnemonicParsing="false" onAction="#onGoToDashboard" prefWidth="210.0" styleClass="sidebar-item sidebar-item-active">
                                 <graphic>
                                     <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                        <StackPane styleClass="sidebar-icon-box">
-                                            <Label text="🏠" style="-fx-font-size: 16px;" />
+                                        <StackPane styleClass="sidebar-icon-box-active">
+                                            <Label text="🏠" style="-fx-font-size: 16px; -fx-text-fill: white;" />
                                         </StackPane>
                                         <Label text="Dashboard" />
                                     </HBox>
                                 </graphic>
                             </Button>
+                        </VBox>
+
+                        <Label fx:id="lblAdminHeader" styleClass="section-header" text="ADMIN" />
+                        <VBox fx:id="boxAdmin" spacing="10.0">
+                            <children>
+                                <Button mnemonicParsing="false" onAction="#onShowConnectedUsers" prefWidth="210.0" styleClass="sidebar-item">
+                                    <graphic>
+                                        <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                            <StackPane styleClass="sidebar-icon-box">
+                                                <Label text="👤" style="-fx-font-size: 16px;" />
+                                            </StackPane>
+                                            <Label text="Connected Users" />
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                                <Button mnemonicParsing="false" onAction="#onShowPostModeration" prefWidth="210.0" styleClass="sidebar-item">
+                                    <graphic>
+                                        <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                            <StackPane styleClass="sidebar-icon-box">
+                                                <Label text="✓" style="-fx-font-size: 16px;" />
+                                            </StackPane>
+                                            <Label text="Post Moderation" />
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                            </children>
                         </VBox>
 
                         <Label styleClass="section-header" text="WORKFLOW MANAGEMENT" />
@@ -82,7 +109,7 @@
                                     </HBox>
                                 </graphic>
                             </Button>
-                            <Button fx:id="btnForum" mnemonicParsing="false" onAction="#showForum" prefWidth="210.0" styleClass="sidebar-item">
+                            <Button fx:id="btnForum" mnemonicParsing="false" onAction="#onShowForum" prefWidth="210.0" styleClass="sidebar-item">
                                 <graphic>
                                     <HBox spacing="15.0" alignment="CENTER_LEFT">
                                         <StackPane styleClass="sidebar-icon-box">
@@ -114,24 +141,7 @@
                             </Button>
                         </VBox>
 
-                        <Label fx:id="lblAdminHeader" styleClass="section-header" text="ADMINISTRATION" />
-                        <VBox fx:id="boxAdmin" spacing="10.0">
-                            <children>
-                                <Button fx:id="btnAdmin" mnemonicParsing="false" onAction="#onShowAdmin" prefWidth="210.0" styleClass="sidebar-item">
-                                    <graphic>
-                                        <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                            <StackPane styleClass="sidebar-icon-box">
-                                                <Label text="🛠" style="-fx-font-size: 16px;" />
-                                            </StackPane>
-                                            <Label text="Admin Panel" />
-                                        </HBox>
-                                    </graphic>
-                                </Button>
-                            </children>
-                        </VBox>
-
                         <Region VBox.vgrow="ALWAYS" />
-                        <Button onAction="#logout" text="Log Out" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" />
                     </children>
                 </VBox>
             </content>
@@ -147,22 +157,39 @@
                     </padding>
                     <children>
                         <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
-                              style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
+                               style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
                             <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #854d0e; -fx-font-size: 14;" />
                             <Region HBox.hgrow="ALWAYS" />
                             <Button text="Exit Preview" onAction="#exitPreview"
-                                    style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
+                                     style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
                         </HBox>
 
-                        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
+                        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
                             <children>
                                 <VBox>
-                                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Dashboard" />
-                                    <Label fx:id="txtWelcome" styleClass="title-label" text="Explore" />
+                                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Dashboard" />
+                                    <Label fx:id="txtWelcome" styleClass="title-label" text="Explore" style="-fx-font-size: 20px;"/>
                                 </VBox>
+                                
                                 <Region HBox.hgrow="ALWAYS" />
-                                <TextField fx:id="searchField" promptText="Search courses..." styleClass="search-bar" prefWidth="280.0" />
-                                <Button onAction="#onShowProfile" styleClass="btn-logout" style="-fx-background-color: #2d3748;">
+                                
+                                <Button style="-fx-background-color: white; -fx-background-radius: 12; -fx-min-width: 40; -fx-min-height: 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+                                    <graphic>
+                                        <Label text="🔔" style="-fx-font-size: 16px;" />
+                                    </graphic>
+                                </Button>
+
+                                <HBox alignment="CENTER" spacing="12" onMouseClicked="#onOpenProfile" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4); -fx-cursor: hand;">
+                                    <children>
+                                        <VBox alignment="CENTER_RIGHT">
+                                            <Label text="Welcome" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 10px; -fx-font-weight: bold;" />
+                                            <Label fx:id="lblUsername" text="Admin User" style="-fx-text-fill: -fx-text-main; -fx-font-weight: bold; -fx-font-size: 14px;" />
+                                        </VBox>
+                                        <Label fx:id="lblUserRole" text="ADMIN" styleClass="badge-pink" style="-fx-font-size: 9px; -fx-padding: 2 8;"/>
+                                    </children>
+                                </HBox>
+
+                                <Button onAction="#logout" styleClass="btn-logout" prefHeight="40" prefWidth="40">
                                     <graphic>
                                         <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 16px;" />
                                     </graphic>
@@ -170,18 +197,58 @@
                             </children>
                         </HBox>
 
+                        <!-- Dashboard Header Section -->
+                        <GridPane hgap="22.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="72.0" />
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="28.0" />
+                            </columnConstraints>
+                            <children>
+                                <!-- Workshop Discovery Card -->
+                                <VBox styleClass="card" GridPane.columnIndex="0">
+                                    <children>
+                                        <VBox spacing="5.0">
+                                            <Label text="Discover our workshops" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" />
+                                            <Label text="Choose a category to explore available courses and resources." styleClass="subtitle-label" />
+                                        </VBox>
+                                        <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                            <TextField fx:id="searchField" promptText="Rechercher" styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                                            <HBox fx:id="boxAdminActions" spacing="10.0">
+                                                <children>
+                                                    <Button text="Manage Categories" onAction="#onManageCategories" styleClass="btn-primary" prefHeight="45.0" />
+                                                    <Button text="+ Add Course" onAction="#onAddCourse" styleClass="btn-primary" prefHeight="45.0" style="-fx-background-color: #2d3748; -fx-text-fill: white;" />
+                                                </children>
+                                            </HBox>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+
+                                <!-- Mentoring Support Card -->
+                                <VBox styleClass="mentoring-card" spacing="15.0" GridPane.columnIndex="1">
+                                    <children>
+                                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                            <Label text="🤝" style="-fx-font-size: 20px;" />
+                                            <Label text="Mentoring Support" styleClass="mentoring-title" />
+                                        </HBox>
+                                        <Label text="You have pending questions from creators." wrapText="true" styleClass="mentoring-subtitle" />
+                                        <Button text="View Questions" onAction="#onViewQuestions" prefWidth="Infinity" styleClass="btn-mentoring" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </GridPane>
+
                         <ScrollPane fitToWidth="true"
                                     hbarPolicy="NEVER"
                                     style="-fx-background: transparent; -fx-background-color: transparent;"
                                     VBox.vgrow="ALWAYS">
                             <content>
-                                <TilePane fx:id="coursesContainer"
-                                          hgap="20"
-                                          vgap="20"
-                                          prefTileWidth="340"
-                                          alignment="TOP_CENTER"
-                                          style="-fx-padding: 10;">
-                                </TilePane>
+                                <FlowPane fx:id="coursesContainer"
+                                          hgap="24.0"
+                                          vgap="24.0"
+                                          prefWrapLength="1000"
+                                          alignment="TOP_LEFT"
+                                          style="-fx-padding: 10 5;">
+                                </FlowPane>
                             </content>
                         </ScrollPane>
                     </children>

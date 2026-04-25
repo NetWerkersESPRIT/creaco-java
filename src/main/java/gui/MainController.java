@@ -10,14 +10,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import services.CourseService;
+import gui.post.DisplayPostController;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -63,37 +59,27 @@ public class MainController {
 
     @FXML
     private void onShowUsers() {
-        System.out.println("Users management - Coming soon");
-        // Add logic to load users view if available
+        loadSubView("/Users/Admin.fxml", "Connected Users");
     }
 
     @FXML
     private void onShowModeration() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/postModeration.fxml"));
-            Parent root = loader.load();
-            contentArea.getChildren().setAll(root);
-            if (pageTitleLabel != null) {
-                pageTitleLabel.setText("Post Moderation");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        loadSubView("/post/postModeration.fxml", "Post Moderation");
     }
 
     @FXML
     private void onShowIdeas() {
-        System.out.println("Ideas section - Coming soon");
+        loadSubView("/TSK/Idea.fxml", "Ideas");
     }
 
     @FXML
     private void onShowMissions() {
-        System.out.println("Missions section - Coming soon");
+        loadSubView("/TSK/Mission.fxml", "Missions");
     }
 
     @FXML
     private void onShowTasks() {
-        System.out.println("Tasks section - Coming soon");
+        loadSubView("/TSK/Tasks.fxml", "Tasks");
     }
 
     @FXML
@@ -102,36 +88,53 @@ public class MainController {
     }
 
     @FXML
-    private void showForum() {
+    public void onShowForum() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
             Parent root = loader.load();
             gui.post.DisplayPostController controller = loader.getController();
-            controller.setAdminMode(true);
-            contentArea.getChildren().setAll(root);
-            if (pageTitleLabel != null && !"Post Moderation".equals(pageTitleLabel.getText())) {
-                pageTitleLabel.setText("Forum");
+            if (controller != null) {
+                controller.setAdminMode(true);
             }
+            contentArea.getChildren().setAll(root);
+            if (pageTitleLabel != null) pageTitleLabel.setText("Forum");
         } catch (IOException e) {
             e.printStackTrace();
+            System.err.println("Failed to load forum: " + e.getMessage());
         }
     }
 
     @FXML
     private void onShowCollaborations() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/collaborator/ListCollaborator.fxml"));
-            Parent root = loader.load();
-            contentArea.getChildren().setAll(root);
-            if (pageTitleLabel != null) pageTitleLabel.setText("Collaborations");
-        } catch (IOException e) {
-            System.err.println("Error loading collaborations: " + e.getMessage());
-        }
+        loadSubView("/collaborator/ListCollaborator.fxml", "Collaborations");
     }
 
     @FXML
     private void onShowCourses() {
         onGoToDashboard();
+    }
+
+    private void loadSubView(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            
+            if (pageTitleLabel != null) pageTitleLabel.setText(title);
+
+            if (root instanceof javafx.scene.layout.BorderPane) {
+                Node center = ((javafx.scene.layout.BorderPane) root).getCenter();
+                if (center instanceof VBox) {
+                    ((VBox) center).setPrefWidth(Double.MAX_VALUE);
+                    ((VBox) center).setPrefHeight(Double.MAX_VALUE);
+                }
+                contentArea.getChildren().setAll(center);
+            } else {
+                contentArea.getChildren().setAll(root);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to load sub-view: " + fxmlPath);
+        }
     }
 
     private void saveAllCards() {
@@ -223,7 +226,6 @@ public class MainController {
         card.setPrefWidth(320);
         card.setMinWidth(320);
 
-        // Top Row: Icon and Title
         HBox header = new HBox(15);
         header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
@@ -246,7 +248,6 @@ public class MainController {
 
         header.getChildren().addAll(iconContainer, titleBox);
 
-        // Middle: Description
         VBox contentBox = new VBox(6);
         Label updatedLabel = new Label("Updated " + safeText(course.getDateDeModification()));
         updatedLabel.getStyleClass().add("card-subtitle");
@@ -258,7 +259,6 @@ public class MainController {
 
         contentBox.getChildren().addAll(updatedLabel, descriptionLabel);
 
-        // Bottom: Footer Link
         HBox footer = new HBox();
         footer.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
@@ -285,14 +285,14 @@ public class MainController {
 
     private void openRessources(Course course, Node sourceNode) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resource-list-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
             Parent root = loader.load();
-            RessourceListController controller = loader.getController();
+            FrontResourceController controller = loader.getController();
             controller.setCourse(course);
             Stage stage = (Stage) sourceNode.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to open the resource list view.", exception);
+            exception.printStackTrace();
         }
     }
 

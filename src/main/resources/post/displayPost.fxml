@@ -33,15 +33,15 @@
                                 <Label style="-fx-font-size: 16px;" text="🔔" />
                             </graphic>
                         </Button>
-                        <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15 5 15;">
+                        <HBox alignment="CENTER" spacing="10.0" onMouseClicked="#onOpenProfile" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15 5 15; -fx-cursor: hand;">
                             <children>
                                 <VBox alignment="CENTER_RIGHT">
                                     <children>
                                         <Label style="-fx-font-size: 10px; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" text="Welcome" />
-                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Admin User" />
+                                        <Label fx:id="lblUsername" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Admin User" />
                                     </children>
                                 </VBox>
-                                <Label styleClass="badge-pink" text="ADMIN" />
+                                <Label fx:id="lblUserRole" styleClass="badge-pink" text="ADMIN" />
                             </children>
                         </HBox>
                         <Button onAction="#logout" styleClass="btn-logout">

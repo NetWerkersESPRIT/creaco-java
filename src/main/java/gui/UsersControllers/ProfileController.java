@@ -10,25 +10,43 @@ import javafx.scene.layout.StackPane;
 public class ProfileController {
 
     @FXML private Label lblUsername, lblEmail, lblNumtel, lblPoints, lblCreatedAt;
+    @FXML private Label lblInitial, lblUserRole;
+
+    private Users currentUser;
 
     @FXML
     public void initialize() {
-        Users user = SessionManager.getInstance().getCurrentUser();
-        if (user != null) {
-            lblUsername.setText(user.getUsername());
-            lblEmail.setText(user.getEmail());
-            lblNumtel.setText(user.getNumtel() != null ? user.getNumtel() : "Not set");
-            lblPoints.setText(user.getPoints() + " XP");
-            lblCreatedAt.setText(user.getCreated_at() != null ? user.getCreated_at() : "-");
+        currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String name = currentUser.getUsername() != null ? currentUser.getUsername() : "Unknown";
+            lblUsername.setText(name);
+            lblEmail.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "-");
+            lblNumtel.setText(currentUser.getNumtel() != null && !currentUser.getNumtel().isEmpty()
+                    ? currentUser.getNumtel() : "Not set");
+            lblPoints.setText(currentUser.getPoints() + " XP");
+            lblCreatedAt.setText(currentUser.getCreated_at() != null ? currentUser.getCreated_at() : "-");
+
+            if (lblInitial != null) lblInitial.setText(String.valueOf(name.charAt(0)).toUpperCase());
+            if (lblUserRole != null) {
+                String role = currentUser.getRole() != null
+                        ? currentUser.getRole().replace("ROLE_", "") : "USER";
+                lblUserRole.setText(role);
+            }
         }
     }
 
     @FXML
-    public void goToEditProfile() throws Exception {
-        StackPane contentArea = (StackPane) lblUsername.getScene().lookup("#contentArea");
-        if (contentArea != null) {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/EditProfile.fxml"));
-            contentArea.getChildren().setAll((javafx.scene.Node) loader.load());
+    public void goToEditProfile() {
+        try {
+            StackPane contentArea = (StackPane) lblUsername.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/EditProfile.fxml"));
+                javafx.scene.Node root = loader.load();
+                contentArea.getChildren().setAll(root);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Could not open Edit Profile: " + e.getMessage());
         }
     }
 }

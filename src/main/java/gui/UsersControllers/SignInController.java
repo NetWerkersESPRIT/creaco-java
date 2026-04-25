@@ -55,7 +55,8 @@ public class SignInController {
 
             // Route to unified Dashboard A
             Stage stage = (Stage) txtEmail.getScene().getWindow();
-            stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml"))));
+            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml")));
+            stage.setMaximized(true);
             stage.setTitle("CreaCo Dashboard");
 
         } catch (Exception e) {
@@ -67,7 +68,7 @@ public class SignInController {
     @FXML
     public void goToRegister() throws Exception {
         Stage stage = (Stage) txtEmail.getScene().getWindow();
-        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/Users/CreateAccount.fxml"))));
+        stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/CreateAccount.fxml")));
         stage.setTitle("Create Account");
     }
 

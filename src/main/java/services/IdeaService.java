@@ -53,4 +53,24 @@ public class IdeaService {
         }
         return list;
     }
+    public Idea getIdeaById(int id) {
+        try {
+            String sql = "SELECT * FROM idea WHERE id = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Idea idea = new Idea();
+                idea.setId(rs.getInt("id"));
+                idea.setTitle(rs.getString("title"));
+                idea.setDescription(rs.getString("description"));
+                idea.setCategory(rs.getString("category"));
+                idea.setCreated_at(rs.getString("created_at"));
+                idea.setLast_used(rs.getString("last_used"));
+                idea.setCreator_id(rs.getInt("creator_id"));
+                return idea;
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
 }

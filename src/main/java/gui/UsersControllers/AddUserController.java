@@ -111,9 +111,9 @@ public class AddUserController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Admin.fxml"));
             contentArea.getChildren().setAll((javafx.scene.Node) loader.load());
         } else {
-            // Safety fallback: switch scene if dashboard can't be found
+            // Safety fallback: switch scene if dashboard can't be found (Standalone Mode)
             Stage stage = (Stage) txtUsername.getScene().getWindow();
-            stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml"))));
+            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/Admin.fxml")));
         }
     }
 }

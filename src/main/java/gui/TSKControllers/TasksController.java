@@ -3,23 +3,21 @@ package gui.TSKControllers;
 import utils.SessionManager;
 import entities.Tasks;
 import services.TskService;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.*;
+import javafx.scene.control.*;
+import javafx.geometry.Pos;
 import java.sql.SQLException;
 
 public class TasksController {
-    @FXML private javafx.scene.control.Button btnAdmin;
-    @FXML private TableView<Tasks> tasksTable;
-    @FXML private TableColumn<Tasks, Integer> colId;
-    @FXML private TableColumn<Tasks, String> colTitle;
-    @FXML private TableColumn<Tasks, String> colState;
-    @FXML private TableColumn<Tasks, String> colTimeLimit;
-    @FXML private TableColumn<Tasks, Void> colActions;
+    @FXML private Button btnAdmin;
+    @FXML private VBox tasksList;
+    @FXML private Label lblNavUsername;
+    @FXML private Label lblNavUserRole;
 
     private final TskService tskService = new TskService();
+    private final services.MissionService missionService = new services.MissionService();
 
     @FXML
     public void initialize() {
@@ -30,12 +28,14 @@ public class TasksController {
             btnAdmin.setManaged(isAdmin);
         }
 
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
-        colState.setCellValueFactory(new PropertyValueFactory<>("state"));
-        colTimeLimit.setCellValueFactory(new PropertyValueFactory<>("time_limit"));
-        
-        addActionButtons();
+        // Populate Navbar Profile
+        entities.Users current = SessionManager.getInstance().getCurrentUser();
+        if (current != null && lblNavUsername != null) {
+            lblNavUsername.setText(current.getUsername());
+            String role = current.getRole() != null ? current.getRole().replace("ROLE_", "") : "USER";
+            lblNavUserRole.setText(role);
+        }
+
         loadTasks();
     }
 
@@ -45,60 +45,136 @@ public class TasksController {
     @FXML public void goToTasks()   throws Exception { switchScene("/TSK/Tasks.fxml"); }
 
     private void switchScene(String fxml) throws Exception {
-        javafx.stage.Stage stage = (javafx.stage.Stage) tasksTable.getScene().getWindow();
-        stage.setScene(new javafx.scene.Scene(javafx.fxml.FXMLLoader.load(getClass().getResource(fxml))));
-    }
+        StackPane contentArea = (StackPane) tasksList.getScene().lookup("#contentArea");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+        javafx.scene.Parent root = loader.load();
+        javafx.scene.Node view = root;
 
-    private void addActionButtons() {
-        colActions.setCellFactory(col -> new javafx.scene.control.TableCell<>() {
-            private final javafx.scene.control.Button btnEdit = new javafx.scene.control.Button("✏");
-            private final javafx.scene.control.Button btnDelete = new javafx.scene.control.Button("🗑");
-            private final javafx.scene.layout.HBox buttons = new javafx.scene.layout.HBox(5, btnEdit, btnDelete);
-            {
-                btnEdit.setOnAction(e -> {
-                    Tasks t = getTableView().getItems().get(getIndex());
-                    try {
-                        javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/TSK/EditTask.fxml"));
-                        javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
-                        EditTaskController ctrl = loader.getController();
-                        ctrl.setTask(t);
-                        ((javafx.stage.Stage) getTableView().getScene().getWindow()).setScene(scene);
-                    } catch (Exception ex) { ex.printStackTrace(); }
-                });
-                btnDelete.setOnAction(e -> {
-                    Tasks t = getTableView().getItems().get(getIndex());
-                    try {
-                        tskService.supprimer(t.getId());
-                        loadTasks();
-                    } catch (Exception ex) { ex.printStackTrace(); }
-                });
-            }
+        if (root instanceof BorderPane) {
+            view = ((BorderPane) root).getCenter();
+        }
 
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : buttons);
-            }
-        });
+        if (contentArea != null) {
+            contentArea.getChildren().setAll(view);
+        } else {
+            javafx.stage.Stage stage = (javafx.stage.Stage) tasksList.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        }
     }
 
     private void loadTasks() {
         try {
-            tasksTable.setItems(FXCollections.observableArrayList(tskService.afficher()));
+            tasksList.getChildren().clear();
+            for (Tasks t : tskService.afficher()) {
+                tasksList.getChildren().add(buildTaskRow(t));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    private HBox buildTaskRow(Tasks t) {
+        HBox row = new HBox(15);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setStyle("-fx-padding: 15; -fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 10, 0, 0, 2); -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;");
+        
+        // Task Info
+        VBox taskInfo = new VBox(5);
+        taskInfo.setPrefWidth(300);
+        Label lblTitle = new Label(t.getTitle());
+        lblTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 14px;");
+        
+        entities.Mission associatedMission = (t.getBelong_to_id() > 0) ? missionService.getMissionById(t.getBelong_to_id()) : null;
+        String missionStr = (associatedMission != null) ? "Mission: " + associatedMission.getTitle() : "No Mission associated";
+        
+        Label lblId = new Label("#" + t.getId() + " | " + missionStr);
+        lblId.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        taskInfo.getChildren().addAll(lblTitle, lblId);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        // Status Badge
+        Label lblStatus = new Label(t.getState() != null ? t.getState().toUpperCase() : "PENDING");
+        String statusColor = "#94a3b8"; // Default gray
+        if ("done".equalsIgnoreCase(t.getState()) || "COMPLETED".equalsIgnoreCase(t.getState())) statusColor = "#10b981";
+        else if ("doing".equalsIgnoreCase(t.getState()) || "IN_PROGRESS".equalsIgnoreCase(t.getState())) statusColor = "#3b82f6";
+        else if ("to do".equalsIgnoreCase(t.getState()) || "TODO".equalsIgnoreCase(t.getState()) || "new".equalsIgnoreCase(t.getState())) statusColor = "#f59e0b";
+        
+        lblStatus.setStyle("-fx-background-color: " + statusColor + "15; -fx-text-fill: " + statusColor + "; -fx-padding: 5 12; -fx-background-radius: 10; -fx-font-weight: bold; -fx-font-size: 10px;");
+        lblStatus.setMinWidth(120);
+        lblStatus.setAlignment(Pos.CENTER);
+
+        // Deadline
+        Label lblDeadline = new Label(t.getTime_limit() != null ? t.getTime_limit() : "No Deadline");
+        lblDeadline.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+        lblDeadline.setMinWidth(150);
+        lblDeadline.setAlignment(Pos.CENTER);
+
+        // Actions
+        HBox actions = new HBox(10);
+        actions.setPrefWidth(200);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        
+        Button btnEdit = new Button("✎");
+        btnEdit.setStyle("-fx-background-color: #3b82f615; -fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;");
+        btnEdit.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/TSK/EditTask.fxml"));
+                javafx.scene.Node root = loader.load();
+                EditTaskController ctrl = loader.getController();
+                ctrl.setTask(t);
+                
+                StackPane contentArea = (StackPane) tasksList.getScene().lookup("#contentArea");
+                if (contentArea != null) contentArea.getChildren().setAll(root);
+            } catch (Exception ex) { ex.printStackTrace(); }
+        });
+        
+        Button btnDelete = new Button("🗑");
+        btnDelete.setStyle("-fx-background-color: #ef444415; -fx-text-fill: #ef4444; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;");
+        btnDelete.setOnAction(e -> {
+            if (gui.util.AlertHelper.showCustomAlert("Delete Task?", "Are you sure you want to delete this task?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+                try {
+                    tskService.supprimer(t.getId());
+                    loadTasks();
+                } catch (Exception ex) { ex.printStackTrace(); }
+            }
+        });
+        
+        actions.getChildren().addAll(btnEdit, btnDelete);
+
+        row.getChildren().addAll(taskInfo, spacer, lblStatus, lblDeadline, actions);
+
+        row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 15; -fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"));
+        row.setOnMouseExited(e -> row.setStyle("-fx-padding: 15; -fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
+
+        return row;
+    }
+
     @FXML
     public void handleAddTask() throws Exception {
-        javafx.stage.Stage stage = (javafx.stage.Stage) tasksTable.getScene().getWindow();
-        stage.setScene(new javafx.scene.Scene(javafx.fxml.FXMLLoader.load(getClass().getResource("/TSK/AddTask.fxml"))));
+        StackPane contentArea = (StackPane) tasksList.getScene().lookup("#contentArea");
+        if (contentArea != null) {
+            contentArea.getChildren().setAll((javafx.scene.Node) FXMLLoader.load(getClass().getResource("/TSK/AddTask.fxml")));
+        } else {
+            javafx.stage.Stage stage = (javafx.stage.Stage) tasksList.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(FXMLLoader.load(getClass().getResource("/TSK/AddTask.fxml"))));
+        }
     }
 
     @FXML
     public void goBack() throws Exception {
-        javafx.stage.Stage stage = (javafx.stage.Stage) tasksTable.getScene().getWindow();
-        stage.setScene(new javafx.scene.Scene(javafx.fxml.FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml"))));
+        javafx.stage.Stage stage = (javafx.stage.Stage) tasksList.getScene().getWindow();
+        stage.setScene(new javafx.scene.Scene(FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml"))));
+    }
+
+    @FXML
+    public void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        try { switchScene("/Users/Profile.fxml"); } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
+    public void logout(javafx.event.ActionEvent event) {
+        gui.SessionHelper.logout(event);
     }
 }

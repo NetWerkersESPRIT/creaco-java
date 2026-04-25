@@ -19,7 +19,6 @@ public class Users {
         this.role = role;
         this.numtel = numtel;
         this.created_at = created_at;
-        this.id = id;
         this.points = points;
     }
     public Users(String username, String email, String password, String role, String numtel, String created_at, int id, int points) {
