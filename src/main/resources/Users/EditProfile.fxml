@@ -46,6 +46,32 @@
                             </children>
                         </VBox>
 
+                        <!-- AI Avatar Section -->
+                        <VBox spacing="15.0" alignment="CENTER">
+                            <children>
+                                <StackPane style="-fx-background-color: #f3f4f6; -fx-background-radius: 50; -fx-padding: 2;">
+                                    <children>
+                                        <javafx.scene.image.ImageView fx:id="imgAvatar" fitHeight="120.0" fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
+                                            <clip>
+                                                <javafx.scene.shape.Circle centerX="60" centerY="60" radius="60" />
+                                            </clip>
+                                        </javafx.scene.image.ImageView>
+                                    </children>
+                                </StackPane>
+                                
+                                <HBox spacing="10" alignment="CENTER">
+                                    <children>
+                                        <TextField fx:id="txtAiPrompt" promptText="Enter a prompt (e.g. 'coding wizard')" 
+                                                   style="-fx-background-color: #f3f4f6; -fx-background-radius: 10; -fx-padding: 10; -fx-font-size: 13px;" HBox.hgrow="ALWAYS" />
+                                        <Button text="🎨 Generate" onAction="#generateAvatar" 
+                                                style="-fx-background-color: -fx-primary-pink; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;" />
+                                    </children>
+                                </HBox>
+                                
+                                <Label text="Powered by Pollinations AI &amp; Dicebear" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
+                            </children>
+                        </VBox>
+
                         <Separator style="-fx-opacity: 0.4;" />
 
                         <!-- Form Fields -->

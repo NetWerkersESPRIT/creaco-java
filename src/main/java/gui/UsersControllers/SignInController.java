@@ -5,7 +5,7 @@ import services.UsersService;
 import utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -15,6 +15,8 @@ public class SignInController {
 
     @FXML private TextField     txtEmail;
     @FXML private PasswordField txtPassword;
+    @FXML private TextField     txtPasswordVisible;
+    @FXML private Button        btnTogglePassword;
     @FXML private Label         lblMessage;
 
     private final UsersService usersService = new UsersService();
@@ -22,7 +24,7 @@ public class SignInController {
     @FXML
     public void handleLogin() {
         String email    = txtEmail.getText().trim();
-        String password = txtPassword.getText();
+        String password = txtPassword.isVisible() ? txtPassword.getText() : txtPasswordVisible.getText();
 
         if (email.isEmpty() || password.isEmpty()) {
             showError("❌ Please fill in all fields.");
@@ -40,6 +42,20 @@ public class SignInController {
 
             if (user == null) {
                 showError("❌ No account found with this email.");
+                return;
+            }
+
+            // Check if user is banned
+            if (user.isBanned()) {
+                String banMessage = "Your account has been suspended by an administrator.\n\n" +
+                                   "If you believe this is a mistake, please contact support.";
+                
+                // Show ONLY the popup alert as requested
+                gui.util.AlertHelper.showCustomAlert(
+                    "Account Suspended", 
+                    banMessage, 
+                    gui.util.AlertHelper.AlertType.WARNING
+                );
                 return;
             }
 
@@ -62,6 +78,21 @@ public class SignInController {
         } catch (Exception e) {
             showError("❌ Error: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void togglePassword() {
+        if (txtPassword.isVisible()) {
+            txtPasswordVisible.setText(txtPassword.getText());
+            txtPasswordVisible.setVisible(true);
+            txtPassword.setVisible(false);
+            btnTogglePassword.setText("🙈");
+        } else {
+            txtPassword.setText(txtPasswordVisible.getText());
+            txtPassword.setVisible(true);
+            txtPasswordVisible.setVisible(false);
+            btnTogglePassword.setText("👁");
         }
     }
 
