@@ -183,6 +183,19 @@ public class PostModerationController {
     }
 
     @FXML
+    private void onShowAnalytics() {
+        try {
+            javafx.scene.layout.StackPane contentArea =
+                    (javafx.scene.layout.StackPane) moderationList.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                        getClass().getResource("/post/forumStats.fxml"));
+                contentArea.getChildren().setAll((javafx.scene.Node) loader.load());
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
     private void handleApprove() {
         if (selectedPost == null) return;
 
