@@ -23,7 +23,7 @@ public class Course {
         this.titre = titre;
         this.description = description;
         this.image = image;
-        this.date_de_creation = this.date_de_creation;
+        this.date_de_creation = date_de_creation;
         this.categorie_id = categorie_id;
         this.slug = slug;
         this.statut = statut;
@@ -44,8 +44,8 @@ public class Course {
         this.views = views;
         this.statut = statut;
         this.niveau = niveau;
-        this.duree_estimee = duree_estimee;
-        this.deleted_at = deleted_at;
+        this.duree_estimee = dureeEstimee;
+        this.deleted_at = deletedAt;
     }
 
     public int getId() {
