@@ -8,18 +8,93 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PostService implements ForumInterface<Post> {
     Connection con;
 
+    // Simulated in-memory list for pending pin requests: requesterUserId -> postId
+    private static final Map<Integer, Integer> pendingPinRequests = new HashMap<>();
+
     public PostService() {
         con = MyConnection.getInstance().getConnection();
+    }
+
+    public void checkUserCanPin(int userId) throws Exception {
+        if (pendingPinRequests.containsKey(userId)) {
+            throw new Exception("You already have a pinned or pending post. Only one pin is allowed.");
+        }
+        List<Post> posts = afficher();
+        boolean hasPinned = posts.stream().anyMatch(p -> p.getUserId() == userId && p.isPinned());
+        if (hasPinned) {
+            throw new Exception("You already have a pinned or pending post. Only one pin is allowed.");
+        }
+    }
+
+    public void requestPin(int userId, int postId) {
+        pendingPinRequests.put(userId, postId);
+    }
+
+    public boolean isPinRequested(int postId) {
+        return pendingPinRequests.containsValue(postId);
+    }
+
+    public void rejectPinRequest(int postId) {
+        pendingPinRequests.values().removeIf(id -> id == postId);
+    }
+
+    public String handleTogglePin(Post post, boolean isAdmin, int userId) throws Exception {
+        if (isAdmin) {
+            if (post.isPinned()) {
+                post.setPinned(false);
+                modifier(post.getId(), post);
+                return null;
+            } else {
+                acceptPinRequest(post.getId());
+                return null;
+            }
+        } else {
+            if (post.isPinned()) {
+                throw new Exception("Only admins can unpin posts directly.");
+            } else {
+                checkUserCanPin(userId);
+                requestPin(userId, post.getId());
+                return "Pin request sent to admin.";
+            }
+        }
+    }
+
+    public void acceptPinRequest(int postId) throws SQLException {
+        // Ensure absolutely NO other posts are pinned
+        List<Post> allPosts = afficher();
+        for (Post p : allPosts) {
+            if (p.isPinned() && p.getId() != postId) {
+                p.setPinned(false);
+                modifier(p.getId(), p);
+            }
+        }
+        Post newPinned = getPostById(postId);
+        if (newPinned != null) {
+            newPinned.setPinned(true);
+            modifier(postId, newPinned);
+            pendingPinRequests.values().removeIf(id -> id == postId);
+        }
+    }
+
+    public Post getPinnedPost() throws SQLException {
+        return afficher().stream().filter(Post::isPinned).findFirst().orElse(null);
+    }
+
+    public Post getPostById(int id) throws SQLException {
+        return afficher().stream().filter(p -> p.getId() == id).findFirst().orElse(null);
     }
 
     @Override
     public void ajouter(Post post) throws SQLException {
         String sql = "INSERT INTO `post`(`title`, `content`, `status`, `user_id`, `image_name`, `pdf_name`, `likes`, `pinned`, `is_comment_locked`, `is_profane`, `is_spam`, `spam_score`, `profane_words`, `grammar_errors`, `refusal_reason`, `created_at`) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = con.prepareStatement(sql);
+        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, post.getTitle());
         ps.setString(2, post.getContent());
         ps.setString(3, post.getStatus());
@@ -37,6 +112,10 @@ public class PostService implements ForumInterface<Post> {
         ps.setString(15, post.getRefusalReason());
         ps.setTimestamp(16, Timestamp.valueOf(LocalDateTime.now()));
         ps.executeUpdate();
+        ResultSet rs = ps.getGeneratedKeys();
+        if (rs.next()) {
+            post.setId(rs.getInt(1));
+        }
         System.out.println("Post ajouté avec succès!");
     }
 
