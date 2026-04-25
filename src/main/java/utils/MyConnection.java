@@ -16,9 +16,13 @@ public class MyConnection {
     private MyConnection(){
         try {
             connection = DriverManager.getConnection(URL, USER, PASS);
-            System.out.println("Connection established");
+            System.out.println("✅ Connection established successfully to: " + URL);
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            System.err.println("❌ CRITICAL: Database connection failed!");
+            System.err.println("URL: " + URL);
+            System.err.println("Error: " + e.getMessage());
+            // Throwing an exception here prevents the app from continuing with a null connection
+            throw new RuntimeException("Could not connect to database. Please ensure MySQL is running and the database 'creaco' exists.", e);
         }
     }
 

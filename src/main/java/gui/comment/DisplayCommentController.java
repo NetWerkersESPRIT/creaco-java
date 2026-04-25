@@ -15,6 +15,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import services.forum.CommentService;
 import services.UserService;
+import services.forum.PostService;
+import entities.ReactionType;
+import java.util.Map;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -34,9 +37,14 @@ public class DisplayCommentController {
     @FXML private Label repliesBadge;
     @FXML private TextArea commentArea;
     @FXML private VBox emptyState;
+    @FXML private StackPane postAuthorAvatarContainer;
+    @FXML private Label likesBadge;
+    @FXML private Button btnEditPost;
+    @FXML private Button btnDeletePost;
 
     private final CommentService commentService = new CommentService();
     private final UserService userService = new UserService();
+    private final PostService postService = new PostService();
     private Post currentPost;
     private boolean isAdminMode = false;
 
@@ -54,6 +62,52 @@ public class DisplayCommentController {
             String username = (author != null) ? author.getUsername() : "Unknown";
             String date = (post.getCreatedAt() != null) ? post.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "-";
             postMetaLabel.setText("Posted by " + username + " • " + date);
+
+            // Set Author Avatar
+            if (author != null && postAuthorAvatarContainer != null) {
+                StackPane avatar = buildAvatar(author);
+                // Adjust size for the header
+                avatar.setPrefSize(45, 45);
+                avatar.setMinSize(45, 45);
+                avatar.setMaxSize(45, 45);
+                // Update the clip if it was used (buildAvatar uses 16 for 32x32, so we need 22.5 for 45x45)
+                if (!avatar.getChildren().isEmpty() && avatar.getChildren().get(0) instanceof javafx.scene.image.ImageView) {
+                    javafx.scene.image.ImageView iv = (javafx.scene.image.ImageView) avatar.getChildren().get(0);
+                    iv.setFitWidth(45);
+                    iv.setFitHeight(45);
+                    iv.setClip(new javafx.scene.shape.Circle(22.5, 22.5, 22.5));
+                } else if (!avatar.getChildren().isEmpty() && avatar.getChildren().get(0) instanceof Label) {
+                    Label l = (Label) avatar.getChildren().get(0);
+                    l.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
+                }
+                postAuthorAvatarContainer.getChildren().setAll(avatar.getChildren());
+                postAuthorAvatarContainer.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 12;");
+            }
+
+            // Set Likes Count
+            if (likesBadge != null) {
+                try {
+                    Map<ReactionType, Integer> counts = postService.getReactionCounts(post.getId());
+                    int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+                    likesBadge.setText("👍 LIKE " + total);
+                } catch (SQLException e) {
+                    likesBadge.setText("👍 LIKE 0");
+                }
+            }
+
+            // Visibility for Edit/Delete
+            Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
+            boolean isOwner = (post.getUserId() == currentUserId);
+            
+            if (btnEditPost != null) {
+                btnEditPost.setVisible(isOwner);
+                btnEditPost.setManaged(isOwner);
+            }
+            if (btnDeletePost != null) {
+                btnDeletePost.setVisible(isOwner || isAdminMode);
+                btnDeletePost.setManaged(isOwner || isAdminMode);
+            }
             
             loadCommentsByPost();
         }
@@ -120,7 +174,7 @@ public class DisplayCommentController {
         HBox header = new HBox(10);
         header.setAlignment(Pos.CENTER_LEFT);
         
-        StackPane avatar = buildAvatar(username);
+        StackPane avatar = buildAvatar(user);
         Label userLabel = new Label(username);
         userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 13px;");
         Label dateLabel = new Label(dateStr);
@@ -144,7 +198,7 @@ public class DisplayCommentController {
 
         actions.getChildren().add(replyBtn);
         
-        int currentUserId = isAdminMode ? 5 : 1;
+        int currentUserId = utils.SessionManager.getInstance().getCurrentUser().getId();
         if (comment.getUserId() == currentUserId) {
             actions.getChildren().add(editBtn);
         }
@@ -250,15 +304,53 @@ public class DisplayCommentController {
         return btn;
     }
 
-    private StackPane buildAvatar(String username) {
+    private StackPane buildAvatar(entities.Users user) {
+        String username = (user != null) ? user.getUsername() : "Unknown";
+        String imageUrl = (user != null) ? user.getImage() : null;
+
+        StackPane circle = new StackPane();
+        circle.setPrefSize(32, 32);
+        circle.setMinSize(32, 32);
+        circle.setMaxSize(32, 32);
+        circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                javafx.scene.image.Image img;
+                if (imageUrl.startsWith("http")) {
+                    img = new javafx.scene.image.Image(imageUrl, true);
+                } else {
+                    java.io.File file = new java.io.File("src/main/resources/uploads/images/" + imageUrl);
+                    if (file.exists()) {
+                        img = new javafx.scene.image.Image(file.toURI().toString());
+                    } else {
+                        img = null;
+                    }
+                }
+
+                if (img != null) {
+                    javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView(img);
+                    imageView.setFitWidth(32);
+                    imageView.setFitHeight(32);
+                    imageView.setPreserveRatio(true);
+                    
+                    // Clip to circle
+                    javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(16, 16, 16);
+                    imageView.setClip(clip);
+                    
+                    circle.getChildren().add(imageView);
+                    return circle;
+                }
+            } catch (Exception e) {
+                // Fallback to initials
+            }
+        }
+
         char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
         Label initLabel = new Label(String.valueOf(initial));
         initLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
+        circle.getChildren().add(initLabel);
 
-        StackPane circle = new StackPane(initLabel);
-        circle.setPrefSize(32, 32);
-        circle.setMinSize(32, 32);
-        circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50%;");
         return circle;
     }
 
@@ -269,7 +361,7 @@ public class DisplayCommentController {
 
         Comment comment = new Comment();
         comment.setPostId(currentPost.getId());
-        comment.setUserId(isAdminMode ? 5 : 1);
+        comment.setUserId(utils.SessionManager.getInstance().getCurrentUser().getId());
         comment.setBody(body);
         comment.setCreatedAt(LocalDateTime.now());
 
@@ -295,7 +387,7 @@ public class DisplayCommentController {
         Comment reply = new Comment();
         reply.setPostId(currentPost.getId());
         reply.setParentCommentId(parent.getId());
-        reply.setUserId(isAdminMode ? 5 : 1);
+        reply.setUserId(utils.SessionManager.getInstance().getCurrentUser().getId());
         reply.setBody(body);
         reply.setCreatedAt(LocalDateTime.now());
         try {
@@ -323,6 +415,65 @@ public class DisplayCommentController {
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(root);
         } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    @FXML
+    private void onSharePost() {
+        // Dummy share logic
+        gui.util.AlertHelper.showCustomAlert("Share", "Post link copied to clipboard!", gui.util.AlertHelper.AlertType.INFORMATION);
+    }
+
+    @FXML
+    private void onPinPost() {
+        if (currentPost == null) return;
+        try {
+            int userId = utils.SessionManager.getInstance().getCurrentUser().getId();
+            String msg = postService.handleTogglePin(currentPost, isAdminMode, userId);
+            if (msg != null) {
+                gui.util.AlertHelper.showCustomAlert("Pin Status", msg, gui.util.AlertHelper.AlertType.INFORMATION);
+            }
+        } catch (Exception e) {
+            gui.util.AlertHelper.showCustomAlert("Error", e.getMessage(), gui.util.AlertHelper.AlertType.WARNING);
+        }
+    }
+
+    @FXML
+    private void onLockPost() {
+        if (currentPost == null) return;
+        try {
+            currentPost.setCommentLocked(!currentPost.isCommentLocked());
+            postService.modifier(currentPost.getId(), currentPost);
+            String status = currentPost.isCommentLocked() ? "LOCKED" : "UNLOCKED";
+            gui.util.AlertHelper.showCustomAlert("Post Status", "Comments are now " + status, gui.util.AlertHelper.AlertType.INFORMATION);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onEditPost(ActionEvent event) {
+        if (currentPost == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/updatePost.fxml"));
+            Parent root = loader.load();
+            gui.post.UpdatePostController controller = loader.getController();
+            controller.setPost(currentPost);
+            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
+            if (contentArea != null) contentArea.getChildren().setAll(root);
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    @FXML
+    private void onDeletePost(ActionEvent event) {
+        if (currentPost == null) return;
+        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Are you sure you want to delete this post?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+            try {
+                postService.supprimer(currentPost.getId());
+                goBackToPosts(event);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private String formatDate(LocalDateTime date) {

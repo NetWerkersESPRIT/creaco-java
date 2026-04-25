@@ -11,6 +11,7 @@ entities\Comment.class
 gui\collabrequest\EditCollabRequestController.class
 gui\post\AddPostController.class
 gui\MainController.class
+entities\PostReaction.class
 services\CollaboratorService.class
 gui\collaborator\EditCollaboratorController.class
 gui\collabrequest\AddCollabRequestController.class

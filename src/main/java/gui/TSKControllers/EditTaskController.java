@@ -23,6 +23,7 @@ public class EditTaskController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Edit Task", "Tasks / Management");
         comboState.setItems(FXCollections.observableArrayList("to do", "doing", "done"));
     }
 
