@@ -112,6 +112,7 @@
                                     <Label fx:id="detailDateLabel" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 12px;" text="APRIL 22, 2026, 1:13 PM" />
                                 </HBox>
                                 <Label fx:id="detailStatusLabel" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 12px;" text="PENDING" />
+                                <Label fx:id="pinRequestLabel" text="📌 Pin requested" style="-fx-text-fill: #ce2d7c; -fx-font-weight: bold; -fx-font-size: 12px;" visible="false" managed="false" />
                             </children>
                         </HBox>
 

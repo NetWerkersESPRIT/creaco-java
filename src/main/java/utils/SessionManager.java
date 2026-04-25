@@ -22,7 +22,7 @@ public class SessionManager {
     public Users getCurrentUser()          { return currentUser; }
 
     public boolean isAdmin() {
-        return currentUser != null && "ROLE_ADMIN".equals(currentUser.getRole());
+        return currentUser != null && ("ROLE_ADMIN".equals(currentUser.getRole()) || "ADMIN".equals(currentUser.getRole()));
     }
 
     public boolean isContentCreator() {

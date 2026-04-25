@@ -62,7 +62,8 @@ public class DisplayPostController {
     private final java.util.Set<Integer> likedPosts = new java.util.HashSet<>();
     
     public void setAdminMode(boolean isAdminMode) {
-        this.isAdminMode = isAdminMode;
+        // The session now strictly controls admin mode
+        // this.isAdminMode = isAdminMode;
         if (initialized) {
             loadPosts();
         }
@@ -70,6 +71,7 @@ public class DisplayPostController {
 
     @FXML
     public void initialize() {
+        this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         initialized = true;
         loadPosts();
         
@@ -226,10 +228,10 @@ public class DisplayPostController {
             actionsRow.getChildren().add(deleteBtn);
         }
 
-        actionsRow.getChildren().addAll(
-            createPinAction(post),
-            createSimpleAction("↪ Share", "")
-        );
+        if (isAdminMode) {
+            actionsRow.getChildren().add(createPinAction(post));
+        }
+        actionsRow.getChildren().add(createSimpleAction("↪ Share", ""));
 
         card.getChildren().add(actionsRow);
 
@@ -330,12 +332,16 @@ public class DisplayPostController {
 
     private void togglePin(Post post) {
         try {
-            post.setPinned(!post.isPinned());
-            postService.modifier(post.getId(), post);
+            int userId = utils.SessionManager.getInstance().getCurrentUser().getId();
+            String alertMessage = postService.handleTogglePin(post, isAdminMode, userId);
+            
+            if (alertMessage != null) {
+                showAlert(Alert.AlertType.INFORMATION, "Pin Action", alertMessage);
+            }
+            
             loadPosts(); // Refresh list to show pinned at top
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not pin post.");
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.WARNING, "Pin Denied", e.getMessage());
         }
     }
 

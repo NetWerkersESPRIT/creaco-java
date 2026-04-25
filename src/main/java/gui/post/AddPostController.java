@@ -54,11 +54,13 @@ public class AddPostController {
     private boolean isAdminMode = false;
 
     public void setAdminMode(boolean isAdminMode) {
-        this.isAdminMode = isAdminMode;
+        // Admin mode is now session-based
+        // this.isAdminMode = isAdminMode;
     }
 
     @FXML
     private void initialize() {
+        this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         Users user = SessionManager.getInstance().getCurrentUser();
         if (user != null) {
             String displayName = user.getUsername() != null ? user.getUsername() : "User";
@@ -88,7 +90,8 @@ public class AddPostController {
             post.setStatus("PENDING");
         }
         
-        post.setPinned(pinToggle.isSelected());
+        boolean requestPin = pinToggle.isSelected();
+        post.setPinned(false);
         post.setCreatedAt(java.time.LocalDateTime.now());
         
         Users currentUser = SessionManager.getInstance().getCurrentUser();
@@ -97,6 +100,8 @@ public class AddPostController {
         } else {
             post.setUserId(5); // Fallback to Admin ID if session is null for some reason
         }
+
+        // Pin eligibility is not checked during creation anymore as per user request
 
         // Handle Image
         if (imageFile != null) {
@@ -112,6 +117,22 @@ public class AddPostController {
 //hadoum ali save  post kan tzadit fil backoffice w  el front office
         try {
             postService.ajouter(post);
+            if (requestPin) {
+                if (isAdminMode) {
+                    postService.acceptPinRequest(post.getId());
+                } else {
+                    postService.requestPin(post.getUserId(), post.getId());
+                }
+            }
+            
+            if (!isAdminMode) {
+                if (requestPin) {
+                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your post and pin request have been submitted and are awaiting admin approval.");
+                } else {
+                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your post has been submitted and is awaiting admin approval.");
+                }
+            }
+            
             goBack(event);
         } catch (SQLException e) {
             e.printStackTrace();
