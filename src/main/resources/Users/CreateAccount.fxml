@@ -83,7 +83,13 @@
 
                             <VBox spacing="8">
                                 <Label text="PASSWORD" styleClass="section-header" style="-fx-padding: 0;"/>
-                                <PasswordField fx:id="txtPassword" promptText="••••••••" styleClass="search-bar" />
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <StackPane HBox.hgrow="ALWAYS">
+                                        <PasswordField fx:id="txtPassword" promptText="••••••••" styleClass="search-bar" />
+                                        <TextField fx:id="txtPasswordVisible" promptText="••••••••" styleClass="search-bar" visible="false" />
+                                    </StackPane>
+                                    <Button fx:id="btnTogglePassword" onAction="#togglePassword" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #718096; -fx-font-size: 18px;" text="👁" />
+                                </HBox>
                             </VBox>
                         </VBox>
 

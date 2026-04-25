@@ -41,7 +41,11 @@
                             <children>
                                 <StackPane style="-fx-background-color: linear-gradient(to bottom right, #ce2d7c, #9124b8); -fx-background-radius: 50; -fx-min-width: 72; -fx-min-height: 72; -fx-max-width: 72; -fx-max-height: 72;">
                                     <children>
-                                        <Label fx:id="lblInitial" text="U" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                                        <javafx.scene.image.ImageView fx:id="imgAvatar" fitHeight="72.0" fitWidth="72.0" pickOnBounds="true" preserveRatio="true">
+                                            <clip>
+                                                <javafx.scene.shape.Circle centerX="36" centerY="36" radius="36" />
+                                            </clip>
+                                        </javafx.scene.image.ImageView>
                                     </children>
                                 </StackPane>
                                 <VBox spacing="4.0">

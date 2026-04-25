@@ -15,20 +15,24 @@ public class Course {
     private Integer duree_estimee;
     private String deleted_at;
 
-    public Course() {}
+    public Course() {
+    }
 
-    public Course(String titre, String description, String image, String date_de_creation, int categorie_id, String slug, String statut, String niveau) {
+    public Course(String titre, String description, String image, String date_de_creation, int categorie_id,
+            String slug, String statut, String niveau) {
         this.titre = titre;
         this.description = description;
         this.image = image;
-        this.date_de_creation = this.date_de_creation;
+        this.date_de_creation = date_de_creation;
         this.categorie_id = categorie_id;
         this.slug = slug;
         this.statut = statut;
         this.niveau = niveau;
     }
 
-    public Course(int id, String titre, String description, String image, String date_de_creation, String date_de_modification, int categorie_id, String slug, Integer views, String statut, String niveau, Integer dureeEstimee, String deletedAt) {
+    public Course(int id, String titre, String description, String image, String date_de_creation,
+            String date_de_modification, int categorie_id, String slug, Integer views, String statut, String niveau,
+            Integer dureeEstimee, String deletedAt) {
         this.id = id;
         this.titre = titre;
         this.description = description;
@@ -40,8 +44,8 @@ public class Course {
         this.views = views;
         this.statut = statut;
         this.niveau = niveau;
-        this.duree_estimee = duree_estimee;
-        this.deleted_at = deleted_at;
+        this.duree_estimee = dureeEstimee;
+        this.deleted_at = deletedAt;
     }
 
     public int getId() {

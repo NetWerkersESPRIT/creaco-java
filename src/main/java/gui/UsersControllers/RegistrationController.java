@@ -18,6 +18,8 @@ public class RegistrationController {
 
     @FXML private TextField txtUsername, txtEmail, txtNumtel;
     @FXML private PasswordField txtPassword;
+    @FXML private TextField     txtPasswordVisible;
+    @FXML private Button        btnTogglePassword;
     @FXML private Label lblMessage;
 
     private final UsersService usersService = new UsersService();
@@ -25,7 +27,7 @@ public class RegistrationController {
     private String validate() {
         String username  = txtUsername.getText().trim();
         String email     = txtEmail.getText().trim();
-        String password  = txtPassword.getText();
+        String password  = txtPassword.isVisible() ? txtPassword.getText() : txtPasswordVisible.getText();
         String numtel    = txtNumtel.getText().trim();
 
         if (username.length() < 4) return "❌ Username must be at least 4 characters.";
@@ -52,7 +54,7 @@ public class RegistrationController {
             Users u = new Users();
             u.setUsername(txtUsername.getText().trim());
             u.setEmail(txtEmail.getText().trim());
-            u.setPassword(txtPassword.getText());
+            u.setPassword(txtPassword.isVisible() ? txtPassword.getText() : txtPasswordVisible.getText());
             u.setRole("ROLE_CONTENT_CREATOR");
             u.setNumtel(txtNumtel.getText().trim());
             u.setPoints(0);
@@ -73,6 +75,21 @@ public class RegistrationController {
         } catch (Exception e) {
             lblMessage.setStyle("-fx-text-fill: red;");
             lblMessage.setText("❌ Error: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void togglePassword() {
+        if (txtPassword.isVisible()) {
+            txtPasswordVisible.setText(txtPassword.getText());
+            txtPasswordVisible.setVisible(true);
+            txtPassword.setVisible(false);
+            btnTogglePassword.setText("🙈");
+        } else {
+            txtPassword.setText(txtPasswordVisible.getText());
+            txtPassword.setVisible(true);
+            txtPasswordVisible.setVisible(false);
+            btnTogglePassword.setText("👁");
         }
     }
 
