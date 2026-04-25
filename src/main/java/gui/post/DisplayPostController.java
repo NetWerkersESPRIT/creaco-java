@@ -1,25 +1,31 @@
 package gui.post;
 
 import entities.Post;
+import entities.ReactionType;
 import gui.comment.DisplayCommentController;
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.SequentialTransition;
+import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
+import javafx.util.Duration;
 import services.forum.CommentService;
 import services.forum.PostService;
 import services.UserService;
@@ -31,7 +37,9 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DisplayPostController {
@@ -56,10 +64,12 @@ public class DisplayPostController {
     private final UserService userService = new UserService();
     
     private List<Post> allPosts = new ArrayList<>();
-    
+
     private boolean isAdminMode = false;
     private boolean initialized = false;
-    private final java.util.Set<Integer> likedPosts = new java.util.HashSet<>();
+
+    /** Tracks the current user's active reaction per post (postId → ReactionType or null). */
+    private final Map<Integer, ReactionType> userReactions = new HashMap<>();
     
     public void setAdminMode(boolean isAdminMode) {
         // The session now strictly controls admin mode
@@ -94,6 +104,15 @@ public class DisplayPostController {
     public void loadPosts() {
         try {
             allPosts = postService.getAcceptedPosts();
+            // Pre-load this user's reactions for all posts
+            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
+            if (currentUserId > 0) {
+                for (Post p : allPosts) {
+                    ReactionType rt = postService.getUserReaction(currentUserId, p.getId());
+                    userReactions.put(p.getId(), rt);
+                }
+            }
             renderPosts(allPosts);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -205,7 +224,7 @@ public class DisplayPostController {
         actionsRow.setPadding(new Insets(10, 0, 0, 0));
 
         actionsRow.getChildren().addAll(
-            createLikeAction(post),
+            createReactionBar(post),
             createCommentAction(post),
             createReadAction(post)
         );
@@ -256,37 +275,198 @@ public class DisplayPostController {
         return box;
     }
 
-    private HBox createLikeAction(Post post) {
-        HBox box = createSimpleAction("👍 Like", String.valueOf(post.getLikes()));
-        Label iconLabel = (Label) box.getChildren().get(0);
-        Label countLabel = (Label) box.getChildren().get(1);
+    // =========================================================================
+    // INLINE REACTION BAR
+    // =========================================================================
 
-        if (likedPosts.contains(post.getId())) {
-            iconLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
-            countLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+    // =========================================================================
+    // MODERN POPUP REACTION BAR (Facebook/LinkedIn style)
+    // =========================================================================
+
+    private HBox createReactionBar(Post post) {
+        int postId = post.getId();
+        entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+        int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
+
+        ReactionType currentReaction = userReactions.get(postId);
+
+        // ---- Count summary ----
+        Label countSummary = new Label();
+        countSummary.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-padding: 0 0 0 8;");
+        refreshCountSummary(countSummary, postId);
+
+        // ---- Main Trigger Button ----
+        Label triggerBtn = new Label(buildMainLabel(currentReaction));
+        triggerBtn.setStyle(buildMainBtnStyle(currentReaction));
+        triggerBtn.setCursor(javafx.scene.Cursor.HAND);
+
+        // Click to Like/Unlike directly
+        triggerBtn.setOnMouseClicked(ev -> {
+            if (currentUserId < 1) return;
+            try {
+                // If already reacted, clicking the main button toggles it off.
+                // If not reacted, clicking the main button defaults to LIKE.
+                ReactionType current = userReactions.get(postId);
+                ReactionType typeToApply = (current != null) ? current : ReactionType.LIKE;
+                
+                ReactionType result = postService.handleReaction(currentUserId, postId, typeToApply);
+                userReactions.put(postId, result);
+                
+                triggerBtn.setText(buildMainLabel(result));
+                triggerBtn.setStyle(buildMainBtnStyle(result));
+                refreshCountSummary(countSummary, postId);
+
+                // Bounce animation
+                ScaleTransition up = new ScaleTransition(Duration.millis(100), triggerBtn);
+                up.setToX(1.2); up.setToY(1.2);
+                ScaleTransition down = new ScaleTransition(Duration.millis(100), triggerBtn);
+                down.setToX(1.0); down.setToY(1.0);
+                new SequentialTransition(up, down).play();
+            } catch (SQLException ex) { ex.printStackTrace(); }
+        });
+
+        HBox triggerRow = new HBox(8, triggerBtn, countSummary);
+        triggerRow.setAlignment(Pos.CENTER_LEFT);
+
+        // ---- Popup Emoji Pill ----
+        HBox emojiPill = new HBox(8);
+        emojiPill.setAlignment(Pos.CENTER);
+        emojiPill.setStyle(
+            "-fx-background-color: white; " +
+            "-fx-background-radius: 30; " +
+            "-fx-padding: 8 16 8 16; " +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 5);"
+        );
+
+        for (ReactionType rt : ReactionType.values()) {
+            Label emoji = new Label(rt.getEmoji());
+            emoji.setCursor(javafx.scene.Cursor.HAND);
+            emoji.setFont(javafx.scene.text.Font.font(26));
+            // Force native color emoji rendering by specifying emoji fonts and NOT overriding text-fill
+            emoji.setStyle("-fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji';");
+            
+            // Hover animation
+            emoji.setOnMouseEntered(ev -> {
+                ScaleTransition s = new ScaleTransition(Duration.millis(150), emoji);
+                s.setToX(1.4); s.setToY(1.4); s.play();
+            });
+            emoji.setOnMouseExited(ev -> {
+                ScaleTransition s = new ScaleTransition(Duration.millis(150), emoji);
+                s.setToX(1.0); s.setToY(1.0); s.play();
+            });
+
+            // Click handling
+            emoji.setOnMouseClicked(ev -> {
+                if (currentUserId < 1) return;
+                try {
+                    ReactionType result = postService.handleReaction(currentUserId, postId, rt);
+                    userReactions.put(postId, result);
+                    
+                    triggerBtn.setText(buildMainLabel(result));
+                    triggerBtn.setStyle(buildMainBtnStyle(result));
+                    refreshCountSummary(countSummary, postId);
+
+                    // Bounce trigger btn
+                    ScaleTransition up = new ScaleTransition(Duration.millis(100), triggerBtn);
+                    up.setToX(1.2); up.setToY(1.2);
+                    ScaleTransition down = new ScaleTransition(Duration.millis(100), triggerBtn);
+                    down.setToX(1.0); down.setToY(1.0);
+                    new SequentialTransition(up, down).play();
+                } catch (SQLException ex) { ex.printStackTrace(); }
+            });
+
+            emojiPill.getChildren().add(emoji);
         }
 
-        box.setOnMouseClicked(e -> {
-            try {
-                if (likedPosts.contains(post.getId())) {
-                    likedPosts.remove(post.getId());
-                    post.setLikes(post.getLikes() - 1);
-                    iconLabel.setStyle("-fx-text-fill: #64748b;");
-                    countLabel.setStyle("-fx-text-fill: #64748b;");
-                } else {
-                    likedPosts.add(post.getId());
-                    post.setLikes(post.getLikes() + 1);
-                    iconLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
-                    countLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.getContent().add(emojiPill);
+
+        // Hover Logic
+        triggerBtn.setOnMouseEntered(ev -> {
+            if (!popup.isShowing()) {
+                Bounds bounds = triggerBtn.localToScreen(triggerBtn.getBoundsInLocal());
+                if (bounds != null) {
+                    popup.show(triggerBtn, bounds.getMinX() - 10, bounds.getMinY() - 55);
+                    emojiPill.setOpacity(0);
+                    emojiPill.setTranslateY(10);
+                    // Sped up from 200ms to 100ms for a snappier feel
+                    FadeTransition ft = new FadeTransition(Duration.millis(100), emojiPill);
+                    ft.setToValue(1); ft.play();
+                    TranslateTransition tt = new TranslateTransition(Duration.millis(100), emojiPill);
+                    tt.setToY(0); tt.play();
                 }
-                postService.likePost(post.getId(), post.getLikes());
-                countLabel.setText(String.valueOf(post.getLikes()));
-            } catch (SQLException ex) {
-                ex.printStackTrace();
             }
         });
-        box.setStyle("-fx-cursor: hand;");
-        return box;
+
+        triggerBtn.setOnMouseExited(ev -> {
+            new Thread(() -> {
+                // Reduced delay from 250ms to 100ms
+                try { Thread.sleep(100); } catch (Exception ignored) {}
+                javafx.application.Platform.runLater(() -> {
+                    if (!emojiPill.isHover()) {
+                        FadeTransition ft = new FadeTransition(Duration.millis(100), emojiPill);
+                        ft.setToValue(0);
+                        ft.setOnFinished(e -> popup.hide());
+                        ft.play();
+                    }
+                });
+            }).start();
+        });
+
+        emojiPill.setOnMouseExited(ev -> {
+            FadeTransition ft = new FadeTransition(Duration.millis(100), emojiPill);
+            ft.setToValue(0);
+            ft.setOnFinished(e -> popup.hide());
+            ft.play();
+        });
+
+        return triggerRow;
+    }
+
+    // ---- Helpers ----
+
+    private String buildMainLabel(ReactionType rt) {
+        if (rt == null) return "👍 Like";
+        return rt.getEmoji() + " " + capitalize(rt.name());
+    }
+
+    private String buildMainBtnStyle(ReactionType rt) {
+        String base = "-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 6 12 6 12; -fx-background-radius: 20; ";
+        if (rt == null) {
+            return base + "-fx-text-fill: #64748b; -fx-background-color: transparent;";
+        }
+        return base + "-fx-text-fill: " + getEmojiColor(rt) + "; -fx-background-color: #f1f5f9;";
+    }
+
+    private String getEmojiColor(ReactionType rt) {
+        switch (rt) {
+            case LIKE: return "#1877f2"; // Blue
+            case LOVE: return "#f33e58"; // Red
+            case HAHA: 
+            case WOW: 
+            case SAD: return "#f7b125"; // Yellow
+            default: return "#64748b";
+        }
+    }
+
+    private void refreshCountSummary(Label lbl, int postId) {
+        try {
+            java.util.Map<ReactionType, Integer> counts = postService.getReactionCounts(postId);
+            int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+            if (total > 0) {
+                lbl.setText(total + " reactions");
+            } else {
+                lbl.setText("");
+            }
+        } catch (java.sql.SQLException e) {
+            lbl.setText("");
+        }
+    }
+
+    private String capitalize(String s) {
+        if (s == null || s.isEmpty()) return s;
+        return s.charAt(0) + s.substring(1).toLowerCase();
     }
 
     private HBox createCommentAction(Post post) {
