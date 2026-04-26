@@ -81,6 +81,10 @@ public class AddPostController {
             return;
         }
 
+        // Automatic Text Correction
+        title = services.forum.TextCorrectionService.correctText(title);
+        content = services.forum.TextCorrectionService.correctText(content);
+
         Post post = new Post();
         post.setTitle(title);
         post.setContent(content);

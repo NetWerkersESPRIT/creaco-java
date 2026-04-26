@@ -96,6 +96,10 @@ public class UpdatePostController {
             return;
         }
 
+        // Automatic Text Correction
+        title = services.forum.TextCorrectionService.correctText(title);
+        content = services.forum.TextCorrectionService.correctText(content);
+
         postToUpdate.setTitle(title);
         postToUpdate.setContent(content);
         boolean requestPin = pinToggle.isSelected();
