@@ -111,16 +111,7 @@ public class CoursesController {
         }
     }
 
-    private Node buildCourseCard(Course course) {
-        VBox card = new VBox(15);
-        card.getStyleClass().add("card");
-        card.setPrefWidth(300);
-        card.setMinWidth(300);
-
-        HBox header = new HBox(15);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        StackPane iconContainer = new StackPane();
+    private void showFallbackIcon(StackPane container, Course course) {
         String catName = categoryNames.getOrDefault(course.getCategorieId(), "General").toLowerCase();
         String iconClass = "card-icon-pink";
         String iconEmoji = "📦";
@@ -131,36 +122,73 @@ public class CoursesController {
             iconClass = "card-icon-blue";
             iconEmoji = "🎨";
         }
-        iconContainer.getStyleClass().addAll("card-icon-container", iconClass);
+        
+        container.getStyleClass().add(iconClass);
         Label iconLabel = new Label(iconEmoji);
-        iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
-        iconContainer.getChildren().add(iconLabel);
+        iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 40px;"); // Larger for the big container
+        container.getChildren().add(iconLabel);
+    }
 
+    private Node buildCourseCard(Course course) {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+        card.setPrefWidth(300);
+        card.setMinWidth(300);
+        card.setStyle("-fx-padding: 0; -fx-overflow: hidden;"); // Clean edge for image
+
+        StackPane visualContainer = new StackPane();
+        visualContainer.setPrefHeight(160);
+        visualContainer.setMinHeight(160);
+        visualContainer.setMaxHeight(160);
+        visualContainer.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 15 15 0 0;"); // Rounded top only
+
+        if (course.getImage() != null && !course.getImage().isBlank()) {
+            try {
+                javafx.scene.image.ImageView courseImg = new javafx.scene.image.ImageView(new javafx.scene.image.Image(course.getImage(), true));
+                courseImg.setFitWidth(300);
+                courseImg.setFitHeight(160);
+                courseImg.setPreserveRatio(false);
+                
+                javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(300, 160);
+                clip.setArcWidth(30);
+                clip.setArcHeight(30);
+                courseImg.setClip(clip);
+                
+                visualContainer.getChildren().add(courseImg);
+            } catch (Exception e) {
+                showFallbackIcon(visualContainer, course);
+            }
+        } else {
+            showFallbackIcon(visualContainer, course);
+        }
+
+        VBox infoBox = new VBox(12);
+        infoBox.setStyle("-fx-padding: 15;");
+        
         VBox titleBox = new VBox(2);
         Label titleLabel = new Label(course.getTitre());
         titleLabel.getStyleClass().add("card-title");
         titleLabel.setWrapText(true);
-        Label categoryLabel = new Label(catName.toUpperCase());
+        String catName = categoryNames.getOrDefault(course.getCategorieId(), "General").toUpperCase();
+        Label categoryLabel = new Label(catName);
         categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 10px;");
-        titleBox.getChildren().addAll(titleLabel, categoryLabel);
-        HBox.setHgrow(titleBox, Priority.ALWAYS);
-        header.getChildren().addAll(iconContainer, titleBox);
+        titleBox.getChildren().addAll(categoryLabel, titleLabel);
 
-        VBox contentBox = new VBox(6);
-        Label updatedLabel = new Label("Updated " + (course.getDateDeModification() != null ? course.getDateDeModification() : "recently"));
-        updatedLabel.getStyleClass().add("card-subtitle");
         Label descriptionLabel = new Label(course.getDescription() != null ? course.getDescription() : "No description available.");
         descriptionLabel.setWrapText(true);
-        descriptionLabel.setMinHeight(50);
-        descriptionLabel.setMaxHeight(50);
-        descriptionLabel.getStyleClass().add("subtitle-label");
-        contentBox.getChildren().addAll(updatedLabel, descriptionLabel);
-
+        descriptionLabel.setMinHeight(40);
+        descriptionLabel.setMaxHeight(40);
+        descriptionLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
+        
+        HBox footer = new HBox();
+        footer.setAlignment(Pos.CENTER_LEFT);
         Label exploreLink = new Label("EXPLORE RESOURCES →");
         exploreLink.getStyleClass().add("card-action-link");
-        exploreLink.setOnMouseClicked(event -> openCourse(course));
+        footer.getChildren().add(exploreLink);
 
-        card.getChildren().addAll(header, contentBox, exploreLink);
+        infoBox.getChildren().addAll(titleBox, descriptionLabel, footer);
+        card.getChildren().addAll(visualContainer, infoBox);
+        
         card.setCursor(javafx.scene.Cursor.HAND);
         card.setOnMouseClicked(event -> openCourse(course));
 

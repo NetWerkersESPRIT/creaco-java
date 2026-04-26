@@ -25,15 +25,15 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories" />
-                            <Label fx:id="titleLabel" styleClass="title-label" text="Edit Category" />
-                            <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Modify the category details below" />
-                        </VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
+                            <VBox>
+                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories" />
+                                <Label fx:id="titleLabel" styleClass="title-label" text="Edit Category" />
+                                <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Modify the category details below" />
+                            </VBox>
+                        </HBox>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#onCancel"
-                                styleClass="btn-secondary" prefWidth="120" prefHeight="40"
-                                text="Cancel" />
                     </children>
                 </HBox>
                 

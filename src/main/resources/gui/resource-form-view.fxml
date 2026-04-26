@@ -25,11 +25,14 @@
             <children>
                 <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Resources / Edit" />
-                            <Label fx:id="titleLabel" styleClass="title-label" text="Add Resource" />
-                            <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a new resource." />
-                        </VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
+                            <VBox>
+                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Resources / Edit" />
+                                <Label fx:id="titleLabel" styleClass="title-label" text="Add Resource" />
+                                <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a new resource." />
+                            </VBox>
+                        </HBox>
                         <Region HBox.hgrow="ALWAYS" />
                         <Button onAction="#logout" styleClass="btn-logout">
                             <graphic>
@@ -72,9 +75,6 @@
                         </VBox>
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">
                             <children>
-                                <Button mnemonicParsing="false" onAction="#onCancel"
-                                        styleClass="btn-secondary" prefWidth="120" prefHeight="40"
-                                        text="Cancel" />
                                 <Button mnemonicParsing="false" onAction="#onSave"
                                         styleClass="btn-primary" prefWidth="150" prefHeight="40"
                                         text="Save resource" />

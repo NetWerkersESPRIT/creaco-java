@@ -24,11 +24,14 @@
             <children>
                 <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Button onAction="#onBackToCourses" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
                             <VBox>
                                 <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Resources" />
                                 <Label fx:id="titleLabel" styleClass="title-label" text="Resources" />
                                 <Label fx:id="statusLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Ready" />
                             </VBox>
+                        </HBox>
                         <Region HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#onAddRessource" prefHeight="44.0" styleClass="btn-primary" text="Add resource" />
                         <Button onAction="#logout" styleClass="btn-logout">

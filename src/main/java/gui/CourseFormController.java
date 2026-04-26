@@ -71,6 +71,15 @@ public class CourseFormController {
     @FXML
     private TextArea descriptionArea;
 
+    @FXML
+    private javafx.scene.image.ImageView imagePreview;
+
+    @FXML
+    private TextField imagePathField;
+
+    @FXML
+    private Label noImageLabel;
+
     private Course course;
     private CourseCategory returnCategory;
     private final Map<String, Integer> categoryNameToId = new LinkedHashMap<>();
@@ -120,7 +129,7 @@ public class CourseFormController {
         target.setStatut(publishedRadio.isSelected() ? "Published" : "Draft");
         target.setNiveau(levelCombo.getValue());
         target.setDateDeModification(LocalDateTime.now().toString());
-        target.setImage(target.getImage() != null ? target.getImage() : "");
+        target.setImage(imagePathField.getText().trim());
 
         // Handle category selection
         String selectedCategory = categoryCombo.getValue();
@@ -270,6 +279,38 @@ public class CourseFormController {
         openCoursesPage();
     }
 
+    @FXML
+    private void onUploadImage() {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Select Course Image");
+        fileChooser.getExtensionFilters().addAll(
+            new javafx.stage.FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+        
+        java.io.File selectedFile = fileChooser.showOpenDialog(imagePreview.getScene().getWindow());
+        if (selectedFile != null) {
+            String path = selectedFile.toURI().toString();
+            imagePathField.setText(path);
+            updateImagePreview(path);
+        }
+    }
+
+    private void updateImagePreview(String imagePath) {
+        if (imagePath != null && !imagePath.isBlank()) {
+            try {
+                javafx.scene.image.Image img = new javafx.scene.image.Image(imagePath, true);
+                imagePreview.setImage(img);
+                noImageLabel.setVisible(false);
+            } catch (Exception e) {
+                imagePreview.setImage(null);
+                noImageLabel.setVisible(true);
+            }
+        } else {
+            imagePreview.setImage(null);
+            noImageLabel.setVisible(true);
+        }
+    }
+
     private void loadCategories() throws SQLException {
         categoryNameToId.clear();
         categoryCombo.getItems().clear();
@@ -322,6 +363,10 @@ public class CourseFormController {
 
         // Set duration
         durationField.setText(course.getDureeEstimee() == null ? "" : String.valueOf(course.getDureeEstimee()));
+        
+        // Set image
+        imagePathField.setText(course.getImage() != null ? course.getImage() : "");
+        updateImagePreview(course.getImage());
     }
 
     private void openCoursesPage() {

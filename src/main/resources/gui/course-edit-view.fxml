@@ -34,11 +34,14 @@
             <children>
                 <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Edit" />
-                            <Label fx:id="titleLabel" styleClass="title-label" text="Add Course" />
-                            <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a new course." />
-                        </VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
+                            <VBox>
+                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Edit" />
+                                <Label fx:id="titleLabel" styleClass="title-label" text="Add Course" />
+                                <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a new course." />
+                            </VBox>
+                        </HBox>
                         <Region HBox.hgrow="ALWAYS" />
                         <HBox alignment="CENTER" spacing="10.0">
                              <Button onAction="#logout" styleClass="btn-logout">
@@ -102,17 +105,36 @@
                                 </VBox>
                             </children>
                         </GridPane>
+                        <VBox spacing="15.0" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15;">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Course Image" />
+                                <HBox spacing="20.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <StackPane style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-overflow: hidden;" minWidth="160" minHeight="100" maxWidth="160" maxHeight="100">
+                                            <children>
+                                                <javafx.scene.image.ImageView fx:id="imagePreview" fitWidth="160" fitHeight="100" preserveRatio="true" />
+                                                <Label fx:id="noImageLabel" text="No Image" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" />
+                                            </children>
+                                        </StackPane>
+                                        <VBox spacing="10.0">
+                                            <children>
+                                                <Button onAction="#onUploadImage" styleClass="btn-action-light" text="📁 Choose Image" />
+                                                <Label style="-fx-text-fill: #64748b; -fx-font-size: 11px;" text="Recommended: 800x500px (JPG, PNG)" />
+                                                <TextField fx:id="imagePathField" editable="false" promptText="No file selected" style="-fx-font-size: 10px; -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
                         <VBox spacing="8.0">
                             <children>
                                 <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Description" />
-                                <TextArea fx:id="descriptionArea" prefHeight="220.0" promptText="Describe this course..." wrapText="true" />
+                                <TextArea fx:id="descriptionArea" prefHeight="120.0" promptText="Describe this course..." wrapText="true" />
                             </children>
                         </VBox>
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">
                             <children>
-                                <Button mnemonicParsing="false" onAction="#onCancel"
-                                        styleClass="btn-secondary" prefWidth="120" prefHeight="40"
-                                        text="Cancel" />
                                 <Button mnemonicParsing="false" onAction="#onSave"
                                         styleClass="btn-primary" prefWidth="150" prefHeight="40"
                                         text="Save course" />

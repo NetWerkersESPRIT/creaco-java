@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.CourseCategoryListController">
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.CourseCategoryListController">
     <left>
         <fx:include source="sidebar.fxml" />
     </left>
@@ -22,11 +22,14 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories" />
-                            <Label fx:id="titleLabel" styleClass="title-label" text="Course Categories" />
-                            <Label fx:id="statusLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Ready" />
-                        </VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Button onAction="#onBackToCourses" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
+                            <VBox>
+                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories" />
+                                <Label fx:id="titleLabel" styleClass="title-label" text="Course Categories" />
+                                <Label fx:id="statusLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Ready" />
+                            </VBox>
+                        </HBox>
                         <Region HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#onAddCategory" prefHeight="44.0" styleClass="btn-primary" text="Add category" />
                     </children>

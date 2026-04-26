@@ -169,9 +169,25 @@ public class RessourceListController {
     }
 
     private Button createActionButton(String text, String colorClass) {
-        Button button = new Button(text);
+        String displayText = text;
+        if ("Edit".equalsIgnoreCase(text)) displayText = "✏";
+        else if ("Delete".equalsIgnoreCase(text)) displayText = "🗑";
+        
+        Button button = new Button(displayText);
         button.getStyleClass().addAll("btn-action", colorClass);
-        button.setMinWidth(90);
+        button.setMinWidth(40);
+        
+        // Custom styling for smaller, grey buttons
+        String baseStyle = "-fx-font-size: 13px; -fx-padding: 6 12; -fx-background-radius: 8;";
+        if ("btn-action-dark".equals(colorClass)) {
+            button.setStyle(baseStyle + " -fx-background-color: #4b5563; -fx-text-fill: white;");
+        } else {
+            button.setStyle(baseStyle + " -fx-background-color: #f1f5f9; -fx-text-fill: #4b5563;");
+        }
+        
+        if ("✏".equals(displayText)) button.setTooltip(new javafx.scene.control.Tooltip("Edit"));
+        if ("🗑".equals(displayText)) button.setTooltip(new javafx.scene.control.Tooltip("Delete"));
+        
         return button;
     }
 
