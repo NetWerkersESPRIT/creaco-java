@@ -123,9 +123,66 @@ public class CommentService implements ForumInterface<Comment> {
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setInt(1, postId);
         ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return rs.getInt(1);
-        }
+        if (rs.next()) return rs.getInt(1);
         return 0;
     }
-}
+
+    /** Returns current likes count for a comment. */
+    public int getLikes(int commentId) throws SQLException {
+        String sql = "SELECT likes FROM comment WHERE id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, commentId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) return rs.getInt(1);
+        return 0;
+    }
+
+    /** Ensures the comment_like table exists (idempotent). */
+    private void ensureLikeTable() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS `comment_like` (" +
+                     "`comment_id` INT NOT NULL, " +
+                     "`user_id` INT NOT NULL, " +
+                     "PRIMARY KEY (`comment_id`, `user_id`))";
+        con.createStatement().executeUpdate(sql);
+    }
+
+    /** Returns true if the given user has already liked this comment. */
+    public boolean hasUserLiked(int commentId, int userId) throws SQLException {
+        ensureLikeTable();
+        String sql = "SELECT 1 FROM comment_like WHERE comment_id = ? AND user_id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, commentId);
+        ps.setInt(2, userId);
+        ResultSet rs = ps.executeQuery();
+        return rs.next();
+    }
+
+    /**
+     * Per-user like toggle:
+     *  - If user hasn't liked → inserts row + increments likes counter → returns new count
+     *  - If user already liked → removes row + decrements likes counter → returns new count
+     */
+    public int toggleCommentLike(int commentId, int userId) throws SQLException {
+        ensureLikeTable();
+        if (hasUserLiked(commentId, userId)) {
+            // Unlike
+            String del = "DELETE FROM comment_like WHERE comment_id = ? AND user_id = ?";
+            PreparedStatement ps = con.prepareStatement(del);
+            ps.setInt(1, commentId); ps.setInt(2, userId);
+            ps.executeUpdate();
+            String upd = "UPDATE comment SET likes = GREATEST(likes - 1, 0) WHERE id = ?";
+            PreparedStatement ps2 = con.prepareStatement(upd);
+            ps2.setInt(1, commentId); ps2.executeUpdate();
+        } else {
+            // Like
+            String ins = "INSERT INTO comment_like (comment_id, user_id) VALUES (?, ?)";
+            PreparedStatement ps = con.prepareStatement(ins);
+            ps.setInt(1, commentId); ps.setInt(2, userId);
+            ps.executeUpdate();
+            String upd = "UPDATE comment SET likes = likes + 1 WHERE id = ?";
+            PreparedStatement ps2 = con.prepareStatement(upd);
+            ps2.setInt(1, commentId); ps2.executeUpdate();
+        }
+        return getLikes(commentId);
+    }
+}

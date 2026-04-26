@@ -42,11 +42,18 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 
 public class DisplayPostController {
 
@@ -188,6 +195,7 @@ public class DisplayPostController {
 
     private VBox buildPostCard(Post post) {
         VBox card = new VBox(15);
+        card.setId("post-card-" + post.getId()); // Set ID for scrolling
         card.getStyleClass().add("card");
         card.setPadding(new Insets(25));
         card.setAlignment(javafx.geometry.Pos.TOP_LEFT);
@@ -198,7 +206,7 @@ public class DisplayPostController {
         HBox authorRow = new HBox(12);
         authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        StackPane avatar = buildAvatar(author);
+        StackPane avatar = buildAvatarWithRing(author, 35);
         Label usernameLabel = new Label(username);
         usernameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;");
         authorRow.getChildren().addAll(avatar, usernameLabel);
@@ -274,7 +282,11 @@ public class DisplayPostController {
         if (isAdminMode) {
             actionsRow.getChildren().add(createPinAction(post));
         }
-        actionsRow.getChildren().add(createSimpleAction("↪ Share", ""));
+        
+        HBox shareBtn = createSimpleAction("↪ Share", "");
+        shareBtn.setOnMouseClicked(e -> onSharePost(post, shareBtn));
+        shareBtn.setStyle("-fx-cursor: hand;");
+        actionsRow.getChildren().add(shareBtn);
 
         card.getChildren().add(actionsRow);
 
@@ -337,6 +349,11 @@ public class DisplayPostController {
                 ReactionType result = postService.handleReaction(currentUserId, postId, typeToApply);
                 userReactions.put(postId, result);
 
+                // Notify Post Owner
+                if (result != null && post.getUserId() != currentUserId) {
+                    new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                }
+
                 triggerBtn.setText(buildMainLabel(result));
                 triggerBtn.setStyle(buildMainBtnStyle(result));
                 refreshCountSummary(countSummary, postId);
@@ -395,6 +412,11 @@ public class DisplayPostController {
                 try {
                     ReactionType result = postService.handleReaction(currentUserId, postId, rt);
                     userReactions.put(postId, result);
+
+                    // Notify Post Owner
+                    if (result != null && post.getUserId() != currentUserId) {
+                        new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                    }
 
                     triggerBtn.setText(buildMainLabel(result));
                     triggerBtn.setStyle(buildMainBtnStyle(result));
@@ -788,10 +810,15 @@ public class DisplayPostController {
         String imageUrl = (user != null) ? user.getImage() : null;
 
         StackPane circle = new StackPane();
-        circle.setPrefSize(35, 35);
-        circle.setMinSize(35, 35);
-        circle.setMaxSize(35, 35);
+        circle.setPrefSize(32, 32);
+        circle.setMinSize(32, 32);
+        circle.setMaxSize(32, 32);
         circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
+
+        // Use Dicebear fallback if no image (matches Profile view)
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+        }
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
             try {
@@ -803,35 +830,57 @@ public class DisplayPostController {
                     if (file.exists()) {
                         img = new Image(file.toURI().toString());
                     } else {
-                        img = null;
+                        // Fallback to dicebear if local file missing
+                        img = new Image("https://api.dicebear.com/7.x/avataaars/png?seed=" + username, true);
                     }
                 }
 
                 if (img != null) {
                     ImageView imageView = new ImageView(img);
-                    imageView.setFitWidth(35);
-                    imageView.setFitHeight(35);
+                    imageView.setFitWidth(32);
+                    imageView.setFitHeight(32);
                     imageView.setPreserveRatio(true);
-
-                    // Clip to circle
-                    javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(17.5, 17.5, 17.5);
-                    imageView.setClip(clip);
+                    imageView.setClip(new javafx.scene.shape.Circle(16, 16, 16));
 
                     circle.getChildren().add(imageView);
                     return circle;
                 }
-            } catch (Exception e) {
-                // Fallback to initials on error
-            }
+            } catch (Exception e) {}
         }
 
-        // Fallback: Initials
         char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
         Label initLabel = new Label(String.valueOf(initial));
         initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
         circle.getChildren().add(initLabel);
-
         return circle;
+    }
+
+    private StackPane buildAvatarWithRing(entities.Users user, int size) {
+        StackPane ring = new StackPane();
+        ring.setPrefSize(size + 4, size + 4);
+        ring.setMinSize(size + 4, size + 4);
+        ring.setMaxSize(size + 4, size + 4);
+        ring.setStyle("-fx-background-radius: 50; " +
+                "-fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);");
+        
+        StackPane inner = buildAvatar(user);
+        inner.setPrefSize(size, size);
+        inner.setMinSize(size, size);
+        inner.setMaxSize(size, size);
+        
+        if (!inner.getChildren().isEmpty() && inner.getChildren().get(0) instanceof ImageView) {
+            ImageView iv = (ImageView) inner.getChildren().get(0);
+            iv.setFitWidth(size); iv.setFitHeight(size);
+            iv.setClip(new javafx.scene.shape.Circle(size / 2.0, size / 2.0, size / 2.0));
+        }
+        
+        StackPane bg = new StackPane();
+        bg.setStyle("-fx-background-color: white; -fx-background-radius: 50;");
+        bg.setPrefSize(size + 1, size + 1);
+        bg.getChildren().add(inner);
+        
+        ring.getChildren().add(bg);
+        return ring;
     }
 
     private void openPdf(String pdfName) {
@@ -926,8 +975,77 @@ public class DisplayPostController {
         }
     }
 
+    private void onSharePost(Post post, Node anchor) {
+        if (post == null) return;
+        
+        ContextMenu shareMenu = new ContextMenu();
+        shareMenu.setStyle("-fx-background-radius: 10; -fx-padding: 5;");
+
+        MenuItem twitterItem = new MenuItem("Share on Twitter");
+        twitterItem.setOnAction(e -> openSocialLink(post, "https://twitter.com/intent/tweet?text="));
+
+        MenuItem whatsappItem = new MenuItem("Share on WhatsApp");
+        whatsappItem.setOnAction(e -> openSocialLink(post, "https://wa.me/?text="));
+
+        MenuItem copyItem = new MenuItem("Copy Link");
+        copyItem.setOnAction(e -> {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            String postUrl = "https://creaco.com/post/" + post.getId();
+            content.putString(postUrl);
+            clipboard.setContent(content);
+            showAlert(Alert.AlertType.INFORMATION, "Copied", "Post link copied to clipboard!");
+        });
+
+        shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem);
+        shareMenu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
+    }
+
+    private void openSocialLink(Post post, String baseUrl) {
+        try {
+            String postUrl = "https://creaco.com/post/" + post.getId();
+            String encodedUrl = URLEncoder.encode(postUrl, StandardCharsets.UTF_8);
+            String url = baseUrl + encodedUrl;
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(new URI(url));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open share link.");
+        }
+    }
+
     private String formatDate(LocalDateTime date) {
         return (date == null) ? "-" : date.format(DISPLAY_DATE_FORMAT);
+    }
+
+    public void scrollToPost(int postId) {
+        javafx.application.Platform.runLater(() -> {
+            Node target = postsContainer.lookup("#post-card-" + postId);
+            if (target != null) {
+                // Highlight effect
+                String originalStyle = target.getStyle();
+                target.setStyle(originalStyle + "; -fx-border-color: #ce2d7c; -fx-border-width: 2; -fx-background-color: #fff1f2;");
+                
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                pause.setOnFinished(e -> target.setStyle(originalStyle));
+                pause.play();
+
+                // Scroll to target
+                Node parent = postsContainer.getParent();
+                while (parent != null && !(parent instanceof javafx.scene.control.ScrollPane)) {
+                    parent = parent.getParent();
+                }
+                
+                if (parent instanceof javafx.scene.control.ScrollPane) {
+                    javafx.scene.control.ScrollPane scrollPane = (javafx.scene.control.ScrollPane) parent;
+                    double scrollHeight = postsContainer.getBoundsInLocal().getHeight();
+                    double nodeY = target.getBoundsInParent().getMinY();
+                    scrollPane.setVvalue(nodeY / scrollHeight);
+                }
+            }
+        });
     }
 
     private String safeText(String value) {

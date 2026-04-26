@@ -12,6 +12,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import services.forum.PostService;
 import services.UserService;
+import services.forum.SpamDetectionService;
+import services.NotificationService;
 
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +37,7 @@ public class PostModerationController {
 
     private final PostService postService = new PostService();
     private final UserService userService = new UserService();
+    private final SpamDetectionService spamService = new SpamDetectionService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private final DateTimeFormatter metaFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy, h:mm a");
 
@@ -115,10 +118,23 @@ public class PostModerationController {
         authorLabel.setPrefWidth(150);
         authorLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-font-size: 14px;");
 
-        // Spam Score
-        Label spamLabel = new Label(post.getSpamScore() + "/100");
-        spamLabel.setPrefWidth(120);
-        spamLabel.setStyle("-fx-text-fill: #718096; -fx-font-weight: bold;");
+        // Spam Score with dynamic styling (Badge/Pill style)
+        int spamScore = post.getSpamScore();
+        Label spamLabel = new Label(spamScore + "/100");
+        spamLabel.setPrefWidth(100);
+        spamLabel.setAlignment(javafx.geometry.Pos.CENTER);
+        
+        String spamStyle = "-fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 4 10; -fx-background-radius: 15; -fx-border-radius: 15; ";
+        if (spamScore >= 80) {
+            spamStyle += "-fx-text-fill: #991b1b; -fx-background-color: #fef2f2; -fx-border-color: #fecdd3; -fx-border-width: 1;"; // High Spam - Red
+        } else if (spamScore >= 40) {
+            spamStyle += "-fx-text-fill: #9a3412; -fx-background-color: #fff7ed; -fx-border-color: #fed7aa; -fx-border-width: 1;"; // Suspicious - Orange
+        } else if (spamScore > 0) {
+            spamStyle += "-fx-text-fill: #1e40af; -fx-background-color: #eff6ff; -fx-border-color: #bfdbfe; -fx-border-width: 1;"; // Minimal - Blue
+        } else {
+            spamStyle += "-fx-text-fill: #166534; -fx-background-color: #f0fdf4; -fx-border-color: #bbf7d0; -fx-border-width: 1;"; // Clean - Green
+        }
+        spamLabel.setStyle(spamStyle);
 
         // Date
         String dateStr = (post.getCreatedAt() != null) ? post.getCreatedAt().format(formatter) : "-";
@@ -183,6 +199,14 @@ public class PostModerationController {
     }
 
     @FXML
+    private void onRunSpamFilter() {
+        // This method re-analyzes all pending posts and sorts those with highest spam scores to the top
+        loadPendingPosts();
+        // Visual feedback
+        gui.util.AlertHelper.showCustomAlert("Spam Analysis", "Spam scores have been updated and highlighted.", gui.util.AlertHelper.AlertType.INFORMATION);
+    }
+
+    @FXML
     private void onShowAnalytics() {
         try {
             javafx.scene.layout.StackPane contentArea =
@@ -212,6 +236,9 @@ public class PostModerationController {
                 selectedPost.setStatus("ACCEPTED");
                 postService.updatePostStatus(selectedPost);
                 
+                // Notify User
+                new NotificationService().notifyPostApproved(selectedPost.getUserId(), selectedPost.getId());
+                
                 gui.util.AlertHelper.showCustomAlert("Success", "Post approved!", gui.util.AlertHelper.AlertType.INFORMATION);
                 showList();
             } catch (SQLException ex) {
@@ -222,6 +249,10 @@ public class PostModerationController {
                 try {
                     selectedPost.setStatus("ACCEPTED");
                     postService.updatePostStatus(selectedPost);
+                    
+                    // Notify User
+                    new NotificationService().notifyPostApproved(selectedPost.getUserId(), selectedPost.getId());
+                    
                     gui.util.AlertHelper.showCustomAlert("Success", "Post approved!", gui.util.AlertHelper.AlertType.INFORMATION);
                     showList();
                 } catch (SQLException e) { e.printStackTrace(); }
@@ -279,6 +310,10 @@ public class PostModerationController {
                 selectedPost.setStatus("REJECTED");
                 selectedPost.setRefusalReason(reason);
                 postService.updatePostStatus(selectedPost);
+                
+                // Notify User
+                new NotificationService().notifyPostRefused(selectedPost.getUserId(), selectedPost.getId());
+                
                 gui.util.AlertHelper.showCustomAlert("Refused", "Post has been rejected.", gui.util.AlertHelper.AlertType.INFORMATION);
                 showList();
             } catch (SQLException e) { e.printStackTrace(); }

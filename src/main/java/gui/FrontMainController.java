@@ -49,6 +49,11 @@ public class FrontMainController {
     @FXML private Label lblUsername;
     @FXML private Label lblUserRole;
     @FXML private javafx.scene.image.ImageView imgNavAvatar;
+    @FXML private Button btnNotifications;
+    @FXML private javafx.scene.layout.StackPane notifBadge;
+    @FXML private Label lblNotifCount;
+
+    private javafx.stage.Popup notificationPopup;
 
     private static FrontMainController instance;
 
@@ -103,6 +108,54 @@ public class FrontMainController {
                 btnUserGroups.setVisible(isTeamMember);
                 btnUserGroups.setManaged(isTeamMember);
             }
+
+            checkUnreadNotifications();
+        }
+    }
+
+    private void checkUnreadNotifications() {
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null && notifBadge != null) {
+            services.NotificationService ns = new services.NotificationService();
+            List<entities.Notification> notifications = ns.getNotificationsForUser(user.getId());
+            long unreadCount = notifications.stream().filter(n -> !n.isRead()).count();
+            
+            if (unreadCount > 0) {
+                lblNotifCount.setText(String.valueOf(unreadCount > 9 ? "9+" : unreadCount));
+                notifBadge.setVisible(true);
+            } else {
+                notifBadge.setVisible(false);
+            }
+        }
+    }
+
+    @FXML
+    private void onShowNotifications() {
+        if (notificationPopup != null && notificationPopup.isShowing()) {
+            notificationPopup.hide();
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/notification/notification_list.fxml"));
+            Parent root = loader.load();
+            gui.notification.NotificationListController controller = loader.getController();
+
+            notificationPopup = new javafx.stage.Popup();
+            notificationPopup.getContent().add(root);
+            notificationPopup.setAutoHide(true);
+
+            controller.setOnCloseCallback(() -> {
+                notificationPopup.hide();
+                checkUnreadNotifications();
+            });
+
+            // Position popup below the button
+            javafx.geometry.Bounds bounds = btnNotifications.localToScreen(btnNotifications.getBoundsInLocal());
+            notificationPopup.show(btnNotifications, bounds.getMinX() - 360, bounds.getMaxY() + 10);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
