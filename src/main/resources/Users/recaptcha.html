@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>reCAPTCHA Enterprise Verification</title>
+    <!-- Use the Enterprise API endpoint -->
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=explicit" async defer></script>
+    <script type="text/javascript">
+        var SITE_KEY = "";
+        var apiReady = false;
+
+        function onRecaptchaSuccess(token) {
+            window.location.href = "recaptcha-verify:" + token;
+        }
+        
+        function onRecaptchaExpired() {
+            window.location.href = "recaptcha-expired:true";
+        }
+
+        function initRecaptcha(key) {
+            SITE_KEY = key;
+            tryRender();
+        }
+
+        function tryRender() {
+            // Check for grecaptcha.enterprise for Enterprise keys
+            if (SITE_KEY !== "" && typeof grecaptcha !== 'undefined' && typeof grecaptcha.enterprise !== 'undefined') {
+                grecaptcha.enterprise.render('recaptcha-container', {
+                    'sitekey' : SITE_KEY,
+                    'callback' : onRecaptchaSuccess,
+                    'expired-callback' : onRecaptchaExpired
+                });
+                console.log("reCAPTCHA Enterprise rendered");
+            } else {
+                setTimeout(tryRender, 500);
+            }
+        }
+    </script>
+    <style>
+        body { margin: 0; padding: 0; background-color: transparent; display: flex; justify-content: center; align-items: center; overflow: hidden; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="recaptcha-container"></div>
+</body>
+</html>

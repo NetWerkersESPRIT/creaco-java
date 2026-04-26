@@ -1,14 +1,29 @@
 package utils;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 public class GeminiService {
-    private static final String API_KEY = "AIzaSyDXIfuY0hCoi-tmYBWDnd7qeVmCref5l60";
+    private static String API_KEY;
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+
+    static {
+        Properties properties = new Properties();
+        try (FileInputStream fis = new FileInputStream("config.properties")) {
+            properties.load(fis);
+            API_KEY = properties.getProperty("GEMINI_API_KEY");
+        } catch (IOException e) {
+            System.err.println("Error loading config.properties: " + e.getMessage());
+            // Fallback or handle error - maybe use an environment variable?
+            API_KEY = System.getenv("GEMINI_API_KEY");
+        }
+    }
 
     public static String getGeminiResponse(String prompt) {
         try {

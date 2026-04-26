@@ -1,2 +1,16 @@
 # Stakpak session files
 .stakpak/session*
+# Sensitive Configs
+config.properties
+
+# Maven
+target/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project/
+.classpath/
+bin/
