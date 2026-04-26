@@ -42,6 +42,8 @@ public class FrontMainController {
     @FXML private Label lblAdminHeader;
     @FXML private VBox boxAdmin;
     @FXML private HBox boxAdminActions;
+    @FXML private Button btnMyTeam;
+    @FXML private Button btnUserGroups;
 
     // User Profile in Navbar
     @FXML private Label lblUsername;
@@ -88,6 +90,18 @@ public class FrontMainController {
             if (boxAdminActions != null) {
                 boxAdminActions.setVisible(isAdmin);
                 boxAdminActions.setManaged(isAdmin);
+            }
+
+            boolean isContentCreator = "ROLE_CONTENT_CREATOR".equals(user.getRole());
+            if (btnMyTeam != null) {
+                btnMyTeam.setVisible(isContentCreator);
+                btnMyTeam.setManaged(isContentCreator);
+            }
+
+            boolean isTeamMember = "ROLE_MANAGER".equals(user.getRole()) || "ROLE_MEMBER".equals(user.getRole());
+            if (btnUserGroups != null) {
+                btnUserGroups.setVisible(isTeamMember);
+                btnUserGroups.setManaged(isTeamMember);
             }
         }
     }
@@ -196,6 +210,18 @@ public class FrontMainController {
         if (txtWelcome != null) txtWelcome.setText("Collaborations");
         if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Collaborations");
         loadSubView("/collaborator/ListCollaborator.fxml"); 
+    }
+
+    @FXML public void onShowMyTeam() {
+        if (txtWelcome != null) txtWelcome.setText("Manage Team");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Team Management");
+        loadSubView("/Users/GroupManagement.fxml");
+    }
+
+    @FXML public void onShowUserGroups() {
+        if (txtWelcome != null) txtWelcome.setText("My Teams");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Joined Teams");
+        loadSubView("/Users/UserGroupsDashboard.fxml");
     }
 
     @FXML
