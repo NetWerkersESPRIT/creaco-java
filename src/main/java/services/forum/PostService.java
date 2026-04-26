@@ -68,14 +68,8 @@ public class PostService implements ForumInterface<Post> {
     }
 
     public void checkUserCanPin(int userId) throws Exception {
-        if (pendingPinRequests.containsKey(userId)) {
-            throw new Exception("You already have a pinned or pending post. Only one pin is allowed.");
-        }
-        List<Post> posts = afficher();
-        boolean hasPinned = posts.stream().anyMatch(p -> p.getUserId() == userId && p.isPinned());
-        if (hasPinned) {
-            throw new Exception("You already have a pinned or pending post. Only one pin is allowed.");
-        }
+        // Only admins can pin now as per user request
+        throw new Exception("Only administrators can pin posts to the forum.");
     }
 
     public void requestPin(int userId, int postId) {
@@ -101,13 +95,8 @@ public class PostService implements ForumInterface<Post> {
                 return null;
             }
         } else {
-            if (post.isPinned()) {
-                throw new Exception("Only admins can unpin posts directly.");
-            } else {
-                checkUserCanPin(userId);
-                requestPin(userId, post.getId());
-                return "Pin request sent to admin.";
-            }
+            // Normal users cannot pin or request pin anymore
+            throw new Exception("Only administrators can pin posts to the forum.");
         }
     }
 

@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import services.forum.PostService;
 import services.UserService;
 import services.forum.SpamDetectionService;
+import services.NotificationService;
 
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
@@ -235,6 +236,9 @@ public class PostModerationController {
                 selectedPost.setStatus("ACCEPTED");
                 postService.updatePostStatus(selectedPost);
                 
+                // Notify User
+                new NotificationService().notifyPostApproved(selectedPost.getUserId(), selectedPost.getId());
+                
                 gui.util.AlertHelper.showCustomAlert("Success", "Post approved!", gui.util.AlertHelper.AlertType.INFORMATION);
                 showList();
             } catch (SQLException ex) {
@@ -245,6 +249,10 @@ public class PostModerationController {
                 try {
                     selectedPost.setStatus("ACCEPTED");
                     postService.updatePostStatus(selectedPost);
+                    
+                    // Notify User
+                    new NotificationService().notifyPostApproved(selectedPost.getUserId(), selectedPost.getId());
+                    
                     gui.util.AlertHelper.showCustomAlert("Success", "Post approved!", gui.util.AlertHelper.AlertType.INFORMATION);
                     showList();
                 } catch (SQLException e) { e.printStackTrace(); }
@@ -302,6 +310,10 @@ public class PostModerationController {
                 selectedPost.setStatus("REJECTED");
                 selectedPost.setRefusalReason(reason);
                 postService.updatePostStatus(selectedPost);
+                
+                // Notify User
+                new NotificationService().notifyPostRefused(selectedPost.getUserId(), selectedPost.getId());
+                
                 gui.util.AlertHelper.showCustomAlert("Refused", "Post has been rejected.", gui.util.AlertHelper.AlertType.INFORMATION);
                 showList();
             } catch (SQLException e) { e.printStackTrace(); }

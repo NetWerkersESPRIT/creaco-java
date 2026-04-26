@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<HBox fx:id="itemRoot" alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0; -fx-cursor: hand;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.notification.NotificationItemController">
+    <children>
+        <StackPane fx:id="iconContainer" prefHeight="48.0" prefWidth="48.0" style="-fx-background-radius: 12; -fx-background-color: linear-gradient(to bottom right, #a855f7, #ec4899);">
+            <children>
+                <Label fx:id="iconLabel" text="🔔" style="-fx-text-fill: white; -fx-font-size: 20px;" />
+            </children>
+        </StackPane>
+        
+        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+            <children>
+                <Label fx:id="messageLabel" text="Welcome to CreaCo, ranim ric! 🎉 Your account has been created successfully." wrapText="true" style="-fx-font-size: 14px; -fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-line-spacing: 2;" />
+                <HBox alignment="CENTER_LEFT" spacing="5.0">
+                    <children>
+                        <Label text="🕒" style="-fx-font-size: 12px; -fx-text-fill: #94a3b8;" />
+                        <Label fx:id="timeLabel" text="21s" style="-fx-font-size: 12px; -fx-text-fill: #94a3b8;" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+        
+        <Circle fx:id="unreadDot" radius="5.0" fill="linear-gradient(to bottom right, #a855f7, #ec4899)" visible="false" />
+    </children>
+</HBox>

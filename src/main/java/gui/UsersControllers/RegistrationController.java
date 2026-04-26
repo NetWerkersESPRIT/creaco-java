@@ -1,7 +1,10 @@
 package gui.UsersControllers;
 
 import entities.Users;
+import entities.Group;
 import services.UsersService;
+import services.GroupService;
+import services.NotificationService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -23,6 +26,7 @@ public class RegistrationController {
     @FXML private Label lblMessage;
 
     private final UsersService usersService = new UsersService();
+    private final GroupService groupService = new GroupService();
 
     private String validate() {
         String username  = txtUsername.getText().trim();
@@ -61,6 +65,13 @@ public class RegistrationController {
             u.setCreated_at(now);
 
             usersService.ajouter(u);
+            
+            // Retrieve the user from DB to get the generated ID
+            Users dbUser = usersService.findByEmail(u.getEmail());
+            if (dbUser != null) {
+                new NotificationService().notifyWelcome(dbUser);
+            }
+            
             lblMessage.setStyle("-fx-text-fill: green;");
             lblMessage.setText("✅ Account created! Redirecting...");
 

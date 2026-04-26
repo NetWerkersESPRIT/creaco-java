@@ -195,6 +195,7 @@ public class DisplayPostController {
 
     private VBox buildPostCard(Post post) {
         VBox card = new VBox(15);
+        card.setId("post-card-" + post.getId()); // Set ID for scrolling
         card.getStyleClass().add("card");
         card.setPadding(new Insets(25));
         card.setAlignment(javafx.geometry.Pos.TOP_LEFT);
@@ -348,6 +349,11 @@ public class DisplayPostController {
                 ReactionType result = postService.handleReaction(currentUserId, postId, typeToApply);
                 userReactions.put(postId, result);
 
+                // Notify Post Owner
+                if (result != null && post.getUserId() != currentUserId) {
+                    new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                }
+
                 triggerBtn.setText(buildMainLabel(result));
                 triggerBtn.setStyle(buildMainBtnStyle(result));
                 refreshCountSummary(countSummary, postId);
@@ -406,6 +412,11 @@ public class DisplayPostController {
                 try {
                     ReactionType result = postService.handleReaction(currentUserId, postId, rt);
                     userReactions.put(postId, result);
+
+                    // Notify Post Owner
+                    if (result != null && post.getUserId() != currentUserId) {
+                        new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                    }
 
                     triggerBtn.setText(buildMainLabel(result));
                     triggerBtn.setStyle(buildMainBtnStyle(result));
@@ -1007,6 +1018,34 @@ public class DisplayPostController {
 
     private String formatDate(LocalDateTime date) {
         return (date == null) ? "-" : date.format(DISPLAY_DATE_FORMAT);
+    }
+
+    public void scrollToPost(int postId) {
+        javafx.application.Platform.runLater(() -> {
+            Node target = postsContainer.lookup("#post-card-" + postId);
+            if (target != null) {
+                // Highlight effect
+                String originalStyle = target.getStyle();
+                target.setStyle(originalStyle + "; -fx-border-color: #ce2d7c; -fx-border-width: 2; -fx-background-color: #fff1f2;");
+                
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                pause.setOnFinished(e -> target.setStyle(originalStyle));
+                pause.play();
+
+                // Scroll to target
+                Node parent = postsContainer.getParent();
+                while (parent != null && !(parent instanceof javafx.scene.control.ScrollPane)) {
+                    parent = parent.getParent();
+                }
+                
+                if (parent instanceof javafx.scene.control.ScrollPane) {
+                    javafx.scene.control.ScrollPane scrollPane = (javafx.scene.control.ScrollPane) parent;
+                    double scrollHeight = postsContainer.getBoundsInLocal().getHeight();
+                    double nodeY = target.getBoundsInParent().getMinY();
+                    scrollPane.setVvalue(nodeY / scrollHeight);
+                }
+            }
+        });
     }
 
     private String safeText(String value) {

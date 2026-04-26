@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
 
 <BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -139,6 +140,26 @@
                                     </HBox>
                                 </graphic>
                             </Button>
+                            <Button fx:id="btnMyTeam" mnemonicParsing="false" onAction="#onShowMyTeam" prefWidth="210.0" styleClass="sidebar-item">
+                                <graphic>
+                                    <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                        <StackPane styleClass="sidebar-icon-box">
+                                            <Label text="👥" style="-fx-font-size: 16px;" />
+                                        </StackPane>
+                                        <Label text="Manage Team" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+                            <Button fx:id="btnUserGroups" mnemonicParsing="false" onAction="#onShowUserGroups" prefWidth="210.0" styleClass="sidebar-item">
+                                <graphic>
+                                    <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                        <StackPane styleClass="sidebar-icon-box">
+                                            <Label text="👥" style="-fx-font-size: 16px;" />
+                                        </StackPane>
+                                        <Label text="My Teams" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
                             <Button fx:id="btnCourses" mnemonicParsing="false" onAction="#onShowCourses" prefWidth="210.0" styleClass="sidebar-item">
                                 <graphic>
                                     <HBox spacing="15.0" alignment="CENTER_LEFT">
@@ -184,9 +205,24 @@
                                 
                                 <Region HBox.hgrow="ALWAYS" />
                                 
-                                <Button style="-fx-background-color: white; -fx-background-radius: 12; -fx-min-width: 40; -fx-min-height: 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+                                <Button fx:id="btnNotifications" onAction="#onShowNotifications" style="-fx-background-color: white; -fx-background-radius: 12; -fx-min-width: 40; -fx-min-height: 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);">
                                     <graphic>
-                                        <Label text="🔔" style="-fx-font-size: 16px;" />
+                                        <StackPane>
+                                            <Label text="🔔" style="-fx-font-size: 16px;" />
+                                            <StackPane fx:id="notifBadge" visible="false" StackPane.alignment="TOP_RIGHT">
+                                                <children>
+                                                    <Circle radius="8" fill="linear-gradient(to bottom right, #a855f7, #ec4899)" stroke="white" strokeWidth="1.5">
+                                                        <effect>
+                                                            <javafx.scene.effect.DropShadow color="rgba(0,0,0,0.2)" radius="4" offsetX="0" offsetY="2" />
+                                                        </effect>
+                                                    </Circle>
+                                                    <Label fx:id="lblNotifCount" text="0" style="-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                                                </children>
+                                                <StackPane.margin>
+                                                    <Insets right="-5" top="-5" />
+                                                </StackPane.margin>
+                                            </StackPane>
+                                        </StackPane>
                                     </graphic>
                                 </Button>
 
