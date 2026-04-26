@@ -29,6 +29,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import gui.forum.GifPickerModalController;
+import services.NotificationService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -178,6 +179,7 @@ public class DisplayCommentController {
         // ── Layout ───────────────────────────────────────────────────────────────
         double leftPad = depth > 0 ? 52.0 * Math.min(depth, 3) : 0.0;
         VBox card = new VBox(0);
+        card.setId("comment-card-" + comment.getId()); // Set ID for scrolling/lookup
         card.setStyle("-fx-background-color: transparent;");
         card.setPadding(new Insets(10, 0, 2, leftPad));
 
@@ -325,6 +327,12 @@ public class DisplayCommentController {
             try {
                 likeCount[0] = commentService.toggleCommentLike(comment.getId(), curUserIdForLike);
                 liked[0] = commentService.hasUserLiked(comment.getId(), curUserIdForLike);
+                
+                // Notify Comment Owner
+                if (liked[0] && comment.getUserId() != curUserIdForLike) {
+                    Users liker = utils.SessionManager.getInstance().getCurrentUser();
+                    new NotificationService().notifyCommentLike(comment.getUserId(), liker.getUsername(), comment.getId(), currentPost.getId());
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -496,6 +504,12 @@ public class DisplayCommentController {
 
         try {
             commentService.ajouter(comment);
+            
+            // Notify Post Owner
+            if (currentPost.getUserId() != currentUser.getId()) {
+                new NotificationService().notifyComment(currentPost.getUserId(), currentUser.getUsername(), currentPost.getId());
+            }
+
             commentArea.clear();
             removeAttachment();
             loadCommentsByPost();
@@ -521,6 +535,13 @@ public class DisplayCommentController {
         reply.setCreatedAt(LocalDateTime.now());
         try {
             commentService.ajouter(reply);
+            
+            // Notify Comment Owner
+            if (parent.getUserId() != reply.getUserId()) {
+                Users replier = utils.SessionManager.getInstance().getCurrentUser();
+                new NotificationService().notifyReply(parent.getUserId(), replier.getUsername(), reply.getId(), currentPost.getId());
+            }
+
             loadCommentsByPost();
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -694,6 +715,35 @@ public class DisplayCommentController {
         gifPreview.setUserData(null);
         attachmentPreview.setVisible(false);
         attachmentPreview.setManaged(false);
+    }
+
+    public void scrollToComment(int commentId) {
+        javafx.application.Platform.runLater(() -> {
+            Node target = commentsContainer.lookup("#comment-card-" + commentId);
+            if (target != null) {
+                // Highlight effect
+                String originalStyle = target.getStyle();
+                target.setStyle(originalStyle + "; -fx-background-color: #fff1f2;"); // Light pink highlight
+                
+                // Fade out highlight after 3 seconds
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                pause.setOnFinished(e -> target.setStyle(originalStyle));
+                pause.play();
+
+                // Scroll to target (find the ScrollPane first)
+                Node parent = commentsContainer.getParent();
+                while (parent != null && !(parent instanceof ScrollPane)) {
+                    parent = parent.getParent();
+                }
+                
+                if (parent instanceof ScrollPane) {
+                    ScrollPane scrollPane = (ScrollPane) parent;
+                    double scrollHeight = commentsContainer.getBoundsInLocal().getHeight();
+                    double nodeY = target.getBoundsInParent().getMinY();
+                    scrollPane.setVvalue(nodeY / scrollHeight);
+                }
+            }
+        });
     }
 
     private String formatDate(LocalDateTime date) {

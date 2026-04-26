@@ -101,6 +101,8 @@
                                 </children>
                             </HBox>
     
+                            <Label fx:id="statusLabel" style="-fx-text-fill: #4a5568; -fx-font-size: 13px;" />
+
                             <VBox spacing="15.0" alignment="CENTER" maxWidth="Infinity">
                                 <children>
                                     <Button mnemonicParsing="false" onAction="#savePost" styleClass="btn-primary" 

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="22.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.UsersControllers.GroupManagementController">
+    <padding>
+        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+    </padding>
+    <children>
+        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 24; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);" VBox.vgrow="ALWAYS">
+            <children>
+                <HBox alignment="CENTER_LEFT">
+                    <children>
+                        <VBox spacing="5">
+                            <children>
+                                <Label fx:id="lblTeamName" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="My Team" />
+                                <Label style="-fx-font-size: 14px; -fx-text-fill: #64748b;" text="Manage your team members and their roles." />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#handleAddMember" style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 24; -fx-cursor: hand;" text="+ Add Member" />
+                    </children>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;" />
+
+                <VBox spacing="0.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 10 20;">
+                            <children>
+                                <Label prefWidth="300.0" style="-fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-letter-spacing: 1;" text="TEAM MEMBER" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label alignment="CENTER" prefWidth="180.0" style="-fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-letter-spacing: 1;" text="ROLE" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label alignment="CENTER" prefWidth="200.0" style="-fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-letter-spacing: 1;" text="ACTIONS" />
+                            </children>
+                        </HBox>
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+                            <content>
+                                <VBox fx:id="membersList" spacing="0.0" style="-fx-background-color: white;" />
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</VBox>
