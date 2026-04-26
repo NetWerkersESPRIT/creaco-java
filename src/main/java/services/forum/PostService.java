@@ -68,14 +68,8 @@ public class PostService implements ForumInterface<Post> {
     }
 
     public void checkUserCanPin(int userId) throws Exception {
-        if (pendingPinRequests.containsKey(userId)) {
-            throw new Exception("You already have a pinned or pending post. Only one pin is allowed.");
-        }
-        List<Post> posts = afficher();
-        boolean hasPinned = posts.stream().anyMatch(p -> p.getUserId() == userId && p.isPinned());
-        if (hasPinned) {
-            throw new Exception("You already have a pinned or pending post. Only one pin is allowed.");
-        }
+        // Only admins can pin now as per user request
+        throw new Exception("Only administrators can pin posts to the forum.");
     }
 
     public void requestPin(int userId, int postId) {
@@ -101,13 +95,8 @@ public class PostService implements ForumInterface<Post> {
                 return null;
             }
         } else {
-            if (post.isPinned()) {
-                throw new Exception("Only admins can unpin posts directly.");
-            } else {
-                checkUserCanPin(userId);
-                requestPin(userId, post.getId());
-                return "Pin request sent to admin.";
-            }
+            // Normal users cannot pin or request pin anymore
+            throw new Exception("Only administrators can pin posts to the forum.");
         }
     }
 
@@ -300,7 +289,7 @@ public class PostService implements ForumInterface<Post> {
 
     @Override
     public void modifier(int id, Post post) throws SQLException {
-        String sql = "UPDATE `post` SET `title`=?, `content`=?, `status`=?, `user_id`=?, `image_name`=?, `pdf_name`=?, `pinned`=?, `is_comment_locked`=?, `updated_at`=? WHERE `id`=?";
+        String sql = "UPDATE `post` SET `title`=?, `content`=?, `status`=?, `user_id`=?, `image_name`=?, `pdf_name`=?, `pinned`=?, `is_comment_locked`=?, `is_spam`=?, `spam_score`=?, `updated_at`=? WHERE `id`=?";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setString(1, post.getTitle());
         ps.setString(2, post.getContent());
@@ -310,8 +299,10 @@ public class PostService implements ForumInterface<Post> {
         ps.setString(6, post.getPdfName());
         ps.setBoolean(7, post.isPinned());
         ps.setBoolean(8, post.isCommentLocked());
-        ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
-        ps.setInt(10, id);
+        ps.setBoolean(9, post.isSpam());
+        ps.setInt(10, post.getSpamScore());
+        ps.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
+        ps.setInt(12, id);
         ps.executeUpdate();
         System.out.println("Post modifié avec succès!");
     }
