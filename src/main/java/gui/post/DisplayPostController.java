@@ -42,11 +42,18 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 
 public class DisplayPostController {
 
@@ -274,7 +281,11 @@ public class DisplayPostController {
         if (isAdminMode) {
             actionsRow.getChildren().add(createPinAction(post));
         }
-        actionsRow.getChildren().add(createSimpleAction("↪ Share", ""));
+        
+        HBox shareBtn = createSimpleAction("↪ Share", "");
+        shareBtn.setOnMouseClicked(e -> onSharePost(post, shareBtn));
+        shareBtn.setStyle("-fx-cursor: hand;");
+        actionsRow.getChildren().add(shareBtn);
 
         card.getChildren().add(actionsRow);
 
@@ -923,6 +934,47 @@ public class DisplayPostController {
             } catch (SQLException e) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Could not delete.");
             }
+        }
+    }
+
+    private void onSharePost(Post post, Node anchor) {
+        if (post == null) return;
+        
+        ContextMenu shareMenu = new ContextMenu();
+        shareMenu.setStyle("-fx-background-radius: 10; -fx-padding: 5;");
+
+        MenuItem twitterItem = new MenuItem("Share on Twitter");
+        twitterItem.setOnAction(e -> openSocialLink(post, "https://twitter.com/intent/tweet?text="));
+
+        MenuItem whatsappItem = new MenuItem("Share on WhatsApp");
+        whatsappItem.setOnAction(e -> openSocialLink(post, "https://wa.me/?text="));
+
+        MenuItem copyItem = new MenuItem("Copy Link");
+        copyItem.setOnAction(e -> {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            String postUrl = "https://creaco.com/post/" + post.getId();
+            content.putString(postUrl);
+            clipboard.setContent(content);
+            showAlert(Alert.AlertType.INFORMATION, "Copied", "Post link copied to clipboard!");
+        });
+
+        shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem);
+        shareMenu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
+    }
+
+    private void openSocialLink(Post post, String baseUrl) {
+        try {
+            String postUrl = "https://creaco.com/post/" + post.getId();
+            String encodedUrl = URLEncoder.encode(postUrl, StandardCharsets.UTF_8);
+            String url = baseUrl + encodedUrl;
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(new URI(url));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open share link.");
         }
     }
 

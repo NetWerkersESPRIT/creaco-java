@@ -8,6 +8,7 @@ entities\CollabRequest.class
 gui\collaborator\AddCollaboratorController.class
 gui\contract\AddContractController.class
 entities\Comment.class
+services\forum\TextCorrectionService.class
 gui\collabrequest\EditCollabRequestController.class
 gui\post\AddPostController.class
 gui\MainController.class

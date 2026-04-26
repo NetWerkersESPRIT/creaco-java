@@ -18,6 +18,10 @@ import services.UserService;
 import services.forum.PostService;
 import entities.ReactionType;
 import java.util.Map;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -25,6 +29,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.awt.Desktop;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class DisplayCommentController {
 
@@ -359,6 +367,8 @@ public class DisplayCommentController {
         String body = commentArea.getText();
         if (body == null || body.trim().isEmpty()) return;
 
+        body = services.forum.TextCorrectionService.correctText(body);
+
         Comment comment = new Comment();
         comment.setPostId(currentPost.getId());
         comment.setUserId(utils.SessionManager.getInstance().getCurrentUser().getId());
@@ -377,6 +387,7 @@ public class DisplayCommentController {
 
     private void submitEdit(Comment comment, String newBody) {
         try {
+            newBody = services.forum.TextCorrectionService.correctText(newBody);
             comment.setBody(newBody);
             commentService.modifier(comment.getId(), comment);
             loadCommentsByPost();
@@ -384,6 +395,7 @@ public class DisplayCommentController {
     }
 
     private void submitReply(Comment parent, String body) {
+        body = services.forum.TextCorrectionService.correctText(body);
         Comment reply = new Comment();
         reply.setPostId(currentPost.getId());
         reply.setParentCommentId(parent.getId());
@@ -418,9 +430,46 @@ public class DisplayCommentController {
     }
 
     @FXML
-    private void onSharePost() {
-        // Dummy share logic
-        gui.util.AlertHelper.showCustomAlert("Share", "Post link copied to clipboard!", gui.util.AlertHelper.AlertType.INFORMATION);
+    private void onSharePost(ActionEvent event) {
+        if (currentPost == null) return;
+        
+        Button sourceBtn = (Button) event.getSource();
+        ContextMenu shareMenu = new ContextMenu();
+        shareMenu.setStyle("-fx-background-radius: 10; -fx-padding: 5;");
+
+        MenuItem twitterItem = new MenuItem("Share on Twitter");
+        twitterItem.setOnAction(e -> openSocialLink("https://twitter.com/intent/tweet?text="));
+
+        MenuItem whatsappItem = new MenuItem("Share on WhatsApp");
+        whatsappItem.setOnAction(e -> openSocialLink("https://wa.me/?text="));
+
+        MenuItem copyItem = new MenuItem("Copy Link");
+        copyItem.setOnAction(e -> {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            String postUrl = "https://creaco.com/post/" + currentPost.getId();
+            content.putString(postUrl);
+            clipboard.setContent(content);
+            gui.util.AlertHelper.showCustomAlert("Copied", "Post link copied to clipboard!", gui.util.AlertHelper.AlertType.INFORMATION);
+        });
+
+        shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem);
+        shareMenu.show(sourceBtn, javafx.geometry.Side.BOTTOM, 0, 0);
+    }
+
+    private void openSocialLink(String baseUrl) {
+        try {
+            String postUrl = "https://creaco.com/post/" + currentPost.getId();
+            String encodedUrl = URLEncoder.encode(postUrl, StandardCharsets.UTF_8);
+            String url = baseUrl + encodedUrl;
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(new URI(url));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            gui.util.AlertHelper.showCustomAlert("Error", "Could not open share link.", gui.util.AlertHelper.AlertType.ERROR);
+        }
     }
 
     @FXML
