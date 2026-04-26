@@ -348,3 +348,32 @@
     -fx-background-color: #0284c7;
     -fx-effect: dropshadow(three-pass-box, rgba(14, 165, 233, 0.3), 10, 0, 0, 3);
 }
+
+/* Colorful Glow Hover Effect */
+.glow-on-hover:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.4), 20, 0, 0, 5);
+    -fx-border-color: -fx-primary-pink;
+    -fx-translate-y: -1;
+}
+
+.glow-on-hover:pressed {
+    -fx-translate-y: 1;
+}
+
+/* Simple Combo Style */
+.combo-simple {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+    -fx-border-radius: 10;
+    -fx-padding: 5;
+}
+
+.combo-simple:hover {
+    -fx-background-color: #f1f5f9;
+}
+
+.combo-simple:focused {
+    -fx-background-color: #edf2f7;
+    -fx-border-color: #cbd5e1;
+}
