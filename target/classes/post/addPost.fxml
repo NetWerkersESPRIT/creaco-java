@@ -11,104 +11,111 @@
     <children>
 
         <!-- Centered Main Form Card -->
-        <StackPane VBox.vgrow="ALWAYS">
-            <children>
-                <VBox maxWidth="980.0" spacing="25.0" styleClass="card" alignment="TOP_CENTER">
-                    <padding>
-                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
-                    </padding>
-                    <children>
-                        <VBox alignment="CENTER" spacing="8.0">
-                            <children>
-                                <Label text="Create New Discussion" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
-                                <Label text="Ask a question or share your knowledge with the community" styleClass="subtitle-label" />
-                            </children>
-                        </VBox>
-                        
-                        <VBox spacing="15.0" alignment="TOP_LEFT">
-                            <children>
-                                <HBox spacing="10" alignment="CENTER_LEFT">
-                                    <Label text="Title" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
-                                    <HBox spacing="5" alignment="CENTER_LEFT" onMouseClicked="#onDictateTitle" style="-fx-cursor: hand;">
-                                        <Label text="🎤" style="-fx-font-size: 14px;" />
-                                        <Label text="Click to dictate" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+        <content>
+            <StackPane>
+                <children>
+                    <VBox maxWidth="980.0" spacing="25.0" styleClass="card" alignment="TOP_CENTER">
+                        <padding>
+                            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                        </padding>
+                        <children>
+                            <VBox alignment="CENTER" spacing="8.0">
+                                <children>
+                                    <Label text="Create New Discussion" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                                    <Label text="Ask a question or share your knowledge with the community" styleClass="subtitle-label" />
+                                </children>
+                            </VBox>
+                            
+                            <VBox spacing="15.0" alignment="TOP_LEFT">
+                                <children>
+                                    <HBox spacing="10" alignment="CENTER_LEFT">
+                                        <Label text="Title" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
+                                        <HBox spacing="5" alignment="CENTER_LEFT" onMouseClicked="#onDictateTitle" style="-fx-cursor: hand;">
+                                            <Label text="🎤" style="-fx-font-size: 14px;" />
+                                            <Label text="Click to dictate" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
+                                        </HBox>
                                     </HBox>
-                                </HBox>
-                                <TextField fx:id="titleField" promptText="Enter title..." 
-                                           style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12;" />
-                                <Label fx:id="titleErrorLabel" managed="false" visible="false" style="-fx-text-fill: #e53e3e; -fx-font-size: 11px;" />
-                            </children>
-                        </VBox>
-                        
-                        <VBox spacing="15.0" alignment="TOP_LEFT">
-                            <children>
-                                <HBox alignment="CENTER_LEFT" spacing="10">
-                                     <Label text="Content" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
-                                     <HBox spacing="5" alignment="CENTER_LEFT" onMouseClicked="#onDictateContent" style="-fx-cursor: hand;">
-                                         <Label text="🎤" style="-fx-font-size: 14px;" />
-                                         <Label text="Click to dictate" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
-                                     </HBox>
-                                     <Region HBox.hgrow="ALWAYS" />
-                                     <Button text="✎ SWITCH TO ADVANCED EDITOR" style="-fx-background-color: white; -fx-border-color: #4a5568; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-padding: 5 12;" />
-                                </HBox>
-                                <TextArea fx:id="contentArea" prefHeight="180.0" promptText="Write something..." 
-                                          style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;" wrapText="true" />
-                                <Label fx:id="contentErrorLabel" managed="false" visible="false" style="-fx-text-fill: #e53e3e; -fx-font-size: 11px;" />
-                            </children>
-                        </VBox>
+                                    <TextField fx:id="titleField" promptText="Enter title..." 
+                                               style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12;" />
+                                    <Label fx:id="titleErrorLabel" managed="false" visible="false" style="-fx-text-fill: #e53e3e; -fx-font-size: 11px;" />
+                                </children>
+                            </VBox>
+                            
+                            <VBox spacing="15.0" alignment="TOP_LEFT">
+                                <children>
+                                    <HBox alignment="CENTER_LEFT" spacing="10">
+                                         <Label text="Content" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
+                                         <HBox spacing="5" alignment="CENTER_LEFT" onMouseClicked="#onDictateContent" style="-fx-cursor: hand;">
+                                             <Label text="🎤" style="-fx-font-size: 14px;" />
+                                             <Label text="Click to dictate" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
+                                         </HBox>
+                                         <Region HBox.hgrow="ALWAYS" />
+                                         <Button text="✎ SWITCH TO ADVANCED EDITOR" style="-fx-background-color: white; -fx-border-color: #4a5568; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-padding: 5 12;" />
+                                    </HBox>
+                                    <TextArea fx:id="contentArea" prefHeight="180.0" promptText="Write something..." 
+                                              style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;" wrapText="true" />
+                                    <Label fx:id="contentErrorLabel" managed="false" visible="false" style="-fx-text-fill: #e53e3e; -fx-font-size: 11px;" />
+                                </children>
+                            </VBox>
+    
+                            <VBox fx:id="sentimentWarningContainer" managed="false" visible="false" spacing="15.0" />
+    
+                            <HBox spacing="30.0">
+                                <children>
+                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                        <children>
+                                            <Label text="Cover Image" style="-fx-font-weight: bold; -fx-text-fill: #4a5568;" />
+                                            <HBox alignment="CENTER_LEFT" style="-fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 2;">
+                                                <children>
+                                                    <Button onAction="#chooseImage" text="Choose File" 
+                                                            style="-fx-background-color: transparent; -fx-border-color: #dbe4f0; -fx-border-width: 0 1 0 0; -fx-padding: 10 15; -fx-text-fill: #4a5568; -fx-font-weight: bold;" />
+                                                    <Label fx:id="imageLabel" text="No file chosen" style="-fx-padding: 0 15; -fx-text-fill: #718096;" />
+                                                </children>
+                                            </HBox>
+                                        </children>
+                                    </VBox>
+                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                        <children>
+                                            <Label text="PDF Document" style="-fx-font-weight: bold; -fx-text-fill: #4a5568;" />
+                                            <HBox alignment="CENTER_LEFT" style="-fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 2;">
+                                                <children>
+                                                    <Button onAction="#choosePDF" text="Choose File" 
+                                                            style="-fx-background-color: transparent; -fx-border-color: #dbe4f0; -fx-border-width: 0 1 0 0; -fx-padding: 10 15; -fx-text-fill: #4a5568; -fx-font-weight: bold;" />
+                                                    <Label fx:id="pdfLabel" text="No file chosen" style="-fx-padding: 0 15; -fx-text-fill: #718096;" />
+                                                </children>
+                                            </HBox>
+                                        </children>
+                                    </VBox>
+                                </children>
+                            </HBox>
+    
+                            <HBox spacing="12.0" alignment="CENTER_LEFT">
+                                <children>
+                                    <ToggleButton fx:id="pinToggle" styleClass="toggle-switch">
+                                        <graphic>
+                                            <Region styleClass="thumb" />
+                                        </graphic>
+                                    </ToggleButton>
+                                    <Label text="Pin this post" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 13px;" />
+                                </children>
+                            </HBox>
+    
+                            <VBox spacing="15.0" alignment="CENTER" maxWidth="Infinity">
+                                <children>
+                                    <Button mnemonicParsing="false" onAction="#savePost" styleClass="btn-primary" 
+                                            prefHeight="50.0" maxWidth="Infinity" text="SAVE" />
+                                    <Button mnemonicParsing="false" onAction="#goBack" 
+                                            style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-text-fill: #4a5568; -fx-font-weight: bold;" 
+                                            prefHeight="50.0" maxWidth="Infinity" text="CANCEL" />
+                                </children>
+                            </VBox>
+                        </children>
+                    </VBox>
+                </children>
+            </StackPane>
+        </content>
+    </ScrollPane>
 
-                        <HBox spacing="30.0">
-                            <children>
-                                <VBox spacing="10.0" HBox.hgrow="ALWAYS">
-                                    <children>
-                                        <Label text="Cover Image" style="-fx-font-weight: bold; -fx-text-fill: #4a5568;" />
-                                        <HBox alignment="CENTER_LEFT" style="-fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 2;">
-                                            <children>
-                                                <Button onAction="#chooseImage" text="Choose File" 
-                                                        style="-fx-background-color: transparent; -fx-border-color: #dbe4f0; -fx-border-width: 0 1 0 0; -fx-padding: 10 15; -fx-text-fill: #4a5568; -fx-font-weight: bold;" />
-                                                <Label fx:id="imageLabel" text="No file chosen" style="-fx-padding: 0 15; -fx-text-fill: #718096;" />
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-                                <VBox spacing="10.0" HBox.hgrow="ALWAYS">
-                                    <children>
-                                        <Label text="PDF Document" style="-fx-font-weight: bold; -fx-text-fill: #4a5568;" />
-                                        <HBox alignment="CENTER_LEFT" style="-fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 2;">
-                                            <children>
-                                                <Button onAction="#choosePDF" text="Choose File" 
-                                                        style="-fx-background-color: transparent; -fx-border-color: #dbe4f0; -fx-border-width: 0 1 0 0; -fx-padding: 10 15; -fx-text-fill: #4a5568; -fx-font-weight: bold;" />
-                                                <Label fx:id="pdfLabel" text="No file chosen" style="-fx-padding: 0 15; -fx-text-fill: #718096;" />
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </HBox>
-
-                        <HBox spacing="12.0" alignment="CENTER_LEFT">
-                            <children>
-                                <ToggleButton fx:id="pinToggle" styleClass="toggle-switch">
-                                    <graphic>
-                                        <Region styleClass="thumb" />
-                                    </graphic>
-                                </ToggleButton>
-                                <Label text="Pin this post" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 13px;" />
-                            </children>
-                        </HBox>
-
-                        <VBox spacing="15.0" alignment="CENTER" maxWidth="Infinity">
-                            <children>
-                                <Button mnemonicParsing="false" onAction="#savePost" styleClass="btn-primary" 
-                                        prefHeight="50.0" maxWidth="Infinity" text="SAVE" />
-                                <Button mnemonicParsing="false" onAction="#goBack" 
-                                        style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-text-fill: #4a5568; -fx-font-weight: bold;" 
-                                        prefHeight="50.0" maxWidth="Infinity" text="CANCEL" />
-                            </children>
-                        </VBox>
-                    </children>
-                </VBox>
-            </children>
-        </StackPane>
     </children>
 </VBox>

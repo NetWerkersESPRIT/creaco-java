@@ -8,7 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import services.forum.PostService;
 import utils.SessionManager;
@@ -19,10 +19,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 import java.util.Scanner;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javafx.animation.PauseTransition;
+import javafx.concurrent.Task;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
+import javafx.scene.paint.Color;
+import services.forum.UserPostValidator;
+import entities.forum.SentimentResult;
+import gui.forum.CatMatchGame;
 
 public class AddPostController {
 
@@ -38,6 +47,8 @@ public class AddPostController {
     @FXML
     private Label pdfLabel;
     @FXML
+    private VBox sentimentWarningContainer;
+    @FXML
     private Label titleErrorLabel;
     @FXML
     private Label contentErrorLabel;
@@ -52,6 +63,9 @@ public class AddPostController {
 
     private final PostService postService = new PostService();
     private boolean isAdminMode = false;
+    private final UserPostValidator postValidator = new UserPostValidator();
+    private final PauseTransition debounce = new PauseTransition(javafx.util.Duration.millis(800));
+    private boolean isPostCalm = false;
 
     public void setAdminMode(boolean isAdminMode) {
         // Admin mode is now session-based
@@ -70,6 +84,167 @@ public class AddPostController {
             String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
             if (lblUserRole != null) lblUserRole.setText(role);
         }
+
+        setupSentimentAnalysis();
+    }
+
+    private void setupSentimentAnalysis() {
+        contentArea.textProperty().addListener((obs, oldVal, newVal) -> {
+            debounce.setOnFinished(e -> analyzeSentiment(newVal));
+            debounce.playFromStart();
+        });
+    }
+
+    private void analyzeSentiment(String text) {
+        if (text == null || text.trim().length() < 10) {
+            hideSentimentWarning();
+            return;
+        }
+
+        Task<List<SentimentResult>> task = new Task<>() {
+            @Override
+            protected List<SentimentResult> call() {
+                return postValidator.validate(text);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            List<SentimentResult> results = task.getValue();
+            if (!results.isEmpty()) {
+                SentimentResult res = results.get(0); 
+                if ("NEGATIVE".equalsIgnoreCase(res.getLabel()) && res.getScore() >= 0.5) {
+                    if (isPostCalm) {
+                        showCalmState(res);
+                    } else {
+                        showSentimentWarning(res);
+                    }
+                } else {
+                    hideSentimentWarning();
+                    isPostCalm = false; 
+                }
+            }
+        });
+
+        new Thread(task).start();
+    }
+
+    private void showSentimentWarning(SentimentResult res) {
+        sentimentWarningContainer.getChildren().clear();
+        sentimentWarningContainer.setVisible(true);
+        sentimentWarningContainer.setManaged(true);
+        sentimentWarningContainer.setStyle("-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 25; -fx-background-radius: 25; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);");
+
+        VBox content = new VBox(20);
+        
+        HBox header = new HBox(15);
+        header.setAlignment(Pos.TOP_LEFT);
+        
+        // Wind/Waves icon using symbol
+        Label icon = new Label("≋"); 
+        icon.setStyle("-fx-font-size: 28px; -fx-text-fill: #475569; -fx-font-weight: bold;");
+        
+        VBox titles = new VBox(8);
+        Label title = new Label("It seems you're feeling a bit frustrated...");
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #334155;");
+        Label sub = new Label("Your words carry some heat. Take a moment to breathe! This advice is not a substitute for professional help.");
+        sub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px;");
+        sub.setWrapText(true);
+        titles.getChildren().addAll(title, sub);
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Label closeBtn = new Label("✕");
+        closeBtn.setStyle("-fx-cursor: hand; -fx-text-fill: #94a3b8; -fx-font-size: 18px;");
+        closeBtn.setOnMouseClicked(e -> hideSentimentWarning());
+        
+        header.getChildren().addAll(icon, titles, spacer, closeBtn);
+
+        Label sentimentLabel = new Label("Sentiment: NEGATIVE (" + (int)(res.getScore() * 100) + "%)");
+        sentimentLabel.setStyle("-fx-text-fill: #f87171; -fx-font-weight: bold; -fx-font-size: 16px;");
+
+        VBox suggestions = new VBox(12);
+        String[] list = {"Try 4 slow deep breaths", "Step away for 1 minute", "Rephrase calmly"};
+        for (String s : list) {
+            HBox item = new HBox(12);
+            item.setAlignment(Pos.CENTER_LEFT);
+            Label check = new Label("✓");
+            check.setStyle("-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 16px;");
+            Label text = new Label(s);
+            text.setStyle("-fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 16px;");
+            item.getChildren().addAll(check, text);
+            suggestions.getChildren().add(item);
+        }
+
+        Button gameBtn = new Button("😻 Click Me for a Cat-tastic Mini-Exercise! 😻");
+        gameBtn.setStyle("-fx-background-color: linear-gradient(to right, #818cf8, #c084fc); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-size: 14px;");
+        gameBtn.setOnAction(e -> CatMatchGame.launch(sentimentWarningContainer.getScene().getWindow(), () -> {
+            isPostCalm = true;
+            analyzeSentiment(contentArea.getText());
+        }));
+
+        content.getChildren().addAll(header, sentimentLabel, suggestions, gameBtn);
+        sentimentWarningContainer.getChildren().add(content);
+        
+        contentArea.setStyle("-fx-border-color: #f472b6; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10; -fx-border-width: 2;");
+    }
+
+    private void showCalmState(SentimentResult res) {
+        sentimentWarningContainer.getChildren().clear();
+        sentimentWarningContainer.setVisible(true);
+        sentimentWarningContainer.setManaged(true);
+        sentimentWarningContainer.setStyle("-fx-background-color: #ecfdf5; -fx-border-color: #d1fae5; -fx-border-radius: 25; -fx-background-radius: 25; -fx-padding: 30;");
+
+        VBox content = new VBox(20);
+        
+        HBox header = new HBox(15);
+        header.setAlignment(Pos.CENTER_LEFT);
+        
+        // Green check icon
+        Label icon = new Label("✔"); 
+        icon.setStyle("-fx-font-size: 22px; -fx-text-fill: #059669; -fx-font-weight: bold; -fx-background-color: white; -fx-background-radius: 50; -fx-padding: 5;");
+        
+        VBox titles = new VBox(8);
+        Label title = new Label("Ready to rephrase calmly? ✨");
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #065f46;");
+        Label sub = new Label("You look much calmer now! Why not try to rephrase your thoughts into a more positive post?");
+        sub.setStyle("-fx-text-fill: #065f46; -fx-font-size: 14px;");
+        sub.setWrapText(true);
+        titles.getChildren().addAll(title, sub);
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Label closeBtn = new Label("✕");
+        closeBtn.setStyle("-fx-cursor: hand; -fx-text-fill: #065f46; -fx-font-size: 18px;");
+        closeBtn.setOnMouseClicked(e -> hideSentimentWarning());
+        
+        header.getChildren().addAll(icon, titles, spacer, closeBtn);
+
+        Label sentimentLabel = new Label("Sentiment: NEGATIVE (" + (int)(res.getScore() * 100) + "%)");
+        sentimentLabel.setStyle("-fx-text-fill: #f87171; -fx-font-weight: bold; -fx-font-size: 16px;");
+
+        VBox suggestions = new VBox(12);
+        String[] list = {"Try 4 slow deep breaths", "Step away for 1 minute", "Rephrase calmly"};
+        for (String s : list) {
+            HBox item = new HBox(12);
+            item.setAlignment(Pos.CENTER_LEFT);
+            Label check = new Label("✓");
+            check.setStyle("-fx-text-fill: #334155; -fx-font-weight: bold; -fx-font-size: 16px;");
+            Label text = new Label(s);
+            text.setStyle("-fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 16px;");
+            item.getChildren().addAll(check, text);
+            suggestions.getChildren().add(item);
+        }
+
+        content.getChildren().addAll(header, sentimentLabel, suggestions);
+        sentimentWarningContainer.getChildren().add(content);
+        
+        contentArea.setStyle("-fx-border-color: #86efac; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10; -fx-border-width: 2;");
+    }
+
+    private void hideSentimentWarning() {
+        sentimentWarningContainer.setVisible(false);
+        sentimentWarningContainer.setManaged(false);
+        contentArea.setStyle("-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
     }
 
     @FXML
@@ -82,8 +257,8 @@ public class AddPostController {
         }
 
         // Automatic Text Correction
-        title = services.forum.TextCorrectionService.correctText(title);
-        content = services.forum.TextCorrectionService.correctText(content);
+        title = utils.TextCorrectionService.correctText(title);
+        content = utils.TextCorrectionService.correctText(content);
 
         Post post = new Post();
         post.setTitle(title);
