@@ -180,11 +180,44 @@ public class CoursesController {
         descriptionLabel.setMaxHeight(40);
         descriptionLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
         
-        HBox footer = new HBox();
+        HBox footer = new HBox(10);
         footer.setAlignment(Pos.CENTER_LEFT);
+        
         Label exploreLink = new Label("EXPLORE RESOURCES →");
         exploreLink.getStyleClass().add("card-action-link");
-        footer.getChildren().add(exploreLink);
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        
+        HBox interactionBox = new HBox(8);
+        interactionBox.setAlignment(Pos.CENTER_RIGHT);
+        
+        Button likeBtn = new Button("👍 " + course.getLikes());
+        likeBtn.getStyleClass().add("btn-action-light");
+        likeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12;");
+        likeBtn.setOnAction(e -> {
+            e.consume(); // Prevent card click
+            try {
+                courseService.likeCourse(course.getId());
+                course.setLikes(course.getLikes() + 1);
+                likeBtn.setText("👍 " + course.getLikes());
+            } catch (SQLException ex) { ex.printStackTrace(); }
+        });
+        
+        Button dislikeBtn = new Button("👎 " + course.getDislikes());
+        dislikeBtn.getStyleClass().add("btn-action-light");
+        dislikeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12;");
+        dislikeBtn.setOnAction(e -> {
+            e.consume(); // Prevent card click
+            try {
+                courseService.dislikeCourse(course.getId());
+                course.setDislikes(course.getDislikes() + 1);
+                dislikeBtn.setText("👎 " + course.getDislikes());
+            } catch (SQLException ex) { ex.printStackTrace(); }
+        });
+        
+        interactionBox.getChildren().addAll(likeBtn, dislikeBtn);
+        footer.getChildren().addAll(exploreLink, spacer, interactionBox);
 
         infoBox.getChildren().addAll(titleBox, descriptionLabel, footer);
         card.getChildren().addAll(visualContainer, infoBox);

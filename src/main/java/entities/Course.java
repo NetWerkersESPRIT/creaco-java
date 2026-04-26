@@ -14,6 +14,8 @@ public class Course {
     private String niveau;
     private Integer duree_estimee;
     private String deleted_at;
+    private Integer likes;
+    private Integer dislikes;
 
     public Course() {
     }
@@ -32,7 +34,7 @@ public class Course {
 
     public Course(int id, String titre, String description, String image, String date_de_creation,
             String date_de_modification, int categorie_id, String slug, Integer views, String statut, String niveau,
-            Integer dureeEstimee, String deletedAt) {
+            Integer dureeEstimee, String deletedAt, Integer likes, Integer dislikes) {
         this.id = id;
         this.titre = titre;
         this.description = description;
@@ -46,6 +48,8 @@ public class Course {
         this.niveau = niveau;
         this.duree_estimee = dureeEstimee;
         this.deleted_at = deletedAt;
+        this.likes = likes;
+        this.dislikes = dislikes;
     }
 
     public int getId() {
@@ -152,6 +156,22 @@ public class Course {
         this.deleted_at = deleted_at;
     }
 
+    public Integer getLikes() {
+        return likes != null ? likes : 0;
+    }
+
+    public void setLikes(Integer likes) {
+        this.likes = likes;
+    }
+
+    public Integer getDislikes() {
+        return dislikes != null ? dislikes : 0;
+    }
+
+    public void setDislikes(Integer dislikes) {
+        this.dislikes = dislikes;
+    }
+
     @Override
     public String toString() {
         return "Course{" +
@@ -168,6 +188,8 @@ public class Course {
                 ", niveau='" + niveau + '\'' +
                 ", dureeEstimee=" + duree_estimee +
                 ", deletedAt='" + deleted_at + '\'' +
+                ", likes=" + likes +
+                ", dislikes=" + dislikes +
                 '}';
     }
 }

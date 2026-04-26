@@ -89,8 +89,8 @@ public class CourseService {
 
     public void ajouter(Course course) throws SQLException {
         String sql = "INSERT INTO cours (titre, description, image, date_de_creation, date_de_modification, "
-                + "categorie_id, slug, views, statut, niveau, duree_estimee, deleted_at) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "categorie_id, slug, views, statut, niveau, duree_estimee, deleted_at, likes, dislikes) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, course.getTitre());
@@ -113,13 +113,16 @@ public class CourseService {
                 ps.setInt(11, course.getDureeEstimee());
             }
             ps.setNull(12, java.sql.Types.TIMESTAMP);
+            ps.setInt(13, course.getLikes());
+            ps.setInt(14, course.getDislikes());
             ps.executeUpdate();
         }
     }
 
     public void modifier(Course course) throws SQLException {
         String sql = "UPDATE cours SET titre = ?, description = ?, image = ?, date_de_modification = ?, "
-                + "categorie_id = ?, slug = ?, views = ?, statut = ?, niveau = ?, duree_estimee = ? "
+                + "categorie_id = ?, slug = ?, views = ?, statut = ?, niveau = ?, duree_estimee = ?, "
+                + "likes = ?, dislikes = ? "
                 + "WHERE id = ?";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -141,7 +144,9 @@ public class CourseService {
             } else {
                 ps.setInt(10, course.getDureeEstimee());
             }
-            ps.setInt(11, course.getId());
+            ps.setInt(11, course.getLikes());
+            ps.setInt(12, course.getDislikes());
+            ps.setInt(13, course.getId());
             ps.executeUpdate();
         }
     }
@@ -193,6 +198,8 @@ public class CourseService {
         course.setNiveau(rs.getString("niveau"));
         course.setDureeEstimee((Integer) rs.getObject("duree_estimee"));
         course.setDeletedAt(toString(rs.getTimestamp("deleted_at")));
+        course.setLikes((Integer) rs.getObject("likes"));
+        course.setDislikes((Integer) rs.getObject("dislikes"));
         return course;
     }
 
@@ -242,5 +249,21 @@ public class CourseService {
             }
         }
         return false;
+    }
+
+    public void likeCourse(int id) throws SQLException {
+        String sql = "UPDATE cours SET likes = likes + 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
+    public void dislikeCourse(int id) throws SQLException {
+        String sql = "UPDATE cours SET dislikes = dislikes + 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
     }
 }
