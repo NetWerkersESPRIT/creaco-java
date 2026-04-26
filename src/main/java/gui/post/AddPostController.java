@@ -32,6 +32,7 @@ import javafx.scene.paint.Color;
 import services.forum.UserPostValidator;
 import entities.forum.SentimentResult;
 import gui.forum.CatMatchGame;
+import services.forum.SpamDetectionService;
 
 public class AddPostController {
 
@@ -64,6 +65,7 @@ public class AddPostController {
     private final PostService postService = new PostService();
     private boolean isAdminMode = false;
     private final UserPostValidator postValidator = new UserPostValidator();
+    private final SpamDetectionService spamService = new SpamDetectionService();
     private final PauseTransition debounce = new PauseTransition(javafx.util.Duration.millis(800));
     private boolean isPostCalm = false;
 
@@ -249,75 +251,110 @@ public class AddPostController {
 
     @FXML
     private void savePost(ActionEvent event) {
-        String title = titleField.getText().trim();
-        String content = contentArea.getText().trim();
+        String titleRaw = titleField.getText().trim();
+        String contentRaw = contentArea.getText().trim();
 
-        if (!validateInputs(title, content)) {
+        if (!validateInputs(titleRaw, contentRaw)) {
             return;
         }
 
-        // Automatic Text Correction
-        title = utils.TextCorrectionService.correctText(title);
-        content = utils.TextCorrectionService.correctText(content);
+        // Show loading state
+        statusLabel.setText("Saving your discussion... ⏳");
+        titleField.setDisable(true);
+        contentArea.setDisable(true);
 
-        Post post = new Post();
-        post.setTitle(title);
-        post.setContent(content);
-        
-        if (isAdminMode) {
-            post.setStatus("ACCEPTED");
-        } else {
-            post.setStatus("PENDING");
-        }
-        
-        boolean requestPin = pinToggle.isSelected();
-        post.setPinned(false);
-        post.setCreatedAt(java.time.LocalDateTime.now());
-        
-        Users currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            post.setUserId(currentUser.getId());
-        } else {
-            post.setUserId(5); // Fallback to Admin ID if session is null for some reason
-        }
+        Task<Post> saveTask = new Task<>() {
+            @Override
+            protected Post call() throws Exception {
+                // 1. Text Correction (External API - Blocking)
+                String title = services.forum.TextCorrectionService.correctText(titleRaw);
+                String content = services.forum.TextCorrectionService.correctText(contentRaw);
 
-        // Pin eligibility is not checked during creation anymore as per user request
-
-        // Handle Image
-        if (imageFile != null) {
-            String newImageName = saveFile(imageFile, "images");
-            post.setImageName(newImageName);
-        }
-
-        // Handle PDF
-        if (pdfFile != null) {
-            String newPdfName = saveFile(pdfFile, "pdfs");
-            post.setPdfName(newPdfName);
-        }
-//hadoum ali save  post kan tzadit fil backoffice w  el front office
-        try {
-            postService.ajouter(post);
-            if (requestPin) {
+                // 2. Spam Detection (Blocking)
+                int spamScore = spamService.calculateSpamScore(title + " " + content);
+                
+                Post post = new Post();
+                post.setTitle(title);
+                post.setContent(content);
+                post.setSpamScore(spamScore);
+                post.setSpam(spamScore >= 40);
+                
                 if (isAdminMode) {
-                    postService.acceptPinRequest(post.getId());
+                    post.setStatus("ACCEPTED");
                 } else {
-                    postService.requestPin(post.getUserId(), post.getId());
+                    post.setStatus("PENDING");
                 }
+                
+                post.setPinned(false);
+                post.setCreatedAt(java.time.LocalDateTime.now());
+                
+                Users currentUser = SessionManager.getInstance().getCurrentUser();
+                if (currentUser != null) {
+                    post.setUserId(currentUser.getId());
+                } else {
+                    post.setUserId(5); 
+                }
+
+                // Handle Image
+                if (imageFile != null) {
+                    String newImageName = saveFile(imageFile, "images");
+                    post.setImageName(newImageName);
+                }
+
+                // Handle PDF
+                if (pdfFile != null) {
+                    String newPdfName = saveFile(pdfFile, "pdfs");
+                    post.setPdfName(newPdfName);
+                }
+
+                // 3. Database Save
+                postService.ajouter(post);
+                return post;
             }
+        };
+
+        saveTask.setOnSucceeded(e -> {
+            Post savedPost = saveTask.getValue();
+            boolean requestPin = pinToggle.isSelected();
             
-            if (!isAdminMode) {
+            try {
                 if (requestPin) {
-                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your post and pin request have been submitted and are awaiting admin approval.");
-                } else {
-                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your post has been submitted and is awaiting admin approval.");
+                    if (isAdminMode) {
+                        postService.acceptPinRequest(savedPost.getId());
+                    } else {
+                        postService.requestPin(savedPost.getUserId(), savedPost.getId());
+                    }
                 }
+
+                if (!isAdminMode) {
+                    String msg = requestPin 
+                        ? "Your post and pin request have been submitted and are awaiting admin approval."
+                        : "Your post has been submitted and is awaiting admin approval.";
+                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", msg);
+                }
+                
+                goBack(event);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Error", "Post saved but pin request failed.");
             }
+        });
+
+        saveTask.setOnFailed(e -> {
+            titleField.setDisable(false);
+            contentArea.setDisable(false);
+            statusLabel.setText("Error saving post.");
+            saveTask.getException().printStackTrace();
             
-            goBack(event);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Could not save the post.");
-        }
+            Throwable ex = saveTask.getException();
+            if (ex instanceof SQLException && ex.getMessage().contains("Data too long")) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Content is too long for the database.");
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Database Error", "Could not save the post. Please try again.");
+            }
+        });
+
+        new Thread(saveTask).start();
     }
 
     @FXML

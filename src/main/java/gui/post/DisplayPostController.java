@@ -205,7 +205,7 @@ public class DisplayPostController {
         HBox authorRow = new HBox(12);
         authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        StackPane avatar = buildAvatar(author);
+        StackPane avatar = buildAvatarWithRing(author, 35);
         Label usernameLabel = new Label(username);
         usernameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;");
         authorRow.getChildren().addAll(avatar, usernameLabel);
@@ -799,10 +799,15 @@ public class DisplayPostController {
         String imageUrl = (user != null) ? user.getImage() : null;
 
         StackPane circle = new StackPane();
-        circle.setPrefSize(35, 35);
-        circle.setMinSize(35, 35);
-        circle.setMaxSize(35, 35);
+        circle.setPrefSize(32, 32);
+        circle.setMinSize(32, 32);
+        circle.setMaxSize(32, 32);
         circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
+
+        // Use Dicebear fallback if no image (matches Profile view)
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+        }
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
             try {
@@ -814,35 +819,57 @@ public class DisplayPostController {
                     if (file.exists()) {
                         img = new Image(file.toURI().toString());
                     } else {
-                        img = null;
+                        // Fallback to dicebear if local file missing
+                        img = new Image("https://api.dicebear.com/7.x/avataaars/png?seed=" + username, true);
                     }
                 }
 
                 if (img != null) {
                     ImageView imageView = new ImageView(img);
-                    imageView.setFitWidth(35);
-                    imageView.setFitHeight(35);
+                    imageView.setFitWidth(32);
+                    imageView.setFitHeight(32);
                     imageView.setPreserveRatio(true);
-
-                    // Clip to circle
-                    javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(17.5, 17.5, 17.5);
-                    imageView.setClip(clip);
+                    imageView.setClip(new javafx.scene.shape.Circle(16, 16, 16));
 
                     circle.getChildren().add(imageView);
                     return circle;
                 }
-            } catch (Exception e) {
-                // Fallback to initials on error
-            }
+            } catch (Exception e) {}
         }
 
-        // Fallback: Initials
         char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
         Label initLabel = new Label(String.valueOf(initial));
         initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
         circle.getChildren().add(initLabel);
-
         return circle;
+    }
+
+    private StackPane buildAvatarWithRing(entities.Users user, int size) {
+        StackPane ring = new StackPane();
+        ring.setPrefSize(size + 4, size + 4);
+        ring.setMinSize(size + 4, size + 4);
+        ring.setMaxSize(size + 4, size + 4);
+        ring.setStyle("-fx-background-radius: 50; " +
+                "-fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);");
+        
+        StackPane inner = buildAvatar(user);
+        inner.setPrefSize(size, size);
+        inner.setMinSize(size, size);
+        inner.setMaxSize(size, size);
+        
+        if (!inner.getChildren().isEmpty() && inner.getChildren().get(0) instanceof ImageView) {
+            ImageView iv = (ImageView) inner.getChildren().get(0);
+            iv.setFitWidth(size); iv.setFitHeight(size);
+            iv.setClip(new javafx.scene.shape.Circle(size / 2.0, size / 2.0, size / 2.0));
+        }
+        
+        StackPane bg = new StackPane();
+        bg.setStyle("-fx-background-color: white; -fx-background-radius: 50;");
+        bg.setPrefSize(size + 1, size + 1);
+        bg.getChildren().add(inner);
+        
+        ring.getChildren().add(bg);
+        return ring;
     }
 
     private void openPdf(String pdfName) {

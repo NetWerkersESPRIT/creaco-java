@@ -11,7 +11,6 @@ gui\collabrequest\EditCollabRequestController.class
 gui\MainController.class
 entities\PostReaction.class
 services\CollaboratorService.class
-services\forum\QuoteService.class
 gui\collaborator\EditCollaboratorController.class
 gui\collabrequest\AddCollabRequestController.class
 gui\collabrequest\ListCollabRequestController.class
@@ -20,5 +19,6 @@ entities\Users.class
 entities\Post.class
 gui\comment\UpdateCommentController.class
 gui\comment\AddCommentController.class
+gui\post\DisplayPostController$1.class
 services\CourseCategoryService.class
 gui\AlertHelper.class

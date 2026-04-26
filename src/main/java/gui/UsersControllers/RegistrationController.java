@@ -64,10 +64,13 @@ public class RegistrationController {
             lblMessage.setStyle("-fx-text-fill: green;");
             lblMessage.setText("✅ Account created! Redirecting...");
 
+            // Capture Stage NOW while the scene is still attached
+            Stage stage = (Stage) txtUsername.getScene().getWindow();
+
             javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1.5));
             pause.setOnFinished(e -> {
                 try {
-                    goBack();
+                    goBackWithStage(stage);
                 } catch (Exception ex) { ex.printStackTrace(); }
             });
             pause.play();
@@ -95,8 +98,15 @@ public class RegistrationController {
 
     @FXML
     public void goBack() throws Exception {
-        Stage stage = (Stage) txtUsername.getScene().getWindow();
-        stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/SignIn.fxml")));
-        stage.setTitle("CreaCo - Sign In");
+        if (txtUsername.getScene() != null) {
+            goBackWithStage((Stage) txtUsername.getScene().getWindow());
+        }
+    }
+
+    private void goBackWithStage(Stage stage) throws Exception {
+        if (stage != null) {
+            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/SignIn.fxml")));
+            stage.setTitle("CreaCo - Sign In");
+        }
     }
 }

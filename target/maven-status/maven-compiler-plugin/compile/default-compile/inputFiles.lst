@@ -32,6 +32,8 @@ D:\pidev\creaco-java\src\main\java\gui\CourseCategoryFormController.java
 D:\pidev\creaco-java\src\main\java\gui\CourseCategoryListController.java
 D:\pidev\creaco-java\src\main\java\gui\CourseFormController.java
 D:\pidev\creaco-java\src\main\java\gui\forum\CatMatchGame.java
+D:\pidev\creaco-java\src\main\java\gui\forum\EmojiPickerModalController.java
+D:\pidev\creaco-java\src\main\java\gui\forum\GifPickerModalController.java
 D:\pidev\creaco-java\src\main\java\gui\FrontMainController.java
 D:\pidev\creaco-java\src\main\java\gui\FrontResourceController.java
 D:\pidev\creaco-java\src\main\java\gui\MainController.java
@@ -71,8 +73,11 @@ D:\pidev\creaco-java\src\main\java\services\forum\AIAnalysisStrategy.java
 D:\pidev\creaco-java\src\main\java\services\forum\CommentService.java
 D:\pidev\creaco-java\src\main\java\services\forum\ForumInterface.java
 D:\pidev\creaco-java\src\main\java\services\forum\ForumStatsService.java
+D:\pidev\creaco-java\src\main\java\services\forum\GifService.java
 D:\pidev\creaco-java\src\main\java\services\forum\PostService.java
 D:\pidev\creaco-java\src\main\java\services\forum\ReactionDAO.java
+D:\pidev\creaco-java\src\main\java\services\forum\SpamDetectionService.java
+D:\pidev\creaco-java\src\main\java\services\forum\TextCorrectionService.java
 D:\pidev\creaco-java\src\main\java\services\forum\UserPostValidator.java
 D:\pidev\creaco-java\src\main\java\services\ICourseCategoryService.java
 D:\pidev\creaco-java\src\main\java\services\IdeaService.java
@@ -88,4 +93,3 @@ D:\pidev\creaco-java\src\main\java\utils\OpenRouterService.java
 D:\pidev\creaco-java\src\main\java\utils\QuoteService.java
 D:\pidev\creaco-java\src\main\java\utils\SentimentService.java
 D:\pidev\creaco-java\src\main\java\utils\SessionManager.java
-D:\pidev\creaco-java\src\main\java\utils\TextCorrectionService.java

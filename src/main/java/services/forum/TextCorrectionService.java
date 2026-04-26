@@ -1,4 +1,4 @@
-package utils;
+package services.forum;
 
 import java.net.URI;
 import java.net.URLEncoder;

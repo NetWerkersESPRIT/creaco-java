@@ -7,11 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import services.forum.PostService;
@@ -36,6 +32,7 @@ import javafx.scene.layout.Priority;
 import services.forum.UserPostValidator;
 import entities.forum.SentimentResult;
 import gui.forum.CatMatchGame;
+import services.forum.SpamDetectionService;
 
 public class UpdatePostController {
 
@@ -65,6 +62,7 @@ public class UpdatePostController {
     private Post postToUpdate;
     private boolean isAdminMode = false;
     private final UserPostValidator postValidator = new UserPostValidator();
+    private final SpamDetectionService spamService = new SpamDetectionService();
     private final PauseTransition debounce = new PauseTransition(javafx.util.Duration.millis(800));
     private boolean isPostCalm = false;
 
@@ -272,11 +270,20 @@ public class UpdatePostController {
         }
 
         // Automatic Text Correction
-        title = utils.TextCorrectionService.correctText(title);
-        content = utils.TextCorrectionService.correctText(content);
+        title = services.forum.TextCorrectionService.correctText(title);
+        content = services.forum.TextCorrectionService.correctText(content);
+
+        // Spam Detection
+        int spamScore = spamService.calculateSpamScore(title + " " + content);
+        if (spamScore >= 80) {
+            showAlert(Alert.AlertType.ERROR, "Spam Detected", "Your changes have been blocked because the content was detected as spam (Score: " + spamScore + "/100).");
+            return;
+        }
 
         postToUpdate.setTitle(title);
         postToUpdate.setContent(content);
+        postToUpdate.setSpamScore(spamScore);
+        postToUpdate.setSpam(spamScore >= 40);
         boolean requestPin = pinToggle.isSelected();
         
         if (!isAdminMode) {
