@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 
 <VBox spacing="25.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.comment.DisplayCommentController">
     <padding>
@@ -66,42 +67,87 @@
             </children>
         </VBox>
 
-        <!-- Discussion / Add Comment Card -->
-        <VBox styleClass="card" spacing="20.0" VBox.vgrow="ALWAYS">
-            <padding>
-                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-            </padding>
-            <children>
-                <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="Discussion" />
-                
-                <VBox spacing="10.0" style="-fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-padding: 2;">
-                    <children>
-                        <TextArea fx:id="commentArea" prefHeight="120.0" promptText="What are your thoughts?" 
-                                  style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent; -fx-font-size: 15px;" wrapText="true" />
-                        <HBox alignment="BOTTOM_RIGHT" style="-fx-padding: 0 10 10 0;">
-                            <children>
-                                <Button onAction="#addComment" styleClass="btn-primary" prefHeight="40.0" prefWidth="150.0" text="POST COMMENT" />
-                            </children>
-                        </HBox>
-                    </children>
-                </VBox>
+        <!-- Discussion / Comments Card (Instagram-style white) -->
+        <VBox style="-fx-background-color: white; -fx-background-radius: 18; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20, 0, 0, 4);" spacing="0" VBox.vgrow="ALWAYS">
 
-                <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;">
-                    <content>
-                        <VBox fx:id="commentsContainer" spacing="20.0">
-                            <children>
-                                <!-- Empty State -->
-                                <VBox fx:id="emptyState" alignment="CENTER" spacing="15.0" style="-fx-padding: 40 0 40 0;">
-                                    <children>
-                                        <Label text="💬" style="-fx-font-size: 30px; -fx-text-fill: #cbd5e1;" />
-                                        <Label text="No comments yet. Be the first to share your thoughts!" style="-fx-font-size: 14px; -fx-text-fill: #718096; -fx-font-weight: bold;" />
-                                    </children>
-                                </VBox>
-                            </children>
-                        </VBox>
-                    </content>
-                </ScrollPane>
-            </children>
+            <!-- Header row -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 18 20 12 20; -fx-border-color: transparent transparent #e2e8f0 transparent; -fx-border-width: 0 0 1 0;">
+                <children>
+                    <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;" text="Comments" />
+                    <Label fx:id="repliesBadge" text="" style="-fx-font-size: 12px; -fx-text-fill: #94a3b8;" />
+                </children>
+            </HBox>
+
+            <!-- Comment Feed -->
+            <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true"
+                        style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;">
+                <content>
+                    <VBox fx:id="commentsContainer" spacing="0" style="-fx-padding: 8 16 8 16;">
+                        <children>
+                            <!-- Empty State -->
+                            <VBox fx:id="emptyState" alignment="CENTER" spacing="12.0" style="-fx-padding: 50 0 50 0;">
+                                <children>
+                                    <Label text="💬" style="-fx-font-size: 36px; -fx-text-fill: #3a3a3c;" />
+                                    <Label text="No comments yet" style="-fx-font-size: 14px; -fx-text-fill: #636366; -fx-font-weight: bold;" />
+                                    <Label text="Be the first to share your thoughts!" style="-fx-font-size: 12px; -fx-text-fill: #48484a;" />
+                                </children>
+                            </VBox>
+                        </children>
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- GIF Attachment Preview -->
+            <HBox fx:id="attachmentPreview" alignment="CENTER_LEFT" managed="false" spacing="10.0"
+                  style="-fx-padding: 8 20 4 20; -fx-background-color: #f8fafc;" visible="false">
+                <children>
+                    <StackPane style="-fx-background-radius: 10;">
+                        <children>
+                            <ImageView fx:id="gifPreview" fitHeight="70.0" fitWidth="70.0" preserveRatio="true" />
+                            <Button onAction="#removeAttachment"
+                                    style="-fx-background-color: rgba(0,0,0,0.6); -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 18; -fx-max-width: 18; -fx-min-height: 18; -fx-max-height: 18; -fx-font-size: 9px; -fx-cursor: hand;"
+                                    text="✕" StackPane.alignment="TOP_RIGHT">
+                                <StackPane.margin><Insets right="-4.0" top="-4.0" /></StackPane.margin>
+                            </Button>
+                        </children>
+                    </StackPane>
+                    <Label style="-fx-text-fill: #8e8e8e; -fx-font-size: 11px;" text="GIF attached" />
+                </children>
+            </HBox>
+
+            <!-- Bottom Instagram-style input bar -->
+            <HBox alignment="CENTER" spacing="10.0"
+                  style="-fx-padding: 10 16 14 16; -fx-border-color: #e2e8f0 transparent transparent transparent; -fx-border-width: 1 0 0 0;">
+                <children>
+                    <!-- Current User Avatar -->
+                    <StackPane fx:id="currentUserAvatarContainer" />
+
+                    <!-- Emoji Button -->
+                    <Button onAction="#openEmojiPicker"
+                            style="-fx-background-color: transparent; -fx-font-size: 22px; -fx-cursor: hand; -fx-padding: 0;"
+                            text="😊" />
+
+                    <!-- Pill text field -->
+                    <HBox alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: #f1f5f9; -fx-background-radius: 22; -fx-padding: 8 14 8 14;">
+                        <children>
+                            <TextArea fx:id="commentArea" prefHeight="32.0" maxHeight="80.0"
+                                      promptText="Add a comment..."
+                                      style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent; -fx-text-fill: #1a1a2e; -fx-font-size: 13px; -fx-prompt-text-fill: #94a3b8;"
+                                      wrapText="true" HBox.hgrow="ALWAYS" />
+                            <!-- GIF inside pill -->
+                            <Button onAction="#openGifPicker"
+                                    style="-fx-background-color: #e2e8f0; -fx-background-radius: 8; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 4 8; -fx-cursor: hand;"
+                                    text="GIF" />
+                        </children>
+                    </HBox>
+
+                    <!-- Post Button -->
+                    <Button onAction="#addComment"
+                            style="-fx-background-color: transparent; -fx-text-fill: #3897f0; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 0;"
+                            text="Post" />
+                </children>
+            </HBox>
         </VBox>
     </children>
 </VBox>

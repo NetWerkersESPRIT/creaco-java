@@ -300,7 +300,7 @@ public class PostService implements ForumInterface<Post> {
 
     @Override
     public void modifier(int id, Post post) throws SQLException {
-        String sql = "UPDATE `post` SET `title`=?, `content`=?, `status`=?, `user_id`=?, `image_name`=?, `pdf_name`=?, `pinned`=?, `is_comment_locked`=?, `updated_at`=? WHERE `id`=?";
+        String sql = "UPDATE `post` SET `title`=?, `content`=?, `status`=?, `user_id`=?, `image_name`=?, `pdf_name`=?, `pinned`=?, `is_comment_locked`=?, `is_spam`=?, `spam_score`=?, `updated_at`=? WHERE `id`=?";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setString(1, post.getTitle());
         ps.setString(2, post.getContent());
@@ -310,8 +310,10 @@ public class PostService implements ForumInterface<Post> {
         ps.setString(6, post.getPdfName());
         ps.setBoolean(7, post.isPinned());
         ps.setBoolean(8, post.isCommentLocked());
-        ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
-        ps.setInt(10, id);
+        ps.setBoolean(9, post.isSpam());
+        ps.setInt(10, post.getSpamScore());
+        ps.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
+        ps.setInt(12, id);
         ps.executeUpdate();
         System.out.println("Post modifié avec succès!");
     }

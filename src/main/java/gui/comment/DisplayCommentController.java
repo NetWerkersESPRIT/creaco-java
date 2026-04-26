@@ -3,6 +3,7 @@ package gui.comment;
 import entities.Comment;
 import entities.Post;
 import entities.Users;
+import gui.forum.EmojiPickerModalController;
 import gui.post.DisplayPostController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.text.TextFlow;
 import javafx.scene.layout.*;
 import services.forum.CommentService;
 import services.UserService;
@@ -22,6 +24,11 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import gui.forum.GifPickerModalController;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -49,6 +56,9 @@ public class DisplayCommentController {
     @FXML private Label likesBadge;
     @FXML private Button btnEditPost;
     @FXML private Button btnDeletePost;
+    @FXML private HBox attachmentPreview;
+    @FXML private ImageView gifPreview;
+    @FXML private StackPane currentUserAvatarContainer;
 
     private final CommentService commentService = new CommentService();
     private final UserService userService = new UserService();
@@ -71,25 +81,26 @@ public class DisplayCommentController {
             String date = (post.getCreatedAt() != null) ? post.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "-";
             postMetaLabel.setText("Posted by " + username + " • " + date);
 
-            // Set Author Avatar
+            // Set Author Avatar with Ring
             if (author != null && postAuthorAvatarContainer != null) {
-                StackPane avatar = buildAvatar(author);
-                // Adjust size for the header
-                avatar.setPrefSize(45, 45);
-                avatar.setMinSize(45, 45);
-                avatar.setMaxSize(45, 45);
-                // Update the clip if it was used (buildAvatar uses 16 for 32x32, so we need 22.5 for 45x45)
-                if (!avatar.getChildren().isEmpty() && avatar.getChildren().get(0) instanceof javafx.scene.image.ImageView) {
-                    javafx.scene.image.ImageView iv = (javafx.scene.image.ImageView) avatar.getChildren().get(0);
-                    iv.setFitWidth(45);
-                    iv.setFitHeight(45);
-                    iv.setClip(new javafx.scene.shape.Circle(22.5, 22.5, 22.5));
-                } else if (!avatar.getChildren().isEmpty() && avatar.getChildren().get(0) instanceof Label) {
-                    Label l = (Label) avatar.getChildren().get(0);
-                    l.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
+                StackPane avatarWithRing = buildAvatarWithRing(author, 45);
+                postAuthorAvatarContainer.getChildren().setAll(avatarWithRing);
+                postAuthorAvatarContainer.setStyle("-fx-background-color: transparent;");
+            }
+
+            // Set Current User Avatar in Input Bar
+            Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            if (currentUser != null && currentUserAvatarContainer != null) {
+                StackPane currentAvatar = buildAvatar(currentUser);
+                currentAvatar.setPrefSize(32, 32);
+                currentAvatar.setMinSize(32, 32);
+                currentAvatar.setMaxSize(32, 32);
+                if (!currentAvatar.getChildren().isEmpty() && currentAvatar.getChildren().get(0) instanceof ImageView) {
+                    ImageView iv = (ImageView) currentAvatar.getChildren().get(0);
+                    iv.setFitWidth(32); iv.setFitHeight(32);
+                    iv.setClip(new javafx.scene.shape.Circle(16, 16, 16));
                 }
-                postAuthorAvatarContainer.getChildren().setAll(avatar.getChildren());
-                postAuthorAvatarContainer.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 12;");
+                currentUserAvatarContainer.getChildren().setAll(currentAvatar);
             }
 
             // Set Likes Count
@@ -104,7 +115,6 @@ public class DisplayCommentController {
             }
 
             // Visibility for Edit/Delete
-            Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
             int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
             boolean isOwner = (post.getUserId() == currentUserId);
             
@@ -127,7 +137,7 @@ public class DisplayCommentController {
         commentsContainer.getChildren().clear();
         try {
             List<Comment> allComments = commentService.getCommentsByPost(currentPost.getId());
-            repliesBadge.setText("💬 " + allComments.size() + " REPLIES");
+            repliesBadge.setText("• " + allComments.size() + " comments");
             
             if (allComments.isEmpty()) {
                 commentsContainer.getChildren().add(emptyState);
@@ -150,14 +160,8 @@ public class DisplayCommentController {
     }
 
     private void renderCommentThread(Comment comment, List<Comment> allComments, int depth) {
-        VBox card = createCommentCard(comment);
-        if (depth > 0) {
-            VBox indentedContainer = new VBox(card);
-            indentedContainer.setPadding(new Insets(0, 0, 0, 50 * Math.min(depth, 3)));
-            commentsContainer.getChildren().add(indentedContainer);
-        } else {
-            commentsContainer.getChildren().add(card);
-        }
+        VBox card = createCommentCard(comment, depth);
+        commentsContainer.getChildren().add(card);
 
         List<Comment> replies = allComments.stream()
                 .filter(c -> c.getParentCommentId() != null && c.getParentCommentId() == comment.getId())
@@ -169,147 +173,246 @@ public class DisplayCommentController {
         }
     }
 
-    private VBox createCommentCard(Comment comment) {
-        VBox card = new VBox(8);
+    // ── Instagram-style comment card ────────────────────────────────────────────
+    private VBox createCommentCard(Comment comment, int depth) {
+        // ── Layout ───────────────────────────────────────────────────────────────
+        double leftPad = depth > 0 ? 52.0 * Math.min(depth, 3) : 0.0;
+        VBox card = new VBox(0);
         card.setStyle("-fx-background-color: transparent;");
-        card.setPadding(new Insets(10, 0, 10, 0));
+        card.setPadding(new Insets(10, 0, 2, leftPad));
 
         Users user = userService.getUserById(comment.getUserId());
         String username = (user != null) ? user.getUsername() : "Unknown";
         String dateStr = formatDate(comment.getCreatedAt());
 
-        // Header: Avatar + Username + Date
-        HBox header = new HBox(10);
-        header.setAlignment(Pos.CENTER_LEFT);
-        
-        StackPane avatar = buildAvatar(user);
-        Label userLabel = new Label(username);
-        userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 13px;");
-        Label dateLabel = new Label(dateStr);
-        dateLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px;");
-        
-        header.getChildren().addAll(avatar, userLabel, dateLabel);
-
-        // Body: Content
-        Label bodyLabel = new Label(safeText(comment.getBody()));
-        bodyLabel.setWrapText(true);
-        bodyLabel.setStyle("-fx-text-fill: #4a5568; -fx-font-size: 15px; -fx-padding: 0 0 0 40;");
-
-        // Action Bar
-        HBox actions = new HBox(15);
-        actions.setAlignment(Pos.CENTER_LEFT);
-        actions.setPadding(new Insets(0, 0, 0, 40));
-
-        Button replyBtn = createIconButton("↩ REPLY");
-        Button editBtn = createIconButton("📝 EDIT");
-        Button deleteBtn = createIconButton("🗑 DELETE");
-
-        actions.getChildren().add(replyBtn);
-        
-        int currentUserId = utils.SessionManager.getInstance().getCurrentUser().getId();
-        if (comment.getUserId() == currentUserId) {
-            actions.getChildren().add(editBtn);
-        }
-        
-        // Delete visibility: Author of comment OR Admin OR Author of the thread (Post)
-        boolean isPostOwner = (currentPost != null && currentPost.getUserId() == currentUserId);
-        if (comment.getUserId() == currentUserId || isAdminMode || isPostOwner) {
-            actions.getChildren().add(deleteBtn);
+        // ── Parse body ───────────────────────────────────────────────────────────
+        String bodyText = safeText(comment.getBody());
+        String textContent = bodyText;
+        String gifUrl = null;
+        if (bodyText.contains("[GIF]")) {
+            String[] parts = bodyText.split("\\[GIF\\]");
+            textContent = parts[0].trim();
+            if (parts.length > 1) gifUrl = parts[1].trim();
+        } else if (bodyText.startsWith("http") && (bodyText.contains("klipy.com") || bodyText.endsWith(".gif"))) {
+            gifUrl = bodyText;
+            textContent = "";
         }
 
-        // Inline Edit Section (Hidden by default)
-        VBox inlineEditBox = new VBox(10);
-        inlineEditBox.setVisible(false);
-        inlineEditBox.setManaged(false);
-        inlineEditBox.setPadding(new Insets(10, 0, 10, 40));
-        
-        VBox editAreaBox = new VBox(5);
-        editAreaBox.setStyle("-fx-background-color: #fef2f2; -fx-background-radius: 15; -fx-border-color: #fca5a5; -fx-border-radius: 15; -fx-padding: 2;");
-        
+        // ── Avatar ───────────────────────────────────────────────────────────────
+        int avatarSize = depth > 0 ? 28 : 36;
+        StackPane avatarPane = buildAvatarWithRing(user, avatarSize);
+
+        // ── Main row: avatar | content-col | heart ───────────────────────────────
+        HBox mainRow = new HBox(10);
+        mainRow.setAlignment(Pos.TOP_LEFT);
+
+        // Content column
+        VBox contentCol = new VBox(4);
+        HBox.setHgrow(contentCol, Priority.ALWAYS);
+
+        // Username + text inline via TextFlow
+        javafx.scene.text.TextFlow commentLine = new javafx.scene.text.TextFlow();
+        commentLine.setMaxWidth(Double.MAX_VALUE);
+        javafx.scene.text.Text uTxt = new javafx.scene.text.Text(username + " ");
+        uTxt.setStyle("-fx-font-weight: bold; -fx-fill: #1a1a2e; -fx-font-size: 13px;");
+        javafx.scene.text.Text bTxt = new javafx.scene.text.Text(textContent);
+        bTxt.setStyle("-fx-fill: #4a5568; -fx-font-size: 13px;");
+        commentLine.getChildren().addAll(uTxt, bTxt);
+        contentCol.getChildren().add(commentLine);
+
+        // GIF (if any)
+        if (gifUrl != null) {
+            ImageView gifView = new ImageView(new Image(gifUrl, true));
+            gifView.setFitWidth(200);
+            gifView.setPreserveRatio(true);
+            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+            clip.setArcWidth(16); clip.setArcHeight(16);
+            gifView.imageProperty().addListener((obs, o, nv) -> {
+                if (nv != null) { clip.setWidth(gifView.getFitWidth()); clip.setHeight(nv.getHeight() * (gifView.getFitWidth() / nv.getWidth())); }
+            });
+            gifView.setClip(clip);
+            contentCol.getChildren().add(gifView);
+        }
+
+        // ── Meta row: time · likes · Reply [· Edit] [· Delete] ──────────────────
+        HBox metaRow = new HBox(12);
+        metaRow.setAlignment(Pos.CENTER_LEFT);
+        metaRow.setPadding(new Insets(2, 0, 0, 0));
+
+        String metaStyle = "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;";
+        String metaHover = "-fx-background-color: transparent; -fx-text-fill: #475569; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;";
+
+        Label timeLabel = new Label(dateStr);
+        timeLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        metaRow.getChildren().add(timeLabel);
+
+        // Reply button
+        int curUserId = utils.SessionManager.getInstance().getCurrentUser().getId();
+        boolean isPostOwner = (currentPost != null && currentPost.getUserId() == curUserId);
+
+        Button replyBtn = new Button("Reply");
+        replyBtn.setStyle("-fx-font-weight: bold; " + metaStyle);
+        replyBtn.setOnMouseEntered(e -> replyBtn.setStyle("-fx-font-weight: bold; " + metaHover));
+        replyBtn.setOnMouseExited(e -> replyBtn.setStyle("-fx-font-weight: bold; " + metaStyle));
+        metaRow.getChildren().add(replyBtn);
+
+        // Edit button (owner only)
         TextArea editTextArea = new TextArea(comment.getBody());
-        editTextArea.setPrefHeight(80);
-        editTextArea.setWrapText(true);
-        editTextArea.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent; -fx-font-size: 14px;");
-        
-        HBox editBtnBox = new HBox();
-        editBtnBox.setAlignment(Pos.BOTTOM_RIGHT);
-        editBtnBox.setPadding(new Insets(0, 10, 10, 0));
-        Button saveEditBtn = new Button("SAVE CHANGES");
-        saveEditBtn.setStyle("-fx-background-color: #ce2d7c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 8 20;");
-        
-        editBtnBox.getChildren().add(saveEditBtn);
-        editAreaBox.getChildren().addAll(editTextArea, editBtnBox);
-        inlineEditBox.getChildren().add(editAreaBox);
+        VBox inlineEditBox = new VBox(8);
+        if (comment.getUserId() == curUserId) {
+            Button editBtn = new Button("Edit");
+            editBtn.setStyle("-fx-font-weight: bold; " + metaStyle);
+            editBtn.setOnMouseEntered(e -> editBtn.setStyle("-fx-font-weight: bold; " + metaHover));
+            editBtn.setOnMouseExited(e -> editBtn.setStyle("-fx-font-weight: bold; " + metaStyle));
+            metaRow.getChildren().add(editBtn);
 
-        // Inline Reply Section (Hidden by default)
-        VBox inlineReplyBox = new VBox(10);
+            // Build inline edit box
+            inlineEditBox.setVisible(false);
+            inlineEditBox.setManaged(false);
+            inlineEditBox.setPadding(new Insets(6, 0, 0, 0));
+            editTextArea.setPrefHeight(70); editTextArea.setWrapText(true);
+            editTextArea.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 12; -fx-text-fill: #1a1a2e; -fx-font-size: 13px; -fx-border-color: transparent;");
+            HBox editBtnRow = new HBox(8); editBtnRow.setAlignment(Pos.CENTER_RIGHT);
+            Button cancelE = new Button("Cancel");
+            cancelE.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-cursor: hand;");
+            Button saveE = new Button("Save");
+            saveE.setStyle("-fx-background-color: #ce2d7c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 5 16; -fx-cursor: hand;");
+            editBtnRow.getChildren().addAll(cancelE, saveE);
+            inlineEditBox.getChildren().addAll(editTextArea, editBtnRow);
+
+            editBtn.setOnAction(e -> { boolean v = !inlineEditBox.isVisible(); inlineEditBox.setVisible(v); inlineEditBox.setManaged(v); if (v) { editTextArea.setText(comment.getBody()); editTextArea.requestFocus(); } });
+            cancelE.setOnAction(e -> { inlineEditBox.setVisible(false); inlineEditBox.setManaged(false); });
+            saveE.setOnAction(e -> { String nb = editTextArea.getText(); if (nb != null && !nb.trim().isEmpty()) submitEdit(comment, nb); });
+        }
+
+        // Delete button
+        if (comment.getUserId() == curUserId || isAdminMode || isPostOwner) {
+            Button deleteBtn = new Button("Delete");
+            deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;");
+            deleteBtn.setOnMouseEntered(e -> deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
+            deleteBtn.setOnMouseExited(e -> deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
+            deleteBtn.setOnAction(e -> deleteComment(comment.getId()));
+            metaRow.getChildren().add(deleteBtn);
+        }
+        contentCol.getChildren().add(metaRow);
+
+        // ── Heart button (per-user like toggle) ──────────────────────────────────
+        int curUserIdForLike = utils.SessionManager.getInstance().getCurrentUser().getId();
+
+        // Check from DB if this user already liked this comment
+        boolean alreadyLiked = false;
+        try { alreadyLiked = commentService.hasUserLiked(comment.getId(), curUserIdForLike); } catch (Exception ignored) {}
+
+        final boolean[] liked = {alreadyLiked};
+        final int[] likeCount = {comment.getLikes()};
+
+        VBox heartBox = new VBox(1);
+        heartBox.setAlignment(Pos.TOP_CENTER);
+
+        Button heartBtn = new Button(liked[0] ? "♥" : "♡");
+        heartBtn.setStyle(liked[0]
+            ? "-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;"
+            : "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+
+        Label likeCountLbl = new Label(likeCount[0] > 0 ? String.valueOf(likeCount[0]) : "");
+        likeCountLbl.setStyle(liked[0]
+            ? "-fx-text-fill: #ef4444; -fx-font-size: 10px;"
+            : "-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
+
+        heartBox.getChildren().addAll(heartBtn, likeCountLbl);
+
+        heartBtn.setOnAction(e -> {
+            try {
+                likeCount[0] = commentService.toggleCommentLike(comment.getId(), curUserIdForLike);
+                liked[0] = commentService.hasUserLiked(comment.getId(), curUserIdForLike);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            if (liked[0]) {
+                heartBtn.setText("♥");
+                heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+                likeCountLbl.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 10px;");
+            } else {
+                heartBtn.setText("♡");
+                heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+                likeCountLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
+            }
+            likeCountLbl.setText(likeCount[0] > 0 ? String.valueOf(likeCount[0]) : "");
+        });
+
+        heartBtn.setOnMouseEntered(e -> {
+            if (!liked[0]) heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+        });
+        heartBtn.setOnMouseExited(e -> {
+            if (!liked[0]) heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+        });
+
+        mainRow.getChildren().addAll(avatarPane, contentCol, heartBox);
+
+        // ── Inline reply box ─────────────────────────────────────────────────────
+        VBox inlineReplyBox = new VBox(0);
         inlineReplyBox.setVisible(false);
         inlineReplyBox.setManaged(false);
-        inlineReplyBox.setPadding(new Insets(10, 0, 10, 40));
-        
-        VBox replyAreaBox = new VBox(5);
-        replyAreaBox.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-padding: 2;");
-        
-        TextArea replyTextArea = new TextArea();
-        replyTextArea.setPromptText("Your reply...");
-        replyTextArea.setPrefHeight(80);
-        replyTextArea.setWrapText(true);
-        replyTextArea.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent; -fx-font-size: 14px;");
-        
-        HBox replyBtnBox = new HBox();
-        replyBtnBox.setAlignment(Pos.BOTTOM_RIGHT);
-        replyBtnBox.setPadding(new Insets(0, 10, 10, 0));
-        Button postReplyBtn = new Button("REPLY");
-        postReplyBtn.setStyle("-fx-background-color: -fx-primary-gradient; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 8 20;");
-        
-        replyBtnBox.getChildren().add(postReplyBtn);
-        replyAreaBox.getChildren().addAll(replyTextArea, replyBtnBox);
-        inlineReplyBox.getChildren().add(replyAreaBox);
+        inlineReplyBox.setPadding(new Insets(6, 0, 0, avatarSize + 10));
+        HBox replyInputRow = new HBox(8);
+        replyInputRow.setAlignment(Pos.CENTER_LEFT);
+        replyInputRow.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 18; -fx-padding: 7 12;");
+        TextField replyField = new TextField();
+        replyField.setPromptText("Add a reply...");
+        replyField.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-text-fill: #1a1a2e; -fx-font-size: 13px; -fx-prompt-text-fill: #94a3b8;");
+        HBox.setHgrow(replyField, Priority.ALWAYS);
+        Button postReplyBtn = new Button("Post");
+        postReplyBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3897f0; -fx-font-weight: bold; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 0;");
+        replyInputRow.getChildren().addAll(replyField, postReplyBtn);
+        inlineReplyBox.getChildren().add(replyInputRow);
 
-        // Actions Logic
-        editBtn.setOnAction(e -> {
-            boolean visible = !inlineEditBox.isVisible();
-            inlineEditBox.setVisible(visible);
-            inlineEditBox.setManaged(visible);
-            if (visible) {
-                editTextArea.setText(comment.getBody());
-                editTextArea.requestFocus();
-            }
-        });
+        replyBtn.setOnAction(e -> { boolean v = !inlineReplyBox.isVisible(); inlineReplyBox.setVisible(v); inlineReplyBox.setManaged(v); if (v) replyField.requestFocus(); });
+        postReplyBtn.setOnAction(e -> { String b = replyField.getText(); if (b != null && !b.trim().isEmpty()) submitReply(comment, b); });
 
-        saveEditBtn.setOnAction(e -> {
-            String newBody = editTextArea.getText();
-            if (newBody != null && !newBody.trim().isEmpty()) {
-                submitEdit(comment, newBody);
-            }
-        });
+        // ── Thin separator ───────────────────────────────────────────────────────
+        javafx.scene.control.Separator sep = new javafx.scene.control.Separator();
+        sep.setStyle("-fx-background-color: #f1f5f9; -fx-opacity: 0.4; -fx-pref-height: 1px; -fx-max-height: 1px;");
+        sep.setPadding(new Insets(3, 0, 0, 0));
 
-        replyBtn.setOnAction(e -> {
-            boolean visible = !inlineReplyBox.isVisible();
-            inlineReplyBox.setVisible(visible);
-            inlineReplyBox.setManaged(visible);
-            if (visible) replyTextArea.requestFocus();
-        });
-
-        postReplyBtn.setOnAction(e -> {
-            String body = replyTextArea.getText();
-            if (body != null && !body.trim().isEmpty()) {
-                submitReply(comment, body);
-            }
-        });
-
-        deleteBtn.setOnAction(e -> deleteComment(comment.getId()));
-        
-        card.getChildren().addAll(header, bodyLabel, actions, inlineEditBox, inlineReplyBox);
+        card.getChildren().addAll(mainRow, inlineEditBox, inlineReplyBox, sep);
         return card;
     }
 
     private Button createIconButton(String text) {
         Button btn = new Button(text);
-        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;");
-        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
-        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
+        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #636366; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;");
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #aeaeb2; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #636366; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
         return btn;
+    }
+
+    /** Builds a circular avatar with an Instagram-style gradient ring. */
+    private StackPane buildAvatarWithRing(Users user, int size) {
+        // Outer gradient ring
+        StackPane ring = new StackPane();
+        ring.setPrefSize(size + 4, size + 4);
+        ring.setMinSize(size + 4, size + 4);
+        ring.setMaxSize(size + 4, size + 4);
+        ring.setStyle("-fx-background-radius: 50; " +
+                "-fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);");
+        // Inner avatar (2px inset)
+        StackPane inner = buildAvatar(user);
+        inner.setPrefSize(size, size);
+        inner.setMinSize(size, size);
+        inner.setMaxSize(size, size);
+        if (!inner.getChildren().isEmpty() && inner.getChildren().get(0) instanceof ImageView) {
+            ImageView iv = (ImageView) inner.getChildren().get(0);
+            iv.setFitWidth(size); iv.setFitHeight(size);
+            iv.setClip(new javafx.scene.shape.Circle(size / 2.0, size / 2.0, size / 2.0));
+        }
+        // Dark gap between ring and photo (1 px)
+        StackPane gap = new StackPane(inner);
+        gap.setPrefSize(size + 2, size + 2);
+        gap.setMinSize(size + 2, size + 2);
+        gap.setMaxSize(size + 2, size + 2);
+        gap.setStyle("-fx-background-radius: 50; -fx-background-color: white;");
+        ring.getChildren().add(gap);
+        return ring;
     }
 
     private StackPane buildAvatar(entities.Users user) {
@@ -322,6 +425,10 @@ public class DisplayCommentController {
         circle.setMaxSize(32, 32);
         circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
 
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+        }
+
         if (imageUrl != null && !imageUrl.isEmpty()) {
             try {
                 javafx.scene.image.Image img;
@@ -332,7 +439,8 @@ public class DisplayCommentController {
                     if (file.exists()) {
                         img = new javafx.scene.image.Image(file.toURI().toString());
                     } else {
-                        img = null;
+                        // If local file not found, use dicebear as fallback instead of initials
+                        img = new javafx.scene.image.Image("https://api.dicebear.com/7.x/avataaars/png?seed=" + username, true);
                     }
                 }
 
@@ -349,11 +457,10 @@ public class DisplayCommentController {
                     circle.getChildren().add(imageView);
                     return circle;
                 }
-            } catch (Exception e) {
-                // Fallback to initials
-            }
+            } catch (Exception e) {}
         }
 
+        // Final fallback: Initials (should rarely be reached now)
         char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
         Label initLabel = new Label(String.valueOf(initial));
         initLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
@@ -364,22 +471,34 @@ public class DisplayCommentController {
 
     @FXML
     private void addComment() {
-        String body = commentArea.getText();
-        if (body == null || body.trim().isEmpty()) return;
+        String body = commentArea.getText().trim();
+        String attachedGif = (String) gifPreview.getUserData();
+        
+        if (body.isEmpty() && attachedGif == null) return;
 
-        body = services.forum.TextCorrectionService.correctText(body);
+        // Combine text and GIF
+        String finalBody = body;
+        if (attachedGif != null) {
+            finalBody = body + " [GIF]" + attachedGif;
+        }
 
         Comment comment = new Comment();
         comment.setPostId(currentPost.getId());
-        comment.setUserId(utils.SessionManager.getInstance().getCurrentUser().getId());
-        comment.setBody(body);
+        
+        Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            gui.util.AlertHelper.showCustomAlert("Error", "You must be logged in to comment.", gui.util.AlertHelper.AlertType.ERROR);
+            return;
+        }
+        comment.setUserId(currentUser.getId());
+        comment.setBody(finalBody);
         comment.setCreatedAt(LocalDateTime.now());
 
         try {
             commentService.ajouter(comment);
             commentArea.clear();
+            removeAttachment();
             loadCommentsByPost();
-            // No alert popups as requested
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -387,7 +506,6 @@ public class DisplayCommentController {
 
     private void submitEdit(Comment comment, String newBody) {
         try {
-            newBody = services.forum.TextCorrectionService.correctText(newBody);
             comment.setBody(newBody);
             commentService.modifier(comment.getId(), comment);
             loadCommentsByPost();
@@ -395,7 +513,6 @@ public class DisplayCommentController {
     }
 
     private void submitReply(Comment parent, String body) {
-        body = services.forum.TextCorrectionService.correctText(body);
         Comment reply = new Comment();
         reply.setPostId(currentPost.getId());
         reply.setParentCommentId(parent.getId());
@@ -523,6 +640,60 @@ public class DisplayCommentController {
                 e.printStackTrace();
             }
         }
+    }
+
+    @FXML
+    private void openGifPicker() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/gif_picker.fxml"));
+            Parent root = loader.load();
+            
+            GifPickerModalController controller = loader.getController();
+            controller.setOnGifSelected(gifUrl -> {
+                gifPreview.setImage(new Image(gifUrl, true));
+                gifPreview.setUserData(gifUrl);
+                attachmentPreview.setVisible(true);
+                attachmentPreview.setManaged(true);
+            });
+
+            Stage stage = new Stage();
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setTitle("Select a GIF");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            gui.util.AlertHelper.showCustomAlert("Error", "Could not open GIF picker.", gui.util.AlertHelper.AlertType.ERROR);
+        }
+    }
+
+    @FXML
+    private void openEmojiPicker() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/emoji_picker.fxml"));
+            Parent root = loader.load();
+            
+            EmojiPickerModalController controller = loader.getController();
+            controller.setOnEmojiSelected(emoji -> {
+                commentArea.appendText(emoji);
+            });
+
+            Stage stage = new Stage();
+            stage.initModality(javafx.stage.Modality.NONE);
+            stage.setTitle("Emojis");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void removeAttachment() {
+        gifPreview.setImage(null);
+        gifPreview.setUserData(null);
+        attachmentPreview.setVisible(false);
+        attachmentPreview.setManaged(false);
     }
 
     private String formatDate(LocalDateTime date) {
