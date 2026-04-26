@@ -120,6 +120,21 @@
     -fx-padding: 8;
 }
 
+.btn-logout-sidebar {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #dc2626;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-border-color: #fee2e2;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.btn-logout-sidebar:hover {
+    -fx-background-color: #fee2e2;
+    -fx-effect: dropshadow(three-pass-box, rgba(220, 38, 38, 0.1), 10, 0, 0, 4);
+}
+
 /* Cards */
 .card {
     -fx-background-color: white;
@@ -237,6 +252,56 @@
     -fx-font-weight: bold;
     -fx-background-radius: 50;
     -fx-padding: 3 8 3 8;
+}
+
+.badge-pending {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #3b82f6;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 4 10;
+}
+
+.badge-awaiting {
+    -fx-background-color: #fff7ed;
+    -fx-text-fill: #ea580c;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 4 10;
+}
+
+.badge-resolved {
+    -fx-background-color: #f0fdf4;
+    -fx-text-fill: #16a34a;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 4 10;
+}
+
+.question-card {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-border-color: #f1f5f9;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.03), 10, 0, 0, 2);
+}
+
+.reply-box {
+    -fx-background-color: #f0fdf4;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-border-color: #dcfce7;
+    -fx-border-width: 1;
+}
+
+.admin-reply-label {
+    -fx-text-fill: #16a34a;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
 }
 
 

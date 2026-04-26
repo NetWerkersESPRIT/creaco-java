@@ -52,7 +52,7 @@ public class RessourceListController {
 
     @FXML
     private void onBackToCourses() {
-        openScene("/gui/main-view.fxml", null);
+        openScene("/gui/admin-courses-view.fxml", null);
     }
 
     @FXML

@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import services.forum.PostService;
 import utils.SessionManager;
 import entities.Users;
@@ -190,14 +191,26 @@ public class AddPostController {
     @FXML
     private void goBack(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
+            Users currentUser = SessionManager.getInstance().getCurrentUser();
+            String fxmlPath = "/post/displayPost.fxml";
+            
+            // If Content Creator, return to the Courses Hub where the Help Desk is located
+            if (currentUser != null && "ROLE_CONTENT_CREATOR".equals(currentUser.getRole())) {
+                fxmlPath = "/gui/front-courses-grid-view.fxml";
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
             
-            DisplayPostController controller = loader.getController();
-            controller.setAdminMode(this.isAdminMode);
+            // If going back to forum, set admin mode
+            if (fxmlPath.contains("displayPost")) {
+                DisplayPostController controller = loader.getController();
+                controller.setAdminMode(this.isAdminMode);
+            }
             
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            // Use setRoot to ensure full-screen transitions as per project pattern
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -330,7 +330,7 @@ public class CourseFormController {
             if (returnCategory != null) {
                 loader = new FXMLLoader(getClass().getResource("/gui/category-courses-view.fxml"));
             } else {
-                loader = new FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
+                loader = new FXMLLoader(getClass().getResource("/gui/admin-courses-view.fxml"));
             }
 
             Parent root = loader.load();

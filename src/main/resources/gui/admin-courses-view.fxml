@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MainController">
+    <left>
+        <fx:include source="sidebar.fxml" />
+    </left>
+    <center>
+        <StackPane fx:id="contentArea">
+            <children>
+                <VBox fx:id="dashboardView" spacing="22.0">
+                    <padding>
+                        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                    </padding>
+                    <children>
+                        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
+                            <children>
+                                <VBox>
+                                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Dashboard" />
+                                    <Label fx:id="pageTitleLabel" styleClass="title-label" text="Dashboard" />
+                                    <Label fx:id="statusLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Ready" />
+                                </VBox>
+                                <Region HBox.hgrow="ALWAYS" />
+                                <HBox alignment="CENTER" spacing="10.0">
+                                    <Button style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 8;">
+                                        <graphic>
+                                            <Label text="🔔" style="-fx-font-size: 16px;" />
+                                        </graphic>
+                                    </Button>
+                                    <HBox style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15 5 15;" alignment="CENTER" spacing="10.0">
+                                        <VBox alignment="CENTER_RIGHT">
+                                            <Label text="Welcome" style="-fx-font-size: 10px; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" />
+                                            <Label text="Admin User" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                                        </VBox>
+                                        <Label text="ADMIN" styleClass="badge-pink" />
+                                    </HBox>
+                                    <Button onAction="#logout" styleClass="btn-logout">
+                                        <graphic>
+                                            <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                                        </graphic>
+                                    </Button>
+                                </HBox>
+                            </children>
+                        </HBox>
+
+                        <VBox spacing="15.0" styleClass="card">
+                            <children>
+                                <VBox spacing="5.0">
+                                    <Label text="Discover our workshops" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" />
+                                    <Label text="Choose a category to explore available courses and resources." styleClass="subtitle-label" />
+                                </VBox>
+                                <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                    <TextField fx:id="searchField" promptText="Rechercher" styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                                    <Button text="Manage Categories" onAction="#onManageCategories" styleClass="btn-primary" prefHeight="45.0" />
+                                    <Button text="+ Add Course" onAction="#onAddCourse" styleClass="btn-primary" prefHeight="45.0" style="-fx-background-color: #2d3748; -fx-text-fill: white;" />
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="true" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                            <content>
+                                <FlowPane fx:id="coursesContainer" hgap="24.0" vgap="24.0" prefWrapLength="1000">
+                                    <padding>
+                                        <Insets bottom="20.0" left="5.0" right="5.0" top="10.0" />
+                                    </padding>
+                                </FlowPane>
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+</BorderPane>

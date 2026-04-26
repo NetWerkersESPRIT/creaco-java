@@ -47,7 +47,7 @@ public class CourseCategoryListController {
 
     @FXML
     private void onBackToCourses() {
-        openScene("/gui/main-view.fxml", null);
+        openScene("/gui/admin-courses-view.fxml", null);
     }
 
     @FXML
