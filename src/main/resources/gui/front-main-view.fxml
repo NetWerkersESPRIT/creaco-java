@@ -139,6 +139,26 @@
                                     </HBox>
                                 </graphic>
                             </Button>
+                            <Button fx:id="btnMyTeam" mnemonicParsing="false" onAction="#onShowMyTeam" prefWidth="210.0" styleClass="sidebar-item">
+                                <graphic>
+                                    <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                        <StackPane styleClass="sidebar-icon-box">
+                                            <Label text="👥" style="-fx-font-size: 16px;" />
+                                        </StackPane>
+                                        <Label text="Manage Team" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+                            <Button fx:id="btnUserGroups" mnemonicParsing="false" onAction="#onShowUserGroups" prefWidth="210.0" styleClass="sidebar-item">
+                                <graphic>
+                                    <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                        <StackPane styleClass="sidebar-icon-box">
+                                            <Label text="👥" style="-fx-font-size: 16px;" />
+                                        </StackPane>
+                                        <Label text="My Teams" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
                             <Button fx:id="btnCourses" mnemonicParsing="false" onAction="#onShowCourses" prefWidth="210.0" styleClass="sidebar-item">
                                 <graphic>
                                     <HBox spacing="15.0" alignment="CENTER_LEFT">

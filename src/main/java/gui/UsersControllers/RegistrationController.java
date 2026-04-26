@@ -1,7 +1,9 @@
 package gui.UsersControllers;
 
 import entities.Users;
+import entities.Group;
 import services.UsersService;
+import services.GroupService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -23,6 +25,7 @@ public class RegistrationController {
     @FXML private Label lblMessage;
 
     private final UsersService usersService = new UsersService();
+    private final GroupService groupService = new GroupService();
 
     private String validate() {
         String username  = txtUsername.getText().trim();
