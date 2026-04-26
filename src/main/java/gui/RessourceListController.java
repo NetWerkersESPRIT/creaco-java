@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -52,7 +53,21 @@ public class RessourceListController {
 
     @FXML
     private void onBackToCourses() {
-        openScene("/gui/admin-courses-view.fxml", null);
+        if (FrontMainController.isPreviewModeActive()) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-courses-grid-view.fxml"));
+                Parent root = loader.load();
+                if (root instanceof BorderPane) {
+                    FrontMainController.loadContent(((BorderPane) root).getCenter());
+                } else {
+                    FrontMainController.loadContent(root);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            openScene("/gui/admin-courses-view.fxml", null);
+        }
     }
 
     @FXML
@@ -182,8 +197,17 @@ public class RessourceListController {
             if (initializer != null) {
                 initializer.initialize(loader.getController());
             }
-            Stage stage = (Stage) titleLabel.getScene().getWindow();
-            stage.getScene().setRoot(root);
+            
+            if (FrontMainController.isPreviewModeActive()) {
+                if (root instanceof BorderPane) {
+                    FrontMainController.loadContent(((BorderPane) root).getCenter());
+                } else {
+                    FrontMainController.loadContent(root);
+                }
+            } else {
+                Stage stage = (Stage) titleLabel.getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to open view: " + fxmlPath, exception);
         }

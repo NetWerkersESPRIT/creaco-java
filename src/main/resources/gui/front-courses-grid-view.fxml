@@ -35,7 +35,7 @@
                                     <TextField fx:id="searchField" promptText="Search courses..." styleClass="search-bar" prefWidth="350.0" />
                                     <HBox fx:id="boxAdminActions" spacing="10.0">
                                         <children>
-                                            <Button text="Categories" onAction="#onManageCategories" styleClass="btn-primary" prefHeight="40.0" />
+                                            <Button text="Manage Categories" onAction="#onManageCategories" styleClass="btn-primary" prefHeight="40.0" />
                                             <Button text="+ Add Course" onAction="#onAddCourse" styleClass="btn-primary" prefHeight="40.0" style="-fx-background-color: #2d3748; -fx-text-fill: white;" />
                                         </children>
                                     </HBox>
@@ -43,34 +43,12 @@
                             </children>
                         </HBox>
 
-                        <!-- MIDDLE: Horizontal Courses List -->
-                        <VBox spacing="15">
-                            <Label text="Course Workshops" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
-                            <ScrollPane fitToHeight="true" vbarPolicy="NEVER" hbarPolicy="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0;">
-                                <content>
-                                    <HBox fx:id="coursesContainer" spacing="20.0" style="-fx-padding: 10 5;">
-                                        <!-- Course cards will be added here horizontally -->
-                                    </HBox>
-                                </content>
-                            </ScrollPane>
-                        </VBox>
-
-                        <!-- BOTTOM: Help Desk Section -->
+                        <!-- MIDDLE: Course Workshops Grid -->
                         <VBox spacing="20">
-                            <HBox alignment="CENTER_LEFT">
-                                <children>
-                                    <VBox spacing="5">
-                                        <Label text="Help Desk Support" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
-                                        <Label text="Submit your questions to the administration team" style="-fx-text-fill: #718096; -fx-font-size: 12px;" />
-                                    </VBox>
-                                    <Region HBox.hgrow="ALWAYS" />
-                                    <Button text="＋ Send New Question" onAction="#onSendQuestion" styleClass="btn-mentoring" prefHeight="40.0" />
-                                </children>
-                            </HBox>
-                            
-                            <VBox fx:id="questionsContainer" spacing="15.0">
-                                <!-- Help Desk cards will be added here -->
-                            </VBox>
+                            <Label text="Course Workshops" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                            <FlowPane fx:id="coursesContainer" hgap="24.0" vgap="24.0" prefWrapLength="1000">
+                                <!-- Course cards will be added here as a grid -->
+                            </FlowPane>
                         </VBox>
                     </children>
                 </VBox>

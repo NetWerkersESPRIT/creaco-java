@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
@@ -34,6 +35,8 @@ public class FrontResourceController {
     // Profile Navbar labels
     @FXML private Label lblNavUsername;
     @FXML private Label lblNavUserRole;
+    @FXML private javafx.scene.layout.HBox profileBox;
+    @FXML private Button logoutBtn;
 
     @FXML
     public void initialize() {
@@ -126,9 +129,22 @@ public class FrontResourceController {
 
     public void setPreviewMode(boolean isPreview) {
         this.isPreview = isPreview;
+        
+        // Hide the internal banner if we are already in the main dashboard shell
+        // which has its own banner.
         if (previewBanner != null) {
-            previewBanner.setVisible(isPreview);
-            previewBanner.setManaged(isPreview);
+            previewBanner.setVisible(isPreview && !FrontMainController.isPreviewModeActive());
+            previewBanner.setManaged(isPreview && !FrontMainController.isPreviewModeActive());
+        }
+        
+        if (profileBox != null) {
+            profileBox.setVisible(!isPreview);
+            profileBox.setManaged(!isPreview);
+        }
+        
+        if (logoutBtn != null) {
+            logoutBtn.setVisible(!isPreview);
+            logoutBtn.setManaged(!isPreview);
         }
     }
 
@@ -146,17 +162,29 @@ public class FrontResourceController {
 
     @FXML
     private void goBack(javafx.event.ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-main-view.fxml"));
-            Parent root = loader.load();
-            
-            FrontMainController controller = loader.getController();
-            controller.setPreviewMode(this.isPreview);
-            
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (FrontMainController.isPreviewModeActive()) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-courses-grid-view.fxml"));
+                Parent root = loader.load();
+                if (root instanceof BorderPane) {
+                    FrontMainController.loadContent(((BorderPane) root).getCenter());
+                } else {
+                    FrontMainController.loadContent(root);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-main-view.fxml"));
+                Parent root = loader.load();
+                FrontMainController controller = loader.getController();
+                controller.setPreviewMode(this.isPreview);
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.getScene().setRoot(root);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

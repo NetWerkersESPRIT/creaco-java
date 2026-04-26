@@ -29,6 +29,7 @@ public class FrontMainController {
     @FXML private StackPane contentArea;
     @FXML private VBox dashboardView;
     @FXML private javafx.scene.layout.HBox previewBanner;
+    @FXML private HBox topNav;
     @FXML private Label txtWelcome;
     @FXML private Label lblBreadcrumb;
 
@@ -71,11 +72,43 @@ public class FrontMainController {
             previewBanner.setVisible(isPreview);
             previewBanner.setManaged(isPreview);
         }
+        if (topNav != null) {
+            topNav.setVisible(!isPreview);
+            topNav.setManaged(!isPreview);
+        }
+        if (isPreview) {
+            loadPreviewContent();
+        }
+    }
+
+    private void loadPreviewContent() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-courses-grid-view.fxml"));
+            Parent root = loader.load();
+            if (root instanceof BorderPane) {
+                Node center = ((BorderPane) root).getCenter();
+                contentArea.getChildren().setAll(center);
+            } else {
+                contentArea.getChildren().setAll(root);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void refreshNavbar() {
         if (instance != null) {
             instance.updateNavbarProfile();
+        }
+    }
+
+    public static boolean isPreviewModeActive() {
+        return instance != null && instance.previewBanner != null && instance.previewBanner.isVisible();
+    }
+
+    public static void loadContent(Node node) {
+        if (instance != null) {
+            instance.contentArea.getChildren().setAll(node);
         }
     }
 

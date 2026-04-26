@@ -11,6 +11,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import services.CourseService;
 import services.HelpTicketService;
@@ -33,7 +34,7 @@ public class CoursesController {
     private Map<Integer, String> categoryNames = Collections.emptyMap();
     private List<Node> allCourseCards = new ArrayList<>();
 
-    @FXML private HBox coursesContainer;
+    @FXML private FlowPane coursesContainer;
     @FXML private VBox questionsContainer;
     @FXML private TextField searchField;
     @FXML private HBox boxAdminActions;
@@ -168,13 +169,26 @@ public class CoursesController {
 
     private void openCourse(Course course) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resource-list-view.fxml"));
             Parent root = loader.load();
-            FrontResourceController controller = loader.getController();
-            controller.setCourse(course);
-            
-            Stage stage = (Stage) coursesContainer.getScene().getWindow();
-            stage.getScene().setRoot(root);
+            if (FrontMainController.isPreviewModeActive()) {
+                FXMLLoader previewLoader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
+                Parent previewRoot = previewLoader.load();
+                FrontResourceController controller = previewLoader.getController();
+                controller.setCourse(course);
+                controller.setPreviewMode(true);
+                
+                if (previewRoot instanceof BorderPane) {
+                    FrontMainController.loadContent(((BorderPane) previewRoot).getCenter());
+                } else {
+                    FrontMainController.loadContent(previewRoot);
+                }
+            } else {
+                RessourceListController controller = loader.getController();
+                controller.setCourse(course);
+                Stage stage = (Stage) coursesContainer.getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) { e.printStackTrace(); }
     }
 

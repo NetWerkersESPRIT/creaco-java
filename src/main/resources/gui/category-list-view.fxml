@@ -20,8 +20,14 @@
                 <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
             </padding>
             <children>
-                <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
                     <children>
+                        <VBox>
+                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories" />
+                            <Label fx:id="titleLabel" styleClass="title-label" text="Course Categories" />
+                            <Label fx:id="statusLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Ready" />
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#onAddCategory" prefHeight="44.0" styleClass="btn-primary" text="Add category" />
                     </children>
                 </HBox>

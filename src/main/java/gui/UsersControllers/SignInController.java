@@ -138,7 +138,8 @@ public class SignInController {
             SessionManager.getInstance().setCurrentUser(user);
 
             Stage stage = (Stage) txtEmail.getScene().getWindow();
-            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml")));
+            String fxmlPath = "/gui/front-main-view.fxml";
+            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource(fxmlPath)));
             stage.setMaximized(true);
             stage.setTitle("CreaCo Dashboard");
 

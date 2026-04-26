@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox spacing="25.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.HelpDeskMessagesController">
+    <padding>
+        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+    </padding>
+    
+    <!-- STATS CARDS -->
+    <HBox spacing="20.0">
+        <children>
+            <VBox spacing="12" styleClass="card" HBox.hgrow="ALWAYS" style="-fx-min-width: 150; -fx-border-color: transparent transparent transparent #1e293b; -fx-border-width: 0 0 0 4; -fx-border-radius: 20;">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <StackPane style="-fx-background-color: #f1f5f9; -fx-background-radius: 10; -fx-padding: 10;">
+                        <Label text="✉️" style="-fx-font-size: 20px;" />
+                    </StackPane>
+                    <Label text="TOTAL OPEN" style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-font-weight: 900; -fx-letter-spacing: 0.5;" />
+                </HBox>
+                <Label fx:id="lblTotalOpen" text="3" style="-fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #1e293b;" />
+            </VBox>
+            <VBox spacing="12" styleClass="card" HBox.hgrow="ALWAYS" style="-fx-min-width: 150; -fx-border-color: transparent transparent transparent #434a75; -fx-border-width: 0 0 0 4; -fx-border-radius: 20;">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <StackPane style="-fx-background-color: #fff7ed; -fx-background-radius: 10; -fx-padding: 10;">
+                        <Label text="⏳" style="-fx-font-size: 20px;" />
+                    </StackPane>
+                    <Label text="PENDING REPLY" style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-font-weight: 900; -fx-letter-spacing: 0.5;" />
+                </HBox>
+                <Label fx:id="lblPendingReply" text="2" style="-fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #434a75;" />
+            </VBox>
+            <VBox spacing="12" styleClass="card" HBox.hgrow="ALWAYS" style="-fx-min-width: 150; -fx-border-color: transparent transparent transparent #ce2d7c; -fx-border-width: 0 0 0 4; -fx-border-radius: 20;">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <StackPane style="-fx-background-color: #fdf2f8; -fx-background-radius: 10; -fx-padding: 10;">
+                        <Label text="🔥" style="-fx-font-size: 20px;" />
+                    </StackPane>
+                    <Label text="URGENT" style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-font-weight: 900; -fx-letter-spacing: 0.5;" />
+                </HBox>
+                <Label fx:id="lblUrgentCount" text="1" style="-fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #ce2d7c;" />
+            </VBox>
+            <VBox spacing="12" styleClass="card" HBox.hgrow="ALWAYS" style="-fx-min-width: 150; -fx-border-color: transparent transparent transparent #16a34a; -fx-border-width: 0 0 0 4; -fx-border-radius: 20;">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <StackPane style="-fx-background-color: #f0fdf4; -fx-background-radius: 10; -fx-padding: 10;">
+                        <Label text="✅" style="-fx-font-size: 20px;" />
+                    </StackPane>
+                    <Label text="RESOLVED" style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-font-weight: 900; -fx-letter-spacing: 0.5;" />
+                </HBox>
+                <Label fx:id="lblResolvedToday" text="0" style="-fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #16a34a;" />
+            </VBox>
+            <VBox spacing="12" styleClass="card" HBox.hgrow="ALWAYS" style="-fx-min-width: 150; -fx-border-color: transparent transparent transparent #6366f1; -fx-border-width: 0 0 0 4; -fx-border-radius: 20;">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <StackPane style="-fx-background-color: #eef2ff; -fx-background-radius: 10; -fx-padding: 10;">
+                        <Label text="⚡" style="-fx-font-size: 20px;" />
+                    </StackPane>
+                    <Label text="AVG. RESPONSE" style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-font-weight: 900; -fx-letter-spacing: 0.5;" />
+                </HBox>
+                <Label fx:id="lblAvgResponseTime" text="1.8h" style="-fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #6366f1;" />
+            </VBox>
+        </children>
+    </HBox>
+
+    <!-- FILTERS AND SEARCH -->
+    <HBox spacing="15.0" alignment="CENTER_LEFT">
+        <children>
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <Button fx:id="btnMyMessages" text="My messages" onAction="#filterMyMessages" styleClass="btn-action-light" />
+                <Button fx:id="btnUnread" text="Unread only" onAction="#filterUnread" styleClass="btn-primary" />
+                <Button fx:id="btnUrgent" text="Urgent only" onAction="#filterUrgent" styleClass="btn-action-light" />
+                <Separator orientation="VERTICAL" prefHeight="20" />
+                <Button fx:id="btnToday" text="Today" onAction="#filterToday" styleClass="btn-action-light" />
+                <Button fx:id="btnWeek" text="This week" onAction="#filterThisWeek" styleClass="btn-action-light" />
+            </HBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <TextField fx:id="searchField" promptText="Search messages..." styleClass="search-bar" prefWidth="250.0" />
+        </children>
+    </HBox>
+
+    <!-- LIST HEADER -->
+    <HBox spacing="20.0" style="-fx-padding: 0 20;">
+        <children>
+            <Label text="CREATOR / MESSAGE" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;" prefWidth="350" />
+            <Label text="PRIORITY" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;" prefWidth="120" alignment="CENTER" />
+            <Label text="STATUS" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;" prefWidth="120" alignment="CENTER" />
+            <Label text="DATE" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;" prefWidth="120" alignment="CENTER" />
+            <Region HBox.hgrow="ALWAYS" />
+        </children>
+    </HBox>
+
+    <!-- SCROLLABLE LIST -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent;">
+        <content>
+            <VBox fx:id="messagesContainer" spacing="12.0">
+                <!-- Message rows will be added here -->
+            </VBox>
+        </content>
+    </ScrollPane>
+</VBox>

@@ -23,6 +23,20 @@
                 <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
             </padding>
             <children>
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <VBox>
+                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Categories" />
+                            <Label fx:id="titleLabel" styleClass="title-label" text="Edit Category" />
+                            <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Modify the category details below" />
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#onCancel"
+                                styleClass="btn-secondary" prefWidth="120" prefHeight="40"
+                                text="Cancel" />
+                    </children>
+                </HBox>
+                
                 <VBox maxWidth="860.0" spacing="20.0" styleClass="card">
                     <padding>
                         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
@@ -49,9 +63,6 @@
                         </VBox>
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">
                             <children>
-                                <Button mnemonicParsing="false" onAction="#onCancel"
-                                        styleClass="btn-secondary" prefWidth="120" prefHeight="40"
-                                        text="Cancel" />
                                 <Button mnemonicParsing="false" onAction="#onSave"
                                         styleClass="btn-primary" prefWidth="150" prefHeight="40"
                                         text="Save category" />

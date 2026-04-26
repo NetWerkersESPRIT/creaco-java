@@ -102,7 +102,12 @@ public class SidebarController {
 
     @FXML
     private void onShowCourses(ActionEvent event) {
-        navigateTo(event, "/gui/front-courses-grid-view.fxml");
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null && "ROLE_ADMIN".equals(user.getRole())) {
+            navigateTo(event, "/gui/admin-courses-view.fxml");
+        } else {
+            navigateTo(event, "/gui/front-courses-grid-view.fxml");
+        }
     }
 
     @FXML

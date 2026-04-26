@@ -26,14 +26,14 @@
                     </padding>
                     <children>
                         <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
-                               style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
-                            <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #854d0e; -fx-font-size: 14;" />
+                               style="-fx-background-color: #f1f5f9; -fx-padding: 12 24; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                            <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 14;" />
                             <Region HBox.hgrow="ALWAYS" />
                             <Button text="Exit Preview" onAction="#exitPreview"
-                                     style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
+                                     style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
                         </HBox>
 
-                        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
+                        <HBox fx:id="topNav" styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
                             <children>
                                 <VBox>
                                     <Label fx:id="lblBreadcrumb" style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Dashboard" />

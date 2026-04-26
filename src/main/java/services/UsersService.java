@@ -148,4 +148,27 @@ public class UsersService implements services.UsersInterface<Users> {
         }
         return null;
     }
+
+    /** Returns the Users entity matching the given ID, or null if not found. */
+    public Users getById(int id) throws SQLException {
+        String sql = "SELECT * FROM users WHERE id = ? LIMIT 1";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            Users u = new Users();
+            u.setId(rs.getInt("id"));
+            u.setUsername(rs.getString("username"));
+            u.setEmail(rs.getString("email"));
+            u.setPassword(rs.getString("password"));
+            u.setRole(rs.getString("role"));
+            u.setNumtel(rs.getString("numtel"));
+            u.setPoints(rs.getInt("points"));
+            u.setCreated_at(rs.getString("created_at"));
+            u.setBanned(rs.getBoolean("is_banned"));
+            u.setImage(rs.getString("image"));
+            return u;
+        }
+        return null;
+    }
 }

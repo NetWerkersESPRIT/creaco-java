@@ -62,6 +62,19 @@
                                 </VBox>
                                 <HBox spacing="15.0" alignment="CENTER_LEFT">
                                     <TextField fx:id="searchField" promptText="Rechercher" styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                                    
+                                    <!-- Support Mentorat Banner -->
+                                    <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: #f1f5f9; -fx-background-radius: 15; -fx-padding: 8 20; -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 5, 0, 0, 2);">
+                                        <children>
+                                            <Label text="🤝" style="-fx-font-size: 18px;" />
+                                            <VBox alignment="CENTER_LEFT">
+                                                <Label text="Support Mentorat" style="-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 13px;" />
+                                                <Label text="Questions en attente..." style="-fx-text-fill: #64748b; -fx-font-size: 10px;" />
+                                            </VBox>
+                                            <Button text="View" onAction="#onViewQuestions" styleClass="btn-primary" style="-fx-font-size: 11px; -fx-background-radius: 10; -fx-padding: 6 15; -fx-background-color: #434a75;" />
+                                        </children>
+                                    </HBox>
+
                                     <Button text="Manage Categories" onAction="#onManageCategories" styleClass="btn-primary" prefHeight="45.0" />
                                     <Button text="+ Add Course" onAction="#onAddCourse" styleClass="btn-primary" prefHeight="45.0" style="-fx-background-color: #2d3748; -fx-text-fill: white;" />
                                 </HBox>

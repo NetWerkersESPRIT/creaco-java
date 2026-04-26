@@ -33,6 +33,7 @@ public class MainController {
     private List<Course> courses = Collections.emptyList();
     private Map<Integer, String> categoryNames = Collections.emptyMap();
     private List<Node> allCourseCards = new ArrayList<>();
+    private static MainController instance;
 
     @FXML private FlowPane coursesContainer;
     @FXML private TextField searchField;
@@ -44,10 +45,17 @@ public class MainController {
 
     @FXML
     private void initialize() {
+        instance = this;
         if (pageTitleLabel != null) pageTitleLabel.setText("Courses Dashboard");
         loadCourses();
         if (searchField != null) {
             searchField.textProperty().addListener((obs, oldVal, newVal) -> filterCourses(newVal));
+        }
+    }
+
+    public static void loadContentStatic(Node node) {
+        if (instance != null) {
+            instance.contentArea.getChildren().setAll(node);
         }
     }
 
@@ -183,6 +191,11 @@ public class MainController {
         }
     }
 
+    @FXML
+    private void onViewQuestions() {
+        loadSubView("/gui/help-desk-messages.fxml", "Help Desk Support");
+    }
+
     private void loadCourses() {
         if (coursesContainer == null) return;
         allCourseCards.clear();
@@ -285,9 +298,9 @@ public class MainController {
 
     private void openRessources(Course course, Node sourceNode) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resource-list-view.fxml"));
             Parent root = loader.load();
-            FrontResourceController controller = loader.getController();
+            RessourceListController controller = loader.getController();
             controller.setCourse(course);
             Stage stage = (Stage) sourceNode.getScene().getWindow();
             stage.getScene().setRoot(root);

@@ -21,11 +21,11 @@
             </padding>
             <children>
                 <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
-                      style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
-                    <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #854d0e; -fx-font-size: 14;" />
+                      style="-fx-background-color: #f1f5f9; -fx-padding: 12 24; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                    <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 14;" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button text="Exit Preview" onAction="#exitPreview"
-                            style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
+                            style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
                 </HBox>
 
                 <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
@@ -37,7 +37,7 @@
                         
                         <Region HBox.hgrow="ALWAYS" />
                         
-                        <HBox alignment="CENTER" spacing="12" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                        <HBox fx:id="profileBox" alignment="CENTER" spacing="12" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 5 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
                             <children>
                                 <VBox alignment="CENTER_RIGHT">
                                     <Label text="Welcome" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 10px; -fx-font-weight: bold;" />
@@ -47,7 +47,8 @@
                             </children>
                         </HBox>
 
-                        <Button onAction="#logout" styleClass="btn-logout" prefHeight="40" prefWidth="40">
+
+                        <Button fx:id="logoutBtn" onAction="#logout" styleClass="btn-logout" prefHeight="40" prefWidth="40">
                             <graphic>
                                 <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
                             </graphic>
