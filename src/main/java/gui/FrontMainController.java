@@ -32,6 +32,7 @@ public class FrontMainController {
     @FXML private Label txtWelcome;
     @FXML private Label lblBreadcrumb;
 
+
     // User Profile in Navbar
     @FXML private Label lblUsername;
     @FXML private Label lblUserRole;
@@ -169,6 +170,18 @@ public class FrontMainController {
         if (txtWelcome != null) txtWelcome.setText("Collaborations");
         if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Collaborations");
         loadSubView("/collaborator/ListCollaborator.fxml"); 
+    }
+
+    @FXML public void onShowMyTeam() {
+        if (txtWelcome != null) txtWelcome.setText("Manage Team");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Team Management");
+        loadSubView("/Users/GroupManagement.fxml");
+    }
+
+    @FXML public void onShowUserGroups() {
+        if (txtWelcome != null) txtWelcome.setText("My Teams");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Joined Teams");
+        loadSubView("/Users/UserGroupsDashboard.fxml");
     }
 
     @FXML
