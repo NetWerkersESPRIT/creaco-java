@@ -53,17 +53,14 @@
                                 <Label fx:id="nameErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                             </children>
                         </VBox>
+
                         <VBox spacing="4.0">
                             <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Type *" />
-                                <TextField fx:id="typeField" promptText="PDF, video, image..." />
-                                <Label fx:id="typeErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
-                            </children>
-                        </VBox>
-                        <VBox spacing="4.0">
-                            <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="URL *" />
-                                <TextField fx:id="urlField" promptText="https://example.com/resource" />
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Resource *" />
+                                <HBox spacing="10">
+                                    <TextField fx:id="urlField" promptText="Upload a file or provide a URL" HBox.hgrow="ALWAYS" editable="false" />
+                                    <Button text="Browse" onAction="#onBrowseFile" styleClass="btn-secondary" />
+                                </HBox>
                                 <Label fx:id="urlErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                             </children>
                         </VBox>

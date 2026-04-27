@@ -16,6 +16,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import io.github.cdimascio.dotenv.Dotenv;
+import java.io.File;
+import java.util.Map;
+import javafx.stage.FileChooser;
+
 public class RessourceFormController {
 
     private final RessourceService ressourceService = new RessourceService();
@@ -36,12 +43,6 @@ public class RessourceFormController {
     private Label nameErrorLabel;
 
     @FXML
-    private TextField typeField;
-
-    @FXML
-    private Label typeErrorLabel;
-
-    @FXML
     private TextField urlField;
 
     @FXML
@@ -49,6 +50,19 @@ public class RessourceFormController {
 
     @FXML
     private TextArea contentArea;
+
+    private File selectedFile;
+
+    @FXML
+    private void onBrowseFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Resource File");
+        File file = fileChooser.showOpenDialog(nameField.getScene().getWindow());
+        if (file != null) {
+            selectedFile = file;
+            urlField.setText(file.getAbsolutePath());
+        }
+    }
 
     public void setContext(Course course, Ressource ressource) {
         this.course = course;
@@ -81,9 +95,23 @@ public class RessourceFormController {
         boolean editing = ressource != null;
         Ressource target = editing ? ressource : new Ressource();
 
+        if (selectedFile != null) {
+            try {
+                Dotenv dotenv = Dotenv.load();
+                Cloudinary cloudinary = new Cloudinary(dotenv.get("CLOUDINARY_URL"));
+                Map uploadResult = cloudinary.uploader().upload(selectedFile, ObjectUtils.emptyMap());
+                String secureUrl = (String) uploadResult.get("secure_url");
+                target.setUrl(secureUrl);
+            } catch (Exception e) {
+                AlertHelper.showError("Upload Error", "Failed to upload file to Cloudinary: " + e.getMessage());
+                return;
+            }
+        } else {
+            target.setUrl(urlField.getText().trim());
+        }
+
         target.setNom(nameField.getText().trim());
-        target.setType(typeField.getText().trim());
-        target.setUrl(urlField.getText().trim());
+        target.setType("File");
         target.setContenu(contentArea.getText());
         target.setCourseId(course.getId());
 
@@ -106,7 +134,6 @@ public class RessourceFormController {
 
     private void populateForm() {
         nameField.setText(ressource.getNom() != null ? ressource.getNom() : "");
-        typeField.setText(ressource.getType() != null ? ressource.getType() : "");
         urlField.setText(ressource.getUrl() != null ? ressource.getUrl() : "");
         contentArea.setText(ressource.getContenu() != null ? ressource.getContenu() : "");
     }
@@ -117,7 +144,6 @@ public class RessourceFormController {
         boolean valid = true;
 
         String name = nameField.getText();
-        String type = typeField.getText();
         String url = urlField.getText();
 
         if (name == null || name.isBlank()) {
@@ -127,20 +153,8 @@ public class RessourceFormController {
             valid = false;
         }
 
-        if (type == null || type.isBlank()) {
-            typeErrorLabel.setText("Resource type is required.");
-            typeErrorLabel.setVisible(true);
-            typeErrorLabel.setManaged(true);
-            valid = false;
-        }
-
         if (url == null || url.isBlank()) {
-            urlErrorLabel.setText("Resource URL is required.");
-            urlErrorLabel.setVisible(true);
-            urlErrorLabel.setManaged(true);
-            valid = false;
-        } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            urlErrorLabel.setText("URL must start with http:// or https://.");
+            urlErrorLabel.setText("Resource file or URL is required.");
             urlErrorLabel.setVisible(true);
             urlErrorLabel.setManaged(true);
             valid = false;
@@ -156,10 +170,6 @@ public class RessourceFormController {
         nameErrorLabel.setText("");
         nameErrorLabel.setVisible(false);
         nameErrorLabel.setManaged(false);
-
-        typeErrorLabel.setText("");
-        typeErrorLabel.setVisible(false);
-        typeErrorLabel.setManaged(false);
 
         urlErrorLabel.setText("");
         urlErrorLabel.setVisible(false);

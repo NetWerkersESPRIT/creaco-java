@@ -262,12 +262,14 @@ public class CoursesController {
             
             if (FrontMainController.isPreviewModeActive()) {
                 controller.setPreviewMode(true);
-            }
-            
-            if (root instanceof BorderPane) {
-                FrontMainController.loadContent(((BorderPane) root).getCenter());
+                if (root instanceof BorderPane) {
+                    FrontMainController.loadContent(((BorderPane) root).getCenter());
+                } else {
+                    FrontMainController.loadContent(root);
+                }
             } else {
-                FrontMainController.loadContent(root);
+                Stage stage = (Stage) coursesContainer.getScene().getWindow();
+                stage.getScene().setRoot(root);
             }
         } catch (IOException e) { e.printStackTrace(); }
     }
