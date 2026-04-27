@@ -33,6 +33,7 @@ public class FrontMainController {
     @FXML private FlowPane coursesContainer;
     @FXML private TextField searchField;
     @FXML private StackPane contentArea;
+    @FXML private StackPane rootStackPane;
     @FXML private VBox dashboardView;
     @FXML private javafx.scene.layout.HBox previewBanner;
     @FXML private Label txtWelcome;
@@ -54,6 +55,8 @@ public class FrontMainController {
     @FXML private Label lblNotifCount;
 
     private javafx.stage.Popup notificationPopup;
+    private gui.notification.NotificationListController notificationListController;
+    private javafx.animation.Timeline notificationRefreshTimeline;
 
     private static FrontMainController instance;
 
@@ -110,6 +113,7 @@ public class FrontMainController {
             }
 
             checkUnreadNotifications();
+            startNotificationRefresh();
         }
     }
 
@@ -121,11 +125,32 @@ public class FrontMainController {
             long unreadCount = notifications.stream().filter(n -> !n.isRead()).count();
             
             if (unreadCount > 0) {
-                lblNotifCount.setText(String.valueOf(unreadCount > 9 ? "9+" : unreadCount));
+                lblNotifCount.setText(unreadCount > 9 ? "9+" : String.valueOf(unreadCount));
                 notifBadge.setVisible(true);
+                notifBadge.setManaged(true);
             } else {
                 notifBadge.setVisible(false);
+                notifBadge.setManaged(false);
             }
+        }
+    }
+
+    private void startNotificationRefresh() {
+        if (notificationRefreshTimeline != null) {
+            notificationRefreshTimeline.stop();
+        }
+
+        notificationRefreshTimeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(javafx.util.Duration.seconds(4), e -> refreshNotificationsLive())
+        );
+        notificationRefreshTimeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        notificationRefreshTimeline.play();
+    }
+
+    private void refreshNotificationsLive() {
+        checkUnreadNotifications();
+        if (notificationPopup != null && notificationPopup.isShowing() && notificationListController != null) {
+            notificationListController.refreshNotifications();
         }
     }
 
@@ -139,14 +164,19 @@ public class FrontMainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/notification/notification_list.fxml"));
             Parent root = loader.load();
-            gui.notification.NotificationListController controller = loader.getController();
+            notificationListController = loader.getController();
 
             notificationPopup = new javafx.stage.Popup();
             notificationPopup.getContent().add(root);
             notificationPopup.setAutoHide(true);
 
-            controller.setOnCloseCallback(() -> {
+            notificationListController.setOnCloseCallback(() -> {
                 notificationPopup.hide();
+                checkUnreadNotifications();
+            });
+
+            notificationPopup.setOnHidden(e -> {
+                notificationListController = null;
                 checkUnreadNotifications();
             });
 
@@ -176,6 +206,44 @@ public class FrontMainController {
         if (instance != null) {
             if (instance.txtWelcome != null) instance.txtWelcome.setText(title);
             if (instance.lblBreadcrumb != null) instance.lblBreadcrumb.setText(breadcrumb);
+        }
+    }
+
+    private Node floatingChatNode;
+    private gui.chat.FloatingChatController floatingChatController;
+
+    public void openFloatingChat(int conversationId) {
+        if (floatingChatNode != null) {
+            rootStackPane.getChildren().remove(floatingChatNode);
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/chat/floating_chat.fxml"));
+            floatingChatNode = loader.load();
+            floatingChatController = loader.getController();
+            
+            floatingChatController.setConversationId(conversationId);
+            floatingChatController.setOnClose(() -> {
+                rootStackPane.getChildren().remove(floatingChatNode);
+                floatingChatNode = null;
+                floatingChatController = null;
+            });
+
+            rootStackPane.getChildren().add(floatingChatNode);
+            StackPane.setAlignment(floatingChatNode, Pos.BOTTOM_RIGHT);
+            StackPane.setMargin(floatingChatNode, new javafx.geometry.Insets(0, 20, 20, 0));
+            
+            // Bring to front
+            floatingChatNode.toFront();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showFloatingChat(int conversationId) {
+        if (instance != null) {
+            instance.openFloatingChat(conversationId);
         }
     }
 
