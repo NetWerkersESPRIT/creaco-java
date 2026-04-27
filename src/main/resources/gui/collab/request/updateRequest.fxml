@@ -46,7 +46,11 @@
 
                                 <VBox spacing="8.0">
                                     <children>
-                                        <Label styleClass="form-label" text="Description" />
+                                        <HBox alignment="CENTER_LEFT">
+                                            <Label styleClass="form-label" text="Description" />
+                                            <Region HBox.hgrow="ALWAYS" />
+                                            <Button onAction="#onAssistDescription" style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-background-radius: 4px; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 4 8;" text="✨ Formal Assist" />
+                                        </HBox>
                                         <TextArea fx:id="reqDescArea" prefRowCount="3" promptText="Describe the project goals and context..." wrapText="true" />
                                     </children>
                                 </VBox>
@@ -82,14 +86,22 @@
 
                                 <VBox spacing="8.0">
                                     <children>
-                                        <Label styleClass="form-label" text="Deliverables" />
+                                        <HBox alignment="CENTER_LEFT">
+                                            <Label styleClass="form-label" text="Deliverables" />
+                                            <Region HBox.hgrow="ALWAYS" />
+                                            <Button onAction="#onAssistDeliverables" style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-background-radius: 4px; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 4 8;" text="✨ Formal Assist" />
+                                        </HBox>
                                         <TextArea fx:id="reqDeliverablesArea" prefRowCount="3" promptText="What are the expected outcomes?" wrapText="true" />
                                     </children>
                                 </VBox>
 
                                 <VBox spacing="8.0">
                                     <children>
-                                        <Label styleClass="form-label" text="Payment Terms" />
+                                        <HBox alignment="CENTER_LEFT">
+                                            <Label styleClass="form-label" text="Payment Terms" />
+                                            <Region HBox.hgrow="ALWAYS" />
+                                            <Button onAction="#onAssistPaymentTerms" style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-background-radius: 4px; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 4 8;" text="✨ Formal Assist" />
+                                        </HBox>
                                         <TextArea fx:id="reqPaymentTermsArea" prefRowCount="2" promptText="Milestones, net days, etc." wrapText="true" />
                                     </children>
                                 </VBox>

@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
@@ -129,31 +128,6 @@
                 <!-- Right Column -->
                 <VBox spacing="25.0" minWidth="380">
                     <children>
-                        <!-- AI Prediction -->
-                        <VBox spacing="15.0" styleClass="ai-prediction-card">
-                            <children>
-                                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                    <children>
-                                        <Label text="💡" style="-fx-font-size: 16px;" />
-                                        <Label styleClass="ai-label" text="AI Success Prediction" />
-                                    </children>
-                                </HBox>
-                                <VBox spacing="10.0">
-                                    <children>
-                                        <HBox alignment="CENTER_LEFT">
-                                            <children>
-                                                <Label text="Approval Likelihood" style="-fx-text-fill: #64748b; -fx-font-size: 11px;" />
-                                                <Region HBox.hgrow="ALWAYS" />
-                                                <Label text="50%" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
-                                            </children>
-                                        </HBox>
-                                        <ProgressBar progress="0.5" prefWidth="Infinity" styleClass="ai-progress-bar" prefHeight="8.0" />
-                                    </children>
-                                </VBox>
-                                <Label text="Powered by Google Gemini Flash" style="-fx-text-fill: #94a3b8; -fx-font-size: 9px;" />
-                            </children>
-                        </VBox>
-
                         <!-- Review Decision -->
                         <VBox spacing="25.0" styleClass="card">
                             <padding><Insets bottom="30.0" left="30.0" right="30.0" top="30.0" /></padding>
