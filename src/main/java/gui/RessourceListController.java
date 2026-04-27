@@ -121,12 +121,6 @@ public class RessourceListController {
         Label typeLabel = new Label(formatType(ressource.getType()));
         typeLabel.getStyleClass().add("badge-pink");
 
-        Button openLinkButton = new Button("Open");
-        openLinkButton.getStyleClass().add("btn-primary");
-        openLinkButton.setStyle("-fx-font-size: 13px; -fx-background-radius: 10;"); // Override for row buttons
-        openLinkButton.setPrefWidth(90);
-        openLinkButton.setPrefHeight(35);
-        openLinkButton.setOnAction(event -> openRessource(ressource));
 
         VBox createdAtBox = new VBox(6);
         createdAtBox.setMinWidth(170);
@@ -164,7 +158,7 @@ public class RessourceListController {
         });
 
         actionsBox.getChildren().addAll(editButton, deleteButton);
-        row.getChildren().addAll(nameLabel, typeLabel, openLinkButton, createdAtBox, spacer, actionsBox);
+        row.getChildren().addAll(nameLabel, typeLabel, createdAtBox, spacer, actionsBox);
         return row;
     }
 

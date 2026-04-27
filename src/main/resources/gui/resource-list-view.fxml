@@ -46,9 +46,7 @@
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="NAME" />
                         <Region prefWidth="330.0" />
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="TYPE" />
-                        <Region prefWidth="120.0" />
-                        <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="LINK" />
-                        <Region prefWidth="80.0" />
+                        <Region prefWidth="240.0" />
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="CREATED AT" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="ACTIONS" />
