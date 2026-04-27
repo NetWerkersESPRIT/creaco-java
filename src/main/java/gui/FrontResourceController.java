@@ -28,6 +28,13 @@ import javafx.application.Platform;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -57,6 +64,11 @@ public class FrontResourceController {
     @FXML private ScrollPane chatScroll;
     @FXML private Button askTutorBtn;
     @FXML private VBox mainContent;
+
+    // Resource Modal UI
+    @FXML private StackPane resourceModal;
+    @FXML private Label modalResourceTitle;
+    @FXML private Label modalResourceDesc;
 
     @FXML
     public void initialize() {
@@ -133,7 +145,7 @@ public class FrontResourceController {
         name.getStyleClass().add("card-title");
 
         Label type = new Label("Type: " + (ressource.getType() == null ? "-" : ressource.getType()));
-        type.getStyleClass().add("badge-pink"); // Using badge style for the type
+        type.getStyleClass().add("badge-pink"); 
         type.setMaxWidth(Region.USE_PREF_SIZE);
 
         Label desc = new Label(ressource.getContenu() == null ? "-" : ressource.getContenu());
@@ -141,17 +153,72 @@ public class FrontResourceController {
         desc.setPrefHeight(60);
         desc.getStyleClass().add("card-subtitle");
 
-        Button downloadBtn = new Button("View / Download");
-        downloadBtn.getStyleClass().add("btn-primary");
-        downloadBtn.setPrefWidth(160);
-        downloadBtn.setPrefHeight(40);
-        
-        downloadBtn.setOnAction(e -> {
-            System.out.println("Viewing resource URL: " + ressource.getUrl());
-        });
+        HBox actions = new HBox(10);
+        actions.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        card.getChildren().addAll(name, type, desc, downloadBtn);
+        Button openBtn = new Button("Open");
+        openBtn.getStyleClass().add("btn-primary");
+        openBtn.setPrefWidth(120);
+        openBtn.setPrefHeight(40);
+        openBtn.setOnAction(e -> onOpenResource(ressource));
+
+        Button downloadIconBtn = new Button("📥");
+        downloadIconBtn.getStyleClass().add("btn-action-light");
+        downloadIconBtn.setStyle("-fx-font-size: 18px; -fx-padding: 5 12; -fx-background-radius: 10;");
+        downloadIconBtn.setPrefHeight(40);
+        downloadIconBtn.setOnAction(e -> onDownloadResource(ressource));
+        
+        actions.getChildren().addAll(openBtn, downloadIconBtn);
+
+        card.getChildren().addAll(name, type, desc, actions);
         return card;
+    }
+
+    private void onOpenResource(Ressource res) {
+        modalResourceTitle.setText(res.getNom());
+        modalResourceDesc.setText(res.getContenu() != null ? res.getContenu() : "No details available.");
+        resourceModal.setVisible(true);
+        new ZoomIn(resourceModal).setSpeed(1.5).play();
+    }
+
+    @FXML
+    private void closeResourceModal() {
+        ZoomOut zoomOut = new ZoomOut(resourceModal);
+        zoomOut.setSpeed(1.5);
+        zoomOut.setOnFinished(e -> resourceModal.setVisible(false));
+        zoomOut.play();
+    }
+
+    private void onDownloadResource(Ressource res) {
+        String fileUrl = res.getUrl();
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            System.out.println("No URL for resource: " + res.getNom());
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Resource");
+        
+        // Suggest a filename based on URL or name
+        String ext = fileUrl.contains(".") ? fileUrl.substring(fileUrl.lastIndexOf(".")) : ".bin";
+        if (ext.length() > 5) ext = ".bin"; // Sanitize
+        fileChooser.setInitialFileName(res.getNom().replaceAll("[^a-zA-Z0-9.-]", "_") + ext);
+        
+        File file = fileChooser.showSaveDialog(resourcesContainer.getScene().getWindow());
+        
+        if (file != null) {
+            new Thread(() -> {
+                try (InputStream in = new URL(fileUrl).openStream()) {
+                    Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    Platform.runLater(() -> {
+                        // Optional: Show success alert
+                        System.out.println("Downloaded: " + file.getAbsolutePath());
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
     }
 
     @FXML private javafx.scene.layout.HBox previewBanner;

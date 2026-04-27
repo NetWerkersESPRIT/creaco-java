@@ -41,11 +41,17 @@ public class CoursesController {
     @FXML private TextField searchField;
     @FXML private HBox boxAdminActions;
     @FXML private VBox mainContentBox;
+    @FXML private HBox gamificationCard;
 
     @FXML
     public void initialize() {
         if (mainContentBox != null) {
             new FadeInUp(mainContentBox).setSpeed(0.8).play();
+        }
+        
+        if (gamificationCard != null) {
+            new FadeInRight(gamificationCard).setDelay(javafx.util.Duration.millis(300)).play();
+            gamificationCard.setOnMouseEntered(e -> new Pulse(gamificationCard).setSpeed(2.0).play());
         }
 
         loadCourses();
@@ -466,5 +472,12 @@ public class CoursesController {
     @FXML
     private void onViewQuestions() {
         loadTickets();
+    }
+
+    @FXML
+    private void onGoToLeaderboard() {
+        // Placeholder for leaderboard navigation
+        System.out.println("Navigating to Leaderboard...");
+        // You can add navigation here when the leaderboard view is ready
     }
 }

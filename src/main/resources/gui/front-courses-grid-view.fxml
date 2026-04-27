@@ -43,6 +43,29 @@
                             </children>
                         </HBox>
 
+                        <!-- NEW: Gamification Leaderboard Card -->
+                        <HBox fx:id="gamificationCard" onMouseClicked="#onGoToLeaderboard" spacing="20" style="-fx-background-color: linear-gradient(to right, #8b5cf6, #ec4899); -fx-background-radius: 15; -fx-padding: 25; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(236, 72, 153, 0.3), 15, 0, 0, 5);">
+                            <children>
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="GAMIFICATION" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-weight: bold; -fx-font-size: 10px; -fx-letter-spacing: 1px;" />
+                                        <Label text="Climb the XP leaderboard" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
+                                        <Label text="Earn XP by opening resources and completing courses, unlock badges and see how you rank among other learners." 
+                                               style="-fx-text-fill: rgba(255,255,255,0.9); -fx-font-size: 13px;" wrapText="true" />
+                                        <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
+                                            <Label text="🏆" style="-fx-font-size: 16px;" />
+                                            <Label text="GO TO LEADERBOARD" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;" />
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                                <StackPane alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 50; -fx-min-width: 80; -fx-min-height: 80; -fx-max-width: 80; -fx-max-height: 80;">
+                                    <children>
+                                        <Label text="🔥" style="-fx-font-size: 40px;" />
+                                    </children>
+                                </StackPane>
+                            </children>
+                        </HBox>
+
                         <!-- MIDDLE: Course Workshops Grid -->
                         <VBox spacing="10">
                             <Label text="Course Workshops" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
