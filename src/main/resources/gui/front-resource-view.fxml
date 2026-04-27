@@ -4,18 +4,21 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
-            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="gui.FrontResourceController" stylesheets="@styles.css">
+<StackPane fx:id="rootStack" prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
+           xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="gui.FrontResourceController" stylesheets="@styles.css">
+
+    <BorderPane>
 
     <left>
         <fx:include source="sidebar.fxml" />
     </left>
 
     <center>
-        <VBox spacing="22.0">
+        <VBox fx:id="mainContent" spacing="22.0">
             <padding>
                 <Insets top="24" left="24" right="24" bottom="24"/>
             </padding>
@@ -65,4 +68,37 @@
         </VBox>
     </center>
 
-</BorderPane>
+    </BorderPane>
+
+    <!-- Floating Button (Bottom Right) -->
+    <Button fx:id="askTutorBtn" text="Ask Smart Tutor ✨" onAction="#openTutorModal"
+            style="-fx-background-color: linear-gradient(to right, #ec4899, #8b5cf6); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 25; -fx-padding: 12 24; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 5); -fx-cursor: hand;"
+            StackPane.alignment="BOTTOM_RIGHT" >
+        <StackPane.margin>
+            <Insets bottom="30" right="30" />
+        </StackPane.margin>
+    </Button>
+
+    <!-- Chat Modal Overlay (hidden by default) -->
+    <StackPane fx:id="tutorModal" visible="false" style="-fx-background-color: rgba(0,0,0,0.5);">
+        <VBox maxHeight="550" maxWidth="450" spacing="15" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 20, 0, 0, 5);">
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Smart Course Tutor 🤖" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="✕" onAction="#closeTutorModal" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 18px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 0;" />
+            </HBox>
+            
+            <ScrollPane fx:id="chatScroll" fitToWidth="true" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: #f1f5f9; -fx-border-width: 2; -fx-border-radius: 10;">
+                <VBox fx:id="chatBox" spacing="15" style="-fx-padding: 15; -fx-background-color: white;">
+                    <!-- Chat bubbles go here -->
+                </VBox>
+            </ScrollPane>
+            
+            <HBox spacing="10">
+                <TextField fx:id="chatInput" promptText="Ask a question about this course..." HBox.hgrow="ALWAYS" style="-fx-padding: 12; -fx-background-radius: 25; -fx-border-color: #e2e8f0; -fx-border-radius: 25; -fx-font-size: 13px;" onAction="#sendChatMessage" />
+                <Button text="Send" onAction="#sendChatMessage" style="-fx-background-color: #ec4899; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 10 20; -fx-cursor: hand;" />
+            </HBox>
+        </VBox>
+    </StackPane>
+
+</StackPane>

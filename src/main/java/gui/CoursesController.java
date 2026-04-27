@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import animatefx.animation.*;
+
 public class CoursesController {
 
     private final CourseService courseService = new CourseService();
@@ -38,9 +40,14 @@ public class CoursesController {
     @FXML private VBox questionsContainer;
     @FXML private TextField searchField;
     @FXML private HBox boxAdminActions;
+    @FXML private VBox mainContentBox;
 
     @FXML
     public void initialize() {
+        if (mainContentBox != null) {
+            new FadeInUp(mainContentBox).setSpeed(0.8).play();
+        }
+
         loadCourses();
         loadTickets();
 
@@ -249,6 +256,9 @@ public class CoursesController {
         
         card.setCursor(javafx.scene.Cursor.HAND);
         card.setOnMouseClicked(event -> openCourse(course));
+
+        // Hover animation
+        card.setOnMouseEntered(e -> new Pulse(card).setSpeed(2.0).play());
 
         return card;
     }

@@ -18,7 +18,7 @@
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent;">
             <content>
-                <VBox spacing="30">
+                <VBox fx:id="mainContentBox" spacing="30">
                     <padding>
                         <Insets top="24" left="24" right="24" bottom="24"/>
                     </padding>

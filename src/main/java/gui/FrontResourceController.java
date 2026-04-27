@@ -23,6 +23,18 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import javafx.application.Platform;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.StackPane;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+import animatefx.animation.*;
+
 public class FrontResourceController {
 
     private final RessourceService ressourceService = new RessourceService();
@@ -38,8 +50,26 @@ public class FrontResourceController {
     @FXML private javafx.scene.layout.HBox profileBox;
     @FXML private Button logoutBtn;
 
+    // Smart Tutor UI
+    @FXML private StackPane tutorModal;
+    @FXML private VBox chatBox;
+    @FXML private TextField chatInput;
+    @FXML private ScrollPane chatScroll;
+    @FXML private Button askTutorBtn;
+    @FXML private VBox mainContent;
+
     @FXML
     public void initialize() {
+        // Entrance Animation
+        if (mainContent != null) {
+            new FadeIn(mainContent).setSpeed(0.8).play();
+        }
+
+        // Button Hover Animation
+        if (askTutorBtn != null) {
+            askTutorBtn.setOnMouseEntered(e -> new Pulse(askTutorBtn).setSpeed(2.0).play());
+        }
+
         // Initialize User Profile in Navbar
         Users user = SessionManager.getInstance().getCurrentUser();
         if (user != null) {
@@ -191,5 +221,147 @@ public class FrontResourceController {
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
+    }
+
+    @FXML
+    private void openTutorModal() {
+        tutorModal.setVisible(true);
+        new ZoomIn(tutorModal).setSpeed(1.5).play();
+        if (chatBox.getChildren().isEmpty()) {
+            addChatBubble("Tutor", "Hi! I'm your AI tutor for " + (currentCourse != null ? currentCourse.getTitre() : "this course") + ". What would you like to know?", false);
+        }
+    }
+
+    @FXML
+    private void closeTutorModal() {
+        ZoomOut zoomOut = new ZoomOut(tutorModal);
+        zoomOut.setSpeed(1.5);
+        zoomOut.setOnFinished(e -> tutorModal.setVisible(false));
+        zoomOut.play();
+    }
+
+    @FXML
+    private void sendChatMessage() {
+        String msg = chatInput.getText().trim();
+        if (msg.isEmpty()) return;
+
+        addChatBubble("You", msg, true);
+        chatInput.clear();
+
+        // Call Gemini API asynchronously
+        new Thread(() -> {
+            String reply = callGeminiAPI(msg);
+            Platform.runLater(() -> addChatBubble("Tutor", reply, false));
+        }).start();
+    }
+
+    private void addChatBubble(String sender, String text, boolean isUser) {
+        VBox bubble = new VBox(5);
+        bubble.setMaxWidth(300);
+        
+        Label senderLabel = new Label(sender);
+        senderLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #94a3b8;");
+        
+        Label msgLabel = new Label(text);
+        msgLabel.setWrapText(true);
+        msgLabel.setStyle("-fx-font-size: 13px; -fx-padding: 10; -fx-background-radius: 12; " + 
+                         (isUser ? "-fx-background-color: #ec4899; -fx-text-fill: white;" 
+                                 : "-fx-background-color: #f1f5f9; -fx-text-fill: #334155;"));
+        
+        bubble.getChildren().addAll(senderLabel, msgLabel);
+        
+        javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(bubble);
+        row.setAlignment(isUser ? javafx.geometry.Pos.CENTER_RIGHT : javafx.geometry.Pos.CENTER_LEFT);
+        
+        chatBox.getChildren().add(row);
+        
+        // Auto scroll to bottom
+        Platform.runLater(() -> chatScroll.setVvalue(1.0));
+    }
+
+    private String callGeminiAPI(String prompt) {
+        try {
+            Dotenv dotenv = Dotenv.load();
+            String apiKey = dotenv.get("SMART_TUTOR");
+            if (apiKey == null || apiKey.isEmpty()) return "Error: API key missing.";
+            apiKey = apiKey.trim();
+            
+            String systemPrompt = "You are a helpful course tutor for " + (currentCourse != null ? currentCourse.getTitre() : "this course") + ". Keep answers concise and professional.";
+            
+            // Proper JSON escaping for the prompt
+            String escapedPrompt = prompt.replace("\\", "\\\\")
+                                           .replace("\"", "\\\"")
+                                           .replace("\n", "\\n")
+                                           .replace("\r", "\\r")
+                                           .replace("\t", "\\t");
+            
+            String jsonPayload = "{" +
+                "\"model\": \"llama-3.1-8b-instant\"," +
+                "\"messages\": [" +
+                    "{\"role\": \"system\", \"content\": \"" + systemPrompt.replace("\"", "\\\"") + "\"}," +
+                    "{\"role\": \"user\", \"content\": \"" + escapedPrompt + "\"}" +
+                "]" +
+            "}";
+            
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.groq.com/openai/v1/chat/completions"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+                    
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            String body = response.body();
+            if (response.statusCode() != 200) {
+                return "Groq Error (" + response.statusCode() + "): " + body;
+            }
+
+            // Parse response for OpenAI/Groq format: choices[0].message.content
+            // Using a more flexible search for "content" field
+            int contentKeyIndex = body.indexOf("\"content\"");
+            if (contentKeyIndex != -1) {
+                int colonIndex = body.indexOf(":", contentKeyIndex);
+                if (colonIndex != -1) {
+                    int contentStart = body.indexOf("\"", colonIndex);
+                    if (contentStart != -1) {
+                        contentStart++; // Move past the opening quote
+                        int contentEnd = -1;
+                        
+                        // Find the end quote, skipping escaped ones (\")
+                        for (int i = contentStart; i < body.length(); i++) {
+                            if (body.charAt(i) == '\"') {
+                                // Check if this quote is escaped
+                                int backslashCount = 0;
+                                for (int j = i - 1; j >= contentStart && body.charAt(j) == '\\'; j--) {
+                                    backslashCount++;
+                                }
+                                if (backslashCount % 2 == 0) {
+                                    contentEnd = i;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (contentEnd != -1) {
+                            String result = body.substring(contentStart, contentEnd);
+                            // Unescape the result
+                            result = result.replace("\\n", "\n")
+                                         .replace("\\\"", "\"")
+                                         .replace("\\\\", "\\")
+                                         .replace("\\t", "\t")
+                                         .replace("\\r", "\r");
+                            return result;
+                        }
+                    }
+                }
+            }
+            return "Sorry, I couldn't parse the Groq response. Body: " + body;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error calling AI: " + e.getMessage();
+        }
     }
 }
