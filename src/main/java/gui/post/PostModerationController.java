@@ -312,7 +312,8 @@ public class PostModerationController {
                 postService.updatePostStatus(selectedPost);
                 
                 // Notify User
-                new NotificationService().notifyPostRefused(selectedPost.getUserId(), selectedPost.getId());
+                int adminId = utils.SessionManager.getInstance().getCurrentUser().getId();
+                new NotificationService().notifyPostRefused(selectedPost.getUserId(), selectedPost.getId(), reason, adminId);
                 
                 gui.util.AlertHelper.showCustomAlert("Refused", "Post has been rejected.", gui.util.AlertHelper.AlertType.INFORMATION);
                 showList();

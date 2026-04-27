@@ -65,8 +65,20 @@ public class NotificationService {
         createNotification(userId, "Your post has been approved ✅", "POST_APPROVED", postId, "post/" + postId);
     }
 
-    public void notifyPostRefused(int userId, int postId) {
-        createNotification(userId, "Your post has been refused ❌", "POST_REFUSED", postId, "post/" + postId);
+    public void notifyPostRefused(int userId, int postId, String reason, int adminId) {
+        try {
+            services.forum.MessageService ms = new services.forum.MessageService();
+            entities.forum.Conversation conv = ms.getOrCreateConversation(postId, userId, adminId);
+            if (conv != null) {
+                ms.addMessage(conv.getId(), adminId, reason);
+                createNotification(userId, "Your post has been refused ❌. You can chat with the admin for more details.", "POST_REFUSED_CHAT", postId, "chat/" + conv.getId());
+            } else {
+                createNotification(userId, "Your post has been refused ❌", "POST_REFUSED", postId, "post/" + postId);
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            createNotification(userId, "Your post has been refused ❌", "POST_REFUSED", postId, "post/" + postId);
+        }
     }
 
     public void notifyComment(int postOwnerId, String commenterName, int postId) {
@@ -83,6 +95,14 @@ public class NotificationService {
 
     public void notifyCommentLike(int commentOwnerId, String likerName, int commentId, int postId) {
         createNotification(commentOwnerId, likerName + " liked your comment", "LIKE_COMMENT", commentId, "post/" + postId + "#comment_" + commentId);
+    }
+
+    public void notifyNewMessage(int recipientId, String senderName, int conversationId) {
+        createNotification(recipientId, senderName + " sent you a message 💬", "NEW_MESSAGE", conversationId, "chat/" + conversationId);
+    }
+
+    public void notifyMessageLike(int recipientId, String likerName, int conversationId) {
+        createNotification(recipientId, likerName + " liked your message ❤️", "LIKE_MESSAGE", conversationId, "chat/" + conversationId);
     }
 
     private List<Users> getAllAdmins() throws SQLException {
