@@ -181,6 +181,7 @@ public class FrontResourceController {
         new ZoomIn(resourceModal).setSpeed(1.5).play();
     }
 
+
     @FXML
     private void closeResourceModal() {
         ZoomOut zoomOut = new ZoomOut(resourceModal);

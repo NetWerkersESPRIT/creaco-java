@@ -41,7 +41,6 @@ public class CoursesController {
     @FXML private TextField searchField;
     @FXML private HBox boxAdminActions;
     @FXML private VBox mainContentBox;
-    @FXML private HBox gamificationCard;
 
     @FXML
     public void initialize() {
@@ -49,10 +48,6 @@ public class CoursesController {
             new FadeInUp(mainContentBox).setSpeed(0.8).play();
         }
         
-        if (gamificationCard != null) {
-            new FadeInRight(gamificationCard).setDelay(javafx.util.Duration.millis(300)).play();
-            gamificationCard.setOnMouseEntered(e -> new Pulse(gamificationCard).setSpeed(2.0).play());
-        }
 
         loadCourses();
         loadTickets();
@@ -193,30 +188,7 @@ public class CoursesController {
         descriptionLabel.setMaxHeight(40);
         descriptionLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
         
-        // Progress Bar
-        Users currentUser = SessionManager.getInstance().getCurrentUser();
-        double progressVal = 0.0;
-        if (currentUser != null) {
-            try {
-                services.UserCourseProgressService ps = new services.UserCourseProgressService();
-                progressVal = ps.getProgress(currentUser.getId(), course.getId());
-            } catch (SQLException e) { e.printStackTrace(); }
-        }
-
-        VBox progressBox = new VBox(5);
-        Label progressLabel = new Label("Progress: " + (int)(progressVal * 100) + "%");
-        progressLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;");
-        ProgressBar progressBar = new ProgressBar(0.0);
-        progressBar.setPrefWidth(Double.MAX_VALUE);
-        progressBar.setStyle("-fx-accent: -fx-primary-pink;");
-        progressBox.getChildren().addAll(progressLabel, progressBar);
-
-        // Animate progress on load
-        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
-            new javafx.animation.KeyFrame(javafx.util.Duration.ZERO, new javafx.animation.KeyValue(progressBar.progressProperty(), 0)),
-            new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1), new javafx.animation.KeyValue(progressBar.progressProperty(), progressVal))
-        );
-        timeline.play();
+        // Progress bar removed as requested
         
         HBox footer = new HBox(10);
         footer.setAlignment(Pos.CENTER_LEFT);
@@ -257,7 +229,7 @@ public class CoursesController {
         interactionBox.getChildren().addAll(likeBtn, dislikeBtn);
         footer.getChildren().addAll(exploreLink, spacer, interactionBox);
 
-        infoBox.getChildren().addAll(titleBox, descriptionLabel, progressBox, footer);
+        infoBox.getChildren().addAll(titleBox, descriptionLabel, footer);
         card.getChildren().addAll(visualContainer, infoBox);
         
         card.setCursor(javafx.scene.Cursor.HAND);
@@ -474,10 +446,4 @@ public class CoursesController {
         loadTickets();
     }
 
-    @FXML
-    private void onGoToLeaderboard() {
-        // Placeholder for leaderboard navigation
-        System.out.println("Navigating to Leaderboard...");
-        // You can add navigation here when the leaderboard view is ready
-    }
 }
