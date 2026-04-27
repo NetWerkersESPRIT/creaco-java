@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="25.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.contract.DisplayContractController">
+    <children>
+        <!-- Main Content Card -->
+        <VBox VBox.vgrow="ALWAYS" styleClass="card">
+            <children>
+                <!-- Card Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <children>
+                        <Label styleClass="card-title" text="Manage my contracts" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Label style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: bold;" text="STATUS:" />
+                                <ComboBox fx:id="statusFilter" prefWidth="150" promptText="All Statuses" styleClass="search-bar" />
+                            </children>
+                        </HBox>
+                    </children>
+                </HBox>
+
+                <!-- Column Headers -->
+                <HBox spacing="10.0" style="-fx-padding: 20 0 10 0;">
+                    <children>
+                        <Label prefWidth="300" styleClass="list-header-label" text="CONTRACT NUMBER" />
+                        <Label prefWidth="150" styleClass="list-header-label" text="DOMAIN" />
+                        <Label prefWidth="150" styleClass="list-header-label" text="STATUS" />
+                        <Label prefWidth="200" styleClass="list-header-label" text="EFFECTIVE DATE" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label styleClass="list-header-label" text="Actions" />
+                    </children>
+                </HBox>
+
+                <!-- Contracts List -->
+                <ListView fx:id="contractsListView" minHeight="600" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;"/>
+            </children>
+        </VBox>
+    </children>
+</VBox>

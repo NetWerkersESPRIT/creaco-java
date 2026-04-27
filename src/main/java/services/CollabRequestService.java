@@ -6,86 +6,143 @@ import utils.MyConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
 public class CollabRequestService {
-
-    private Connection connection;
+    private Connection con;
 
     public CollabRequestService() {
-        connection = MyConnection.getInstance().getConnection();
+        con = MyConnection.getInstance().getConnection();
     }
 
-    public void insert(CollabRequest request) throws SQLException {
-        String query = "INSERT INTO collab_request (title, description, budget, startDate, endDate, status, deliverables, paymentTerms, collaboratorId, createdAt) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, request.getTitle());
-            preparedStatement.setString(2, request.getDescription());
-            preparedStatement.setBigDecimal(3, request.getBudget());
-            preparedStatement.setDate(4, request.getStartDate() != null ? new Date(request.getStartDate().getTime()) : null);
-            preparedStatement.setDate(5, request.getEndDate() != null ? new Date(request.getEndDate().getTime()) : null);
-            preparedStatement.setString(6, request.getStatus());
-            preparedStatement.setString(7, request.getDeliverables());
-            preparedStatement.setString(8, request.getPaymentTerms());
-            preparedStatement.setInt(9, request.getCollaboratorId());
-            preparedStatement.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
-            preparedStatement.executeUpdate();
-        }
+    public void ajouter(CollabRequest req) throws SQLException {
+        String sql = "INSERT INTO `collab_request`(`title`, `description`, `budget`, `start_date`, `end_date`, `status`, `rejection_reason`, `deliverables`, `payment_terms`, `created_at`, `creator_id`, `revisor_id`, `collaborator_id`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, req.getTitle());
+        ps.setString(2, req.getDescription());
+        ps.setBigDecimal(3, req.getBudget());
+        ps.setDate(4, req.getStartDate() != null ? new java.sql.Date(req.getStartDate().getTime()) : null);
+        ps.setDate(5, req.getEndDate() != null ? new java.sql.Date(req.getEndDate().getTime()) : null);
+        ps.setString(6, req.getStatus());
+        ps.setString(7, req.getRejectionReason());
+        ps.setString(8, req.getDeliverables());
+        ps.setString(9, req.getPaymentTerms());
+        ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+        ps.setInt(11, req.getCreatorId());
+        ps.setInt(12, req.getRevisorId());
+        ps.setInt(13, req.getCollaboratorId());
+        ps.executeUpdate();
     }
 
-    public List<CollabRequest> getAll() throws SQLException {
-        List<CollabRequest> requests = new ArrayList<>();
-        String query = "SELECT * FROM collab_request";
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-            while (resultSet.next()) {
-                CollabRequest request = new CollabRequest(
-                        resultSet.getInt("id"),
-                        resultSet.getString("title"),
-                        resultSet.getString("description"),
-                        resultSet.getBigDecimal("budget"),
-                        resultSet.getDate("startDate"),
-                        resultSet.getDate("endDate"),
-                        resultSet.getString("status"),
-                        resultSet.getString("rejectionReason"),
-                        resultSet.getString("deliverables"),
-                        resultSet.getString("paymentTerms"),
-                        resultSet.getTimestamp("createdAt"),
-                        resultSet.getTimestamp("updatedAt"),
-                        resultSet.getTimestamp("respondedAt"),
-                        resultSet.getInt("creatorId"),
-                        resultSet.getInt("revisorId"),
-                        resultSet.getInt("collaboratorId")
-                );
-                requests.add(request);
-            }
-        }
-        return requests;
+    public void modifier(int id, CollabRequest req) throws SQLException {
+        String sql = "UPDATE `collab_request` SET `title`=?, `description`=?, `budget`=?, `start_date`=?, `end_date`=?, `status`=?, `rejection_reason`=?, `deliverables`=?, `payment_terms`=?, `updated_at`=?, `revisor_id`=?, `collaborator_id`=? WHERE `id`=?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, req.getTitle());
+        ps.setString(2, req.getDescription());
+        ps.setBigDecimal(3, req.getBudget());
+        ps.setDate(4, req.getStartDate() != null ? new java.sql.Date(req.getStartDate().getTime()) : null);
+        ps.setDate(5, req.getEndDate() != null ? new java.sql.Date(req.getEndDate().getTime()) : null);
+        ps.setString(6, req.getStatus());
+        ps.setString(7, req.getRejectionReason());
+        ps.setString(8, req.getDeliverables());
+        ps.setString(9, req.getPaymentTerms());
+        ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+        ps.setInt(11, req.getRevisorId());
+        ps.setInt(12, req.getCollaboratorId());
+        ps.setInt(13, id);
+        ps.executeUpdate();
     }
 
-    public void update(CollabRequest request) throws SQLException {
-        String query = "UPDATE collab_request SET title=?, description=?, budget=?, startDate=?, endDate=?, status=?, deliverables=?, paymentTerms=?, collaboratorId=?, updatedAt=? WHERE id=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, request.getTitle());
-            preparedStatement.setString(2, request.getDescription());
-            preparedStatement.setBigDecimal(3, request.getBudget());
-            preparedStatement.setDate(4, request.getStartDate() != null ? new Date(request.getStartDate().getTime()) : null);
-            preparedStatement.setDate(5, request.getEndDate() != null ? new Date(request.getEndDate().getTime()) : null);
-            preparedStatement.setString(6, request.getStatus());
-            preparedStatement.setString(7, request.getDeliverables());
-            preparedStatement.setString(8, request.getPaymentTerms());
-            preparedStatement.setInt(9, request.getCollaboratorId());
-            preparedStatement.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
-            preparedStatement.setInt(11, request.getId());
-            preparedStatement.executeUpdate();
-        }
+    public void supprimer(int id) throws SQLException {
+        String sql = "DELETE FROM `collab_request` WHERE `id` = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, id);
+        ps.executeUpdate();
     }
 
-    public void delete(int id) throws SQLException {
-        String query = "DELETE FROM collab_request WHERE id=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
+    public List<CollabRequest> afficher() throws SQLException {
+        List<CollabRequest> list = new ArrayList<>();
+        String sql = "SELECT * FROM collab_request";
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) {
+            list.add(new CollabRequest(
+                    rs.getInt("id"),
+                    rs.getString("title"),
+                    rs.getString("description"),
+                    rs.getBigDecimal("budget"),
+                    rs.getDate("start_date"),
+                    rs.getDate("end_date"),
+                    rs.getString("status"),
+                    rs.getString("rejection_reason"),
+                    rs.getString("deliverables"),
+                    rs.getString("payment_terms"),
+                    rs.getTimestamp("created_at"),
+                    rs.getTimestamp("updated_at"),
+                    rs.getTimestamp("responded_at"),
+                    rs.getInt("creator_id"),
+                    rs.getInt("revisor_id"),
+                    rs.getInt("collaborator_id")
+            ));
         }
+        return list;
+    }
+
+    public List<CollabRequest> afficherByManager(int managerId) throws SQLException {
+        List<CollabRequest> list = new ArrayList<>();
+        String sql = "SELECT * FROM collab_request WHERE revisor_id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, managerId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            list.add(new CollabRequest(
+                    rs.getInt("id"),
+                    rs.getString("title"),
+                    rs.getString("description"),
+                    rs.getBigDecimal("budget"),
+                    rs.getDate("start_date"),
+                    rs.getDate("end_date"),
+                    rs.getString("status"),
+                    rs.getString("rejection_reason"),
+                    rs.getString("deliverables"),
+                    rs.getString("payment_terms"),
+                    rs.getTimestamp("created_at"),
+                    rs.getTimestamp("updated_at"),
+                    rs.getTimestamp("responded_at"),
+                    rs.getInt("creator_id"),
+                    rs.getInt("revisor_id"),
+                    rs.getInt("collaborator_id")
+            ));
+        }
+        return list;
+    }
+    public List<CollabRequest> afficherByCollaborator(int collabId) throws SQLException {
+        List<CollabRequest> list = new ArrayList<>();
+        String sql = "SELECT * FROM collab_request WHERE collaborator_id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, collabId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            list.add(new CollabRequest(
+                    rs.getInt("id"),
+                    rs.getString("title"),
+                    rs.getString("description"),
+                    rs.getBigDecimal("budget"),
+                    rs.getDate("start_date"),
+                    rs.getDate("end_date"),
+                    rs.getString("status"),
+                    rs.getString("rejection_reason"),
+                    rs.getString("deliverables"),
+                    rs.getString("payment_terms"),
+                    rs.getTimestamp("created_at"),
+                    rs.getTimestamp("updated_at"),
+                    rs.getTimestamp("responded_at"),
+                    rs.getInt("creator_id"),
+                    rs.getInt("revisor_id"),
+                    rs.getInt("collaborator_id")
+            ));
+        }
+        return list;
     }
 }

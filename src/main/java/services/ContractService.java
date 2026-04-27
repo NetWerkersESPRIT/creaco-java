@@ -8,111 +8,141 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ContractService {
-
-    private Connection connection;
+    private Connection con;
 
     public ContractService() {
-        connection = MyConnection.getInstance().getConnection();
+        con = MyConnection.getInstance().getConnection();
+    }
+    public void ajouter(Contract c) throws SQLException {
+        String sql = "INSERT INTO `contract` (`contract_number`, `title`, `start_date`, `end_date`, `amount`, `pdf_path`, `status`, `signed_by_creator`, `signed_by_collaborator`, `creator_signature_date`, `collaborator_signature_date`, `terms`, `payment_schedule`, `confidentiality_clause`, `cancellation_terms`, `signature_token`, `created_at`, `sent_at`, `collab_request_id`, `creator_id`, `collaborator_id`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, c.getContractNumber());
+        ps.setString(2, c.getTitle());
+        ps.setDate(3, c.getStartDate() != null ? new java.sql.Date(c.getStartDate().getTime()) : null);
+        ps.setDate(4, c.getEndDate() != null ? new java.sql.Date(c.getEndDate().getTime()) : null);
+        ps.setBigDecimal(5, c.getAmount());
+        ps.setString(6, c.getPdfPath());
+        ps.setString(7, c.getStatus());
+        ps.setBoolean(8, c.isSignedByCreator());
+        ps.setBoolean(9, c.isSignedByCollaborator());
+        ps.setTimestamp(10, c.getCreatorSignatureDate() != null ? new Timestamp(c.getCreatorSignatureDate().getTime()) : null);
+        ps.setTimestamp(11, c.getCollaboratorSignatureDate() != null ? new Timestamp(c.getCollaboratorSignatureDate().getTime()) : null);
+        ps.setString(12, c.getTerms());
+        ps.setString(13, c.getPaymentSchedule());
+        ps.setString(14, c.getConfidentialityClause());
+        ps.setString(15, c.getCancellationTerms());
+        ps.setString(16, c.getSignatureToken());
+        ps.setTimestamp(17, new Timestamp(System.currentTimeMillis()));
+        ps.setTimestamp(18, null); // sent_at
+        ps.setInt(19, c.getCollabRequestId());
+        if (c.getCreatorId() != null) {
+            ps.setInt(20, c.getCreatorId());
+        } else {
+            ps.setNull(20, java.sql.Types.INTEGER);
+        }
+        ps.setInt(21, c.getCollaboratorId());
+        ps.executeUpdate();
     }
 
-    public void insert(Contract contract) throws SQLException {
-        String query = "INSERT INTO contract (contractNumber, title, startDate, endDate, amount, status, signedByCreator, signedByCollaborator, terms, paymentSchedule, confidentialityClause, cancellationTerms, signatureToken, collabRequestId, creatorId, collaboratorId, createdAt) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, contract.getContractNumber());
-            preparedStatement.setString(2, contract.getTitle());
-            preparedStatement.setDate(3, contract.getStartDate() != null ? new Date(contract.getStartDate().getTime()) : null);
-            preparedStatement.setDate(4, contract.getEndDate() != null ? new Date(contract.getEndDate().getTime()) : null);
-            preparedStatement.setBigDecimal(5, contract.getAmount());
-            preparedStatement.setString(6, contract.getStatus());
-            preparedStatement.setBoolean(7, contract.isSignedByCreator());
-            preparedStatement.setBoolean(8, contract.isSignedByCollaborator());
-            preparedStatement.setString(9, contract.getTerms());
-            preparedStatement.setString(10, contract.getPaymentSchedule());
-            preparedStatement.setString(11, contract.getConfidentialityClause());
-            preparedStatement.setString(12, contract.getCancellationTerms());
-            preparedStatement.setString(13, contract.getSignatureToken());
-            preparedStatement.setInt(14, contract.getCollabRequestId());
-            if (contract.getCreatorId() != null) {
-                preparedStatement.setInt(15, contract.getCreatorId());
-            } else {
-                preparedStatement.setNull(15, Types.INTEGER);
-            }
-            preparedStatement.setInt(16, contract.getCollaboratorId());
-            preparedStatement.setTimestamp(17, new Timestamp(System.currentTimeMillis()));
-            preparedStatement.executeUpdate();
+    public void modifier(int id, Contract c) throws SQLException {
+        String sql = "UPDATE `contract` SET `contract_number`=?, `title`=?, `start_date`=?, `end_date`=?, `amount`=?, `pdf_path`=?, `status`=?, `signed_by_creator`=?, `signed_by_collaborator`=?, `creator_signature_date`=?, `collaborator_signature_date`=?, `terms`=?, `payment_schedule`=?, `confidentiality_clause`=?, `cancellation_terms`=?, `signature_token`=?, `collab_request_id`=?, `creator_id`=?, `collaborator_id`=? WHERE `id`=?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, c.getContractNumber());
+        ps.setString(2, c.getTitle());
+        ps.setDate(3, c.getStartDate() != null ? new java.sql.Date(c.getStartDate().getTime()) : null);
+        ps.setDate(4, c.getEndDate() != null ? new java.sql.Date(c.getEndDate().getTime()) : null);
+        ps.setBigDecimal(5, c.getAmount());
+        ps.setString(6, c.getPdfPath());
+        ps.setString(7, c.getStatus());
+        ps.setBoolean(8, c.isSignedByCreator());
+        ps.setBoolean(9, c.isSignedByCollaborator());
+        ps.setTimestamp(10, c.getCreatorSignatureDate() != null ? new Timestamp(c.getCreatorSignatureDate().getTime()) : null);
+        ps.setTimestamp(11, c.getCollaboratorSignatureDate() != null ? new Timestamp(c.getCollaboratorSignatureDate().getTime()) : null);
+        ps.setString(12, c.getTerms());
+        ps.setString(13, c.getPaymentSchedule());
+        ps.setString(14, c.getConfidentialityClause());
+        ps.setString(15, c.getCancellationTerms());
+        ps.setString(16, c.getSignatureToken());
+        ps.setInt(17, c.getCollabRequestId());
+        if (c.getCreatorId() != null) {
+            ps.setInt(18, c.getCreatorId());
+        } else {
+            ps.setNull(18, java.sql.Types.INTEGER);
         }
+        ps.setInt(19, c.getCollaboratorId());
+        ps.setInt(20, id);
+        ps.executeUpdate();
     }
 
-    public List<Contract> getAll() throws SQLException {
-        List<Contract> contracts = new ArrayList<>();
-        String query = "SELECT * FROM contract";
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-            while (resultSet.next()) {
-                Contract contract = new Contract(
-                        resultSet.getInt("id"),
-                        resultSet.getString("contractNumber"),
-                        resultSet.getString("title"),
-                        resultSet.getDate("startDate"),
-                        resultSet.getDate("endDate"),
-                        resultSet.getBigDecimal("amount"),
-                        resultSet.getString("pdfPath"),
-                        resultSet.getString("status"),
-                        resultSet.getBoolean("signedByCreator"),
-                        resultSet.getBoolean("signedByCollaborator"),
-                        resultSet.getTimestamp("creatorSignatureDate"),
-                        resultSet.getTimestamp("collaboratorSignatureDate"),
-                        resultSet.getString("terms"),
-                        resultSet.getString("paymentSchedule"),
-                        resultSet.getString("confidentialityClause"),
-                        resultSet.getString("cancellationTerms"),
-                        resultSet.getString("signatureToken"),
-                        resultSet.getTimestamp("createdAt"),
-                        resultSet.getTimestamp("sentAt"),
-                        resultSet.getInt("collabRequestId"),
-                        (Integer) resultSet.getObject("creatorId"),
-                        resultSet.getInt("collaboratorId")
-                );
-                contracts.add(contract);
-            }
+    public List<Contract> afficher() throws SQLException {
+        List<Contract> list = new ArrayList<>();
+        String sql = "SELECT * FROM contract";
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) {
+            list.add(new Contract(
+                    rs.getInt("id"),
+                    rs.getString("contract_number"),
+                    rs.getString("title"),
+                    rs.getDate("start_date"),
+                    rs.getDate("end_date"),
+                    rs.getBigDecimal("amount"),
+                    rs.getString("pdf_path"),
+                    rs.getString("status"),
+                    rs.getBoolean("signed_by_creator"),
+                    rs.getBoolean("signed_by_collaborator"),
+                    rs.getTimestamp("creator_signature_date"),
+                    rs.getTimestamp("collaborator_signature_date"),
+                    rs.getString("terms"),
+                    rs.getString("payment_schedule"),
+                    rs.getString("confidentiality_clause"),
+                    rs.getString("cancellation_terms"),
+                    rs.getString("signature_token"),
+                    rs.getTimestamp("created_at"),
+                    rs.getTimestamp("sent_at"),
+                    rs.getInt("collab_request_id"),
+                    rs.getObject("creator_id") != null ? rs.getInt("creator_id") : null,
+                    rs.getInt("collaborator_id")
+            ));
         }
-        return contracts;
+        return list;
     }
 
-    public void update(Contract contract) throws SQLException {
-        String query = "UPDATE contract SET contractNumber=?, title=?, startDate=?, endDate=?, amount=?, status=?, signedByCreator=?, signedByCollaborator=?, terms=?, paymentSchedule=?, confidentialityClause=?, cancellationTerms=?, signatureToken=?, collabRequestId=?, creatorId=?, collaboratorId=? WHERE id=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, contract.getContractNumber());
-            preparedStatement.setString(2, contract.getTitle());
-            preparedStatement.setDate(3, contract.getStartDate() != null ? new Date(contract.getStartDate().getTime()) : null);
-            preparedStatement.setDate(4, contract.getEndDate() != null ? new Date(contract.getEndDate().getTime()) : null);
-            preparedStatement.setBigDecimal(5, contract.getAmount());
-            preparedStatement.setString(6, contract.getStatus());
-            preparedStatement.setBoolean(7, contract.isSignedByCreator());
-            preparedStatement.setBoolean(8, contract.isSignedByCollaborator());
-            preparedStatement.setString(9, contract.getTerms());
-            preparedStatement.setString(10, contract.getPaymentSchedule());
-            preparedStatement.setString(11, contract.getConfidentialityClause());
-            preparedStatement.setString(12, contract.getCancellationTerms());
-            preparedStatement.setString(13, contract.getSignatureToken());
-            preparedStatement.setInt(14, contract.getCollabRequestId());
-            if (contract.getCreatorId() != null) {
-                preparedStatement.setInt(15, contract.getCreatorId());
-            } else {
-                preparedStatement.setNull(15, Types.INTEGER);
-            }
-            preparedStatement.setInt(16, contract.getCollaboratorId());
-            preparedStatement.setInt(17, contract.getId());
-            preparedStatement.executeUpdate();
+    public List<Contract> afficherByManager(int managerId) throws SQLException {
+        List<Contract> list = new ArrayList<>();
+        String sql = "SELECT c.* FROM contract c " +
+                "JOIN collab_request r ON c.collab_request_id = r.id " +
+                "WHERE r.revisor_id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, managerId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            list.add(new Contract(
+                    rs.getInt("id"),
+                    rs.getString("contract_number"),
+                    rs.getString("title"),
+                    rs.getDate("start_date"),
+                    rs.getDate("end_date"),
+                    rs.getBigDecimal("amount"),
+                    rs.getString("pdf_path"),
+                    rs.getString("status"),
+                    rs.getBoolean("signed_by_creator"),
+                    rs.getBoolean("signed_by_collaborator"),
+                    rs.getTimestamp("creator_signature_date"),
+                    rs.getTimestamp("collaborator_signature_date"),
+                    rs.getString("terms"),
+                    rs.getString("payment_schedule"),
+                    rs.getString("confidentiality_clause"),
+                    rs.getString("cancellation_terms"),
+                    rs.getString("signature_token"),
+                    rs.getTimestamp("created_at"),
+                    rs.getTimestamp("sent_at"),
+                    rs.getInt("collab_request_id"),
+                    rs.getObject("creator_id") != null ? rs.getInt("creator_id") : null,
+                    rs.getInt("collaborator_id")
+            ));
         }
-    }
-
-    public void delete(int id) throws SQLException {
-        String query = "DELETE FROM contract WHERE id=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        }
+        return list;
     }
 }

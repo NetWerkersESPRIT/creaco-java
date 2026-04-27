@@ -125,7 +125,7 @@ public class FrontMainController {
         }
     }
 
-    @FXML public void onShowCollaborations() { loadSubView("/collaborator/ListCollaborator.fxml"); }
+    @FXML public void onShowCollaborations() { loadSubView("/gui/collab/collab_dashboard.fxml"); }
 
     @FXML
     public void onShowCourses() { onGoToDashboard(); }
