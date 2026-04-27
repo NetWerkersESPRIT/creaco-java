@@ -39,6 +39,11 @@ public class AddPartnerController {
         if (!isValid) return;
 
         try {
+            int currentUserId = 1;
+            if (utils.SessionManager.getInstance().getCurrentUser() != null) {
+                currentUserId = utils.SessionManager.getInstance().getCurrentUser().getId();
+            }
+
             Collaborator collab = new Collaborator(
                     pNameField.getText().trim(),
                     pCompanyField.getText().trim(),
@@ -49,7 +54,7 @@ public class AddPartnerController {
                     pDomainField.getText().trim(),
                     pDescArea.getText().trim(),
                     pLogoField.getText().trim(),
-                    true, "ACTIVE", 1
+                    true, "ACTIVE", currentUserId
             );
             collab.setCreatedAt(java.sql.Timestamp.valueOf(LocalDateTime.now()));
             collaboratorService.ajouter(collab);

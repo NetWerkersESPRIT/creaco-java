@@ -15,6 +15,9 @@ public class UsersService implements services.UsersInterface<Users> {
 
     public UsersService() {
         con = MyConnection.getInstance().getConnection();
+        if (con == null) {
+            System.err.println("❌ UsersService: Connection is null! Database connection likely failed.");
+        }
     }
 
     public static String bcryptHash(String password) {
@@ -33,7 +36,7 @@ public class UsersService implements services.UsersInterface<Users> {
 
     @Override
     public void ajouter(Users users) throws SQLException {
-        String sql = "INSERT INTO users (username, email, password, role, numtel, points, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (username, email, password, role, numtel, points, created_at, is_banned, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = con.prepareStatement(sql);
 
         ps.setString(1, users.getUsername());
@@ -46,6 +49,8 @@ public class UsersService implements services.UsersInterface<Users> {
         ps.setString(5, users.getNumtel());
         ps.setInt(6, users.getPoints());
         ps.setString(7, users.getCreated_at());
+        ps.setBoolean(8, users.isBanned());
+        ps.setString(9, users.getImage());
 
         ps.executeUpdate();
 
@@ -78,6 +83,8 @@ public class UsersService implements services.UsersInterface<Users> {
             users.setRole(rs.getString("role"));
             users.setNumtel(rs.getString("numtel"));
             users.setCreated_at(rs.getString("created_at"));
+            users.setBanned(rs.getBoolean("is_banned"));
+            users.setImage(rs.getString("image"));
             usersList.add(users);
         }
         return usersList;
@@ -87,7 +94,7 @@ public class UsersService implements services.UsersInterface<Users> {
 
     @Override
     public void modifier(Users users) throws SQLException {
-        String sql = "UPDATE users SET username=?, email=?, password=?, role=?, numtel=?, points=? WHERE id=?";
+        String sql = "UPDATE users SET username=?, email=?, password=?, role=?, numtel=?, points=?, is_banned=?, image=? WHERE id=?";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setString(1, users.getUsername());
         ps.setString(2, users.getEmail());
@@ -104,7 +111,17 @@ public class UsersService implements services.UsersInterface<Users> {
         ps.setString(4, users.getRole());
         ps.setString(5, users.getNumtel());
         ps.setInt(6, users.getPoints());
-        ps.setInt(7, users.getId());
+        ps.setBoolean(7, users.isBanned());
+        ps.setString(8, users.getImage());
+        ps.setInt(9, users.getId());
+        ps.executeUpdate();
+    }
+
+    public void modifierBan(int id, boolean status) throws SQLException {
+        String sql = "UPDATE users SET is_banned=? WHERE id=?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setBoolean(1, status);
+        ps.setInt(2, id);
         ps.executeUpdate();
     }
 
@@ -125,6 +142,8 @@ public class UsersService implements services.UsersInterface<Users> {
             u.setNumtel(rs.getString("numtel"));
             u.setPoints(rs.getInt("points"));
             u.setCreated_at(rs.getString("created_at"));
+            u.setBanned(rs.getBoolean("is_banned"));
+            u.setImage(rs.getString("image"));
             return u;
         }
         return null;

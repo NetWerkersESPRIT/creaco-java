@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.request.ViewRequestController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+    <children>
+        <!-- Content Area -->
+        <HBox spacing="30.0">
+            <children>
+                <!-- Left Column: Request Details -->
+                <VBox spacing="25.0" styleClass="card" HBox.hgrow="ALWAYS" maxWidth="850">
+                    <padding>
+                        <Insets bottom="35.0" left="35.0" right="35.0" top="35.0" />
+                    </padding>
+                    <children>
+                        <!-- Header with Title and Status -->
+                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                            <children>
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label fx:id="titleLabel" styleClass="title-label" style="-fx-font-size: 24px;" text="test collab request" />
+                                        <Label fx:id="createdAtLabel" styleClass="card-subtitle" text="Created on 24/04/2026 at 10:30" />
+                                    </children>
+                                </VBox>
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label fx:id="statusBadge" styleClass="status-badge, status-active" text="APPROVED" />
+                            </children>
+                        </HBox>
+
+                        <!-- Summary Boxes -->
+                        <HBox spacing="20.0">
+                            <children>
+                                <VBox styleClass="summary-box" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label styleClass="summary-label" text="PLANNED BUDGET" />
+                                        <Label fx:id="budgetLabel" styleClass="summary-value" text="2 099,000 DT" />
+                                    </children>
+                                </VBox>
+                                <VBox styleClass="summary-box" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label styleClass="summary-label" text="PERIOD" />
+                                        <Label fx:id="periodLabel" styleClass="summary-value" text="24/04/26 to 30/04/26" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <!-- Description Section -->
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label styleClass="details-section-label" text="DESCRIPTION" />
+                                <VBox styleClass="details-text-box">
+                                    <children>
+                                        <Label fx:id="descriptionLabel" text="This is a test collaboration request description with details about the project goals and scope." wrapText="true" style="-fx-text-fill: #475569; -fx-font-size: 14px; -fx-line-spacing: 5;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Deliverables Section -->
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label styleClass="details-section-label" text="EXPECTED DELIVERABLES" />
+                                <VBox styleClass="details-text-box">
+                                    <children>
+                                        <Label fx:id="deliverablesLabel" text="3 Instagram posts, 2 YouTube videos, monthly performance report." wrapText="true" style="-fx-text-fill: #475569; -fx-font-size: 14px; -fx-line-spacing: 5;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Manager Comments -->
+                        <VBox fx:id="commentsContainer" spacing="10.0">
+                            <children>
+                                <Label styleClass="comments-label" text="MANAGER COMMENTS / REASON" />
+                                <VBox styleClass="comments-box">
+                                    <children>
+                                        <Label fx:id="commentsLabel" text="&quot;Request looks good, approved as submitted.&quot;" wrapText="true" style="-fx-text-fill: #991b1b; -fx-font-size: 14px; -fx-font-style: italic;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <Region VBox.vgrow="ALWAYS" />
+                        <HBox alignment="CENTER_LEFT">
+                            <children>
+                                <Button onAction="#onBack" styleClass="btn, btn-secondary" text="BACK TO LIST" prefHeight="40.0" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <!-- Right Column: Context Information -->
+                <VBox spacing="20.0" HBox.hgrow="NEVER" prefWidth="350">
+                    <children>
+                        <!-- Associated Partner -->
+                        <VBox spacing="15.0" styleClass="card">
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
+                            <children>
+                                <Label styleClass="details-section-label" text="Associated partner" />
+                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                    <children>
+                                        <VBox alignment="CENTER" maxHeight="50.0" maxWidth="50.0" minHeight="50.0" minWidth="50.0" style="-fx-background-color: linear-gradient(to bottom right, #ec4899, #a855f7); -fx-background-radius: 10;">
+                                            <children>
+                                                <Label text="🏢" style="-fx-font-size: 20px; -fx-text-fill: white;" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="2.0">
+                                            <children>
+                                                <Label fx:id="partnerNameLabel" styleClass="card-title" style="-fx-font-size: 15px;" text="Amazon" />
+                                                <Hyperlink onAction="#onViewPartner" styleClass="action-link" style="-fx-font-size: 12px;" text="View profile" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Assigned Revisor -->
+                        <VBox spacing="15.0" styleClass="card">
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
+                            <children>
+                                <Label styleClass="details-section-label" text="Assigned revisor" />
+                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                    <children>
+                                        <VBox alignment="CENTER" maxHeight="50.0" maxWidth="50.0" minHeight="50.0" minWidth="50.0" style="-fx-background-color: #64748b; -fx-background-radius: 10;">
+                                            <children>
+                                                <Label text="👤" style="-fx-font-size: 20px; -fx-text-fill: white;" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="2.0">
+                                            <children>
+                                                <Label fx:id="revisorNameLabel" styleClass="card-title" style="-fx-font-size: 15px;" text="Not assigned" />
+                                                <Label styleClass="card-subtitle" text="Case manager" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Contract Status -->
+                        <VBox fx:id="contractCard" spacing="15.0" styleClass="contract-card">
+                            <children>
+                                <Label style="-fx-text-fill: #15803d; -fx-font-weight: bold; -fx-font-size: 14px;" text="Contract available" />
+                                <Label style="-fx-text-fill: #3f6212; -fx-font-size: 13px;" text="The request has been validated and the contract is ready." wrapText="true" />
+                                <Button onAction="#onConsultContract" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-consult" text="CONSULT CONTRACT" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
+</VBox>

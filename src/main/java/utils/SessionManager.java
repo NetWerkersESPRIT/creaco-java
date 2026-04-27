@@ -22,11 +22,21 @@ public class SessionManager {
     public Users getCurrentUser()          { return currentUser; }
 
     public boolean isAdmin() {
-        return currentUser != null && "ROLE_ADMIN".equals(currentUser.getRole());
+        if (currentUser == null || currentUser.getRole() == null) return false;
+        String role = currentUser.getRole().toUpperCase();
+        return role.contains("ADMIN");
     }
 
     public boolean isContentCreator() {
-        return currentUser != null && "ROLE_CONTENT_CREATOR".equals(currentUser.getRole());
+        if (currentUser == null || currentUser.getRole() == null) return false;
+        String role = currentUser.getRole().toUpperCase();
+        return role.contains("CONTENT_CREATOR") || role.contains("CREATOR");
+    }
+
+    public boolean isManager() {
+        if (currentUser == null || currentUser.getRole() == null) return false;
+        String role = currentUser.getRole().toUpperCase();
+        return role.contains("MANAGER");
     }
 
     public void logout() { currentUser = null; }

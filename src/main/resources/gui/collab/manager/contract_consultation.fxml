@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.ContractConsultationController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+    <children>
+        <!-- Hero Banner -->
+        <VBox styleClass="hero-banner-consultation">
+            <children>
+                <VBox spacing="8.0">
+                    <children>
+                        <Label styleClass="hero-title-white" text="Contract Consultation" />
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+
+        <HBox spacing="30.0">
+            <children>
+                <!-- Left: Document Preview -->
+                <VBox spacing="30.0" styleClass="doc-preview-card" HBox.hgrow="ALWAYS">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" styleClass="contract-doc-header">
+                            <children>
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Document Preview" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1e293b;" />
+                                        <Label text="Official collaboration record" style="-fx-font-size: 11px; -fx-text-fill: #64748b;" />
+                                    </children>
+                                </VBox>
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label fx:id="refLabel" styleClass="contract-ref-badge" text="REF: CONT-2026-5CEF8B2A738F" />
+                            </children>
+                        </HBox>
+
+                        <VBox spacing="10.0">
+                            <children>
+                                <HBox alignment="TOP_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label text="⚖️" style="-fx-font-size: 24px;" />
+                                        <VBox>
+                                            <children>
+                                                <Label text="SERVICE CONTRACT" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #1e293b;" />
+                                                <Label fx:id="protocolLabel" text="DIGITAL PROTOCOL #CONT-2026-5CEF8B2A738F" style="-fx-text-fill: #94a3b8; -fx-font-size: 13px;" />
+                                            </children>
+                                        </VBox>
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <VBox alignment="TOP_RIGHT">
+                                            <children>
+                                                <Label text="CreaCo Ecosystem" style="-fx-font-size: 10px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" />
+                                                <Label text="ISSUANCE DATE" style="-fx-font-size: 14px; -fx-text-fill: #94a3b8;" />
+                                                <Label fx:id="dateLabel" text="22/04/2026" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="15.0">
+                            <children>
+                                <Label text="THE PROVIDER" styleClass="contract-section-title" />
+                                <VBox styleClass="contract-party-box">
+                                    <children>
+                                        <Label fx:id="partnerNameLabel" text="Amazon" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                        <Label fx:id="partnerRepLabel" text="Representative: Alex" style="-fx-font-size: 11px; -fx-text-fill: #64748b;" />
+                                        <Label text="Validated Partner Entity" style="-fx-font-size: 10px; -fx-text-fill: #10b981; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+
+                                <Label text="THE CLIENT / EMITTER" styleClass="contract-section-title" />
+                                <VBox styleClass="contract-party-box">
+                                    <children>
+                                        <Label fx:id="creatorNameLabel" text="creatorA" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                        <Label text="Platform Content Curator" style="-fx-font-size: 11px; -fx-text-fill: #64748b;" />
+                                        <Label text="CreaCo Verified Account" style="-fx-font-size: 10px; -fx-text-fill: #10b981; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+
+                <!-- Right: Action Center -->
+                <VBox spacing="20.0" prefWidth="350.0">
+                    <children>
+                        <VBox styleClass="action-center-card" spacing="20.0">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <StackPane style="-fx-background-color: #ec4899; -fx-background-radius: 5; -fx-padding: 5;">
+                                            <children>
+                                                <Label text="⚙️" style="-fx-text-fill: white;" />
+                                            </children>
+                                        </StackPane>
+                                        <Label text="Action Center" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2e3b5e;" />
+                                    </children>
+                                </HBox>
+
+                                <VBox spacing="8.0" style="-fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 15;">
+                                    <children>
+                                        <Label text="GLOBAL STATUS" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;" />
+                                        <Label fx:id="statusLabel" text="DRAFT" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnUpdate" onAction="#onUpdateSpecifications" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-update-spec" text="📑 UPDATE SPECIFICATIONS" />
+                                        <Button fx:id="btnTransmit" onAction="#onTransmitToPartner" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-transmit" text="TRANSMIT TO PARTNER" />
+                                    </children>
+                                </VBox>
+
+                                <Hyperlink onAction="#onBack" text="❮ Return to Registry" style="-fx-text-fill: #64748b; -fx-font-size: 12px;" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
+</VBox>

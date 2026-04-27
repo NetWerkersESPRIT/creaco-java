@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
+
+<VBox spacing="25.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.HubOverviewController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <children>
+        <!-- Stat Cards Grid -->
+        <GridPane hgap="20.0" vgap="20.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" />
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" />
+            </columnConstraints>
+            <children>
+                <!-- Global Partners -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <padding><Insets bottom="20.0" left="25.0" right="25.0" top="20.0" /></padding>
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label styleClass="card-subtitle" text="GLOBAL PARTNERS" />
+                                <Label fx:id="totalPartnersLabel" styleClass="card-title" style="-fx-font-size: 24px;" text="5" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox alignment="CENTER" maxHeight="45.0" maxWidth="45.0" minHeight="45.0" minWidth="45.0" styleClass="card-icon-purple">
+                            <children><Label text="🌐" style="-fx-text-fill: white; -fx-font-size: 18px;" /></children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <!-- Active Power -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <padding><Insets bottom="20.0" left="25.0" right="25.0" top="20.0" /></padding>
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label styleClass="card-subtitle" text="ACTIVE POWER" />
+                                <Label fx:id="activeContractsLabel" styleClass="card-title" style="-fx-font-size: 24px;" text="0 / 1" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox alignment="CENTER" maxHeight="45.0" maxWidth="45.0" minHeight="45.0" minWidth="45.0" style="-fx-background-color: #22c55e; -fx-background-radius: 10;">
+                            <children><Label text="📈" style="-fx-text-fill: white; -fx-font-size: 18px;" /></children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <!-- Controlled Budget -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <padding><Insets bottom="20.0" left="25.0" right="25.0" top="20.0" /></padding>
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label styleClass="card-subtitle" text="CONTROLLED BUDGET" />
+                                <Label fx:id="totalBudgetLabel" styleClass="card-title" style="-fx-font-size: 24px;" text="2,099 DT" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox alignment="CENTER" maxHeight="45.0" maxWidth="45.0" minHeight="45.0" minWidth="45.0" styleClass="card-icon-blue">
+                            <children><Label text="💰" style="-fx-text-fill: white; -fx-font-size: 18px;" /></children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <!-- Pending Sync -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <padding><Insets bottom="20.0" left="25.0" right="25.0" top="20.0" /></padding>
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label styleClass="card-subtitle" text="PENDING SYNC" />
+                                <Label fx:id="pendingRequestsLabel" styleClass="card-title" style="-fx-font-size: 24px;" text="0 Items" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox alignment="CENTER" maxHeight="45.0" maxWidth="45.0" minHeight="45.0" minWidth="45.0" style="-fx-background-color: #ef4444; -fx-background-radius: 10;">
+                            <children><Label text="🔔" style="-fx-text-fill: white; -fx-font-size: 18px;" /></children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </GridPane>
+
+        <!-- Bottom Sections -->
+        <HBox spacing="25.0" VBox.vgrow="ALWAYS">
+            <children>
+                <!-- Strategic Network Velocity (Placeholder for Chart) -->
+                <VBox spacing="15.0" styleClass="card" HBox.hgrow="ALWAYS">
+                    <padding><Insets bottom="25.0" left="25.0" right="25.0" top="25.0" /></padding>
+                    <children>
+                        <Label styleClass="card-title" text="Strategic Network Velocity" />
+                        <Label styleClass="card-subtitle" text="Network activity for the current period" />
+                        <Region VBox.vgrow="ALWAYS" />
+                        <HBox alignment="CENTER" style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-min-height: 200;">
+                            <children>
+                                <Label text="Analytics Visualization Area" style="-fx-text-fill: #94a3b8; -fx-font-style: italic;" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <!-- Recent Pulsations -->
+                <VBox spacing="15.0" styleClass="pulsation-card" minWidth="450">
+                    <children>
+                        <HBox alignment="CENTER_LEFT">
+                            <children>
+                                <Label styleClass="card-title" text="Recent Pulsations" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label text="VIEW ALL" style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand;" />
+                            </children>
+                        </HBox>
+                        
+                        <VBox spacing="10.0" fx:id="pulsationList">
+                            <!-- Pulsation Items will be added here -->
+                            <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="pulsation-item">
+                                <children>
+                                    <VBox alignment="CENTER" styleClass="pulsation-icon">
+                                        <Label text="📝" />
+                                    </VBox>
+                                    <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                        <children>
+                                            <Label style="-fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: #1e293b;" text="#CONT-2026-5CEF8B2A738F - Contract for: test c..." />
+                                            <Label style="-fx-font-size: 11px; -fx-text-fill: #64748b;" text="AMAZON" />
+                                        </children>
+                                    </VBox>
+                                    <Label styleClass="pulsation-status" text="FLOWING" />
+                                </children>
+                            </HBox>
+                        </VBox>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
+</VBox>

@@ -8,7 +8,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import java.util.UUID;
 
 public class EditProfileController {
 
@@ -16,19 +19,30 @@ public class EditProfileController {
     @FXML private TextField txtEmail;
     @FXML private TextField txtNumtel;
     @FXML private PasswordField txtPassword;
+    @FXML private TextField txtAiPrompt;
+    @FXML private ImageView imgAvatar;
     @FXML private Label lblMessage;
+
+    private String currentAvatarUrl;
 
     private final UsersService usersService = new UsersService();
     private Users currentUser;
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Edit Profile", "Account / Settings / Edit");
         currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser != null) {
             txtUsername.setText(currentUser.getUsername() != null ? currentUser.getUsername() : "");
             txtEmail.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
             txtNumtel.setText(currentUser.getNumtel() != null ? currentUser.getNumtel() : "");
-            // Password intentionally left blank for security
+            
+            // Load existing avatar or default
+            currentAvatarUrl = currentUser.getImage();
+            if (currentAvatarUrl == null || currentAvatarUrl.isEmpty()) {
+                currentAvatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + currentUser.getUsername();
+            }
+            imgAvatar.setImage(new Image(currentAvatarUrl, true)); // true = load in background
         }
     }
 
@@ -79,11 +93,13 @@ public class EditProfileController {
             if (!password.isEmpty()) {
                 currentUser.setPassword(password);
             }
+            currentUser.setImage(currentAvatarUrl);
 
             usersService.modifier(currentUser);
 
             // Update session with new info
             SessionManager.getInstance().setCurrentUser(currentUser);
+            gui.FrontMainController.refreshNavbar();
 
             showSuccess("✅ Profile updated successfully!");
 
@@ -96,6 +112,30 @@ public class EditProfileController {
             e.printStackTrace();
             showError("❌ Error: " + e.getMessage());
         }
+    }
+
+    @FXML
+    public void generateAvatar() {
+        String prompt = txtAiPrompt.getText().trim();
+        
+        if (prompt.isEmpty()) {
+            // Fallback to random Dicebear if no prompt
+            String randomSeed = UUID.randomUUID().toString();
+            currentAvatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + randomSeed;
+            showSuccess("✨ Random avatar generated! (Save to keep it)");
+        } else {
+            // Use Pollinations AI for custom prompts
+            try {
+                String encodedPrompt = java.net.URLEncoder.encode(prompt, "UTF-8");
+                currentAvatarUrl = "https://image.pollinations.ai/prompt/" + encodedPrompt + "?width=512&height=512&nologo=true";
+                showSuccess("🎨 AI is generating: '" + prompt + "'...");
+            } catch (Exception e) {
+                currentAvatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + prompt;
+                showError("❌ Error encoding prompt, using fallback.");
+            }
+        }
+        
+        imgAvatar.setImage(new Image(currentAvatarUrl, true));
     }
 
     @FXML

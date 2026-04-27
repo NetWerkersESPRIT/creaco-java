@@ -8,43 +8,49 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.StackPane?>
 
-<VBox spacing="25.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.partner.DisplayPartnerController">
+<VBox spacing="25.0" VBox.vgrow="ALWAYS" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.partner.DisplayPartnerController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
     <children>
         <!-- Main Content Card -->
         <VBox VBox.vgrow="ALWAYS" styleClass="card">
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
             <children>
                 <!-- Card Header -->
                 <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
                         <Label styleClass="card-title" text="Collaborators List" />
-                        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="search-bar" HBox.hgrow="ALWAYS" maxWidth="500">
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="search-bar" maxWidth="400">
                             <children>
-                                <Label text="🔍" style="-fx-text-fill: -fx-text-muted;" />
-                                <TextField fx:id="partnerSearchField" promptText="Search by name, company, email..."
-                                           style="-fx-background-color: transparent; -fx-padding: 0;" HBox.hgrow="ALWAYS" />
+                                <Label text="🔍" style="-fx-text-fill: -fx-text-muted; -fx-font-size: 16px;" />
+                                <TextField fx:id="partnerSearchField" promptText="Search partners..."
+                                           style="-fx-background-color: transparent; -fx-padding: 0; -fx-font-size: 14px;" HBox.hgrow="ALWAYS" />
                             </children>
                         </HBox>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button onAction="#onAddPartner" styleClass="btn-primary" text="+ ADD A PARTNER" />
+                        <Button onAction="#onAddPartner" styleClass="btn-primary" text="+ ADD A PARTNER" prefHeight="45.0" />
                     </children>
                 </HBox>
 
                 <!-- Column Headers -->
-                <HBox spacing="10.0" style="-fx-padding: 20 0 10 0;">
+                <HBox spacing="10.0" style="-fx-padding: 30 0 15 0; -fx-border-color: transparent transparent #f1f5f9 transparent; -fx-border-width: 0 0 1 0;">
                     <children>
                         <Label prefWidth="300" styleClass="list-header-label" text="COLLABORATOR" />
                         <Label prefWidth="200" styleClass="list-header-label" text="DOMAIN" />
                         <Label prefWidth="150" styleClass="list-header-label" text="STATUS" />
                         <Label prefWidth="150" styleClass="list-header-label" text="CREATED AT" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label styleClass="list-header-label" text="Actions" />
+                        <Label styleClass="list-header-label" text="ACTIONS" />
                     </children>
                 </HBox>
 
                 <!-- Partners List -->
-                <ListView fx:id="partnersListView" minHeight="600" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;"/>
+                <ListView fx:id="partnersListView" VBox.vgrow="ALWAYS" minHeight="500.0" prefHeight="600.0"
+                          style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 10 0 0 0;"/>
             </children>
         </VBox>
     </children>

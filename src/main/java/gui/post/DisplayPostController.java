@@ -1,17 +1,24 @@
 package gui.post;
 
 import entities.Post;
+import entities.ReactionType;
 import gui.comment.DisplayCommentController;
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.SequentialTransition;
+import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -20,6 +27,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.util.Duration;
 import services.forum.CommentService;
 import services.forum.PostService;
 import services.UserService;
@@ -30,14 +42,22 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 
 public class DisplayPostController {
 
-    private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML
     private VBox postsContainer;
@@ -48,21 +68,29 @@ public class DisplayPostController {
     @FXML
     private TextField searchField;
 
-    @FXML private Label lblUsername;
-    @FXML private Label lblUserRole;
+    @FXML
+    private Label lblUsername;
+    @FXML
+    private Label lblUserRole;
 
     private final PostService postService = new PostService();
     private final CommentService commentService = new CommentService();
     private final UserService userService = new UserService();
-    
+
     private List<Post> allPosts = new ArrayList<>();
-    
+
     private boolean isAdminMode = false;
     private boolean initialized = false;
-    private final java.util.Set<Integer> likedPosts = new java.util.HashSet<>();
-    
+
+    /**
+     * Tracks the current user's active reaction per post (postId → ReactionType or
+     * null).
+     */
+    private final Map<Integer, ReactionType> userReactions = new HashMap<>();
+
     public void setAdminMode(boolean isAdminMode) {
-        this.isAdminMode = isAdminMode;
+        // The session now strictly controls admin mode
+        // this.isAdminMode = isAdminMode;
         if (initialized) {
             loadPosts();
         }
@@ -70,18 +98,20 @@ public class DisplayPostController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Forum", "Pages / Forum");
+        this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         initialized = true;
         loadPosts();
-        
+
         // Populate User Profile
         entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
         if (user != null && lblUsername != null) {
             String displayName = user.getUsername() != null ? user.getUsername() : "User";
             lblUsername.setText(displayName);
-            
+
             String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
             lblUserRole.setText(role);
-            
+
             // Special styling for ADMIN
             if ("ADMIN".equals(role)) {
                 lblUserRole.setStyle("-fx-background-color: #434a75;");
@@ -92,6 +122,15 @@ public class DisplayPostController {
     public void loadPosts() {
         try {
             allPosts = postService.getAcceptedPosts();
+            // Pre-load this user's reactions for all posts
+            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
+            if (currentUserId > 0) {
+                for (Post p : allPosts) {
+                    ReactionType rt = postService.getUserReaction(currentUserId, p.getId());
+                    userReactions.put(p.getId(), rt);
+                }
+            }
             renderPosts(allPosts);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -111,7 +150,7 @@ public class DisplayPostController {
 
     private void renderPosts(List<Post> postsToDisplay) {
         postsContainer.getChildren().clear();
-        
+
         List<Post> sortedPosts = postsToDisplay.stream()
                 .sorted((p1, p2) -> {
                     if (p1.isPinned() != p2.isPinned()) {
@@ -128,7 +167,7 @@ public class DisplayPostController {
             emptyState.setAlignment(javafx.geometry.Pos.CENTER);
             emptyState.setPadding(new Insets(100, 0, 100, 0));
             emptyState.getStyleClass().add("card");
-            
+
             StackPane iconCircle = new StackPane();
             iconCircle.setPrefSize(60, 60);
             iconCircle.setMaxSize(60, 60);
@@ -136,13 +175,13 @@ public class DisplayPostController {
             Label icon = new Label("🔍");
             icon.setStyle("-fx-font-size: 24px;");
             iconCircle.getChildren().add(icon);
-            
+
             Label mainMsg = new Label("Nothing here yet");
             mainMsg.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;");
-            
+
             Label subMsg = new Label("Start the discussion and be the first to post!");
             subMsg.setStyle("-fx-font-size: 14px; -fx-text-fill: #718096;");
-            
+
             emptyState.getChildren().addAll(iconCircle, mainMsg, subMsg);
             postsContainer.getChildren().add(emptyState);
             return;
@@ -156,6 +195,7 @@ public class DisplayPostController {
 
     private VBox buildPostCard(Post post) {
         VBox card = new VBox(15);
+        card.setId("post-card-" + post.getId()); // Set ID for scrolling
         card.getStyleClass().add("card");
         card.setPadding(new Insets(25));
         card.setAlignment(javafx.geometry.Pos.TOP_LEFT);
@@ -165,23 +205,37 @@ public class DisplayPostController {
         String username = (author != null) ? author.getUsername() : "Unknown";
         HBox authorRow = new HBox(12);
         authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        
-        StackPane avatar = buildAvatar(username);
+
+        StackPane avatar = buildAvatarWithRing(author, 35);
         Label usernameLabel = new Label(username);
         usernameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;");
         authorRow.getChildren().addAll(avatar, usernameLabel);
 
         if (post.isPinned()) {
             Label pinnedBadge = new Label("📌 PINNED");
-            pinnedBadge.setStyle("-fx-font-size: 11px; -fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+            pinnedBadge.setStyle(
+                    "-fx-font-size: 11px; -fx-text-fill: #ce2d7c; -fx-font-weight: bold; -fx-padding: 0 0 0 8;");
             authorRow.getChildren().add(pinnedBadge);
         }
+
+        // --- Spacer to push AI Actions to the right ---
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        authorRow.getChildren().add(spacer);
+
+        // --- AI Actions (Moved to Right) ---
+        HBox aiTopBox = new HBox(8);
+        aiTopBox.setAlignment(Pos.CENTER_RIGHT);
+        aiTopBox.getChildren().addAll(
+                createAIAction("💡 Explain", "explain", post),
+                createAIAction("🔍 Solution", "solution", post));
+        authorRow.getChildren().add(aiTopBox);
 
         // --- Title & Content ---
         VBox body = new VBox(8);
         Label titleLabel = new Label(safeText(post.getTitle()));
         titleLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3748;");
-        
+
         Label contentLabel = new Label(safeText(post.getContent()));
         contentLabel.setWrapText(true);
         contentLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #718096; -fx-line-spacing: 4;");
@@ -203,10 +257,9 @@ public class DisplayPostController {
         actionsRow.setPadding(new Insets(10, 0, 0, 0));
 
         actionsRow.getChildren().addAll(
-            createLikeAction(post),
-            createCommentAction(post),
-            createReadAction(post)
-        );
+                createReactionBar(post),
+                createCommentAction(post),
+                createReadAction(post));
 
         entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
         int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
@@ -226,10 +279,14 @@ public class DisplayPostController {
             actionsRow.getChildren().add(deleteBtn);
         }
 
-        actionsRow.getChildren().addAll(
-            createPinAction(post),
-            createSimpleAction("↪ Share", "")
-        );
+        if (isAdminMode) {
+            actionsRow.getChildren().add(createPinAction(post));
+        }
+        
+        HBox shareBtn = createSimpleAction("↪ Share", "");
+        shareBtn.setOnMouseClicked(e -> onSharePost(post, shareBtn));
+        shareBtn.setStyle("-fx-cursor: hand;");
+        actionsRow.getChildren().add(shareBtn);
 
         card.getChildren().add(actionsRow);
 
@@ -254,42 +311,241 @@ public class DisplayPostController {
         return box;
     }
 
-    private HBox createLikeAction(Post post) {
-        HBox box = createSimpleAction("👍 Like", String.valueOf(post.getLikes()));
-        Label iconLabel = (Label) box.getChildren().get(0);
-        Label countLabel = (Label) box.getChildren().get(1);
+    // =========================================================================
+    // INLINE REACTION BAR
+    // =========================================================================
 
-        if (likedPosts.contains(post.getId())) {
-            iconLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
-            countLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
-        }
+    // =========================================================================
+    // MODERN POPUP REACTION BAR (Facebook/LinkedIn style)
+    // =========================================================================
 
-        box.setOnMouseClicked(e -> {
+    private HBox createReactionBar(Post post) {
+        int postId = post.getId();
+        entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+        int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
+
+        ReactionType currentReaction = userReactions.get(postId);
+
+        // ---- Count summary ----
+        Label countSummary = new Label();
+        countSummary.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-padding: 0 0 0 8;");
+        refreshCountSummary(countSummary, postId);
+
+        // ---- Main Trigger Button ----
+        Label triggerBtn = new Label(buildMainLabel(currentReaction));
+        triggerBtn.setStyle(buildMainBtnStyle(currentReaction));
+        triggerBtn.setCursor(javafx.scene.Cursor.HAND);
+
+        // Click to Like/Unlike directly
+        triggerBtn.setOnMouseClicked(ev -> {
+            if (currentUserId < 1)
+                return;
             try {
-                if (likedPosts.contains(post.getId())) {
-                    likedPosts.remove(post.getId());
-                    post.setLikes(post.getLikes() - 1);
-                    iconLabel.setStyle("-fx-text-fill: #64748b;");
-                    countLabel.setStyle("-fx-text-fill: #64748b;");
-                } else {
-                    likedPosts.add(post.getId());
-                    post.setLikes(post.getLikes() + 1);
-                    iconLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
-                    countLabel.setStyle("-fx-text-fill: #ce2d7c; -fx-font-weight: bold;");
+                // If already reacted, clicking the main button toggles it off.
+                // If not reacted, clicking the main button defaults to LIKE.
+                ReactionType current = userReactions.get(postId);
+                ReactionType typeToApply = (current != null) ? current : ReactionType.LIKE;
+
+                ReactionType result = postService.handleReaction(currentUserId, postId, typeToApply);
+                userReactions.put(postId, result);
+
+                // Notify Post Owner
+                if (result != null && post.getUserId() != currentUserId) {
+                    new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
                 }
-                postService.likePost(post.getId(), post.getLikes());
-                countLabel.setText(String.valueOf(post.getLikes()));
+
+                triggerBtn.setText(buildMainLabel(result));
+                triggerBtn.setStyle(buildMainBtnStyle(result));
+                refreshCountSummary(countSummary, postId);
+
+                // Bounce animation
+                ScaleTransition up = new ScaleTransition(Duration.millis(100), triggerBtn);
+                up.setToX(1.2);
+                up.setToY(1.2);
+                ScaleTransition down = new ScaleTransition(Duration.millis(100), triggerBtn);
+                down.setToX(1.0);
+                down.setToY(1.0);
+                new SequentialTransition(up, down).play();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
         });
-        box.setStyle("-fx-cursor: hand;");
-        return box;
+
+        HBox triggerRow = new HBox(8, triggerBtn, countSummary);
+        triggerRow.setAlignment(Pos.CENTER_LEFT);
+
+        // ---- Popup Emoji Pill ----
+        HBox emojiPill = new HBox(8);
+        emojiPill.setAlignment(Pos.CENTER);
+        emojiPill.setStyle(
+                "-fx-background-color: white; " +
+                        "-fx-background-radius: 30; " +
+                        "-fx-padding: 8 16 8 16; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 5);");
+
+        for (ReactionType rt : ReactionType.values()) {
+            Label emoji = new Label(rt.getEmoji());
+            emoji.setCursor(javafx.scene.Cursor.HAND);
+            emoji.setFont(javafx.scene.text.Font.font(26));
+            // Force native color emoji rendering by specifying emoji fonts and NOT
+            // overriding text-fill
+            emoji.setStyle("-fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji';");
+
+            // Hover animation
+            emoji.setOnMouseEntered(ev -> {
+                ScaleTransition s = new ScaleTransition(Duration.millis(150), emoji);
+                s.setToX(1.4);
+                s.setToY(1.4);
+                s.play();
+            });
+            emoji.setOnMouseExited(ev -> {
+                ScaleTransition s = new ScaleTransition(Duration.millis(150), emoji);
+                s.setToX(1.0);
+                s.setToY(1.0);
+                s.play();
+            });
+
+            // Click handling
+            emoji.setOnMouseClicked(ev -> {
+                if (currentUserId < 1)
+                    return;
+                try {
+                    ReactionType result = postService.handleReaction(currentUserId, postId, rt);
+                    userReactions.put(postId, result);
+
+                    // Notify Post Owner
+                    if (result != null && post.getUserId() != currentUserId) {
+                        new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                    }
+
+                    triggerBtn.setText(buildMainLabel(result));
+                    triggerBtn.setStyle(buildMainBtnStyle(result));
+                    refreshCountSummary(countSummary, postId);
+
+                    // Bounce trigger btn
+                    ScaleTransition up = new ScaleTransition(Duration.millis(100), triggerBtn);
+                    up.setToX(1.2);
+                    up.setToY(1.2);
+                    ScaleTransition down = new ScaleTransition(Duration.millis(100), triggerBtn);
+                    down.setToX(1.0);
+                    down.setToY(1.0);
+                    new SequentialTransition(up, down).play();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            });
+
+            emojiPill.getChildren().add(emoji);
+        }
+
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.getContent().add(emojiPill);
+
+        // Hover Logic
+        triggerBtn.setOnMouseEntered(ev -> {
+            if (!popup.isShowing()) {
+                Bounds bounds = triggerBtn.localToScreen(triggerBtn.getBoundsInLocal());
+                if (bounds != null) {
+                    popup.show(triggerBtn, bounds.getMinX() - 10, bounds.getMinY() - 55);
+                    emojiPill.setOpacity(0);
+                    emojiPill.setTranslateY(10);
+                    // Sped up from 200ms to 100ms for a snappier feel
+                    FadeTransition ft = new FadeTransition(Duration.millis(100), emojiPill);
+                    ft.setToValue(1);
+                    ft.play();
+                    TranslateTransition tt = new TranslateTransition(Duration.millis(100), emojiPill);
+                    tt.setToY(0);
+                    tt.play();
+                }
+            }
+        });
+
+        triggerBtn.setOnMouseExited(ev -> {
+            new Thread(() -> {
+                // Reduced delay from 250ms to 100ms
+                try {
+                    Thread.sleep(100);
+                } catch (Exception ignored) {
+                }
+                javafx.application.Platform.runLater(() -> {
+                    if (!emojiPill.isHover()) {
+                        FadeTransition ft = new FadeTransition(Duration.millis(100), emojiPill);
+                        ft.setToValue(0);
+                        ft.setOnFinished(e -> popup.hide());
+                        ft.play();
+                    }
+                });
+            }).start();
+        });
+
+        emojiPill.setOnMouseExited(ev -> {
+            FadeTransition ft = new FadeTransition(Duration.millis(100), emojiPill);
+            ft.setToValue(0);
+            ft.setOnFinished(e -> popup.hide());
+            ft.play();
+        });
+
+        return triggerRow;
+    }
+
+    // ---- Helpers ----
+
+    private String buildMainLabel(ReactionType rt) {
+        if (rt == null)
+            return "👍 Like";
+        return rt.getEmoji() + " " + capitalize(rt.name());
+    }
+
+    private String buildMainBtnStyle(ReactionType rt) {
+        String base = "-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 6 12 6 12; -fx-background-radius: 20; ";
+        if (rt == null) {
+            return base + "-fx-text-fill: #64748b; -fx-background-color: transparent;";
+        }
+        return base + "-fx-text-fill: " + getEmojiColor(rt) + "; -fx-background-color: #f1f5f9;";
+    }
+
+    private String getEmojiColor(ReactionType rt) {
+        switch (rt) {
+            case LIKE:
+                return "#1877f2"; // Blue
+            case LOVE:
+                return "#f33e58"; // Red
+            case HAHA:
+            case WOW:
+            case SAD:
+                return "#f7b125"; // Yellow
+            default:
+                return "#64748b";
+        }
+    }
+
+    private void refreshCountSummary(Label lbl, int postId) {
+        try {
+            java.util.Map<ReactionType, Integer> counts = postService.getReactionCounts(postId);
+            int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+            if (total > 0) {
+                lbl.setText(total + " reactions");
+            } else {
+                lbl.setText("");
+            }
+        } catch (java.sql.SQLException e) {
+            lbl.setText("");
+        }
+    }
+
+    private String capitalize(String s) {
+        if (s == null || s.isEmpty())
+            return s;
+        return s.charAt(0) + s.substring(1).toLowerCase();
     }
 
     private HBox createCommentAction(Post post) {
         int count = 0;
-        try { count = commentService.getCommentCountByPost(post.getId()); } catch (SQLException e) {}
+        try {
+            count = commentService.getCommentCountByPost(post.getId());
+        } catch (SQLException e) {
+        }
         HBox box = createSimpleAction("💬", count + " Comments");
         box.setOnMouseClicked(e -> openComments(new ActionEvent(box, null), post));
         box.setStyle("-fx-cursor: hand;");
@@ -321,6 +577,188 @@ public class DisplayPostController {
         }).start();
     }
 
+    private HBox createAIAction(String label, String actionType, Post post) {
+        HBox box = createSimpleAction(label, "");
+        box.setStyle("-fx-cursor: hand; -fx-background-color: #f8fafc; -fx-padding: 4 8; -fx-background-radius: 8;");
+        box.setOnMouseEntered(e -> box.setStyle(
+                "-fx-cursor: hand; -fx-background-color: #f1f5f9; -fx-padding: 4 8; -fx-background-radius: 8;"));
+        box.setOnMouseExited(e -> box.setStyle(
+                "-fx-cursor: hand; -fx-background-color: #f8fafc; -fx-padding: 4 8; -fx-background-radius: 8;"));
+
+        box.setOnMouseClicked(e -> runAIAction(post, actionType, label));
+        return box;
+    }
+
+    private void runAIAction(Post post, String actionType, String label) {
+        // Show loading indicator
+        statusLabel.setText("AI is thinking... 🧠");
+
+        new Thread(() -> {
+            String response = utils.OpenRouterService.getAIResponse(post.getContent(), actionType);
+            javafx.application.Platform.runLater(() -> {
+                statusLabel.setText("AI finished processing.");
+                showAIDialog(label, response, post);
+            });
+        }).start();
+    }
+
+    private void showAIDialog(String title, String content, Post post) {
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+
+        VBox mainRoot = new VBox();
+        mainRoot.setStyle(
+                "-fx-background-color: white; " +
+                "-fx-background-radius: 20; " +
+                "-fx-border-color: #e2e8f0; " +
+                "-fx-border-width: 1; " +
+                "-fx-border-radius: 20; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 50, 0, 0, 15);"); // Strong Black Shadow
+        mainRoot.setMaxWidth(450);
+        mainRoot.setPrefWidth(450);
+        mainRoot.setAlignment(Pos.TOP_CENTER);
+
+        // --- Top Bar (Platform Pink) ---
+        HBox topBar = new HBox();
+        topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.setPadding(new Insets(10, 15, 10, 15));
+        topBar.setStyle("-fx-background-color: #ce2d7c; -fx-background-radius: 20 20 0 0;");
+
+        Label forumLabel = new Label("FORUM AI");
+        forumLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        Region spacerHeader = new Region();
+        HBox.setHgrow(spacerHeader, Priority.ALWAYS);
+
+        Label xClose = new Label("✕");
+        xClose.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;");
+        xClose.setOnMouseClicked(e -> stage.close());
+
+        topBar.getChildren().addAll(forumLabel, spacerHeader, xClose);
+
+        // --- Content Area ---
+        VBox contentArea = new VBox(15);
+        contentArea.setPadding(new Insets(20));
+        contentArea.setAlignment(Pos.TOP_LEFT);
+
+        // Title Row
+        HBox titleRow = new HBox(10);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
+        Label iconLabel = new Label(title.contains("Solution") ? "🔍" : "💡");
+        iconLabel.setStyle("-fx-font-size: 18px;");
+        Label mainTitle = new Label(title.toUpperCase());
+        mainTitle.setStyle(
+                "-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #1a202c; -fx-font-family: 'Segoe UI';");
+        titleRow.getChildren().addAll(iconLabel, mainTitle);
+
+        javafx.scene.control.Separator sep1 = new javafx.scene.control.Separator();
+        sep1.setStyle("-fx-background-color: #edf2f7; -fx-opacity: 0.5;");
+
+        // --- AI Text Container with ScrollPane ---
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefHeight(200); // Fixed height
+        scrollPane.setMaxHeight(200);
+        scrollPane.setStyle(
+                "-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;");
+
+        VBox textContainer = new VBox();
+        textContainer.setPadding(new Insets(15));
+        textContainer.setStyle(
+                "-fx-background-color: #f8fafc; -fx-background-radius: 15; -fx-border-color: #f1f5f9; -fx-border-radius: 15;");
+
+        Label textDisplay = new Label(content);
+        textDisplay.setWrapText(true);
+        textDisplay.setStyle(
+                "-fx-font-size: 13px; -fx-text-fill: #475569; -fx-line-spacing: 2; -fx-font-family: 'Segoe UI';");
+        textDisplay.setMaxWidth(380);
+        textContainer.getChildren().add(textDisplay);
+
+        scrollPane.setContent(textContainer);
+
+        javafx.scene.control.Separator sep2 = new javafx.scene.control.Separator();
+        sep2.setStyle("-fx-background-color: #edf2f7; -fx-opacity: 0.5;");
+
+        // Footer Button (Aligned Right)
+        HBox footer = new HBox(15);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+
+        Button postBtn = createForumStyleButton("Post as Comment", "#ce2d7c", true);
+        postBtn.setOnAction(e -> {
+            postAIComment(post, content);
+            stage.close();
+        });
+
+        if (title.contains("Solution")) {
+            footer.getChildren().add(postBtn);
+        } else {
+            Button okBtn = createForumStyleButton("Close", "#64748b", false);
+            okBtn.setOnAction(e -> stage.close());
+            footer.getChildren().add(okBtn);
+        }
+
+        contentArea.getChildren().addAll(titleRow, sep1, scrollPane, sep2, footer);
+        mainRoot.getChildren().addAll(topBar, contentArea);
+
+        Scene scene = new Scene(mainRoot);
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        stage.setScene(scene);
+        stage.sizeToScene();
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    private Button createForumStyleButton(String text, String color, boolean filled) {
+        Button btn = new Button(text);
+        String baseStyle = "-fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 10 25; -fx-font-size: 13px; -fx-cursor: hand; ";
+        if (filled) {
+            btn.setStyle(baseStyle + "-fx-background-color: " + color + "; -fx-text-fill: white;");
+        } else {
+            btn.setStyle(baseStyle
+                    + "-fx-background-color: white; -fx-text-fill: #4a5568; -fx-border-color: #e2e8f0; -fx-border-radius: 25; -fx-border-width: 1;");
+        }
+
+        btn.setOnMouseEntered(e -> {
+            if (!filled)
+                btn.setStyle(btn.getStyle().replace("#white", "#f8fafc"));
+            btn.setOpacity(0.8);
+        });
+        btn.setOnMouseExited(e -> {
+            btn.setOpacity(1.0);
+        });
+
+        return btn;
+    }
+
+    private void postAIComment(Post post, String aiContent) {
+        try {
+            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                showAlert(Alert.AlertType.WARNING, "Not Logged In", "You must be logged in to post comments.");
+                return;
+            }
+
+            entities.Comment aiComment = new entities.Comment();
+            aiComment.setBody("🤖 AI Generated Solution:\n\n" + aiContent);
+            aiComment.setPostId(post.getId());
+            aiComment.setUserId(currentUser.getId());
+            aiComment.setStatus("ACCEPTED");
+            aiComment.setLikes(0);
+            aiComment.setProfane(false);
+            aiComment.setProfaneWords(0);
+            aiComment.setGrammarErrors(0);
+
+            commentService.ajouter(aiComment);
+
+            statusLabel.setText("AI solution posted as comment!");
+            loadPosts(); // Refresh UI to update comment count
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Could not save AI comment.");
+        }
+    }
+
     private HBox createPinAction(Post post) {
         HBox box = createSimpleAction("📌 Pin", "");
         box.setOnMouseClicked(e -> togglePin(post));
@@ -330,12 +768,16 @@ public class DisplayPostController {
 
     private void togglePin(Post post) {
         try {
-            post.setPinned(!post.isPinned());
-            postService.modifier(post.getId(), post);
+            int userId = utils.SessionManager.getInstance().getCurrentUser().getId();
+            String alertMessage = postService.handleTogglePin(post, isAdminMode, userId);
+
+            if (alertMessage != null) {
+                showAlert(Alert.AlertType.INFORMATION, "Pin Action", alertMessage);
+            }
+
             loadPosts(); // Refresh list to show pinned at top
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not pin post.");
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.WARNING, "Pin Denied", e.getMessage());
         }
     }
 
@@ -348,34 +790,109 @@ public class DisplayPostController {
                 imageView.setFitWidth(500);
                 imageView.setPreserveRatio(true);
                 javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
-                clip.setArcWidth(20); clip.setArcHeight(20);
+                clip.setArcWidth(20);
+                clip.setArcHeight(20);
                 clip.widthProperty().bind(imageView.fitWidthProperty());
                 image.progressProperty().addListener((obs, old, val) -> {
-                    if (val.doubleValue() == 1.0) clip.setHeight(imageView.getBoundsInLocal().getHeight());
+                    if (val.doubleValue() == 1.0)
+                        clip.setHeight(imageView.getBoundsInLocal().getHeight());
                 });
                 imageView.setClip(clip);
                 return imageView;
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         return null;
     }
 
-    private StackPane buildAvatar(String username) {
+    private StackPane buildAvatar(entities.Users user) {
+        String username = (user != null) ? user.getUsername() : "Unknown";
+        String imageUrl = (user != null) ? user.getImage() : null;
+
+        StackPane circle = new StackPane();
+        circle.setPrefSize(32, 32);
+        circle.setMinSize(32, 32);
+        circle.setMaxSize(32, 32);
+        circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
+
+        // Use Dicebear fallback if no image (matches Profile view)
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+        }
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                Image img;
+                if (imageUrl.startsWith("http")) {
+                    img = new Image(imageUrl, true);
+                } else {
+                    File file = new File("src/main/resources/uploads/images/" + imageUrl);
+                    if (file.exists()) {
+                        img = new Image(file.toURI().toString());
+                    } else {
+                        // Fallback to dicebear if local file missing
+                        img = new Image("https://api.dicebear.com/7.x/avataaars/png?seed=" + username, true);
+                    }
+                }
+
+                if (img != null) {
+                    ImageView imageView = new ImageView(img);
+                    imageView.setFitWidth(32);
+                    imageView.setFitHeight(32);
+                    imageView.setPreserveRatio(true);
+                    imageView.setClip(new javafx.scene.shape.Circle(16, 16, 16));
+
+                    circle.getChildren().add(imageView);
+                    return circle;
+                }
+            } catch (Exception e) {}
+        }
+
         char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
         Label initLabel = new Label(String.valueOf(initial));
         initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
-        StackPane circle = new StackPane(initLabel);
-        circle.setPrefSize(35, 35); circle.setMinSize(35, 35); circle.setMaxSize(35, 35);
-        circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
+        circle.getChildren().add(initLabel);
         return circle;
+    }
+
+    private StackPane buildAvatarWithRing(entities.Users user, int size) {
+        StackPane ring = new StackPane();
+        ring.setPrefSize(size + 4, size + 4);
+        ring.setMinSize(size + 4, size + 4);
+        ring.setMaxSize(size + 4, size + 4);
+        ring.setStyle("-fx-background-radius: 50; " +
+                "-fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);");
+        
+        StackPane inner = buildAvatar(user);
+        inner.setPrefSize(size, size);
+        inner.setMinSize(size, size);
+        inner.setMaxSize(size, size);
+        
+        if (!inner.getChildren().isEmpty() && inner.getChildren().get(0) instanceof ImageView) {
+            ImageView iv = (ImageView) inner.getChildren().get(0);
+            iv.setFitWidth(size); iv.setFitHeight(size);
+            iv.setClip(new javafx.scene.shape.Circle(size / 2.0, size / 2.0, size / 2.0));
+        }
+        
+        StackPane bg = new StackPane();
+        bg.setStyle("-fx-background-color: white; -fx-background-radius: 50;");
+        bg.setPrefSize(size + 1, size + 1);
+        bg.getChildren().add(inner);
+        
+        ring.getChildren().add(bg);
+        return ring;
     }
 
     private void openPdf(String pdfName) {
         try {
             File file = new File("src/main/resources/uploads/pdfs/" + pdfName);
-            if (file.exists()) Desktop.getDesktop().open(file);
-            else showAlert(Alert.AlertType.WARNING, "Not Found", "PDF not found.");
-        } catch (IOException e) { showAlert(Alert.AlertType.ERROR, "Error", "Could not open PDF."); }
+            if (file.exists())
+                Desktop.getDesktop().open(file);
+            else
+                showAlert(Alert.AlertType.WARNING, "Not Found", "PDF not found.");
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open PDF.");
+        }
     }
 
     private Button createActionButton(String text, String textColor, String backgroundColor) {
@@ -388,10 +905,12 @@ public class DisplayPostController {
 
     private StackPane findContentArea(Node source) {
         StackPane area = (StackPane) source.getScene().lookup("#contentArea");
-        if (area != null) return area;
+        if (area != null)
+            return area;
         Node parent = source.getParent();
         while (parent != null) {
-            if (parent instanceof StackPane && "contentArea".equals(parent.getId())) return (StackPane) parent;
+            if (parent instanceof StackPane && "contentArea".equals(parent.getId()))
+                return (StackPane) parent;
             parent = parent.getParent();
         }
         return null;
@@ -403,10 +922,15 @@ public class DisplayPostController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/addPost.fxml"));
             Parent root = loader.load();
             AddPostController controller = loader.getController();
-            if (controller != null) controller.setAdminMode(this.isAdminMode);
+            if (controller != null)
+                controller.setAdminMode(this.isAdminMode);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (Exception e) { e.printStackTrace(); showAlert(Alert.AlertType.ERROR, "Error", "Could not load Add Post."); }
+            if (contentArea != null)
+                contentArea.getChildren().setAll(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load Add Post.");
+        }
     }
 
     private void openEdit(ActionEvent event, Post post) {
@@ -417,8 +941,11 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (IOException e) { e.printStackTrace(); }
+            if (contentArea != null)
+                contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void openComments(ActionEvent event, Post post) {
@@ -429,23 +956,108 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (IOException e) { e.printStackTrace(); }
-    }
-
-    private void deletePost(int id) {
-        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Are you sure?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
-            try { postService.supprimer(id); loadPosts(); } 
-            catch (SQLException e) { showAlert(Alert.AlertType.ERROR, "Error", "Could not delete."); }
+            if (contentArea != null)
+                contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private String formatDate(LocalDateTime date) { return (date == null) ? "-" : date.format(DISPLAY_DATE_FORMAT); }
-    private String safeText(String value) { return (value == null || value.isBlank()) ? "-" : value; }
+    private void deletePost(int id) {
+        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Are you sure?",
+                gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+            try {
+                postService.supprimer(id);
+                loadPosts();
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Could not delete.");
+            }
+        }
+    }
+
+    private void onSharePost(Post post, Node anchor) {
+        if (post == null) return;
+        
+        ContextMenu shareMenu = new ContextMenu();
+        shareMenu.setStyle("-fx-background-radius: 10; -fx-padding: 5;");
+
+        MenuItem twitterItem = new MenuItem("Share on Twitter");
+        twitterItem.setOnAction(e -> openSocialLink(post, "https://twitter.com/intent/tweet?text="));
+
+        MenuItem whatsappItem = new MenuItem("Share on WhatsApp");
+        whatsappItem.setOnAction(e -> openSocialLink(post, "https://wa.me/?text="));
+
+        MenuItem copyItem = new MenuItem("Copy Link");
+        copyItem.setOnAction(e -> {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            String postUrl = "https://creaco.com/post/" + post.getId();
+            content.putString(postUrl);
+            clipboard.setContent(content);
+            showAlert(Alert.AlertType.INFORMATION, "Copied", "Post link copied to clipboard!");
+        });
+
+        shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem);
+        shareMenu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
+    }
+
+    private void openSocialLink(Post post, String baseUrl) {
+        try {
+            String postUrl = "https://creaco.com/post/" + post.getId();
+            String encodedUrl = URLEncoder.encode(postUrl, StandardCharsets.UTF_8);
+            String url = baseUrl + encodedUrl;
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(new URI(url));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open share link.");
+        }
+    }
+
+    private String formatDate(LocalDateTime date) {
+        return (date == null) ? "-" : date.format(DISPLAY_DATE_FORMAT);
+    }
+
+    public void scrollToPost(int postId) {
+        javafx.application.Platform.runLater(() -> {
+            Node target = postsContainer.lookup("#post-card-" + postId);
+            if (target != null) {
+                // Highlight effect
+                String originalStyle = target.getStyle();
+                target.setStyle(originalStyle + "; -fx-border-color: #ce2d7c; -fx-border-width: 2; -fx-background-color: #fff1f2;");
+                
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                pause.setOnFinished(e -> target.setStyle(originalStyle));
+                pause.play();
+
+                // Scroll to target
+                Node parent = postsContainer.getParent();
+                while (parent != null && !(parent instanceof javafx.scene.control.ScrollPane)) {
+                    parent = parent.getParent();
+                }
+                
+                if (parent instanceof javafx.scene.control.ScrollPane) {
+                    javafx.scene.control.ScrollPane scrollPane = (javafx.scene.control.ScrollPane) parent;
+                    double scrollHeight = postsContainer.getBoundsInLocal().getHeight();
+                    double nodeY = target.getBoundsInParent().getMinY();
+                    scrollPane.setVvalue(nodeY / scrollHeight);
+                }
+            }
+        });
+    }
+
+    private String safeText(String value) {
+        return (value == null || value.isBlank()) ? "-" : value;
+    }
+
     private void showAlert(Alert.AlertType type, String title, String content) {
-        gui.util.AlertHelper.AlertType ct = (type == Alert.AlertType.ERROR) ? gui.util.AlertHelper.AlertType.ERROR : gui.util.AlertHelper.AlertType.INFORMATION;
+        gui.util.AlertHelper.AlertType ct = (type == Alert.AlertType.ERROR) ? gui.util.AlertHelper.AlertType.ERROR
+                : gui.util.AlertHelper.AlertType.INFORMATION;
         gui.util.AlertHelper.showCustomAlert(title, content, ct);
     }
+
     @FXML
     public void onOpenProfile(javafx.scene.input.MouseEvent event) {
         try {
@@ -454,8 +1066,13 @@ public class DisplayPostController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Profile.fxml"));
                 area.getChildren().setAll((Node) loader.load());
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    @FXML public void logout(ActionEvent event) { gui.SessionHelper.logout(event); }
+    @FXML
+    public void logout(ActionEvent event) {
+        gui.SessionHelper.logout(event);
+    }
 }

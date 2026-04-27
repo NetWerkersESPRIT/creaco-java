@@ -21,6 +21,7 @@ public class TasksController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Tasks Management", "Pages / Workflow / Tasks");
         // Hide Admin button if not admin
         boolean isAdmin = SessionManager.getInstance().isAdmin();
         if (btnAdmin != null) {

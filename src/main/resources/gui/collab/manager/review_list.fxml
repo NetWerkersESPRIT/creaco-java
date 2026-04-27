@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.ReviewListController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <children>
+        <!-- Banner -->
+        <VBox styleClass="hero-banner" style="-fx-min-height: 180; -fx-background-color: linear-gradient(to right, #ec4899, #a855f7);">
+            <children>
+                <VBox style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 15; -fx-padding: 20;" maxWidth="950">
+                    <children>
+                        <Label styleClass="hero-title" text="Requests Review Center" style="-fx-text-fill: #1e293b; -fx-font-size: 28px;" />
+                    </children>
+                </VBox>
+            </children>
+            <padding>
+                <Insets left="40" top="80"/>
+            </padding>
+        </VBox>
+
+        <!-- Main Content Card -->
+        <VBox spacing="20.0" styleClass="card" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label styleClass="card-title" text="Collaboration Requests to Review" />
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <children>
+                                        <Label text="🕒" style="-fx-font-size: 14px;" />
+                                        <Label text="Pending review" styleClass="card-subtitle" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                            <children>
+                                <TextField fx:id="searchField" prefWidth="250.0" promptText="Search project, creator, partner..." styleClass="search-field" />
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label styleClass="filter-label" text="STATUS:" />
+                                        <ComboBox fx:id="statusFilter" prefWidth="150.0" styleClass="filter-combo" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </HBox>
+
+                <!-- Column Headers -->
+                <HBox spacing="20.0" styleClass="list-header" style="-fx-padding: 15 20;">
+                    <children>
+                        <Label prefWidth="250" text="PROJECT / PARTNER" />
+                        <Label prefWidth="200" text="CREATOR" />
+                        <Label prefWidth="150" text="BUDGET" />
+                        <Label prefWidth="150" text="STATUS" />
+                        <Label prefWidth="120" text="DATE" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label prefWidth="80" text="" />
+                    </children>
+                </HBox>
+
+                <!-- Scrollable List -->
+                <ListView fx:id="reviewListView" styleClass="modern-list-view" VBox.vgrow="ALWAYS" />
+            </children>
+        </VBox>
+    </children>
+</VBox>

@@ -33,6 +33,7 @@ public class AddRequestController {
 
     private final CollabRequestService requestService = new CollabRequestService();
     private final CollaboratorService collaboratorService = new CollaboratorService();
+    private final services.GroupService groupService = new services.GroupService();
 
     private Runnable onCancelCallback;
     private Runnable onSaveCallback;
@@ -70,9 +71,35 @@ public class AddRequestController {
 
     private void loadManagers() {
         try {
-            services.UsersService usersService = new services.UsersService();
-            reqManagerBox.setItems(FXCollections.observableArrayList(usersService.getManagers()));
-        } catch (Exception e) { e.printStackTrace(); }
+            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            if (currentUser == null) return;
+
+            // Get the group owned by this creator
+            entities.Group team = groupService.getGroupByCreatorId(currentUser.getId());
+            if (team == null) {
+                System.out.println("No team found for creator " + currentUser.getId());
+                return;
+            }
+
+            // Get members and filter for managers
+            java.util.List<entities.Users> teamMembers = groupService.getGroupMembers(team.getId());
+            java.util.List<entities.Users> managers = new java.util.ArrayList<>();
+            
+            for (entities.Users member : teamMembers) {
+                String role = member.getRole();
+                if (role != null && (role.contains("MANAGER") || role.equalsIgnoreCase("ROLE_MANAGER"))) {
+                    managers.add(member);
+                }
+            }
+
+            reqManagerBox.setItems(FXCollections.observableArrayList(managers));
+            if (!managers.isEmpty()) {
+                reqManagerBox.getSelectionModel().selectFirst();
+            }
+        } catch (Exception e) { 
+            System.err.println("Error loading team managers: " + e.getMessage());
+            e.printStackTrace(); 
+        }
     }
 
     private void setupPartnerBox() {

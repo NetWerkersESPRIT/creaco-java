@@ -26,6 +26,7 @@ public class AddTaskController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Add New Task", "Tasks / New");
         try {
             if (comboState != null) {
                 comboState.setItems(javafx.collections.FXCollections.observableArrayList("to do", "doing", "done"));

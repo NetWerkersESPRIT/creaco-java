@@ -74,31 +74,33 @@ public class DisplayPartnerController {
     private Node createPartnerCell(Collaborator collab) {
         HBox cell = new HBox(15);
         cell.setAlignment(Pos.CENTER_LEFT);
-        cell.setPadding(new Insets(12, 0, 12, 0));
+        cell.setPadding(new Insets(15, 0, 15, 0));
         cell.getStyleClass().add("list-row");
 
         // Company Icon Box
         VBox iconBox = new VBox();
         iconBox.setAlignment(Pos.CENTER);
-        iconBox.setMinSize(42, 42);
-        iconBox.setMaxSize(42, 42);
-        iconBox.setStyle("-fx-background-color: #cbd5e1; -fx-background-radius: 12;");
+        iconBox.setMinSize(45, 45);
+        iconBox.setMaxSize(45, 45);
+        iconBox.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 12;");
         Label iconLabel = new Label("🏢");
-        iconLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: white;");
+        iconLabel.setStyle("-fx-font-size: 22px;");
         iconBox.getChildren().add(iconLabel);
 
         // Collaborator Info
         VBox info = new VBox(2);
         info.setPrefWidth(245);
         Label title = new Label(safeText(collab.getCompanyName()));
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;");
+        title.getStyleClass().add("card-title");
+        title.setStyle("-fx-font-size: 14px;"); // Keep size slightly smaller for list
         Label email = new Label(safeText(collab.getEmail()));
-        email.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
+        email.getStyleClass().add("card-subtitle");
         info.getChildren().addAll(title, email);
 
         // Domain
         Label domain = new Label(safeText(collab.getDomain()));
         domain.setPrefWidth(200);
+        domain.getStyleClass().add("card-subtitle");
         domain.setStyle("-fx-text-fill: #475569; -fx-font-size: 13px;");
 
         // Status Badge
@@ -106,17 +108,19 @@ public class DisplayPartnerController {
         statusBadge.getStyleClass().add("status-badge");
         if ("ACTIVE".equalsIgnoreCase(collab.getStatus())) {
             statusBadge.getStyleClass().add("status-active");
+        } else if ("PENDING".equalsIgnoreCase(collab.getStatus())) {
+            statusBadge.getStyleClass().add("status-pending");
         } else {
-            statusBadge.setStyle("-fx-background-color: #94a3b8;");
+            statusBadge.getStyleClass().add("status-rejected");
         }
-        statusBadge.setMinWidth(85);
+        statusBadge.setMinWidth(90);
         statusBadge.setAlignment(Pos.CENTER);
 
         // Date
         String dateStr = collab.getCreatedAt() != null ? collab.getCreatedAt().toString().split(" ")[0] : "14/04/2026";
         Label dateLabel = new Label(dateStr);
         dateLabel.setPrefWidth(150);
-        dateLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+        dateLabel.getStyleClass().add("card-subtitle");
 
         // Actions
         Region spacer = new Region();
@@ -125,18 +129,15 @@ public class DisplayPartnerController {
         HBox actions = new HBox(15);
         actions.setAlignment(Pos.CENTER_RIGHT);
 
-        Hyperlink viewBtn = new Hyperlink("👁 View");
+        Hyperlink viewBtn = new Hyperlink("View");
         viewBtn.getStyleClass().add("action-link");
         viewBtn.setOnAction(e -> onViewPartner(collab));
 
-        Label divider = new Label("/");
-        divider.setStyle("-fx-text-fill: #cbd5e1;");
-
-        Hyperlink editBtn = new Hyperlink("📝 Edit");
+        Hyperlink editBtn = new Hyperlink("Edit");
         editBtn.getStyleClass().add("action-link");
         editBtn.setOnAction(e -> { if(onEditRequested != null) onEditRequested.accept(collab); });
 
-        actions.getChildren().addAll(viewBtn, divider, editBtn);
+        actions.getChildren().addAll(viewBtn, editBtn);
 
         cell.getChildren().addAll(iconBox, info, domain, statusBadge, dateLabel, spacer, actions);
         return cell;

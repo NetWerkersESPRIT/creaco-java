@@ -24,7 +24,7 @@
                             <children>
                                 <VBox styleClass="hero-content-box">
                                     <children>
-                                        <Label styleClass="hero-title" text="Strategic Partners Network" />
+                                        <Label fx:id="bannerTitle" styleClass="hero-title" text="Strategic Partners Network" />
                                     </children>
                                 </VBox>
                             </children>

@@ -16,8 +16,8 @@ public class CollabRequestService {
     }
 
     public void ajouter(CollabRequest req) throws SQLException {
-        String sql = "INSERT INTO `collab_request`(`title`, `description`, `budget`, `start_date`, `end_date`, `status`, `rejection_reason`, `deliverables`, `payment_terms`, `created_at`, `creator_id`, `revisor_id`, `collaborator_id`) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `collab_request`(`title`, `description`, `budget`, `start_date`, `end_date`, `status`, `rejection_reason`, `deliverables`, `payment_terms`, `created_at`, `creator_id`, `revisor_id`, `collaborator_id`, `ai_usage_count`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setString(1, req.getTitle());
         ps.setString(2, req.getDescription());
@@ -32,11 +32,12 @@ public class CollabRequestService {
         ps.setInt(11, req.getCreatorId());
         ps.setInt(12, req.getRevisorId());
         ps.setInt(13, req.getCollaboratorId());
+        ps.setInt(14, req.getAiUsageCount());
         ps.executeUpdate();
     }
 
     public void modifier(int id, CollabRequest req) throws SQLException {
-        String sql = "UPDATE `collab_request` SET `title`=?, `description`=?, `budget`=?, `start_date`=?, `end_date`=?, `status`=?, `rejection_reason`=?, `deliverables`=?, `payment_terms`=?, `updated_at`=?, `revisor_id`=?, `collaborator_id`=? WHERE `id`=?";
+        String sql = "UPDATE `collab_request` SET `title`=?, `description`=?, `budget`=?, `start_date`=?, `end_date`=?, `status`=?, `rejection_reason`=?, `deliverables`=?, `payment_terms`=?, `updated_at`=?, `revisor_id`=?, `collaborator_id`=?, `ai_usage_count`=? WHERE `id`=?";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setString(1, req.getTitle());
         ps.setString(2, req.getDescription());
@@ -50,7 +51,8 @@ public class CollabRequestService {
         ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
         ps.setInt(11, req.getRevisorId());
         ps.setInt(12, req.getCollaboratorId());
-        ps.setInt(13, id);
+        ps.setInt(13, req.getAiUsageCount());
+        ps.setInt(14, id);
         ps.executeUpdate();
     }
 
@@ -67,7 +69,7 @@ public class CollabRequestService {
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(sql);
         while (rs.next()) {
-            list.add(new CollabRequest(
+            CollabRequest req = new CollabRequest(
                     rs.getInt("id"),
                     rs.getString("title"),
                     rs.getString("description"),
@@ -84,7 +86,11 @@ public class CollabRequestService {
                     rs.getInt("creator_id"),
                     rs.getInt("revisor_id"),
                     rs.getInt("collaborator_id")
-            ));
+            );
+            try {
+                req.setAiUsageCount(rs.getInt("ai_usage_count"));
+            } catch (SQLException ignored) {}
+            list.add(req);
         }
         return list;
     }
@@ -96,7 +102,7 @@ public class CollabRequestService {
         ps.setInt(1, managerId);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
-            list.add(new CollabRequest(
+            CollabRequest req = new CollabRequest(
                     rs.getInt("id"),
                     rs.getString("title"),
                     rs.getString("description"),
@@ -113,7 +119,11 @@ public class CollabRequestService {
                     rs.getInt("creator_id"),
                     rs.getInt("revisor_id"),
                     rs.getInt("collaborator_id")
-            ));
+            );
+            try {
+                req.setAiUsageCount(rs.getInt("ai_usage_count"));
+            } catch (SQLException ignored) {}
+            list.add(req);
         }
         return list;
     }
@@ -124,7 +134,7 @@ public class CollabRequestService {
         ps.setInt(1, collabId);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
-            list.add(new CollabRequest(
+            CollabRequest req = new CollabRequest(
                     rs.getInt("id"),
                     rs.getString("title"),
                     rs.getString("description"),
@@ -141,7 +151,11 @@ public class CollabRequestService {
                     rs.getInt("creator_id"),
                     rs.getInt("revisor_id"),
                     rs.getInt("collaborator_id")
-            ));
+            );
+            try {
+                req.setAiUsageCount(rs.getInt("ai_usage_count"));
+            } catch (SQLException ignored) {}
+            list.add(req);
         }
         return list;
     }

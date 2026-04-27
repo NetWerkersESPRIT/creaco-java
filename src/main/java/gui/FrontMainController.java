@@ -36,18 +36,30 @@ public class FrontMainController {
     @FXML private VBox dashboardView;
     @FXML private javafx.scene.layout.HBox previewBanner;
     @FXML private Label txtWelcome;
+    @FXML private Label lblBreadcrumb;
 
     // Sidebar items
     @FXML private Label lblAdminHeader;
     @FXML private VBox boxAdmin;
     @FXML private HBox boxAdminActions;
+    @FXML private Button btnMyTeam;
+    @FXML private Button btnUserGroups;
 
     // User Profile in Navbar
     @FXML private Label lblUsername;
     @FXML private Label lblUserRole;
+    @FXML private javafx.scene.image.ImageView imgNavAvatar;
+    @FXML private Button btnNotifications;
+    @FXML private javafx.scene.layout.StackPane notifBadge;
+    @FXML private Label lblNotifCount;
+
+    private javafx.stage.Popup notificationPopup;
+
+    private static FrontMainController instance;
 
     @FXML
     private void initialize() {
+        instance = this;
         loadCourses();
 
         if (searchField != null) {
@@ -72,7 +84,9 @@ public class FrontMainController {
                 lblUserRole.setStyle("-fx-background-color: #434a75;"); // Dark theme for admin
             }
 
-            boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+            updateNavbarProfile();
+
+            boolean isAdmin = SessionManager.getInstance().isAdmin();
             lblAdminHeader.setVisible(isAdmin);
             lblAdminHeader.setManaged(isAdmin);
             boxAdmin.setVisible(isAdmin);
@@ -82,6 +96,66 @@ public class FrontMainController {
                 boxAdminActions.setVisible(isAdmin);
                 boxAdminActions.setManaged(isAdmin);
             }
+
+            boolean isContentCreator = SessionManager.getInstance().isContentCreator();
+            if (btnMyTeam != null) {
+                btnMyTeam.setVisible(isContentCreator);
+                btnMyTeam.setManaged(isContentCreator);
+            }
+
+            boolean isTeamMember = SessionManager.getInstance().isManager() || "ROLE_MEMBER".equals(user.getRole());
+            if (btnUserGroups != null) {
+                btnUserGroups.setVisible(isTeamMember);
+                btnUserGroups.setManaged(isTeamMember);
+            }
+
+            checkUnreadNotifications();
+        }
+    }
+
+    private void checkUnreadNotifications() {
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null && notifBadge != null) {
+            services.NotificationService ns = new services.NotificationService();
+            List<entities.Notification> notifications = ns.getNotificationsForUser(user.getId());
+            long unreadCount = notifications.stream().filter(n -> !n.isRead()).count();
+            
+            if (unreadCount > 0) {
+                lblNotifCount.setText(String.valueOf(unreadCount > 9 ? "9+" : unreadCount));
+                notifBadge.setVisible(true);
+            } else {
+                notifBadge.setVisible(false);
+            }
+        }
+    }
+
+    @FXML
+    private void onShowNotifications() {
+        if (notificationPopup != null && notificationPopup.isShowing()) {
+            notificationPopup.hide();
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/notification/notification_list.fxml"));
+            Parent root = loader.load();
+            gui.notification.NotificationListController controller = loader.getController();
+
+            notificationPopup = new javafx.stage.Popup();
+            notificationPopup.getContent().add(root);
+            notificationPopup.setAutoHide(true);
+
+            controller.setOnCloseCallback(() -> {
+                notificationPopup.hide();
+                checkUnreadNotifications();
+            });
+
+            // Position popup below the button
+            javafx.geometry.Bounds bounds = btnNotifications.localToScreen(btnNotifications.getBoundsInLocal());
+            notificationPopup.show(btnNotifications, bounds.getMinX() - 360, bounds.getMaxY() + 10);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -92,25 +166,85 @@ public class FrontMainController {
         }
     }
 
+    public static void refreshNavbar() {
+        if (instance != null) {
+            instance.updateNavbarProfile();
+        }
+    }
+
+    public static void setNavbarText(String title, String breadcrumb) {
+        if (instance != null) {
+            if (instance.txtWelcome != null) instance.txtWelcome.setText(title);
+            if (instance.lblBreadcrumb != null) instance.lblBreadcrumb.setText(breadcrumb);
+        }
+    }
+
+    private void updateNavbarProfile() {
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null && imgNavAvatar != null) {
+            String displayName = user.getUsername() != null ? user.getUsername() : "User";
+            lblUsername.setText(displayName);
+            String avatarUrl = user.getImage();
+            if (avatarUrl == null || avatarUrl.isEmpty()) {
+                avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + user.getUsername();
+            }
+            imgNavAvatar.setImage(new javafx.scene.image.Image(avatarUrl, true));
+        }
+    }
+
     @FXML
     private void onGoToDashboard() {
+        if (txtWelcome != null) txtWelcome.setText("Explore");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Dashboard");
         contentArea.getChildren().setAll(dashboardView);
     }
 
-    @FXML public void onShowIdeas() { loadSubView("/TSK/Idea.fxml"); }
+    @FXML public void onShowIdeas() { 
+        if (txtWelcome != null) txtWelcome.setText("Ideas Hub");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Ideas");
+        loadSubView("/TSK/Idea.fxml"); 
+    }
 
-    @FXML public void onShowMissions() { loadSubView("/TSK/Mission.fxml"); }
+    @FXML public void onShowMissions() { 
+        if (txtWelcome != null) txtWelcome.setText("Missions");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Missions");
+        loadSubView("/TSK/Mission.fxml"); 
+    }
 
-    @FXML public void onShowTasks() { loadSubView("/TSK/Tasks.fxml"); }
+    @FXML public void onShowTasks() { 
+        if (txtWelcome != null) txtWelcome.setText("Tasks");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Tasks");
+        loadSubView("/TSK/Tasks.fxml"); 
+    }
 
-    @FXML public void onShowEvents() { System.out.println("Events section - Coming soon"); }
+    @FXML public void onShowEvents() { 
+        if (txtWelcome != null) txtWelcome.setText("Events");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Events");
+        System.out.println("Events section - Coming soon"); 
+    }
 
-    @FXML public void onShowConnectedUsers() { loadSubView("/Users/Admin.fxml"); }
+    @FXML public void onShowConnectedUsers() { 
+        if (txtWelcome != null) txtWelcome.setText("User Management");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Admin / Users");
+        loadSubView("/Users/Admin.fxml"); 
+    }
 
-    @FXML public void onShowPostModeration() { loadSubView("/post/postModeration.fxml"); }
+    @FXML public void onShowPostModeration() { 
+        if (txtWelcome != null) txtWelcome.setText("Post Moderation");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Admin / Forum");
+        loadSubView("/post/postModeration.fxml"); 
+    }
+
+    @FXML public void onShowForumStats() {
+        if (txtWelcome != null) txtWelcome.setText("Forum Analytics");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Admin / Analytics");
+        loadSubView("/post/forumStats.fxml");
+    }
 
     @FXML
     public void onShowForum() {
+        if (txtWelcome != null) txtWelcome.setText("Forum");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Forum");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
             Parent root = loader.load();
@@ -125,10 +259,35 @@ public class FrontMainController {
         }
     }
 
-    @FXML public void onShowCollaborations() { loadSubView("/gui/collab/collab_dashboard.fxml"); }
+    @FXML public void onShowCollaborations() { 
+        if (txtWelcome != null) txtWelcome.setText("Collaborations Hub");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Collaborations");
+        
+        if (SessionManager.getInstance().isAdmin()) {
+            loadSubView("/gui/collab/admin/dashboard.fxml");
+        } else if (SessionManager.getInstance().isManager()) {
+            loadSubView("/gui/collab/manager/dashboard.fxml");
+        } else {
+            loadSubView("/gui/collab/collab_dashboard.fxml");
+        }
+    }
+
+    @FXML public void onShowMyTeam() {
+        if (txtWelcome != null) txtWelcome.setText("Manage Team");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Team Management");
+        loadSubView("/Users/GroupManagement.fxml");
+    }
+
+    @FXML public void onShowUserGroups() {
+        if (txtWelcome != null) txtWelcome.setText("My Teams");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Joined Teams");
+        loadSubView("/Users/UserGroupsDashboard.fxml");
+    }
 
     @FXML
-    public void onShowCourses() { onGoToDashboard(); }
+    public void onShowCourses() { 
+        onGoToDashboard(); 
+    }
 
     @FXML
     private void onManageCategories() {
@@ -308,6 +467,8 @@ public class FrontMainController {
 
     @FXML
     private void onOpenProfile(javafx.scene.input.MouseEvent event) {
+        if (txtWelcome != null) txtWelcome.setText("Edit Profile");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Profile");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Profile.fxml"));
             Parent root = loader.load();

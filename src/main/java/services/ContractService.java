@@ -145,4 +145,38 @@ public class ContractService {
         }
         return list;
     }
+
+    public Contract getByRequestId(int requestId) throws SQLException {
+        String sql = "SELECT * FROM contract WHERE collab_request_id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, requestId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return new Contract(
+                    rs.getInt("id"),
+                    rs.getString("contract_number"),
+                    rs.getString("title"),
+                    rs.getDate("start_date"),
+                    rs.getDate("end_date"),
+                    rs.getBigDecimal("amount"),
+                    rs.getString("pdf_path"),
+                    rs.getString("status"),
+                    rs.getBoolean("signed_by_creator"),
+                    rs.getBoolean("signed_by_collaborator"),
+                    rs.getTimestamp("creator_signature_date"),
+                    rs.getTimestamp("collaborator_signature_date"),
+                    rs.getString("terms"),
+                    rs.getString("payment_schedule"),
+                    rs.getString("confidentiality_clause"),
+                    rs.getString("cancellation_terms"),
+                    rs.getString("signature_token"),
+                    rs.getTimestamp("created_at"),
+                    rs.getTimestamp("sent_at"),
+                    rs.getInt("collab_request_id"),
+                    rs.getObject("creator_id") != null ? rs.getInt("creator_id") : null,
+                    rs.getInt("collaborator_id")
+            );
+        }
+        return null;
+    }
 }

@@ -13,6 +13,7 @@ public class CollabDashboardController {
     @FXML private Button btnPartners;
     @FXML private Button btnRequests;
     @FXML private Button btnContracts;
+    @FXML private javafx.scene.control.Label bannerTitle;
 
     @FXML
     public void initialize() {
@@ -22,6 +23,7 @@ public class CollabDashboardController {
     @FXML
     private void showPartners() {
         setActiveTab(btnPartners);
+        if (bannerTitle != null) bannerTitle.setText("Strategic Partners Network");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/partner/displayPartner.fxml"));
             Parent root = loader.load();
@@ -101,6 +103,7 @@ public class CollabDashboardController {
     @FXML
     private void showRequests() {
         setActiveTab(btnRequests);
+        if (bannerTitle != null) bannerTitle.setText("Collaboration Request Pipeline");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/request/displayRequest.fxml"));
             Parent root = loader.load();
@@ -113,6 +116,29 @@ public class CollabDashboardController {
             controller.setOnEditRequested(req -> {
                 showEditRequestForm(req);
             });
+            
+            controller.setOnViewRequested(req -> {
+                showRequestDetails(req);
+            });
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showRequestDetails(entities.CollabRequest req) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/request/viewRequest.fxml"));
+            Parent root = loader.load();
+            gui.collab.request.ViewRequestController controller = loader.getController();
+            
+            controller.setRequest(req);
+            controller.setCallbacks(
+                    () -> showRequests(),
+                    partner -> showPartnerDetails(partner),
+                    contract -> showContractConsultation(contract)
+            );
             
             contentArea.getChildren().setAll(root);
         } catch (IOException e) {
@@ -154,6 +180,7 @@ public class CollabDashboardController {
     @FXML
     private void showContracts() {
         setActiveTab(btnContracts);
+        if (bannerTitle != null) bannerTitle.setText("My Collaboration Contracts");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/contract/displayContract.fxml"));
             Parent root = loader.load();
