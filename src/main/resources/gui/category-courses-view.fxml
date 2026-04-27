@@ -35,7 +35,6 @@
                             <children>
                                 <TextField fx:id="searchField" promptText=" Search a course..." styleClass="search-bar" prefWidth="240.0" />
                                 <Button mnemonicParsing="false" onAction="#onAddCourse" prefHeight="44.0" styleClass="btn-primary" text="+ Add course" />
-                                <Button text="Back" onAction="#onBackToCategories" styleClass="btn-secondary" prefHeight="44.0" />
                             </children>
                         </HBox>
                     </children>
@@ -45,9 +44,7 @@
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="TITLE" />
                         <Region prefWidth="260.0" />
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="DESCRIPTION" />
-                        <Region prefWidth="360.0" />
-                        <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="VIEWS" />
-                        <Region prefWidth="40.0" />
+                        <Region prefWidth="380.0" />
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="CREATED AT" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="ACTIONS" />

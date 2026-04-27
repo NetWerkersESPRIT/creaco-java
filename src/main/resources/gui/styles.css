@@ -221,6 +221,7 @@
 .btn-action-dark {
     -fx-background-color: #2d3748;
     -fx-text-fill: white;
+    -fx-icon-color: white;
 }
 
 .btn-action-light {
@@ -425,20 +426,75 @@
     -fx-translate-y: 1;
 }
 
-/* Simple Combo Style */
-.combo-simple {
+
+/* Modern Minimalist Inputs */
+.combo-box, .text-field {
     -fx-background-color: #f8fafc;
-    -fx-background-radius: 10;
-    -fx-border-color: transparent;
-    -fx-border-radius: 10;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 6 10;
+    -fx-text-fill: #1e293b;
+    -fx-font-size: 12px;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.combo-box:hover, .text-field:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #cbd5e1;
+}
+
+.combo-box:focused, .text-field:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: -fx-primary-pink;
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.1), 10, 0, 0, 0);
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #1e293b;
+    -fx-padding: 5 10;
+}
+
+/* HTMLEditor Modern Styling */
+.html-editor {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-border-width: 1;
+}
+
+.html-editor .top-toolbar, .html-editor .bottom-toolbar {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
     -fx-padding: 5;
 }
 
-.combo-simple:hover {
-    -fx-background-color: #f1f5f9;
+.html-editor .bottom-toolbar {
+    -fx-border-color: #e2e8f0 transparent transparent transparent;
 }
 
-.combo-simple:focused {
+.html-editor .button, .html-editor .toggle-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-padding: 4 8;
+    -fx-cursor: hand;
+}
+
+.html-editor .button:hover, .html-editor .toggle-button:hover {
     -fx-background-color: #edf2f7;
+}
+
+.html-editor .button:selected, .html-editor .toggle-button:selected {
+    -fx-background-color: #e2e8f0;
     -fx-border-color: #cbd5e1;
+}
+
+.html-editor .combo-box {
+    -fx-background-color: white;
+    -fx-padding: 2 5;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-font-size: 11px;
 }

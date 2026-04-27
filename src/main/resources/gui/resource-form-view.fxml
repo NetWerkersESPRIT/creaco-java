@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.HTMLEditor?>
 
 
 <BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
@@ -74,7 +75,7 @@
                                         <Button fx:id="btnParaphrase" onAction="#onParaphrase" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-font-size: 11px;" text="✨ Paraphrase with AI" />
                                     </children>
                                 </HBox>
-                                <StackPane fx:id="contentContainer" prefHeight="220.0" style="-fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: white;" />
+                                <HTMLEditor fx:id="contentEditor" prefHeight="350.0" style="-fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10;" />
                             </children>
                         </VBox>
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">

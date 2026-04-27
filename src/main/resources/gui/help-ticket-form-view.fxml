@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.web.HTMLEditor?>
 
 <VBox alignment="CENTER" spacing="22.0" style="-fx-background-color: transparent;" 
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
@@ -59,8 +60,7 @@
                         <VBox spacing="10.0" alignment="TOP_LEFT">
                             <children>
                                 <Label text="Message" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
-                                <TextArea fx:id="messageArea" prefHeight="200.0" promptText="Explain your problem in detail..." 
-                                          styleClass="search-bar" wrapText="true" />
+                                <HTMLEditor fx:id="messageEditor" prefHeight="200.0" />
                             </children>
                         </VBox>
 

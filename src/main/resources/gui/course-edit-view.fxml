@@ -16,6 +16,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.HTMLEditor?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -27,15 +29,19 @@
         <ToggleGroup fx:id="statusToggleGroup" />
     </fx:define>
     <center>
-        <VBox alignment="TOP_CENTER" spacing="24.0" BorderPane.alignment="CENTER">
+        <VBox alignment="TOP_CENTER" spacing="18.0" BorderPane.alignment="CENTER">
             <padding>
-                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+                <Insets bottom="20.0" left="24.0" right="24.0" top="20.0" />
             </padding>
             <children>
                 <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10">
-                            <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
+                            <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-padding: 8 12; -fx-background-radius: 12;">
+                                <graphic>
+                                    <FontIcon iconLiteral="fas-arrow-left" iconSize="18" />
+                                </graphic>
+                            </Button>
                             <VBox>
                                 <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Edit" />
                                 <Label fx:id="titleLabel" styleClass="title-label" text="Add Course" />
@@ -45,19 +51,19 @@
                         <Region HBox.hgrow="ALWAYS" />
                         <HBox alignment="CENTER" spacing="10.0">
                              <Button onAction="#logout" styleClass="btn-logout">
-                                <graphic>
-                                    <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
-                                </graphic>
+                                 <graphic>
+                                     <FontIcon iconLiteral="fas-sign-out-alt" iconSize="16" iconColor="white" />
+                                 </graphic>
                              </Button>
                         </HBox>
                     </children>
                 </HBox>
-                <VBox maxWidth="860.0" spacing="22.0" styleClass="card">
+                <VBox maxWidth="860.0" spacing="18.0" styleClass="card">
                     <padding>
-                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                        <Insets bottom="22.0" left="25.0" right="25.0" top="22.0" />
                     </padding>
                     <children>
-                        <GridPane hgap="18.0" vgap="18.0">
+                        <GridPane hgap="15.0" vgap="12.0">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
                                 <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
@@ -105,20 +111,24 @@
                                 </VBox>
                             </children>
                         </GridPane>
-                        <VBox spacing="15.0" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15;">
+                        <VBox spacing="10.0" style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12;">
                             <children>
                                 <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Course Image" />
                                 <HBox spacing="20.0" alignment="CENTER_LEFT">
                                     <children>
-                                        <StackPane style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-overflow: hidden;" minWidth="160" minHeight="100" maxWidth="160" maxHeight="100">
+                                        <StackPane style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-overflow: hidden;" minWidth="120" minHeight="75" maxWidth="120" maxHeight="75">
                                             <children>
-                                                <javafx.scene.image.ImageView fx:id="imagePreview" fitWidth="160" fitHeight="100" preserveRatio="true" />
+                                                <javafx.scene.image.ImageView fx:id="imagePreview" fitWidth="120" fitHeight="75" preserveRatio="true" />
                                                 <Label fx:id="noImageLabel" text="No Image" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" />
                                             </children>
                                         </StackPane>
                                         <VBox spacing="10.0">
                                             <children>
-                                                <Button onAction="#onUploadImage" styleClass="btn-action-light" text="📁 Choose Image" />
+                                                 <Button onAction="#onUploadImage" styleClass="btn-action-light" text="Choose Image">
+                                                     <graphic>
+                                                         <FontIcon iconLiteral="fas-folder-open" iconSize="13" />
+                                                     </graphic>
+                                                 </Button>
                                                 <Label style="-fx-text-fill: #64748b; -fx-font-size: 11px;" text="Recommended: 800x500px (JPG, PNG)" />
                                                 <TextField fx:id="imagePathField" editable="false" promptText="No file selected" style="-fx-font-size: 10px; -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;" />
                                             </children>
@@ -130,7 +140,7 @@
                         <VBox spacing="8.0">
                             <children>
                                 <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Description" />
-                                <StackPane fx:id="descriptionContainer" prefHeight="120.0" style="-fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: white;" />
+                                <HTMLEditor fx:id="descriptionEditor" prefHeight="220.0" />
                             </children>
                         </VBox>
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">

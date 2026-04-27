@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 import services.CourseService;
 import services.HelpTicketService;
@@ -25,7 +26,7 @@ public class HelpTicketFormController {
     @FXML private TextField subjectField;
     @FXML private ComboBox<Course> courseComboBox;
     @FXML private ComboBox<String> priorityComboBox;
-    @FXML private TextArea messageArea;
+    @FXML private HTMLEditor messageEditor;
 
     private final HelpTicketService ticketService = new HelpTicketService();
     private final CourseService courseService = new CourseService();
@@ -67,7 +68,7 @@ public class HelpTicketFormController {
         if (t != null) {
             formTitle.setText("Edit Help Request");
             subjectField.setText(t.getSubject());
-            messageArea.setText(t.getMessage());
+            messageEditor.setHtmlText(t.getMessage());
             priorityComboBox.setValue(t.getPriority());
             
             if (t.getCourseId() != null) {
@@ -84,7 +85,7 @@ public class HelpTicketFormController {
     @FXML
     private void handleSave(ActionEvent event) {
         String subject = subjectField.getText().trim();
-        String message = messageArea.getText().trim();
+        String message = messageEditor.getHtmlText();
         String priority = priorityComboBox.getValue();
         Course selectedCourse = courseComboBox.getValue();
 

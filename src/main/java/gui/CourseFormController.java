@@ -11,11 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import org.fxmisc.richtext.InlineCssTextArea;
-import org.fxmisc.flowless.VirtualizedScrollPane;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 import services.CourseService;
 
@@ -73,10 +69,7 @@ public class CourseFormController {
     private Label durationErrorLabel;
 
     @FXML
-    private InlineCssTextArea descriptionArea;
-
-    @FXML
-    private StackPane descriptionContainer;
+    private HTMLEditor descriptionEditor;
 
     @FXML
     private javafx.scene.image.ImageView imagePreview;
@@ -107,14 +100,6 @@ public class CourseFormController {
 
     @FXML
     private void initialize() {
-        if (descriptionContainer != null) {
-            descriptionArea = new InlineCssTextArea();
-            descriptionArea.setStyle("-fx-font-family: 'Inter'; -fx-font-size: 13px;");
-            VirtualizedScrollPane<InlineCssTextArea> vsPane = new VirtualizedScrollPane<>(descriptionArea);
-            descriptionContainer.getChildren().add(vsPane);
-            VBox.setVgrow(descriptionContainer, Priority.ALWAYS);
-        }
-
         setupLevelCombo();
         try {
             loadCategories();
@@ -140,7 +125,7 @@ public class CourseFormController {
         Course target = creating ? new Course() : course;
 
         target.setTitre(titleField.getText().trim());
-        target.setDescription(descriptionArea.getText().trim());
+        target.setDescription(descriptionEditor.getHtmlText());
         target.setStatut(publishedRadio.isSelected() ? "Published" : "Draft");
         target.setNiveau(levelCombo.getValue());
         target.setDateDeModification(LocalDateTime.now().toString());
@@ -347,14 +332,14 @@ public class CourseFormController {
             publishedRadio.setSelected(true);
             levelCombo.setValue(null);           // Shows prompt text "Select level"
             durationField.clear();
-            descriptionArea.replaceText("");
+            descriptionEditor.setHtmlText("");
             titleField.clear();
             return;
         }
 
         // Editing existing course
         titleField.setText(course.getTitre() != null ? course.getTitre() : "");
-        descriptionArea.replaceText(course.getDescription() != null ? course.getDescription() : "");
+        descriptionEditor.setHtmlText(course.getDescription() != null ? course.getDescription() : "");
 
         // Set category
         String selectedCategory = categoryNameToId.entrySet().stream()

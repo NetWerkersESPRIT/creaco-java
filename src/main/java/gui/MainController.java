@@ -180,7 +180,7 @@ public class MainController {
     @FXML
     private void onAddCourse() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/create-course-form.fxml"));
             Parent root = loader.load();
             CourseFormController controller = loader.getController();
             controller.setCourse(null);

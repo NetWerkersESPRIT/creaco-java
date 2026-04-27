@@ -10,12 +10,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
 import services.CourseService;
 
 import java.io.IOException;
@@ -114,8 +116,27 @@ public class CategoryCoursesController {
 
         StackPane iconBox = new StackPane();
         iconBox.getStyleClass().add("sidebar-icon-box");
-        Label iconLabel = new Label("C");
-        iconBox.getChildren().add(iconLabel);
+        iconBox.setMinWidth(42);
+        iconBox.setMaxWidth(42);
+        iconBox.setMinHeight(42);
+        iconBox.setMaxHeight(42);
+
+        javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView();
+        imageView.setFitWidth(32);
+        imageView.setFitHeight(32);
+        imageView.setPreserveRatio(true);
+
+        String imagePath = course.getImage();
+        if (imagePath != null && !imagePath.isBlank()) {
+            try {
+                imageView.setImage(new javafx.scene.image.Image(imagePath, true));
+            } catch (Exception e) {
+                iconBox.getChildren().add(new Label("C"));
+            }
+        } else {
+            iconBox.getChildren().add(new Label("C"));
+        }
+        iconBox.getChildren().add(imageView);
 
         Label title = new Label(safeText(course.getTitre()));
         title.setMinWidth(240);
@@ -127,10 +148,6 @@ public class CategoryCoursesController {
         description.setWrapText(true);
         description.getStyleClass().add("card-subtitle");
 
-        Label views = new Label(String.valueOf(course.getViews() == null ? 0 : course.getViews()));
-        views.setMinWidth(70);
-        views.getStyleClass().add("card-title");
-        views.setStyle("-fx-font-size: 15px;");
 
         Label createdAt = new Label(formatDate(course.getDateDeCreation()));
         createdAt.setMinWidth(140);
@@ -141,9 +158,11 @@ public class CategoryCoursesController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actions = new HBox(10);
-        Button resourcesButton = createActionButton("Resources", "btn-action-dark");
-        Button editButton = createActionButton("Edit", "btn-action-dark");
-        Button deleteButton = createActionButton("Delete", "btn-action-light");
+        Button resourcesButton = createIconButton("fas-layer-group", "btn-action-dark");
+        Button editButton = createIconButton("fas-edit", "btn-action-dark");
+        Button deleteButton = createIconButton("fas-trash-alt", "btn-action-light");
+        
+        deleteButton.setStyle("-fx-text-fill: #ef4444;");
 
         resourcesButton.setOnAction(event -> openResources(course, row));
         editButton.setOnAction(event -> openEditForm(course, row));
@@ -163,14 +182,28 @@ public class CategoryCoursesController {
         });
 
         actions.getChildren().addAll(resourcesButton, editButton, deleteButton);
-        row.getChildren().addAll(iconBox, title, description, views, createdAt, spacer, actions);
+        row.getChildren().addAll(iconBox, title, description, createdAt, spacer, actions);
         return row;
+    }
+
+    private Button createIconButton(String iconCode, String colorClass) {
+        Button button = new Button();
+        FontIcon icon = new FontIcon(iconCode);
+        icon.setIconSize(18);
+        
+        if ("btn-action-dark".equals(colorClass)) {
+            icon.setIconColor(Color.WHITE);
+        }
+        
+        button.setGraphic(icon);
+        button.getStyleClass().addAll("btn-action", colorClass);
+        button.setPadding(new Insets(5, 10, 5, 10));
+        return button;
     }
 
     private Button createActionButton(String text, String colorClass) {
         Button button = new Button(text);
         button.getStyleClass().addAll("btn-action", colorClass);
-        button.setMinWidth(90);
         return button;
     }
 

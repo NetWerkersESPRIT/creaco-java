@@ -8,11 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.InlineCssTextArea;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 import services.RessourceService;
 
@@ -53,20 +49,10 @@ public class RessourceFormController {
     private Label urlErrorLabel;
 
     @FXML
-    private InlineCssTextArea contentArea;
-
-    @FXML
-    private StackPane contentContainer;
+    private HTMLEditor contentEditor;
 
     @FXML
     public void initialize() {
-        if (contentContainer != null) {
-            contentArea = new InlineCssTextArea();
-            contentArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 13px;");
-            VirtualizedScrollPane<InlineCssTextArea> vsPane = new VirtualizedScrollPane<>(contentArea);
-            contentContainer.getChildren().add(vsPane);
-            VBox.setVgrow(contentContainer, Priority.ALWAYS);
-        }
     }
 
     @FXML
@@ -105,14 +91,14 @@ public class RessourceFormController {
 
     @FXML
     private void onParaphrase() {
-        String content = contentArea.getText();
-        if (content == null || content.isBlank()) {
+        String content = contentEditor.getHtmlText();
+        if (content == null || content.isBlank() || content.equals("<html dir=\"ltr\"><head></head><body contenteditable=\"true\"></body></html>")) {
             AlertHelper.showError("Input Required", "Please enter some content to paraphrase first.");
             return;
         }
 
         // Disable button to show work in progress
-        contentArea.setDisable(true);
+        contentEditor.setDisable(true);
         String originalText = btnParaphrase.getText();
         btnParaphrase.setText("✨ Processing...");
         btnParaphrase.setDisable(true);
@@ -123,11 +109,11 @@ public class RessourceFormController {
             
             javafx.application.Platform.runLater(() -> {
                 if (response != null && !response.startsWith("API Error") && !response.startsWith("Failed to connect") && !response.startsWith("Error:")) {
-                    contentArea.replaceText(response.trim());
+                    contentEditor.setHtmlText(response.trim());
                 } else {
                     AlertHelper.showError("AI Error", "Failed to paraphrase content: " + response);
                 }
-                contentArea.setDisable(false);
+                contentEditor.setDisable(false);
                 btnParaphrase.setText(originalText);
                 btnParaphrase.setDisable(false);
             });
@@ -164,7 +150,7 @@ public class RessourceFormController {
 
         target.setNom(nameField.getText().trim());
         target.setType("File");
-        target.setContenu(contentArea.getText());
+        target.setContenu(contentEditor.getHtmlText());
         target.setCourseId(course.getId());
 
         if (!editing) {
@@ -187,7 +173,7 @@ public class RessourceFormController {
     private void populateForm() {
         nameField.setText(ressource.getNom() != null ? ressource.getNom() : "");
         urlField.setText(ressource.getUrl() != null ? ressource.getUrl() : "");
-        contentArea.replaceText(ressource.getContenu() != null ? ressource.getContenu() : "");
+        contentEditor.setHtmlText(ressource.getContenu() != null ? ressource.getContenu() : "");
     }
 
     private boolean validateForm() {
