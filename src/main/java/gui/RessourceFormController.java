@@ -7,8 +7,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.InlineCssTextArea;
 import javafx.stage.Stage;
 import services.RessourceService;
 
@@ -49,7 +53,21 @@ public class RessourceFormController {
     private Label urlErrorLabel;
 
     @FXML
-    private TextArea contentArea;
+    private InlineCssTextArea contentArea;
+
+    @FXML
+    private StackPane contentContainer;
+
+    @FXML
+    public void initialize() {
+        if (contentContainer != null) {
+            contentArea = new InlineCssTextArea();
+            contentArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 13px;");
+            VirtualizedScrollPane<InlineCssTextArea> vsPane = new VirtualizedScrollPane<>(contentArea);
+            contentContainer.getChildren().add(vsPane);
+            VBox.setVgrow(contentContainer, Priority.ALWAYS);
+        }
+    }
 
     @FXML
     private javafx.scene.control.Button btnParaphrase;
@@ -105,7 +123,7 @@ public class RessourceFormController {
             
             javafx.application.Platform.runLater(() -> {
                 if (response != null && !response.startsWith("API Error") && !response.startsWith("Failed to connect") && !response.startsWith("Error:")) {
-                    contentArea.setText(response.trim());
+                    contentArea.replaceText(response.trim());
                 } else {
                     AlertHelper.showError("AI Error", "Failed to paraphrase content: " + response);
                 }
@@ -169,7 +187,7 @@ public class RessourceFormController {
     private void populateForm() {
         nameField.setText(ressource.getNom() != null ? ressource.getNom() : "");
         urlField.setText(ressource.getUrl() != null ? ressource.getUrl() : "");
-        contentArea.setText(ressource.getContenu() != null ? ressource.getContenu() : "");
+        contentArea.replaceText(ressource.getContenu() != null ? ressource.getContenu() : "");
     }
 
     private boolean validateForm() {

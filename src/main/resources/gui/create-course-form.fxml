@@ -5,14 +5,12 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -37,9 +35,9 @@
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
                             <VBox>
-                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Edit" />
-                                <Label fx:id="titleLabel" styleClass="title-label" text="Add Course" />
-                                <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a new course." />
+                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / New" />
+                                <Label fx:id="titleLabel" styleClass="title-label" text="Create New Course" />
+                                <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Fill in the details to launch your new course." />
                             </VBox>
                         </HBox>
                         <Region HBox.hgrow="ALWAYS" />
@@ -66,14 +64,14 @@
                                 <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Title *" />
-                                        <TextField fx:id="titleField" promptText="Course title" />
+                                        <TextField fx:id="titleField" promptText="Enter course title" />
                                         <Label fx:id="titleErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Category *" />
-                                        <ComboBox fx:id="categoryCombo" promptText="Select category" />
+                                        <ComboBox fx:id="categoryCombo" promptText="Select category" prefWidth="400" />
                                         <Label fx:id="categoryErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
@@ -92,19 +90,20 @@
                                 <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Level *" />
-                                        <ComboBox fx:id="levelCombo" promptText="Select level" />
+                                        <ComboBox fx:id="levelCombo" promptText="Select level" prefWidth="400" />
                                         <Label fx:id="levelErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Estimated duration (min)" />
-                                        <TextField fx:id="durationField" promptText="25" />
+                                        <TextField fx:id="durationField" promptText="e.g., 45" />
                                         <Label fx:id="durationErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
                             </children>
                         </GridPane>
+                        
                         <VBox spacing="15.0" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15;">
                             <children>
                                 <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Course Image" />
@@ -127,17 +126,20 @@
                                 </HBox>
                             </children>
                         </VBox>
-                        <VBox spacing="8.0">
+
+                        <VBox spacing="8.0" VBox.vgrow="ALWAYS">
                             <children>
                                 <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Description" />
-                                <StackPane fx:id="descriptionContainer" prefHeight="120.0" style="-fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: white;" />
+                                <!-- Placeholder for RichTextFX InlineCssTextArea to avoid FXML LoadException -->
+                                <StackPane fx:id="descriptionContainer" prefHeight="200.0" style="-fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: white;" />
                             </children>
                         </VBox>
+
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">
                             <children>
                                 <Button mnemonicParsing="false" onAction="#onSave"
-                                        styleClass="btn-primary" prefWidth="150" prefHeight="40"
-                                        text="Save course" />
+                                        styleClass="btn-primary" prefWidth="180" prefHeight="45"
+                                        text="Launch Course" />
                             </children>
                         </HBox>
                     </children>
