@@ -195,6 +195,22 @@ public class RessourceListController {
 
     private void openRessource(Ressource ressource) {
         try {
+            // Update progress when a resource is opened
+            utils.SessionManager session = utils.SessionManager.getInstance();
+            entities.Users currentUser = session != null ? session.getCurrentUser() : null;
+            if (currentUser != null && course != null) {
+                try {
+                    services.UserCourseProgressService ps = new services.UserCourseProgressService();
+                    double currentProgress = ps.getProgress(currentUser.getId(), course.getId());
+                    if (currentProgress < 1.0) {
+                        double newProgress = Math.min(1.0, currentProgress + 0.20);
+                        ps.setProgress(currentUser.getId(), course.getId(), newProgress);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
             if (ressource.getUrl() != null && !ressource.getUrl().isBlank() && Desktop.isDesktopSupported()) {
                 Desktop.getDesktop().browse(URI.create(ressource.getUrl()));
                 statusLabel.setText("Opened resource: " + ressource.getNom());
@@ -224,8 +240,9 @@ public class RessourceListController {
                 Stage stage = (Stage) titleLabel.getScene().getWindow();
                 stage.getScene().setRoot(root);
             }
-        } catch (IOException exception) {
-            throw new IllegalStateException("Unable to open view: " + fxmlPath, exception);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            AlertHelper.showError("Navigation Error", "Unable to open view: " + exception.getMessage());
         }
     }
 

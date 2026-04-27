@@ -28,7 +28,7 @@
                             <children>
                                 <VBox>
                                     <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Courses" />
-                                    <Label styleClass="title-label" text="Management Hub" style="-fx-font-size: 20px;"/>
+                                    <Label styleClass="title-label" text="Content Creator Hub" style="-fx-font-size: 20px;"/>
                                 </VBox>
                                 <Region HBox.hgrow="ALWAYS" />
                                 <HBox spacing="15.0" alignment="CENTER_LEFT">
@@ -44,11 +44,27 @@
                         </HBox>
 
                         <!-- MIDDLE: Course Workshops Grid -->
-                        <VBox spacing="20">
+                        <VBox spacing="10">
                             <Label text="Course Workshops" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
-                            <FlowPane fx:id="coursesContainer" hgap="24.0" vgap="24.0" prefWrapLength="1000">
-                                <!-- Course cards will be added here as a grid -->
-                            </FlowPane>
+                            <ScrollPane fitToHeight="true" vbarPolicy="NEVER" hbarPolicy="AS_NEEDED" style="-fx-background: transparent; -fx-background-color: transparent;">
+                                <content>
+                                    <HBox fx:id="coursesContainer" spacing="24.0" style="-fx-padding: 10 5;">
+                                        <!-- Course cards will be added here horizontally -->
+                                    </HBox>
+                                </content>
+                            </ScrollPane>
+                        </VBox>
+
+                        <!-- BOTTOM: Help Desk Section -->
+                        <VBox spacing="20">
+                            <HBox alignment="CENTER_LEFT" spacing="20">
+                                <Label text="Help Desk" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Button text="+ New Question" onAction="#onSendQuestion" styleClass="btn-primary" prefHeight="40.0" />
+                            </HBox>
+                            <VBox fx:id="questionsContainer" spacing="15.0">
+                                <!-- Question cards will be added here -->
+                            </VBox>
                         </VBox>
                     </children>
                 </VBox>

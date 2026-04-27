@@ -39,9 +39,9 @@
                                     <Label fx:id="lblBreadcrumb" style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Dashboard" />
                                     <Label fx:id="txtWelcome" styleClass="title-label" text="Explore" style="-fx-font-size: 20px;"/>
                                 </VBox>
-                                
+
                                 <Region HBox.hgrow="ALWAYS" />
-                                
+
                                 <Button style="-fx-background-color: white; -fx-background-radius: 12; -fx-min-width: 40; -fx-min-height: 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);">
                                     <graphic>
                                         <Label text="🔔" style="-fx-font-size: 16px;" />

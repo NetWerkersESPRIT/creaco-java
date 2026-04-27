@@ -34,7 +34,7 @@ public class CoursesController {
     private Map<Integer, String> categoryNames = Collections.emptyMap();
     private List<Node> allCourseCards = new ArrayList<>();
 
-    @FXML private FlowPane coursesContainer;
+    @FXML private Pane coursesContainer;
     @FXML private VBox questionsContainer;
     @FXML private TextField searchField;
     @FXML private HBox boxAdminActions;
@@ -180,6 +180,31 @@ public class CoursesController {
         descriptionLabel.setMaxHeight(40);
         descriptionLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
         
+        // Progress Bar
+        Users currentUser = SessionManager.getInstance().getCurrentUser();
+        double progressVal = 0.0;
+        if (currentUser != null) {
+            try {
+                services.UserCourseProgressService ps = new services.UserCourseProgressService();
+                progressVal = ps.getProgress(currentUser.getId(), course.getId());
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+
+        VBox progressBox = new VBox(5);
+        Label progressLabel = new Label("Progress: " + (int)(progressVal * 100) + "%");
+        progressLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;");
+        ProgressBar progressBar = new ProgressBar(0.0);
+        progressBar.setPrefWidth(Double.MAX_VALUE);
+        progressBar.setStyle("-fx-accent: -fx-primary-pink;");
+        progressBox.getChildren().addAll(progressLabel, progressBar);
+
+        // Animate progress on load
+        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+            new javafx.animation.KeyFrame(javafx.util.Duration.ZERO, new javafx.animation.KeyValue(progressBar.progressProperty(), 0)),
+            new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1), new javafx.animation.KeyValue(progressBar.progressProperty(), progressVal))
+        );
+        timeline.play();
+        
         HBox footer = new HBox(10);
         footer.setAlignment(Pos.CENTER_LEFT);
         
@@ -219,7 +244,7 @@ public class CoursesController {
         interactionBox.getChildren().addAll(likeBtn, dislikeBtn);
         footer.getChildren().addAll(exploreLink, spacer, interactionBox);
 
-        infoBox.getChildren().addAll(titleBox, descriptionLabel, footer);
+        infoBox.getChildren().addAll(titleBox, descriptionLabel, progressBox, footer);
         card.getChildren().addAll(visualContainer, infoBox);
         
         card.setCursor(javafx.scene.Cursor.HAND);
@@ -230,25 +255,19 @@ public class CoursesController {
 
     private void openCourse(Course course) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resource-list-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
             Parent root = loader.load();
+            FrontResourceController controller = loader.getController();
+            controller.setCourse(course);
+            
             if (FrontMainController.isPreviewModeActive()) {
-                FXMLLoader previewLoader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
-                Parent previewRoot = previewLoader.load();
-                FrontResourceController controller = previewLoader.getController();
-                controller.setCourse(course);
                 controller.setPreviewMode(true);
-                
-                if (previewRoot instanceof BorderPane) {
-                    FrontMainController.loadContent(((BorderPane) previewRoot).getCenter());
-                } else {
-                    FrontMainController.loadContent(previewRoot);
-                }
+            }
+            
+            if (root instanceof BorderPane) {
+                FrontMainController.loadContent(((BorderPane) root).getCenter());
             } else {
-                RessourceListController controller = loader.getController();
-                controller.setCourse(course);
-                Stage stage = (Stage) coursesContainer.getScene().getWindow();
-                stage.getScene().setRoot(root);
+                FrontMainController.loadContent(root);
             }
         } catch (IOException e) { e.printStackTrace(); }
     }

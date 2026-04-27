@@ -105,10 +105,10 @@ public class RessourceFormController {
     }
 
     private void populateForm() {
-        nameField.setText(ressource.getNom());
-        typeField.setText(ressource.getType());
-        urlField.setText(ressource.getUrl());
-        contentArea.setText(ressource.getContenu());
+        nameField.setText(ressource.getNom() != null ? ressource.getNom() : "");
+        typeField.setText(ressource.getType() != null ? ressource.getType() : "");
+        urlField.setText(ressource.getUrl() != null ? ressource.getUrl() : "");
+        contentArea.setText(ressource.getContenu() != null ? ressource.getContenu() : "");
     }
 
     private boolean validateForm() {
