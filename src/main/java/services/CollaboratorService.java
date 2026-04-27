@@ -8,86 +8,107 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CollaboratorService {
-
-    private Connection connection;
+    private Connection con;
 
     public CollaboratorService() {
-        connection = MyConnection.getInstance().getConnection();
+        con = MyConnection.getInstance().getConnection();
     }
 
-    public void insert(Collaborator collaborator) throws SQLException {
-        String query = "INSERT INTO collaborator (name, companyName, email, phone, address, website, domain, description, logo, isPublic, status, addedByUserId, createdAt) " +
+    public void ajouter(Collaborator collaborator) throws SQLException {
+        String sql = "INSERT INTO `collaborator`(`name`, `company_name`, `email`, `phone`, `address`, `website`, `domain`, `description`, `logo`, `is_public`, `status`, `created_at`, `added_by_user_id`) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, collaborator.getName());
-            preparedStatement.setString(2, collaborator.getCompanyName());
-            preparedStatement.setString(3, collaborator.getEmail());
-            preparedStatement.setString(4, collaborator.getPhone());
-            preparedStatement.setString(5, collaborator.getAddress());
-            preparedStatement.setString(6, collaborator.getWebsite());
-            preparedStatement.setString(7, collaborator.getDomain());
-            preparedStatement.setString(8, collaborator.getDescription());
-            preparedStatement.setString(9, collaborator.getLogo());
-            preparedStatement.setBoolean(10, collaborator.isPublic());
-            preparedStatement.setString(11, collaborator.getStatus());
-            preparedStatement.setInt(12, collaborator.getAddedByUserId());
-            preparedStatement.setTimestamp(13, new Timestamp(System.currentTimeMillis()));
-            preparedStatement.executeUpdate();
-        }
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, collaborator.getName());
+        ps.setString(2, collaborator.getCompanyName());
+        ps.setString(3, collaborator.getEmail());
+        ps.setString(4, collaborator.getPhone());
+        ps.setString(5, collaborator.getAddress());
+        ps.setString(6, collaborator.getWebsite());
+        ps.setString(7, collaborator.getDomain());
+        ps.setString(8, collaborator.getDescription());
+        ps.setString(9, collaborator.getLogo());
+        ps.setBoolean(10, collaborator.isPublic());
+        ps.setString(11, collaborator.getStatus());
+        ps.setTimestamp(12, collaborator.getCreatedAt() != null ? new Timestamp(collaborator.getCreatedAt().getTime()) : new Timestamp(System.currentTimeMillis()));
+        ps.setInt(13, collaborator.getAddedByUserId());
+        ps.executeUpdate();
     }
 
-    public List<Collaborator> getAll() throws SQLException {
+    public void modifier(int id, Collaborator collaborator) throws SQLException {
+        String sql = "UPDATE `collaborator` SET `name`=?, `company_name`=?, `email`=?, `phone`=?, `address`=?, `website`=?, `domain`=?, `description`=?, `logo`=?, `is_public`=?, `status`=? WHERE `id`=?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, collaborator.getName());
+        ps.setString(2, collaborator.getCompanyName());
+        ps.setString(3, collaborator.getEmail());
+        ps.setString(4, collaborator.getPhone());
+        ps.setString(5, collaborator.getAddress());
+        ps.setString(6, collaborator.getWebsite());
+        ps.setString(7, collaborator.getDomain());
+        ps.setString(8, collaborator.getDescription());
+        ps.setString(9, collaborator.getLogo());
+        ps.setBoolean(10, collaborator.isPublic());
+        ps.setString(11, collaborator.getStatus());
+        ps.setInt(12, id);
+        ps.executeUpdate();
+    }
+
+    public void supprimer(int id) throws SQLException {
+        String sql = "DELETE FROM `collaborator` WHERE `id` = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, id);
+        ps.executeUpdate();
+    }
+
+    public List<Collaborator> afficher() throws SQLException {
         List<Collaborator> collaborators = new ArrayList<>();
-        String query = "SELECT * FROM collaborator";
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-            while (resultSet.next()) {
-                Collaborator collaborator = new Collaborator(
-                        resultSet.getInt("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString("companyName"),
-                        resultSet.getString("email"),
-                        resultSet.getString("phone"),
-                        resultSet.getString("address"),
-                        resultSet.getString("website"),
-                        resultSet.getString("domain"),
-                        resultSet.getString("description"),
-                        resultSet.getString("logo"),
-                        resultSet.getBoolean("isPublic"),
-                        resultSet.getString("status"),
-                        resultSet.getTimestamp("createdAt"),
-                        resultSet.getInt("addedByUserId")
-                );
-                collaborators.add(collaborator);
-            }
+        String sql = "SELECT * FROM collaborator";
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) {
+            Collaborator collab = new Collaborator(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("company_name"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("address"),
+                    rs.getString("website"),
+                    rs.getString("domain"),
+                    rs.getString("description"),
+                    rs.getString("logo"),
+                    rs.getBoolean("is_public"),
+                    rs.getString("status"),
+                    rs.getTimestamp("created_at"),
+                    rs.getInt("added_by_user_id")
+            );
+            collaborators.add(collab);
         }
         return collaborators;
     }
 
-    public void update(Collaborator collaborator) throws SQLException {
-        String query = "UPDATE collaborator SET name=?, companyName=?, email=?, phone=?, address=?, website=?, domain=?, description=?, logo=?, isPublic=?, status=? WHERE id=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, collaborator.getName());
-            preparedStatement.setString(2, collaborator.getCompanyName());
-            preparedStatement.setString(3, collaborator.getEmail());
-            preparedStatement.setString(4, collaborator.getPhone());
-            preparedStatement.setString(5, collaborator.getAddress());
-            preparedStatement.setString(6, collaborator.getWebsite());
-            preparedStatement.setString(7, collaborator.getDomain());
-            preparedStatement.setString(8, collaborator.getDescription());
-            preparedStatement.setString(9, collaborator.getLogo());
-            preparedStatement.setBoolean(10, collaborator.isPublic());
-            preparedStatement.setString(11, collaborator.getStatus());
-            preparedStatement.setInt(12, collaborator.getId());
-            preparedStatement.executeUpdate();
+    public Collaborator getById(int id) throws SQLException {
+        String sql = "SELECT * FROM collaborator WHERE id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return new Collaborator(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("company_name"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("address"),
+                    rs.getString("website"),
+                    rs.getString("domain"),
+                    rs.getString("description"),
+                    rs.getString("logo"),
+                    rs.getBoolean("is_public"),
+                    rs.getString("status"),
+                    rs.getTimestamp("created_at"),
+                    rs.getInt("added_by_user_id")
+            );
         }
-    }
-
-    public void delete(int id) throws SQLException {
-        String query = "DELETE FROM collaborator WHERE id=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        }
+        return null;
     }
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20.0" prefWidth="600.0" prefHeight="400.0" styleClass="main-container"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="gui.collab.admin.ContractController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <VBox spacing="5.0">
+            <children>
+                <Label styleClass="title-label" text="All Contracts" />
+                <Label styleClass="subtitle-label" text="Global view of all system contracts (Admin Read-Only)" />
+            </children>
+        </VBox>
+
+        <VBox VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 10;">
+            <children>
+                <ListView fx:id="contractsListView" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS" />
+            </children>
+        </VBox>
+    </children>
+</VBox>

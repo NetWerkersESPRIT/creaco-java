@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+
+<VBox spacing="25.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.partner.DisplayPartnerController">
+    <children>
+        <!-- Main Content Card -->
+        <VBox VBox.vgrow="ALWAYS" styleClass="card">
+            <children>
+                <!-- Card Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <children>
+                        <Label styleClass="card-title" text="Collaborators List" />
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="search-bar" HBox.hgrow="ALWAYS" maxWidth="500">
+                            <children>
+                                <Label text="🔍" style="-fx-text-fill: -fx-text-muted;" />
+                                <TextField fx:id="partnerSearchField" promptText="Search by name, company, email..."
+                                           style="-fx-background-color: transparent; -fx-padding: 0;" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#onAddPartner" styleClass="btn-primary" text="+ ADD A PARTNER" />
+                    </children>
+                </HBox>
+
+                <!-- Column Headers -->
+                <HBox spacing="10.0" style="-fx-padding: 20 0 10 0;">
+                    <children>
+                        <Label prefWidth="300" styleClass="list-header-label" text="COLLABORATOR" />
+                        <Label prefWidth="200" styleClass="list-header-label" text="DOMAIN" />
+                        <Label prefWidth="150" styleClass="list-header-label" text="STATUS" />
+                        <Label prefWidth="150" styleClass="list-header-label" text="CREATED AT" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label styleClass="list-header-label" text="Actions" />
+                    </children>
+                </HBox>
+
+                <!-- Partners List -->
+                <ListView fx:id="partnersListView" minHeight="600" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;"/>
+            </children>
+        </VBox>
+    </children>
+</VBox>

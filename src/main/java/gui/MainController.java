@@ -106,7 +106,7 @@ public class MainController {
 
     @FXML
     private void onShowCollaborations() {
-        loadSubView("/collaborator/ListCollaborator.fxml", "Collaborations");
+        loadSubView("/gui/collab/collab_dashboard.fxml", "Collaborations");
     }
 
     @FXML

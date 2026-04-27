@@ -1,0 +1,196 @@
+package gui.collab;
+
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.layout.StackPane;
+import javafx.scene.control.Button;
+import java.io.IOException;
+
+public class CollabDashboardController {
+
+    @FXML private StackPane contentArea;
+    @FXML private Button btnPartners;
+    @FXML private Button btnRequests;
+    @FXML private Button btnContracts;
+
+    @FXML
+    public void initialize() {
+        showPartners();
+    }
+
+    @FXML
+    private void showPartners() {
+        setActiveTab(btnPartners);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/partner/displayPartner.fxml"));
+            Parent root = loader.load();
+            gui.collab.partner.DisplayPartnerController controller = loader.getController();
+            
+            controller.setOnAddRequested(() -> {
+                showAddPartnerForm();
+            });
+            
+            controller.setOnEditRequested(collab -> {
+                showEditPartnerForm(collab);
+            });
+
+            controller.setOnViewRequested(collab -> {
+                showPartnerDetails(collab);
+            });
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showPartnerDetails(entities.Collaborator collab) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/partner/viewPartner.fxml"));
+            Parent root = loader.load();
+            gui.collab.partner.ViewPartnerController controller = loader.getController();
+            
+            controller.setPartner(collab);
+            controller.setCallbacks(
+                    () -> showEditPartnerForm(collab),
+                    () -> {
+                        // Handle delete within the view if needed, or just return
+                        showPartners();
+                    },
+                    () -> { /* New request action */ }
+            );
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showAddPartnerForm() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/partner/addPartner.fxml"));
+            Parent root = loader.load();
+            gui.collab.partner.AddPartnerController controller = loader.getController();
+            
+            controller.setOnCancel(() -> showPartners());
+            controller.setOnSave(() -> showPartners());
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showEditPartnerForm(entities.Collaborator collab) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/partner/updatePartner.fxml"));
+            Parent root = loader.load();
+            gui.collab.partner.UpdatePartnerController controller = loader.getController();
+            
+            controller.setPartner(collab);
+            controller.setOnCancel(() -> showPartners());
+            controller.setOnSave(() -> showPartners());
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void showRequests() {
+        setActiveTab(btnRequests);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/request/displayRequest.fxml"));
+            Parent root = loader.load();
+            gui.collab.request.DisplayRequestController controller = loader.getController();
+            
+            controller.setOnAddRequested(() -> {
+                showAddRequestForm();
+            });
+            
+            controller.setOnEditRequested(req -> {
+                showEditRequestForm(req);
+            });
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showAddRequestForm() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/request/addRequest.fxml"));
+            Parent root = loader.load();
+            gui.collab.request.AddRequestController controller = loader.getController();
+            
+            controller.setOnCancel(() -> showRequests());
+            controller.setOnSave(() -> showRequests());
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showEditRequestForm(entities.CollabRequest req) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/request/updateRequest.fxml"));
+            Parent root = loader.load();
+            gui.collab.request.UpdateRequestController controller = loader.getController();
+            
+            controller.setRequest(req);
+            controller.setOnCancel(() -> showRequests());
+            controller.setOnSave(() -> showRequests());
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void showContracts() {
+        setActiveTab(btnContracts);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/contract/displayContract.fxml"));
+            Parent root = loader.load();
+            gui.collab.contract.DisplayContractController controller = loader.getController();
+            
+            controller.setOnViewRequested(contract -> {
+                showContractConsultation(contract);
+            });
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showContractConsultation(entities.Contract contract) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/contract/viewContract.fxml"));
+            Parent root = loader.load();
+            gui.collab.contract.ViewContractController controller = loader.getController();
+            
+            controller.setContract(contract);
+            controller.setOnBack(() -> showContracts());
+            
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setActiveTab(Button activeBtn) {
+        btnPartners.getStyleClass().remove("tab-btn-active");
+        btnRequests.getStyleClass().remove("tab-btn-active");
+        btnContracts.getStyleClass().remove("tab-btn-active");
+        
+        if (activeBtn != null) {
+            activeBtn.getStyleClass().add("tab-btn-active");
+        }
+    }
+}

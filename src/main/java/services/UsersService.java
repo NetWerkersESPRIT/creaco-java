@@ -129,4 +129,24 @@ public class UsersService implements services.UsersInterface<Users> {
         }
         return null;
     }
+
+    public List<Users> getManagers() throws SQLException {
+        List<Users> usersList = new ArrayList<>();
+        String sql = "SELECT * FROM users";
+        Statement statement = con.createStatement();
+        ResultSet rs = statement.executeQuery(sql);
+        while (rs.next()) {
+            Users users = new Users();
+            users.setId(rs.getInt("id"));
+            users.setPoints(rs.getInt("points"));
+            users.setUsername(rs.getString("username"));
+            users.setEmail(rs.getString("email"));
+            users.setPassword(rs.getString("password"));
+            users.setRole(rs.getString("role"));
+            users.setNumtel(rs.getString("numtel"));
+            users.setCreated_at(rs.getString("created_at"));
+            usersList.add(users);
+        }
+        return usersList;
+    }
 }

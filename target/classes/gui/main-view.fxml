@@ -162,9 +162,11 @@
         </ScrollPane>
     </left>
     <center>
-        <StackPane fx:id="contentArea">
-            <children>
-                <VBox fx:id="dashboardView" spacing="22.0">
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+            <content>
+                <StackPane fx:id="contentArea">
+                    <children>
+                        <VBox fx:id="dashboardView" spacing="22.0">
                     <padding>
                         <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
                     </padding>
@@ -226,5 +228,7 @@
                 </VBox>
             </children>
         </StackPane>
-    </center>
+    </content>
+</ScrollPane>
+</center>
 </BorderPane>

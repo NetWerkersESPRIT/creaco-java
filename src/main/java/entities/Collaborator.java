@@ -21,9 +21,9 @@ public class Collaborator {
 
 
     public Collaborator(int id, String name, String companyName, String email,
-                   String phone, String address, String website, String domain,
-                   String description, String logo, boolean isPublic,
-                   String status, Date createdAt, int addedByUserId) {
+                        String phone, String address, String website, String domain,
+                        String description, String logo, boolean isPublic,
+                        String status, Date createdAt, int addedByUserId) {
         this.id = id;
         this.name = name;
         this.companyName = companyName;
@@ -41,9 +41,9 @@ public class Collaborator {
     }
 
     public Collaborator(String name, String companyName, String email,
-                   String phone, String address, String website, String domain,
-                   String description, String logo, boolean isPublic,
-                   String status, int addedByUserId) {
+                        String phone, String address, String website, String domain,
+                        String description, String logo, boolean isPublic,
+                        String status, int addedByUserId) {
         this.name = name;
         this.companyName = companyName;
         this.email = email;

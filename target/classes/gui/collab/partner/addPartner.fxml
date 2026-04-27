@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="gui.collab.partner.AddPartnerController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <children>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox spacing="30.0">
+                    <padding>
+                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                    </padding>
+                    <children>
+                        <VBox spacing="8.0">
+                            <children>
+                                <Label styleClass="title-label" text="Collaborator Information" />
+                                <Label styleClass="subtitle-label" text="Update the information for this partner." />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="20.0" styleClass="card">
+                            <children>
+                                <HBox spacing="20.0">
+                                    <children>
+                                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="form-label" text="Company Name" />
+                                            <TextField fx:id="pCompanyField" />
+                                            <Label fx:id="pCompanyError" managed="false" textFill="#e11d48" visible="false" />
+                                        </VBox>
+                                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="form-label" text="Name" />
+                                            <TextField fx:id="pNameField" />
+                                            <Label fx:id="pNameError" managed="false" textFill="#e11d48" visible="false" />
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                                <HBox spacing="20.0">
+                                    <children>
+                                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="form-label" text="Email Address" />
+                                            <TextField fx:id="pEmailField" />
+                                            <Label fx:id="pEmailError" managed="false" textFill="#e11d48" visible="false" />
+                                        </VBox>
+                                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="form-label" text="Phone" />
+                                            <TextField fx:id="pPhoneField" />
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <VBox spacing="8.0">
+                                    <children>
+                                        <Label styleClass="form-label" text="Domain" />
+                                        <TextField fx:id="pDomainField" promptText="e.g.: Marketing, Tech, Finance" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="8.0">
+                                    <children>
+                                        <Label styleClass="form-label" text="Address" />
+                                        <TextArea fx:id="pAddressArea" prefRowCount="2" />
+                                    </children>
+                                </VBox>
+
+                                <HBox spacing="20.0">
+                                    <children>
+                                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="form-label" text="Website" />
+                                            <TextField fx:id="pWebsiteField" />
+                                            <Label fx:id="pWebsiteError" managed="false" textFill="#e11d48" visible="false" />
+                                        </VBox>
+                                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="form-label" text="Logo (Image file)" />
+                                            <HBox styleClass="file-input-container">
+                                                <children>
+                                                    <Button onAction="#onBrowseLogo" styleClass="file-input-btn" text="Choose File" />
+                                                    <TextField fx:id="pLogoField" editable="false" promptText="No file chosen" styleClass="file-input-text" HBox.hgrow="ALWAYS" />
+                                                </children>
+                                            </HBox>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <VBox spacing="8.0">
+                                    <children>
+                                        <Label styleClass="form-label" text="Description" />
+                                        <TextArea fx:id="pDescArea" prefRowCount="4" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                            <children>
+                                <Button onAction="#onCancelPartner" styleClass="btn-cancel" text="CANCEL" />
+                                <Button onAction="#onSavePartner" styleClass="btn-primary" text="SAVE" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</VBox>
