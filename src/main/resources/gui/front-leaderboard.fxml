@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="gui.LeaderboardController" stylesheets="@styles.css">
+
+    <left>
+        <fx:include source="sidebar.fxml" />
+    </left>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <content>
+                <VBox spacing="35" style="-fx-padding: 30;">
+                    <children>
+                        <!-- Header -->
+                        <HBox alignment="CENTER_LEFT">
+                            <children>
+                                <VBox>
+                                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Gamification" />
+                                    <Label styleClass="title-label" text="Learning Champions" />
+                                </VBox>
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Button text="Back to Courses" onAction="#onBack" styleClass="btn-primary" />
+                            </children>
+                        </HBox>
+
+                        <!-- TOP 3 PODIUM -->
+                        <HBox alignment="CENTER" spacing="25">
+                            <children>
+                                <!-- 2nd Place -->
+                                <VBox fx:id="secondPlaceCard" alignment="TOP_CENTER" prefWidth="280" styleClass="card" style="-fx-padding: 30 20; -fx-translate-y: 20;">
+                                    <children>
+                                        <Label text="2nd" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;" />
+                                        <StackPane>
+                                            <Circle radius="45" fill="WHITE" stroke="#cbd5e1" strokeWidth="3" />
+                                            <ImageView fx:id="imgSecond" fitHeight="80" fitWidth="80">
+                                                <clip><Circle radius="40" centerX="40" centerY="40"/></clip>
+                                            </ImageView>
+                                        </StackPane>
+                                        <Label fx:id="nameSecond" text="Loading..." style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
+                                        <Label fx:id="openedSecond" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+
+                                <!-- 1st Place -->
+                                <VBox fx:id="firstPlaceCard" alignment="TOP_CENTER" prefWidth="320" styleClass="card" style="-fx-padding: 40 20; -fx-border-color: -fx-primary-pink; -fx-border-width: 2;">
+                                    <children>
+                                        <Label text="1st" style="-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: #fbbf24;" />
+                                        <StackPane>
+                                            <Circle radius="55" fill="WHITE" stroke="#fbbf24" strokeWidth="4" />
+                                            <ImageView fx:id="imgFirst" fitHeight="100" fitWidth="100">
+                                                <clip><Circle radius="50" centerX="50" centerY="50"/></clip>
+                                            </ImageView>
+                                        </StackPane>
+                                        <Label fx:id="nameFirst" text="Loading..." style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
+                                        <Label fx:id="openedFirst" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-size: 16px; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+
+                                <!-- 3rd Place -->
+                                <VBox fx:id="thirdPlaceCard" alignment="TOP_CENTER" prefWidth="280" styleClass="card" style="-fx-padding: 30 20; -fx-translate-y: 40;">
+                                    <children>
+                                        <Label text="3rd" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #92400e;" />
+                                        <StackPane>
+                                            <Circle radius="45" fill="WHITE" stroke="#92400e" strokeWidth="3" />
+                                            <ImageView fx:id="imgThird" fitHeight="80" fitWidth="80">
+                                                <clip><Circle radius="40" centerX="40" centerY="40"/></clip>
+                                            </ImageView>
+                                        </StackPane>
+                                        <Label fx:id="nameThird" text="Loading..." style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
+                                        <Label fx:id="openedThird" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <!-- CATEGORY LEADERS SECTION -->
+                        <VBox spacing="15" style="-fx-padding: 40 0 0 0;">
+                            <children>
+                                <Label text="Top Creators by Category" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                                <HBox fx:id="categoryLeadersContainer" spacing="20" alignment="CENTER_LEFT">
+                                    <!-- Leaders will be added here -->
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- GLOBAL RANKING TABLE -->
+                        <VBox spacing="15">
+                            <children>
+                                <Label text="Global Ranking" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                                <VBox fx:id="rankingContainer" spacing="10" style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 10;">
+                                    <!-- Header Row -->
+                                    <HBox spacing="20" style="-fx-padding: 15 25; -fx-background-color: #f8fafc; -fx-background-radius: 12;">
+                                        <children>
+                                            <Label text="Rank" prefWidth="60" style="-fx-font-weight: bold; -fx-text-fill: #64748b;" />
+                                            <Label text="User" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-font-weight: bold; -fx-text-fill: #64748b;" />
+                                            <Label text="Resources Opened" prefWidth="150" alignment="CENTER_RIGHT" style="-fx-font-weight: bold; -fx-text-fill: #64748b;" />
+                                        </children>
+                                    </HBox>
+                                    <!-- User rows will be added here -->
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

@@ -1,7 +1,8 @@
 package services;
 
-import utils.MyConnection;
 import java.sql.*;
+import java.util.*;
+import utils.MyConnection;
 
 public class UserCourseProgressService {
     private final Connection con;
@@ -105,6 +106,105 @@ public class UserCourseProgressService {
         double progress = (double) completedResources / totalResources;
         System.out.println("[DEBUG] New calculated progress: " + (progress * 100) + "%");
         setProgress(userId, courseId, progress);
+    }
+
+    public boolean isResourceCompleted(int userId, int resourceId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM user_resource_completion WHERE user_id = ? AND ressource_id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, resourceId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
+
+    public String getCompletionStats(int userId, int courseId) throws SQLException {
+        int total = 0;
+        String countTotalSql = "SELECT COUNT(*) FROM ressource WHERE cours_id = ?";
+        try (PreparedStatement ps = con.prepareStatement(countTotalSql)) {
+            ps.setInt(1, courseId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) total = rs.getInt(1);
+            }
+        }
+        
+        if (total == 0) return "0/0 Resources";
+
+        int completed = 0;
+        String countCompletedSql = "SELECT COUNT(*) FROM user_resource_completion WHERE user_id = ? AND cours_id = ?";
+        try (PreparedStatement ps = con.prepareStatement(countCompletedSql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) completed = rs.getInt(1);
+            }
+        }
+        
+        return completed + "/" + total + " Resources";
+    }
+
+    public List<Map<String, Object>> getGlobalRankings(int limit) throws SQLException {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT u.id, u.username, u.image, COUNT(urc.ressource_id) as total_opened " +
+                     "FROM users u " +
+                     "LEFT JOIN user_resource_completion urc ON u.id = urc.user_id " +
+                     "GROUP BY u.id " +
+                     "ORDER BY total_opened DESC";
+        if (limit > 0) sql += " LIMIT " + limit;
+
+        try (Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", rs.getInt("id"));
+                map.put("name", rs.getString("username"));
+                map.put("image", rs.getString("image"));
+                map.put("count", rs.getInt("total_opened"));
+                list.add(map);
+            }
+        }
+        return list;
+    }
+
+    public List<Map<String, Object>> getCategoryLeaders(int limitCategories) throws SQLException {
+        List<Map<String, Object>> leaders = new ArrayList<>();
+        
+        // 1. Get random categories that have courses and resources
+        String catSql = "SELECT DISTINCT c.id, c.nom FROM categorie_cours c " +
+                        "JOIN cours co ON c.id = co.categorie_id " +
+                        "ORDER BY RAND() LIMIT " + limitCategories;
+                        
+        try (Statement st = con.createStatement();
+             ResultSet rsCat = st.executeQuery(catSql)) {
+            while (rsCat.next()) {
+                int catId = rsCat.getInt("id");
+                String catName = rsCat.getString("nom");
+                
+                // 2. For this category, find the top user
+                String topUserSql = "SELECT u.id, u.username, u.image, COUNT(urc.ressource_id) as total_opened " +
+                                  "FROM users u " +
+                                  "JOIN user_resource_completion urc ON u.id = urc.user_id " +
+                                  "WHERE urc.cours_id IN (SELECT id FROM cours WHERE categorie_id = ?) " +
+                                  "GROUP BY u.id ORDER BY total_opened DESC LIMIT 1";
+                                  
+                try (PreparedStatement ps = con.prepareStatement(topUserSql)) {
+                    ps.setInt(1, catId);
+                    try (ResultSet rsUser = ps.executeQuery()) {
+                        if (rsUser.next()) {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("categoryName", catName);
+                            map.put("userName", rsUser.getString("username"));
+                            map.put("userImage", rsUser.getString("image"));
+                            map.put("count", rsUser.getInt("total_opened"));
+                            leaders.add(map);
+                        }
+                    }
+                }
+            }
+        }
+        return leaders;
     }
 
     public double getProgress(int userId, int courseId) throws SQLException {

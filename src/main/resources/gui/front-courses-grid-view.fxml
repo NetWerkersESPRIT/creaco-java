@@ -42,6 +42,22 @@
                                 </HBox>
                             </children>
                         </HBox>
+                        
+                        <!-- NEW: Gamification Leaderboard Card -->
+                        <HBox fx:id="gamificationCard" onMouseClicked="#onGoToLeaderboard" spacing="20" style="-fx-background-color: linear-gradient(to right, #ce2d7c, #6c2db1); -fx-background-radius: 15; -fx-padding: 20; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.3), 15, 0, 0, 5);">
+                            <children>
+                                <StackPane style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 12; -fx-min-width: 50; -fx-min-height: 50;">
+                                    <Label text="🏆" style="-fx-font-size: 24px;" />
+                                </StackPane>
+                                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                                    <Label text="LEARNING LEADERBOARD" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-weight: bold; -fx-font-size: 10px; -fx-letter-spacing: 1px;" />
+                                    <Label text="View your rank and earn achievements" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" />
+                                </VBox>
+                                <HBox alignment="CENTER" spacing="10" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 8 15; -fx-background-radius: 20;">
+                                    <Label text="Explore Leaderboard →" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;" />
+                                </HBox>
+                            </children>
+                        </HBox>
 
 
                         <!-- MIDDLE: Course Workshops Grid -->

@@ -41,11 +41,17 @@ public class CoursesController {
     @FXML private TextField searchField;
     @FXML private HBox boxAdminActions;
     @FXML private VBox mainContentBox;
+    @FXML private HBox gamificationCard;
 
     @FXML
     public void initialize() {
         if (mainContentBox != null) {
             new FadeInUp(mainContentBox).setSpeed(0.8).play();
+        }
+        
+        if (gamificationCard != null) {
+            new FadeInRight(gamificationCard).setDelay(javafx.util.Duration.millis(300)).play();
+            gamificationCard.setOnMouseEntered(e -> new Pulse(gamificationCard).setSpeed(2.0).play());
         }
         
 
@@ -188,7 +194,23 @@ public class CoursesController {
         descriptionLabel.setMaxHeight(40);
         descriptionLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
         
-        // Progress bar removed as requested
+        // Resource Completion Stats (X/Y)
+        Users currentUser = SessionManager.getInstance().getCurrentUser();
+        String stats = "0/0 Resources";
+        if (currentUser != null) {
+            try {
+                services.UserCourseProgressService ps = new services.UserCourseProgressService();
+                stats = ps.getCompletionStats(currentUser.getId(), course.getId());
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+
+        HBox statsBox = new HBox(5);
+        statsBox.setAlignment(Pos.CENTER_LEFT);
+        statsBox.setStyle("-fx-padding: 5 0;");
+        Label statsLabel = new Label(stats);
+        statsLabel.setStyle("-fx-text-fill: #ec4899; -fx-font-weight: bold; -fx-font-size: 13px;");
+        Label iconLabel = new Label("📚");
+        statsBox.getChildren().addAll(iconLabel, statsLabel);
         
         HBox footer = new HBox(10);
         footer.setAlignment(Pos.CENTER_LEFT);
@@ -229,7 +251,7 @@ public class CoursesController {
         interactionBox.getChildren().addAll(likeBtn, dislikeBtn);
         footer.getChildren().addAll(exploreLink, spacer, interactionBox);
 
-        infoBox.getChildren().addAll(titleBox, descriptionLabel, footer);
+        infoBox.getChildren().addAll(titleBox, descriptionLabel, statsBox, footer);
         card.getChildren().addAll(visualContainer, infoBox);
         
         card.setCursor(javafx.scene.Cursor.HAND);
@@ -446,4 +468,15 @@ public class CoursesController {
         loadTickets();
     }
 
+    @FXML
+    private void onGoToLeaderboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-leaderboard.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) coursesContainer.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

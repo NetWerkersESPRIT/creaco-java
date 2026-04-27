@@ -45,6 +45,7 @@ import animatefx.animation.*;
 public class FrontResourceController {
 
     private final RessourceService ressourceService = new RessourceService();
+    private final services.UserCourseProgressService progressService = new services.UserCourseProgressService();
     private Course currentCourse;
     private List<Ressource> ressources = Collections.emptyList();
 
@@ -143,6 +144,17 @@ public class FrontResourceController {
 
         Label name = new Label(ressource.getNom());
         name.getStyleClass().add("card-title");
+        
+        // Check completion status
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null) {
+            try {
+                if (progressService.isResourceCompleted(user.getId(), ressource.getId())) {
+                    name.setText("✓ " + ressource.getNom());
+                    name.setStyle("-fx-text-fill: #10b981;"); // Green for completed
+                }
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
 
         Label type = new Label("Type: " + (ressource.getType() == null ? "-" : ressource.getType()));
         type.getStyleClass().add("badge-pink"); 
@@ -179,6 +191,21 @@ public class FrontResourceController {
         modalResourceDesc.setText(res.getContenu() != null ? res.getContenu() : "No details available.");
         resourceModal.setVisible(true);
         new ZoomIn(resourceModal).setSpeed(1.5).play();
+        
+        updateProgress(res);
+    }
+
+    private void updateProgress(Ressource res) {
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null && currentCourse != null) {
+            try {
+                progressService.markResourceCompleted(user.getId(), res.getId(), currentCourse.getId());
+                // Refresh the list to show the checkmark immediately
+                renderResources();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -208,6 +235,7 @@ public class FrontResourceController {
         File file = fileChooser.showSaveDialog(resourcesContainer.getScene().getWindow());
         
         if (file != null) {
+            updateProgress(res);
             new Thread(() -> {
                 try (InputStream in = new URL(fileUrl).openStream()) {
                     Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
