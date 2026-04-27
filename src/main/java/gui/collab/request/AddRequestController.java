@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import services.CollabRequestService;
 import services.CollaboratorService;
+import services.AiAssistLogService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
@@ -34,6 +35,7 @@ public class AddRequestController {
     private final CollabRequestService requestService = new CollabRequestService();
     private final CollaboratorService collaboratorService = new CollaboratorService();
     private final services.GroupService groupService = new services.GroupService();
+    private final AiAssistLogService aiAssistLogService = new AiAssistLogService();
 
     private Runnable onCancelCallback;
     private Runnable onSaveCallback;
@@ -210,5 +212,66 @@ public class AddRequestController {
         alert.setTitle(title);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void onAssistDescription() {
+        String original = reqDescArea.getText();
+        if (original == null || original.trim().isEmpty()) return;
+        
+        // Show loading state
+        reqDescArea.setDisable(true);
+        reqDescArea.setPromptText("Generating formal business text...");
+        
+        new Thread(() -> {
+            String rephrased = utils.GroqAssistService.getFormalBusinessText("description", original);
+            javafx.application.Platform.runLater(() -> {
+                reqDescArea.setText(rephrased);
+                reqDescArea.setDisable(false);
+            });
+            if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
+                aiAssistLogService.logUsage("description", original, rephrased);
+            }
+        }).start();
+    }
+
+    @FXML
+    private void onAssistDeliverables() {
+        String original = reqDeliverablesArea.getText();
+        if (original == null || original.trim().isEmpty()) return;
+        
+        reqDeliverablesArea.setDisable(true);
+        reqDeliverablesArea.setPromptText("Generating formal deliverables text...");
+        
+        new Thread(() -> {
+            String rephrased = utils.GroqAssistService.getFormalBusinessText("deliverables", original);
+            javafx.application.Platform.runLater(() -> {
+                reqDeliverablesArea.setText(rephrased);
+                reqDeliverablesArea.setDisable(false);
+            });
+            if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
+                aiAssistLogService.logUsage("deliverables", original, rephrased);
+            }
+        }).start();
+    }
+
+    @FXML
+    private void onAssistPaymentTerms() {
+        String original = reqPaymentTermsArea.getText();
+        if (original == null || original.trim().isEmpty()) return;
+        
+        reqPaymentTermsArea.setDisable(true);
+        reqPaymentTermsArea.setPromptText("Generating formal payment terms...");
+        
+        new Thread(() -> {
+            String rephrased = utils.GroqAssistService.getFormalBusinessText("payment_terms", original);
+            javafx.application.Platform.runLater(() -> {
+                reqPaymentTermsArea.setText(rephrased);
+                reqPaymentTermsArea.setDisable(false);
+            });
+            if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
+                aiAssistLogService.logUsage("payment_terms", original, rephrased);
+            }
+        }).start();
     }
 }

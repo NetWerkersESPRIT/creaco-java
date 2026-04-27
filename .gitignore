@@ -2,6 +2,8 @@
 .stakpak/session*
 # Sensitive Configs
 config.properties
+# Groq API key — create this locally from groq.properties.template
+src/main/resources/groq.properties
 
 # Maven
 target/
