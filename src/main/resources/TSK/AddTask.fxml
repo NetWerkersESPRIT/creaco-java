@@ -21,14 +21,6 @@
                 <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
             </padding>
             <children>
-                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
-                    <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Tasks / New" />
-                            <Label styleClass="title-label" text="Add New Task" />
-                        </VBox>
-                    </children>
-                </HBox>
 
                 <VBox maxWidth="550" spacing="20" styleClass="card">
                     <children>

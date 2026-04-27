@@ -20,73 +20,81 @@
     <children>
         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
             <content>
-                <VBox spacing="30.0">
+                <VBox spacing="35.0">
                     <padding>
-                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                        <Insets bottom="50.0" left="50.0" right="50.0" top="40.0" />
                     </padding>
                     <children>
-                        <VBox spacing="8.0">
+                        <!-- Header Section -->
+                        <VBox spacing="10.0">
                             <children>
                                 <Label fx:id="requestFormLabel" styleClass="title-label" text="Edit Request" />
                                 <Label styleClass="subtitle-label" text="Modify the collaboration request details." />
                             </children>
                         </VBox>
 
-                        <VBox spacing="20.0" styleClass="card">
+                        <!-- Form Card -->
+                        <VBox spacing="25.0" styleClass="card" maxWidth="1000">
                             <children>
                                 <VBox spacing="8.0">
                                     <children>
                                         <Label styleClass="form-label" text="Project Title" />
                                         <TextField fx:id="reqTitleField" promptText="Enter a descriptive title" />
-                                        <Label fx:id="reqTitleError" managed="false" textFill="#e11d48" visible="false" />
+                                        <Label fx:id="reqTitleError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                     </children>
                                 </VBox>
+
                                 <VBox spacing="8.0">
                                     <children>
                                         <Label styleClass="form-label" text="Description" />
                                         <TextArea fx:id="reqDescArea" prefRowCount="3" promptText="Describe the project goals and context..." wrapText="true" />
                                     </children>
                                 </VBox>
-                                <HBox spacing="20.0">
+
+                                <HBox spacing="25.0">
                                     <children>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="Budget" />
                                             <TextField fx:id="reqBudgetField" promptText="0.00" />
-                                            <Label fx:id="reqBudgetError" managed="false" textFill="#e11d48" visible="false" />
+                                            <Label fx:id="reqBudgetError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                         </VBox>
                                         <VBox spacing="8.0">
                                             <Label styleClass="form-label" text="Currency" />
-                                            <ComboBox fx:id="reqCurrencyBox" prefWidth="120.0" />
+                                            <ComboBox fx:id="reqCurrencyBox" prefWidth="150.0" />
                                         </VBox>
                                     </children>
                                 </HBox>
-                                <HBox spacing="20.0">
+
+                                <HBox spacing="25.0">
                                     <children>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="Start Date" />
                                             <DatePicker fx:id="reqStartDatePicker" maxWidth="1.7976931348623157E308" />
-                                            <Label fx:id="reqStartDateError" managed="false" textFill="#e11d48" visible="false" />
+                                            <Label fx:id="reqStartDateError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                         </VBox>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="End Date" />
                                             <DatePicker fx:id="reqEndDatePicker" maxWidth="1.7976931348623157E308" />
-                                            <Label fx:id="reqEndDateError" managed="false" textFill="#e11d48" visible="false" />
+                                            <Label fx:id="reqEndDateError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                         </VBox>
                                     </children>
                                 </HBox>
+
                                 <VBox spacing="8.0">
                                     <children>
                                         <Label styleClass="form-label" text="Deliverables" />
                                         <TextArea fx:id="reqDeliverablesArea" prefRowCount="3" promptText="What are the expected outcomes?" wrapText="true" />
                                     </children>
                                 </VBox>
+
                                 <VBox spacing="8.0">
                                     <children>
                                         <Label styleClass="form-label" text="Payment Terms" />
                                         <TextArea fx:id="reqPaymentTermsArea" prefRowCount="2" promptText="Milestones, net days, etc." wrapText="true" />
                                     </children>
                                 </VBox>
-                                <HBox spacing="20.0">
+
+                                <HBox spacing="25.0">
                                     <children>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <children>
@@ -98,7 +106,7 @@
                                             <children>
                                                 <Label styleClass="form-label" text="Partner" />
                                                 <ComboBox fx:id="reqPartnerBox" maxWidth="1.7976931348623157E308" promptText="Select target partner..." />
-                                                <Label fx:id="reqPartnerError" managed="false" textFill="#e11d48" visible="false" />
+                                                <Label fx:id="reqPartnerError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                             </children>
                                         </VBox>
                                     </children>
@@ -106,10 +114,11 @@
                             </children>
                         </VBox>
 
-                        <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                        <!-- Actions Section -->
+                        <HBox alignment="CENTER_RIGHT" spacing="20.0" maxWidth="1000">
                             <children>
                                 <Button onAction="#onCancelRequest" styleClass="btn-cancel" text="CANCEL" />
-                                <Button onAction="#onSaveRequest" styleClass="btn-primary" text="SAVE" />
+                                <Button onAction="#onSaveRequest" prefWidth="120.0" prefHeight="45.0" styleClass="btn-primary" text="SAVE" />
                             </children>
                         </HBox>
                     </children>

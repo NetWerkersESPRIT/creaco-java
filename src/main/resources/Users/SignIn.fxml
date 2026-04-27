@@ -10,6 +10,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.web.WebView?>
+
 <StackPane
     xmlns="http://javafx.com/javafx/21"
     xmlns:fx="http://javafx.com/fxml/1"
@@ -53,7 +55,21 @@
 
                 <VBox spacing="8">
                     <Label style="-fx-padding: 0;" styleClass="section-header" text="PASSWORD" />
-                    <PasswordField fx:id="txtPassword" promptText="••••••••" styleClass="search-bar" />
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <StackPane HBox.hgrow="ALWAYS">
+                            <PasswordField fx:id="txtPassword" promptText="••••••••" styleClass="search-bar" />
+                            <TextField fx:id="txtPasswordVisible" promptText="••••••••" styleClass="search-bar" visible="false" />
+                        </StackPane>
+                        <Button fx:id="btnTogglePassword" onAction="#togglePassword" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #718096; -fx-font-size: 18px;" text="👁" />
+                    </HBox>
+                </VBox>
+
+                <!-- Google reCAPTCHA Section -->
+                <VBox spacing="8" alignment="CENTER">
+                    <Label style="-fx-padding: 0;" styleClass="section-header" text="SECURITY VERIFICATION" />
+                    <StackPane style="-fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-overflow: hidden;">
+                        <WebView fx:id="webViewRecaptcha" prefHeight="80" prefWidth="304" minHeight="80" maxHeight="80" />
+                    </StackPane>
                 </VBox>
 
                 <Button maxWidth="Infinity" onAction="#handleLogin" prefHeight="45" styleClass="btn-primary" text="Sign In" />

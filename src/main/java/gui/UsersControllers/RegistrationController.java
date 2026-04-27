@@ -1,7 +1,10 @@
 package gui.UsersControllers;
 
 import entities.Users;
+import entities.Group;
 import services.UsersService;
+import services.GroupService;
+import services.NotificationService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,14 +21,17 @@ public class RegistrationController {
 
     @FXML private TextField txtUsername, txtEmail, txtNumtel;
     @FXML private PasswordField txtPassword;
+    @FXML private TextField     txtPasswordVisible;
+    @FXML private Button        btnTogglePassword;
     @FXML private Label lblMessage;
 
     private final UsersService usersService = new UsersService();
+    private final GroupService groupService = new GroupService();
 
     private String validate() {
         String username  = txtUsername.getText().trim();
         String email     = txtEmail.getText().trim();
-        String password  = txtPassword.getText();
+        String password  = txtPassword.isVisible() ? txtPassword.getText() : txtPasswordVisible.getText();
         String numtel    = txtNumtel.getText().trim();
 
         if (username.length() < 4) return "❌ Username must be at least 4 characters.";
@@ -52,20 +58,30 @@ public class RegistrationController {
             Users u = new Users();
             u.setUsername(txtUsername.getText().trim());
             u.setEmail(txtEmail.getText().trim());
-            u.setPassword(txtPassword.getText());
+            u.setPassword(txtPassword.isVisible() ? txtPassword.getText() : txtPasswordVisible.getText());
             u.setRole("ROLE_CONTENT_CREATOR");
             u.setNumtel(txtNumtel.getText().trim());
             u.setPoints(0);
             u.setCreated_at(now);
 
             usersService.ajouter(u);
+            
+            // Retrieve the user from DB to get the generated ID
+            Users dbUser = usersService.findByEmail(u.getEmail());
+            if (dbUser != null) {
+                new NotificationService().notifyWelcome(dbUser);
+            }
+            
             lblMessage.setStyle("-fx-text-fill: green;");
             lblMessage.setText("✅ Account created! Redirecting...");
+
+            // Capture Stage NOW while the scene is still attached
+            Stage stage = (Stage) txtUsername.getScene().getWindow();
 
             javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1.5));
             pause.setOnFinished(e -> {
                 try {
-                    goBack();
+                    goBackWithStage(stage);
                 } catch (Exception ex) { ex.printStackTrace(); }
             });
             pause.play();
@@ -77,9 +93,31 @@ public class RegistrationController {
     }
 
     @FXML
+    public void togglePassword() {
+        if (txtPassword.isVisible()) {
+            txtPasswordVisible.setText(txtPassword.getText());
+            txtPasswordVisible.setVisible(true);
+            txtPassword.setVisible(false);
+            btnTogglePassword.setText("🙈");
+        } else {
+            txtPassword.setText(txtPasswordVisible.getText());
+            txtPassword.setVisible(true);
+            txtPasswordVisible.setVisible(false);
+            btnTogglePassword.setText("👁");
+        }
+    }
+
+    @FXML
     public void goBack() throws Exception {
-        Stage stage = (Stage) txtUsername.getScene().getWindow();
-        stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/SignIn.fxml")));
-        stage.setTitle("CreaCo - Sign In");
+        if (txtUsername.getScene() != null) {
+            goBackWithStage((Stage) txtUsername.getScene().getWindow());
+        }
+    }
+
+    private void goBackWithStage(Stage stage) throws Exception {
+        if (stage != null) {
+            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/SignIn.fxml")));
+            stage.setTitle("CreaCo - Sign In");
+        }
     }
 }

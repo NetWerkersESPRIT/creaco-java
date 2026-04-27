@@ -22,6 +22,7 @@ import java.util.List;
 public class DisplayRequestController {
 
     @FXML private ListView<CollabRequest> requestsListView;
+    @FXML private TextField requestSearchField;
 
     private final CollabRequestService requestService = new CollabRequestService();
     private final CollaboratorService collaboratorService = new CollaboratorService();
@@ -32,9 +33,11 @@ public class DisplayRequestController {
 
     private Runnable onAddRequested;
     private java.util.function.Consumer<CollabRequest> onEditRequested;
+    private java.util.function.Consumer<CollabRequest> onViewRequested;
 
     public void setOnAddRequested(Runnable callback) { this.onAddRequested = callback; }
     public void setOnEditRequested(java.util.function.Consumer<CollabRequest> callback) { this.onEditRequested = callback; }
+    public void setOnViewRequested(java.util.function.Consumer<CollabRequest> callback) { this.onViewRequested = callback; }
 
     @FXML
     public void initialize() {
@@ -55,30 +58,44 @@ public class DisplayRequestController {
                 }
             }
         });
-        requestsListView.setItems(requestsMasterList);
+
+        javafx.collections.transformation.FilteredList<CollabRequest> filteredData = new javafx.collections.transformation.FilteredList<>(requestsMasterList, p -> true);
+        requestsListView.setItems(filteredData);
+
+        if (requestSearchField != null) {
+            requestSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(req -> {
+                    if (newValue == null || newValue.isEmpty()) return true;
+                    String lower = newValue.toLowerCase();
+                    return safeText(req.getTitle()).toLowerCase().contains(lower) ||
+                            safeText(req.getStatus()).toLowerCase().contains(lower);
+                });
+            });
+        }
     }
 
     private Node createRequestCell(CollabRequest req) {
         HBox cell = new HBox(15);
         cell.setAlignment(Pos.CENTER_LEFT);
-        cell.setPadding(new Insets(12, 0, 12, 0));
+        cell.setPadding(new Insets(15, 0, 15, 0));
         cell.getStyleClass().add("list-row");
 
         // Request Icon Box
         VBox iconBox = new VBox();
         iconBox.setAlignment(Pos.CENTER);
-        iconBox.setMinSize(42, 42);
-        iconBox.setMaxSize(42, 42);
+        iconBox.setMinSize(45, 45);
+        iconBox.setMaxSize(45, 45);
         iconBox.setStyle("-fx-background-color: #fef3c7; -fx-background-radius: 12;");
         Label iconLabel = new Label("🚀");
-        iconLabel.setStyle("-fx-font-size: 20px;");
+        iconLabel.setStyle("-fx-font-size: 22px;");
         iconBox.getChildren().add(iconLabel);
 
         // Project Info
         VBox info = new VBox(2);
         info.setPrefWidth(245);
         Label title = new Label(safeText(req.getTitle()));
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;");
+        title.getStyleClass().add("card-title");
+        title.setStyle("-fx-font-size: 14px;");
 
         String partnerName = "-";
         if (partnersList != null) {
@@ -90,24 +107,30 @@ public class DisplayRequestController {
             }
         }
         Label partner = new Label("Partner: " + partnerName);
-        partner.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
+        partner.getStyleClass().add("card-subtitle");
         info.getChildren().addAll(title, partner);
 
         // Budget
         Label budget = new Label((req.getBudget() != null ? req.getBudget() + " TND" : "-"));
         budget.setPrefWidth(150);
-        budget.setStyle("-fx-text-fill: #475569; -fx-font-size: 13px; -fx-font-weight: bold;");
+        budget.getStyleClass().add("form-label");
+        budget.setStyle("-fx-font-size: 13px;");
 
         // Status Badge
         Label statusBadge = new Label(safeText(req.getStatus()).toUpperCase());
         statusBadge.getStyleClass().add("status-badge");
         String status = req.getStatus().toUpperCase();
-        if ("PENDING".equals(status)) statusBadge.setStyle("-fx-background-color: #f59e0b;");
-        else if ("APPROVED".equals(status) || "ACCEPTED".equals(status)) statusBadge.getStyleClass().add("status-active");
-        else if ("REJECTED".equals(status)) statusBadge.setStyle("-fx-background-color: #ef4444;");
-        else statusBadge.setStyle("-fx-background-color: #94a3b8;");
+        if ("PENDING".equals(status)) {
+            statusBadge.getStyleClass().add("status-pending");
+        } else if ("APPROVED".equals(status) || "ACCEPTED".equals(status)) {
+            statusBadge.getStyleClass().add("status-active");
+        } else if ("REJECTED".equals(status)) {
+            statusBadge.getStyleClass().add("status-rejected");
+        } else {
+            statusBadge.setStyle("-fx-background-color: #94a3b8;");
+        }
 
-        statusBadge.setMinWidth(100);
+        statusBadge.setMinWidth(95);
         statusBadge.setAlignment(Pos.CENTER);
 
         // Period
@@ -115,7 +138,7 @@ public class DisplayRequestController {
         String end = req.getEndDate() != null ? req.getEndDate().toString().split(" ")[0] : "?";
         Label periodLabel = new Label(start + " - " + end);
         periodLabel.setPrefWidth(200);
-        periodLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+        periodLabel.getStyleClass().add("card-subtitle");
 
         // Actions
         Region spacer = new Region();
@@ -124,18 +147,15 @@ public class DisplayRequestController {
         HBox actions = new HBox(15);
         actions.setAlignment(Pos.CENTER_RIGHT);
 
-        Hyperlink viewBtn = new Hyperlink("👁 View");
+        Hyperlink viewBtn = new Hyperlink("View");
         viewBtn.getStyleClass().add("action-link");
         viewBtn.setOnAction(e -> onViewRequest(req));
 
-        Label divider = new Label("/");
-        divider.setStyle("-fx-text-fill: #cbd5e1;");
-
-        Hyperlink editBtn = new Hyperlink("📝 Edit");
+        Hyperlink editBtn = new Hyperlink("Edit");
         editBtn.getStyleClass().add("action-link");
         editBtn.setOnAction(e -> { if(onEditRequested != null) onEditRequested.accept(req); });
 
-        actions.getChildren().addAll(viewBtn, divider, editBtn);
+        actions.getChildren().addAll(viewBtn, editBtn);
 
         cell.getChildren().addAll(iconBox, info, budget, statusBadge, periodLabel, spacer, actions);
         return cell;
@@ -156,14 +176,7 @@ public class DisplayRequestController {
     }
 
     private void onViewRequest(CollabRequest req) {
-        Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
-        infoAlert.setTitle("Request Details");
-        infoAlert.setHeaderText(safeText(req.getTitle()));
-        infoAlert.setContentText("Description: " + safeText(req.getDescription()) + "\n" +
-                "Budget: " + (req.getBudget() != null ? req.getBudget() : "-") + "\n" +
-                "Deliverables: " + safeText(req.getDeliverables()) + "\n" +
-                "Status: " + safeText(req.getStatus()));
-        infoAlert.showAndWait();
+        if (onViewRequested != null) onViewRequested.accept(req);
     }
 
     private void onDeleteRequest(CollabRequest req) {

@@ -20,6 +20,7 @@ public class CollabRequest {
     private int creatorId;
     private int revisorId;
     private int collaboratorId;
+    private int aiUsageCount = 0;
 
     public CollabRequest(int id, String title, String description, BigDecimal budget,
                          Date startDate, Date endDate, String status,
@@ -42,6 +43,7 @@ public class CollabRequest {
         this.creatorId = creatorId;
         this.revisorId = revisorId;
         this.collaboratorId = collaboratorId;
+        this.aiUsageCount = 0;
     }
 
 
@@ -108,6 +110,9 @@ public class CollabRequest {
 
     public int getCollaboratorId() { return collaboratorId; }
     public void setCollaboratorId(int collaboratorId) { this.collaboratorId = collaboratorId; }
+
+    public int getAiUsageCount() { return aiUsageCount; }
+    public void setAiUsageCount(int aiUsageCount) { this.aiUsageCount = aiUsageCount; }
 
     @Override
     public String toString() {

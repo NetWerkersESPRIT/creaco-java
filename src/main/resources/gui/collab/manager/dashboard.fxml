@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="30.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.DashboardController">
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.DashboardController">
     <stylesheets>
         <URL value="@../../styles.css" />
     </stylesheets>
@@ -13,40 +15,28 @@
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
     </padding>
     <children>
-        <VBox spacing="5.0">
+        <!-- Hero Banner -->
+        <VBox styleClass="hero-banner-dark">
             <children>
-                <Label styleClass="title-label" text="Manager Dashboard" />
-                <Label styleClass="subtitle-label" text="Overview of collaboration performance and pending tasks." />
+                <VBox spacing="8.0">
+                    <children>
+                        <Label styleClass="hero-title-white" text="Network Intelligence Central" />
+                        <Label styleClass="hero-subtitle-white" text="Overseeing the tactical alignment of creators and strategic partners, monitor velocity and contract lifecycle." />
+                    </children>
+                </VBox>
             </children>
         </VBox>
 
-        <HBox spacing="20.0">
+        <!-- Navigation Tabs -->
+        <HBox spacing="10.0" styleClass="tab-container">
             <children>
-                <VBox prefHeight="140.0" prefWidth="240.0" styleClass="card">
-                    <children>
-                        <Label styleClass="card-subtitle" text="Total Contracts" />
-                        <Label fx:id="totalContractsLabel" styleClass="card-title" style="-fx-font-size: 32px;" text="0" />
-                    </children>
-                </VBox>
-                <VBox prefHeight="140.0" prefWidth="240.0" styleClass="card">
-                    <children>
-                        <Label styleClass="card-subtitle" text="Active Contracts" />
-                        <Label fx:id="activeContractsLabel" styleClass="card-title" style="-fx-font-size: 32px; -fx-text-fill: #16a34a;" text="0" />
-                    </children>
-                </VBox>
-                <VBox prefHeight="140.0" prefWidth="240.0" styleClass="card">
-                    <children>
-                        <Label styleClass="card-subtitle" text="Total Budget" />
-                        <Label fx:id="totalBudgetLabel" styleClass="card-title" style="-fx-font-size: 28px;" text="0 DT" />
-                    </children>
-                </VBox>
-                <VBox prefHeight="140.0" prefWidth="240.0" styleClass="card">
-                    <children>
-                        <Label styleClass="card-subtitle" text="Pending Requests" />
-                        <Label fx:id="pendingRequestsLabel" styleClass="card-title" style="-fx-font-size: 32px; -fx-text-fill: #ea580c;" text="0" />
-                    </children>
-                </VBox>
+                <Button fx:id="btnHub" onAction="#showHub" styleClass="tab-btn, tab-btn-active" text="📊 Ecosystem Hub" />
+                <Button fx:id="btnReview" onAction="#showReview" styleClass="tab-btn" text="📋 Review Dashboard" />
+                <Button fx:id="btnContracts" onAction="#showContracts" styleClass="tab-btn" text="📑 Managed Contracts" />
             </children>
         </HBox>
+
+        <!-- Dynamic Content Area -->
+        <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS" />
     </children>
 </VBox>

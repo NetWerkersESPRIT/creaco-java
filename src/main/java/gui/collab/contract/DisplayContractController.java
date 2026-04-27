@@ -19,6 +19,7 @@ import java.util.List;
 public class DisplayContractController {
 
     @FXML private ListView<Contract> contractsListView;
+    @FXML private TextField contractSearchField;
     @FXML private ComboBox<String> statusFilter;
 
     private final ContractService contractService = new ContractService();
@@ -54,23 +55,48 @@ public class DisplayContractController {
                 }
             }
         });
-        contractsListView.setItems(contractsMasterList);
+
+        javafx.collections.transformation.FilteredList<Contract> filteredData = new javafx.collections.transformation.FilteredList<>(contractsMasterList, p -> true);
+        contractsListView.setItems(filteredData);
+
+        // Multi-filter logic
+        java.util.function.BiConsumer<String, String> applyFilters = (search, status) -> {
+            filteredData.setPredicate(c -> {
+                boolean matchesSearch = true;
+                if (search != null && !search.isEmpty()) {
+                    String lower = search.toLowerCase();
+                    matchesSearch = safeText(c.getContractNumber()).toLowerCase().contains(lower) ||
+                                  safeText(c.getTitle()).toLowerCase().contains(lower);
+                }
+
+                boolean matchesStatus = true;
+                if (status != null && !"All Statuses".equals(status)) {
+                    matchesStatus = status.equalsIgnoreCase(c.getStatus());
+                }
+
+                return matchesSearch && matchesStatus;
+            });
+        };
+
+        contractSearchField.textProperty().addListener((obs, old, val) -> applyFilters.accept(val, statusFilter.getValue()));
+        statusFilter.valueProperty().addListener((obs, old, val) -> applyFilters.accept(contractSearchField.getText(), val));
     }
 
     private Node createContractCell(Contract c) {
         HBox cell = new HBox(15);
         cell.setAlignment(Pos.CENTER_LEFT);
-        cell.setPadding(new Insets(12, 0, 12, 0));
+        cell.setPadding(new Insets(15, 0, 15, 0));
         cell.getStyleClass().add("list-row");
 
         // Contract Info
         VBox info = new VBox(2);
         info.setPrefWidth(285);
         Label title = new Label(safeText(c.getContractNumber()));
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;");
+        title.getStyleClass().add("card-title");
+        title.setStyle("-fx-font-size: 14px;");
         
         String partnerName = "-";
-        String domain = "E-commerce"; // Default or lookup
+        String domain = "E-commerce";
         if (partnersList != null) {
             for (Collaborator partner : partnersList) {
                 if (partner.getId() == c.getCollaboratorId()) {
@@ -80,31 +106,38 @@ public class DisplayContractController {
                 }
             }
         }
-        Label partner = new Label("Partner: " + partnerName);
-        partner.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
+        Label partner = new Label("Partner : " + partnerName);
+        partner.getStyleClass().add("card-subtitle");
         info.getChildren().addAll(title, partner);
 
         // Domain
         Label domainLabel = new Label(domain);
-        domainLabel.setPrefWidth(150);
-        domainLabel.setStyle("-fx-text-fill: #1e293b; -fx-font-size: 13px; -fx-font-weight: bold;");
+        domainLabel.setPrefWidth(200);
+        domainLabel.getStyleClass().add("form-label");
+        domainLabel.setStyle("-fx-font-size: 13px;");
 
         // Status Badge
         Label statusBadge = new Label(safeText(c.getStatus()).toUpperCase());
         statusBadge.getStyleClass().add("status-badge");
         String status = c.getStatus().toUpperCase();
-        if ("ACTIVE".equalsIgnoreCase(status)) statusBadge.getStyleClass().add("status-active");
-        else if ("DRAFT".equalsIgnoreCase(status) || "SIGNED_BY_COLLABORATOR".equalsIgnoreCase(status)) statusBadge.setStyle("-fx-background-color: #3b82f6;");
-        else if ("TERMINATED".equalsIgnoreCase(status)) statusBadge.setStyle("-fx-background-color: #ef4444;");
-        else statusBadge.setStyle("-fx-background-color: #94a3b8;");
+        if ("ACTIVE".equalsIgnoreCase(status)) {
+            statusBadge.getStyleClass().add("status-active");
+        } else if ("DRAFT".equalsIgnoreCase(status) || "SIGNED_BY_COLLABORATOR".equalsIgnoreCase(status)) {
+            statusBadge.getStyleClass().add("status-pending");
+        } else if ("TERMINATED".equalsIgnoreCase(status)) {
+            statusBadge.getStyleClass().add("status-rejected");
+        } else {
+            statusBadge.setStyle("-fx-background-color: #94a3b8;");
+        }
         
-        statusBadge.setMinWidth(120);
+        statusBadge.setMinWidth(110);
         statusBadge.setAlignment(Pos.CENTER);
 
         // Effective Date
-        Label dateLabel = new Label(c.getStartDate() != null ? c.getStartDate().toString().split(" ")[0] : "-");
+        Label dateLabel = new Label(c.getStartDate() != null ? c.getStartDate().toString().split(" ")[0] : "24/04/2026");
         dateLabel.setPrefWidth(200);
-        dateLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+        dateLabel.getStyleClass().add("card-subtitle");
+        dateLabel.setStyle("-fx-font-size: 13px;");
 
         // Actions
         Region spacer = new Region();
@@ -112,7 +145,6 @@ public class DisplayContractController {
 
         Hyperlink viewBtn = new Hyperlink("View");
         viewBtn.getStyleClass().add("action-link");
-        viewBtn.setStyle("-fx-text-fill: #ce2d7c;"); // Pink "View" link as per mockup
         viewBtn.setOnAction(e -> {
             if (onViewRequested != null) onViewRequested.accept(c);
         });

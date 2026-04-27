@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
 
 <VBox styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="gui.collab.partner.UpdatePartnerController">
@@ -18,44 +19,47 @@
     <children>
         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
             <content>
-                <VBox spacing="30.0">
+                <VBox spacing="35.0">
                     <padding>
-                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                        <Insets bottom="50.0" left="50.0" right="50.0" top="40.0" />
                     </padding>
                     <children>
-                        <VBox spacing="8.0">
+                        <!-- Header Section -->
+                        <VBox spacing="10.0">
                             <children>
                                 <Label fx:id="partnerFormLabel" styleClass="title-label" text="Collaborator Information" />
                                 <Label styleClass="subtitle-label" text="Update the information for this partner." />
                             </children>
                         </VBox>
 
-                        <VBox spacing="20.0" styleClass="card">
+                        <!-- Form Card -->
+                        <VBox spacing="25.0" styleClass="card" maxWidth="900">
                             <children>
-                                <HBox spacing="20.0">
+                                <HBox spacing="25.0">
                                     <children>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="Company Name" />
-                                            <TextField fx:id="pCompanyField" />
-                                            <Label fx:id="pCompanyError" managed="false" textFill="#e11d48" visible="false" />
+                                            <TextField fx:id="pCompanyField" promptText="Enter company name" />
+                                            <Label fx:id="pCompanyError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                         </VBox>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="Name" />
-                                            <TextField fx:id="pNameField" />
-                                            <Label fx:id="pNameError" managed="false" textFill="#e11d48" visible="false" />
+                                            <TextField fx:id="pNameField" promptText="Primary contact name" />
+                                            <Label fx:id="pNameError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                         </VBox>
                                     </children>
                                 </HBox>
-                                <HBox spacing="20.0">
+
+                                <HBox spacing="25.0">
                                     <children>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="Email Address" />
-                                            <TextField fx:id="pEmailField" />
-                                            <Label fx:id="pEmailError" managed="false" textFill="#e11d48" visible="false" />
+                                            <TextField fx:id="pEmailField" promptText="example@company.com" />
+                                            <Label fx:id="pEmailError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                         </VBox>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="Phone" />
-                                            <TextField fx:id="pPhoneField" />
+                                            <TextField fx:id="pPhoneField" promptText="+216 -- --- ---" />
                                         </VBox>
                                     </children>
                                 </HBox>
@@ -70,16 +74,16 @@
                                 <VBox spacing="8.0">
                                     <children>
                                         <Label styleClass="form-label" text="Address" />
-                                        <TextArea fx:id="pAddressArea" prefRowCount="2" />
+                                        <TextArea fx:id="pAddressArea" prefRowCount="2" promptText="Physical address of the company" wrapText="true" />
                                     </children>
                                 </VBox>
 
-                                <HBox spacing="20.0">
+                                <HBox spacing="25.0">
                                     <children>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="Website" />
-                                            <TextField fx:id="pWebsiteField" />
-                                            <Label fx:id="pWebsiteError" managed="false" textFill="#e11d48" visible="false" />
+                                            <TextField fx:id="pWebsiteField" promptText="https://www.example.com" />
+                                            <Label fx:id="pWebsiteError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                         </VBox>
                                         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="form-label" text="Logo (Image file)" />
@@ -96,16 +100,17 @@
                                 <VBox spacing="8.0">
                                     <children>
                                         <Label styleClass="form-label" text="Description" />
-                                        <TextArea fx:id="pDescArea" prefRowCount="4" />
+                                        <TextArea fx:id="pDescArea" prefRowCount="4" promptText="Tell us more about this partnership..." wrapText="true" />
                                     </children>
                                 </VBox>
                             </children>
                         </VBox>
 
-                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                        <!-- Actions Section -->
+                        <HBox alignment="CENTER_RIGHT" spacing="20.0" maxWidth="900">
                             <children>
                                 <Button onAction="#onCancelPartner" styleClass="btn-cancel" text="CANCEL" />
-                                <Button onAction="#onSavePartner" styleClass="btn-primary" text="SAVE" />
+                                <Button onAction="#onSavePartner" prefWidth="120.0" prefHeight="45.0" styleClass="btn-primary" text="SAVE" />
                             </children>
                         </HBox>
                     </children>

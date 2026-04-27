@@ -21,6 +21,7 @@ public class MissionController {
 
     @FXML
     public void initialize() {
+        gui.FrontMainController.setNavbarText("Missions Overview", "Pages / Workflow / Missions");
         // Hide Admin button if not admin
         boolean isAdmin = SessionManager.getInstance().isAdmin();
         if (btnAdmin != null) {

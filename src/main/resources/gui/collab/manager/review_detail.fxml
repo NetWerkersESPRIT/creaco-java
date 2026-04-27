@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.ReviewDetailController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <children>
+        <!-- Top Banner -->
+        <VBox styleClass="hero-banner" style="-fx-min-height: 200; -fx-background-color: linear-gradient(to right, #ec4899, #a855f7); -fx-background-radius: 20;">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 15; -fx-padding: 20;" maxWidth="Infinity">
+                    <children>
+                        <ImageView fx:id="creatorAvatar" fitHeight="60.0" fitWidth="60.0" style="-fx-background-radius: 50;" />
+                        <VBox spacing="2.0">
+                            <children>
+                                <Label fx:id="titleLabel" styleClass="hero-title" style="-fx-text-fill: #1e293b; -fx-font-size: 22px;" text="test collab request" />
+                                <Label fx:id="creatorInfoLabel" styleClass="hero-subtitle" style="-fx-text-fill: #64748b;" text="Requested by creatorA" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox alignment="TOP_RIGHT" spacing="5.0">
+                            <children>
+                                <Label fx:id="statusBadge" styleClass="status-badge, status-active" text="APPROVED" />
+                                <Label fx:id="dateLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" text="Created: 22/04/2026 20:22" />
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+            <padding>
+                <Insets left="40" right="40" top="70"/>
+            </padding>
+        </VBox>
+
+        <!-- Content Area -->
+        <HBox spacing="25.0">
+            <children>
+                <!-- Left Column -->
+                <VBox spacing="25.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <!-- Top Summary Cards -->
+                        <HBox spacing="25.0">
+                            <children>
+                                <VBox alignment="CENTER" spacing="10.0" styleClass="card" HBox.hgrow="ALWAYS">
+                                    <padding><Insets bottom="25.0" left="25.0" right="25.0" top="25.0" /></padding>
+                                    <children>
+                                        <VBox alignment="CENTER" styleClass="pulsation-icon" style="-fx-background-color: #fce7f3; -fx-background-radius: 10; -fx-min-width: 45; -fx-min-height: 45;">
+                                            <Label text="🏢" style="-fx-font-size: 18px;" />
+                                        </VBox>
+                                        <Label styleClass="card-subtitle" text="Partner" />
+                                        <Label fx:id="partnerNameLabel" styleClass="card-title" text="Amazon" />
+                                    </children>
+                                </VBox>
+                                <VBox alignment="CENTER" spacing="10.0" styleClass="card" HBox.hgrow="ALWAYS">
+                                    <padding><Insets bottom="25.0" left="25.0" right="25.0" top="25.0" /></padding>
+                                    <children>
+                                        <VBox alignment="CENTER" styleClass="pulsation-icon" style="-fx-background-color: #f0fdf4; -fx-background-radius: 10; -fx-min-width: 45; -fx-min-height: 45;">
+                                            <Label text="💰" style="-fx-font-size: 18px;" />
+                                        </VBox>
+                                        <Label styleClass="card-subtitle" text="Budget" />
+                                        <Label fx:id="budgetLabel" styleClass="card-title" text="2 099.00 DT" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <!-- Project Timeline -->
+                        <VBox spacing="15.0" styleClass="card">
+                            <padding><Insets bottom="20.0" left="25.0" right="25.0" top="20.0" /></padding>
+                            <children>
+                                <Label styleClass="details-section-label" text="📅 Project Timeline" />
+                                <HBox style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-padding: 15;">
+                                    <children>
+                                        <VBox spacing="5.0">
+                                            <children>
+                                                <Label text="START DATE" style="-fx-font-size: 10px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" />
+                                                <Label fx:id="startDateLabel" text="24/04/2026" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                            </children>
+                                        </VBox>
+                                        <Label text="→" style="-fx-padding: 10 20; -fx-text-fill: #cbd5e1;" />
+                                        <VBox spacing="5.0">
+                                            <children>
+                                                <Label text="END DATE" style="-fx-font-size: 10px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" />
+                                                <Label fx:id="endDateLabel" text="30/04/2026" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Content Sections -->
+                        <VBox spacing="20.0" styleClass="card">
+                            <padding><Insets bottom="25.0" left="25.0" right="25.0" top="25.0" /></padding>
+                            <children>
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Label styleClass="details-section-label" text="📝 DESCRIPTION" />
+                                        <Label fx:id="descriptionLabel" text="test description" wrapText="true" style="-fx-text-fill: #475569; -fx-font-size: 13px;" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Label styleClass="details-section-label" text="✨ EXPECTED DELIVERABLES" />
+                                        <Label fx:id="deliverablesLabel" text="test deliverables" wrapText="true" style="-fx-text-fill: #475569; -fx-font-size: 13px;" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Label styleClass="details-section-label" text="💳 PAYMENT TERMS" />
+                                        <Label fx:id="paymentTermsLabel" text="test payment terms" wrapText="true" style="-fx-text-fill: #475569; -fx-font-size: 13px;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+
+                <!-- Right Column -->
+                <VBox spacing="25.0" minWidth="380">
+                    <children>
+                        <!-- AI Prediction -->
+                        <VBox spacing="15.0" styleClass="ai-prediction-card">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label text="💡" style="-fx-font-size: 16px;" />
+                                        <Label styleClass="ai-label" text="AI Success Prediction" />
+                                    </children>
+                                </HBox>
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT">
+                                            <children>
+                                                <Label text="Approval Likelihood" style="-fx-text-fill: #64748b; -fx-font-size: 11px;" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Label text="50%" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                            </children>
+                                        </HBox>
+                                        <ProgressBar progress="0.5" prefWidth="Infinity" styleClass="ai-progress-bar" prefHeight="8.0" />
+                                    </children>
+                                </VBox>
+                                <Label text="Powered by Google Gemini Flash" style="-fx-text-fill: #94a3b8; -fx-font-size: 9px;" />
+                            </children>
+                        </VBox>
+
+                        <!-- Review Decision -->
+                        <VBox spacing="25.0" styleClass="card">
+                            <padding><Insets bottom="30.0" left="30.0" right="30.0" top="30.0" /></padding>
+                            <children>
+                                <Label styleClass="card-title" text="Review Decision" />
+                                <Label text="Take an action on this collaboration proposal. Note that approving will automatically prepare the contract draft." 
+                                       wrapText="true" style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-line-spacing: 5;" />
+                                
+                                <VBox spacing="12.0">
+                                    <children>
+                                        <Button onAction="#onApprove" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-decision-approve" text="✔  APPROVE REQUEST" />
+                                        <Button onAction="#onRequestModif" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-decision-modif" text="🛠  REQUEST MODIF." />
+                                        <Button onAction="#onReject" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-decision-reject" text="✖  REJECT REQUEST" />
+                                    </children>
+                                </VBox>
+
+                                <Region prefHeight="10.0" />
+                                <VBox alignment="CENTER" spacing="10.0">
+                                    <children>
+                                        <Label text="Comments / Feedback (Optional for approval)" styleClass="details-section-label" />
+                                        <TextArea fx:id="commentsArea" prefHeight="80.0" promptText="Enter your feedback here..." wrapText="true" styleClass="text-area-modern" />
+                                    </children>
+                                </VBox>
+
+                                <Button onAction="#onBack" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-decision-back" text="❮  BACK TO LIST" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
+</VBox>
