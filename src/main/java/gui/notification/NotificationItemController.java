@@ -63,6 +63,16 @@ public class NotificationItemController {
                 iconContainer.setPrefWidth(48);
                 iconContainer.setStyle("-fx-background-radius: 12; -fx-background-color: linear-gradient(to bottom, #fb7185, #e11d48);");
                 break;
+            case "POST_REFUSED":
+                iconLabel.setText("❌");
+                iconContainer.setPrefWidth(48);
+                iconContainer.setStyle("-fx-background-radius: 12; -fx-background-color: linear-gradient(to bottom, #ef4444, #b91c1c);");
+                break;
+            case "POST_REFUSED_CHAT":
+                iconLabel.setText("💬");
+                iconContainer.setPrefWidth(48);
+                iconContainer.setStyle("-fx-background-radius: 12; -fx-background-color: linear-gradient(to bottom, #ec4899, #be185d);");
+                break;
             default:
                 iconLabel.setText("🔔");
                 iconContainer.setPrefWidth(48);
