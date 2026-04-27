@@ -11,31 +11,48 @@ import java.util.Properties;
 
 public class GeminiService {
     private static String API_KEY;
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+    // Using gemini-2.5-flash as 1.5-flash is now legacy/retired
+    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
     static {
-        Properties properties = new Properties();
-        try (FileInputStream fis = new FileInputStream("config.properties")) {
-            properties.load(fis);
-            API_KEY = properties.getProperty("GEMINI_API_KEY");
-        } catch (IOException e) {
-            System.err.println("Error loading config.properties: " + e.getMessage());
-            // Fallback or handle error - maybe use an environment variable?
-            API_KEY = System.getenv("GEMINI_API_KEY");
+        try {
+            io.github.cdimascio.dotenv.Dotenv dotenv = io.github.cdimascio.dotenv.Dotenv.load();
+            API_KEY = dotenv.get("GEMINI_PARAPHRASE");
+            if (API_KEY != null) API_KEY = API_KEY.trim();
+        } catch (Exception e) {
+            System.err.println("Error loading .env file: " + e.getMessage());
+        }
+        
+        if (API_KEY == null) {
+            Properties properties = new Properties();
+            try (FileInputStream fis = new FileInputStream("config.properties")) {
+                properties.load(fis);
+                API_KEY = properties.getProperty("GEMINI_PARAPHRASE");
+            } catch (IOException e) {
+                // Fallback to system environment
+                API_KEY = System.getenv("GEMINI_PARAPHRASE");
+            }
         }
     }
 
-    public static String getGeminiResponse(String prompt) {
+    public static String getParaphrase(String text) {
+        if (API_KEY == null || API_KEY.isEmpty()) {
+            return "Error: GEMINI_PARAPHRASE API key not found in .env";
+        }
+
         try {
             HttpClient client = HttpClient.newHttpClient();
             
             // Format the JSON request body
+            String prompt = "Paraphrase the following text while keeping its original meaning: " + text;
             String jsonBody = "{\"contents\": [{\"parts\": [{\"text\": \"" + prompt.replace("\"", "\\\"").replace("\n", "\\n") + "\"}]}]}";
             
+            // Add API key as query parameter as per user suggestion
+            String urlWithKey = API_URL + "?key=" + API_KEY;
+            
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_URL))
+                    .uri(URI.create(urlWithKey))
                     .header("Content-Type", "application/json")
-                    .header("X-goog-api-key", API_KEY)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody, StandardCharsets.UTF_8))
                     .build();
 

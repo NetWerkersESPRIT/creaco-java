@@ -66,7 +66,13 @@
                         </VBox>
                         <VBox spacing="8.0">
                             <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Content" />
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Content" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="btnParaphrase" onAction="#onParaphrase" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-font-size: 11px;" text="✨ Paraphrase with AI" />
+                                    </children>
+                                </HBox>
                                 <TextArea fx:id="contentArea" prefHeight="220.0" promptText="Optional content or notes..." wrapText="true" />
                             </children>
                         </VBox>

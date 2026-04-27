@@ -51,6 +51,9 @@ public class RessourceFormController {
     @FXML
     private TextArea contentArea;
 
+    @FXML
+    private javafx.scene.control.Button btnParaphrase;
+
     private File selectedFile;
 
     @FXML
@@ -80,6 +83,37 @@ public class RessourceFormController {
     @FXML
     private void onCancel() {
         openRessourceList();
+    }
+
+    @FXML
+    private void onParaphrase() {
+        String content = contentArea.getText();
+        if (content == null || content.isBlank()) {
+            AlertHelper.showError("Input Required", "Please enter some content to paraphrase first.");
+            return;
+        }
+
+        // Disable button to show work in progress
+        contentArea.setDisable(true);
+        String originalText = btnParaphrase.getText();
+        btnParaphrase.setText("✨ Processing...");
+        btnParaphrase.setDisable(true);
+
+        // Run in a separate thread to keep UI responsive
+        new Thread(() -> {
+            String response = utils.GeminiService.getParaphrase(content);
+            
+            javafx.application.Platform.runLater(() -> {
+                if (response != null && !response.startsWith("API Error") && !response.startsWith("Failed to connect") && !response.startsWith("Error:")) {
+                    contentArea.setText(response.trim());
+                } else {
+                    AlertHelper.showError("AI Error", "Failed to paraphrase content: " + response);
+                }
+                contentArea.setDisable(false);
+                btnParaphrase.setText(originalText);
+                btnParaphrase.setDisable(false);
+            });
+        }).start();
     }
 
     @FXML
