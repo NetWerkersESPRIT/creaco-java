@@ -146,6 +146,20 @@ public class ContractService {
         return list;
     }
 
+    /**
+     * Called by the DocuSign poller when the envelope status reaches "completed".
+     * Updates the contract's status to SIGNED and records the collaborator signature date.
+     *
+     * @param contractId the local DB contract ID
+     */
+    public void markAsSignedByCollaborator(int contractId) throws SQLException {
+        String sql = "UPDATE `contract` SET `status`='SIGNED', `signed_by_collaborator`=1, " +
+                     "`collaborator_signature_date`=NOW() WHERE `id`=?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, contractId);
+        ps.executeUpdate();
+    }
+
     public Contract getByRequestId(int requestId) throws SQLException {
         String sql = "SELECT * FROM contract WHERE collab_request_id = ?";
         PreparedStatement ps = con.prepareStatement(sql);

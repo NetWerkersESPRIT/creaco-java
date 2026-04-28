@@ -12,19 +12,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Groq-powered contract analyst.
- *
- * Compiles the full contract proposal into a structured prompt and asks
- * the model to return a strict JSON object containing:
- *   - clarity_score              (0-100)
- *   - budget_realism_score       (0-100)
- *   - timeline_feasibility_score (0-100)
- *   - flags                      (array of strings)
- *
- * The overall acceptance likelihood is the average of the three scores,
- * computed inside {@link ContractAnalysisResult}.
- */
 public class GroqContractAnalystService {
 
     private static final String SYSTEM_PROMPT =
@@ -72,7 +59,7 @@ public class GroqContractAnalystService {
                                  "CONFIDENTIALITY CLAUSE: " + nvl(confidentiality)    + "\n" +
                                  "CANCELLATION TERMS: "     + nvl(cancellationTerms);
 
-            // ── Escape for inline JSON string ───────────────────────────────────────
+            // ── Escape for inline JSON string
             String safeSystem = escapeJson(SYSTEM_PROMPT);
             String safeUser   = escapeJson(userMessage);
 
@@ -85,7 +72,7 @@ public class GroqContractAnalystService {
                 + "\"temperature\": 0.1"   // Low temp → deterministic JSON output
                 + "}";
 
-            // ── HTTP call ───────────────────────────────────────────────────────────
+            // ── HTTP call
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(GroqConfig.API_URL))
@@ -101,7 +88,7 @@ public class GroqContractAnalystService {
                 return new ContractAnalysisResult("API error " + response.statusCode());
             }
 
-            // ── Extract the assistant's content from the chat completion JSON ───────
+            // ── Extract the assistant's content from the chat completion JSON
             String body    = response.body();
             String content = extractContent(body);
             if (content == null || content.isBlank()) {
@@ -111,7 +98,7 @@ public class GroqContractAnalystService {
             // Strip markdown code fences if the model added them despite instructions
             content = content.replaceAll("(?s)```(?:json)?\\s*", "").replaceAll("```", "").trim();
 
-            // ── Parse the structured JSON fields ────────────────────────────────────
+            // ── Parse the structured JSON fields
             int clarity    = parseIntField(content, "clarity_score");
             int budget     = parseIntField(content, "budget_realism_score");
             int timeline   = parseIntField(content, "timeline_feasibility_score");
@@ -125,7 +112,7 @@ public class GroqContractAnalystService {
         }
     }
 
-    // ── Parsing helpers ─────────────────────────────────────────────────────────
+    // ── Parsing helpers
 
     /** Extracts choices[0].message.content from a Groq/OpenAI chat completion JSON. */
     private static String extractContent(String responseBody) {
@@ -174,7 +161,7 @@ public class GroqContractAnalystService {
         return flags;
     }
 
-    // ── String utilities ────────────────────────────────────────────────────────
+    // String utilities
 
     private static String nvl(String s) {
         return (s == null || s.isBlank()) ? "Not specified" : s.trim();

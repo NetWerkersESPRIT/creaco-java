@@ -66,6 +66,13 @@
             <artifactId>javax.mail</artifactId>
             <version>1.6.2</version>
         </dependency>
+
+        <!-- DocuSign eSignature Java SDK -->
+        <dependency>
+            <groupId>com.docusign</groupId>
+            <artifactId>docusign-esign-java</artifactId>
+            <version>3.22.0</version>
+        </dependency>
     </dependencies>
 
     <build>

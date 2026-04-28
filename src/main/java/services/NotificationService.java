@@ -85,6 +85,55 @@ public class NotificationService {
         createNotification(commentOwnerId, likerName + " liked your comment", "LIKE_COMMENT", commentId, "post/" + postId + "#comment_" + commentId);
     }
 
+    // ── COLLABORATION MODULE NOTIFICATIONS ──────────────────────────
+
+    public void notifyNewCollabRequest(int requestId) {
+        try {
+            List<Users> admins = getAllAdmins();
+            for (Users admin : admins) {
+                createNotification(admin.getId(), "New collaboration request submitted for review.", "COLLAB_REQUEST_NEW", requestId, "admin/requests");
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    public void notifyManagerOfNewRequest(int managerId, int requestId, String creatorName) {
+        createNotification(managerId, "📌 " + creatorName + " has assigned you a new collaboration request for review.", "COLLAB_REQUEST_ASSIGNED", requestId, "manager/review");
+    }
+
+    public void notifyCollabRequestStatus(int creatorId, String status, String partnerName) {
+        String icon = status.equalsIgnoreCase("APPROVED") ? "✅" : "❌";
+        createNotification(creatorId, icon + " Your collaboration request with " + partnerName + " has been " + status.toLowerCase() + ".", "COLLAB_REQUEST_UPDATE", null, "my_requests");
+    }
+
+    public void notifyContractSent(int creatorId, String contractNum) {
+        createNotification(creatorId, "📩 Contract " + contractNum + " has been sent to the partner for signature.", "CONTRACT_SENT", null, "contracts");
+    }
+
+    public void notifyContractSignature(int creatorId, String contractNum, String signerType) {
+        String msg = signerType.equalsIgnoreCase("PARTNER") 
+            ? "📝 Partner has signed the contract " + contractNum + "."
+            : "👤 You have signed the contract " + contractNum + ".";
+        createNotification(creatorId, msg, "CONTRACT_SIGNED", null, "contracts");
+        
+        // Also notify admins of progress
+        try {
+            List<Users> admins = getAllAdmins();
+            for (Users admin : admins) {
+                createNotification(admin.getId(), "Contract " + contractNum + " signature progress: " + signerType + " signed.", "CONTRACT_PROGRESS", null, "admin/contracts");
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    public void notifyContractCompleted(int creatorId, String contractNum) {
+        createNotification(creatorId, "🎉 Contract " + contractNum + " is now FULLY SIGNED and active!", "CONTRACT_COMPLETED", null, "contracts");
+        try {
+            List<Users> admins = getAllAdmins();
+            for (Users admin : admins) {
+                createNotification(admin.getId(), "Contract " + contractNum + " is now completed.", "CONTRACT_COMPLETED", null, "admin/contracts");
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
     private List<Users> getAllAdmins() throws SQLException {
         // We'll need to implement this in UsersService or here directly
         // For now, let's query directly to avoid modifying UsersService if possible, 

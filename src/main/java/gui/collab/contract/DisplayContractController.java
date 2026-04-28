@@ -1,4 +1,5 @@
 package gui.collab.contract;
+
 import entities.Contract;
 import entities.Collaborator;
 import services.ContractService;
@@ -15,6 +16,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class DisplayContractController {
 
@@ -27,16 +29,18 @@ public class DisplayContractController {
     private ObservableList<Contract> contractsMasterList = FXCollections.observableArrayList();
     private List<Collaborator> partnersList;
 
-    private java.util.function.Consumer<Contract> onViewRequested;
+    private Consumer<Contract> onViewRequested;
 
-    public void setOnViewRequested(java.util.function.Consumer<Contract> callback) { this.onViewRequested = callback; }
+    public void setOnViewRequested(Consumer<Contract> callback) { 
+        this.onViewRequested = callback; 
+    }
 
     @FXML
     public void initialize() {
         setupContractsView();
         loadContractsData();
         
-        statusFilter.setItems(FXCollections.observableArrayList("All Statuses", "DRAFT", "ACTIVE", "COMPLETED", "TERMINATED"));
+        statusFilter.setItems(FXCollections.observableArrayList("All Statuses", "DRAFT", "SENT_TO_PARTNER", "SIGNED", "TERMINATED"));
         statusFilter.setValue("All Statuses");
     }
 
@@ -46,7 +50,6 @@ public class DisplayContractController {
             protected void updateItem(Contract item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
-                    setText(null);
                     setGraphic(null);
                     setStyle("-fx-background-color: transparent;");
                 } else {
@@ -59,27 +62,28 @@ public class DisplayContractController {
         javafx.collections.transformation.FilteredList<Contract> filteredData = new javafx.collections.transformation.FilteredList<>(contractsMasterList, p -> true);
         contractsListView.setItems(filteredData);
 
-        // Multi-filter logic
-        java.util.function.BiConsumer<String, String> applyFilters = (search, status) -> {
-            filteredData.setPredicate(c -> {
-                boolean matchesSearch = true;
-                if (search != null && !search.isEmpty()) {
-                    String lower = search.toLowerCase();
-                    matchesSearch = safeText(c.getContractNumber()).toLowerCase().contains(lower) ||
-                                  safeText(c.getTitle()).toLowerCase().contains(lower);
-                }
+        // Filter Logic
+        statusFilter.valueProperty().addListener((obs, old, val) -> applyFilters(filteredData));
+        contractSearchField.textProperty().addListener((obs, old, val) -> applyFilters(filteredData));
+    }
 
-                boolean matchesStatus = true;
-                if (status != null && !"All Statuses".equals(status)) {
-                    matchesStatus = status.equalsIgnoreCase(c.getStatus());
-                }
-
-                return matchesSearch && matchesStatus;
-            });
-        };
-
-        contractSearchField.textProperty().addListener((obs, old, val) -> applyFilters.accept(val, statusFilter.getValue()));
-        statusFilter.valueProperty().addListener((obs, old, val) -> applyFilters.accept(contractSearchField.getText(), val));
+    private void applyFilters(javafx.collections.transformation.FilteredList<Contract> filteredData) {
+        String search = contractSearchField.getText();
+        String statusStr = statusFilter.getValue();
+        
+        filteredData.setPredicate(c -> {
+            boolean matchesSearch = true;
+            if (search != null && !search.isEmpty()) {
+                String lower = search.toLowerCase();
+                matchesSearch = safeText(c.getContractNumber()).toLowerCase().contains(lower) ||
+                              safeText(c.getTitle()).toLowerCase().contains(lower);
+            }
+            boolean matchesStatus = true;
+            if (statusStr != null && !"All Statuses".equals(statusStr)) {
+                matchesStatus = statusStr.equalsIgnoreCase(c.getStatus());
+            }
+            return matchesSearch && matchesStatus;
+        });
     }
 
     private Node createContractCell(Contract c) {
@@ -95,13 +99,13 @@ public class DisplayContractController {
         title.getStyleClass().add("card-title");
         title.setStyle("-fx-font-size: 14px;");
         
-        String partnerName = "-";
-        String domain = "E-commerce";
+        String partnerName = "Unknown Partner";
+        String domain = "Collaboration";
         if (partnersList != null) {
-            for (Collaborator partner : partnersList) {
-                if (partner.getId() == c.getCollaboratorId()) {
-                    partnerName = partner.getCompanyName();
-                    domain = partner.getDomain();
+            for (Collaborator p : partnersList) {
+                if (p.getId() == c.getCollaboratorId()) {
+                    partnerName = p.getCompanyName();
+                    domain = p.getDomain();
                     break;
                 }
             }
@@ -117,36 +121,40 @@ public class DisplayContractController {
         domainLabel.setStyle("-fx-font-size: 13px;");
 
         // Status Badge
-        Label statusBadge = new Label(safeText(c.getStatus()).toUpperCase());
+        String statusStr = c.getStatus() != null ? c.getStatus().toUpperCase() : "DRAFT";
+        Label statusBadge = new Label(statusStr);
         statusBadge.getStyleClass().add("status-badge");
-        String status = c.getStatus().toUpperCase();
-        if ("ACTIVE".equalsIgnoreCase(status)) {
-            statusBadge.getStyleClass().add("status-active");
-        } else if ("DRAFT".equalsIgnoreCase(status) || "SIGNED_BY_COLLABORATOR".equalsIgnoreCase(status)) {
-            statusBadge.getStyleClass().add("status-pending");
-        } else if ("TERMINATED".equalsIgnoreCase(status)) {
-            statusBadge.getStyleClass().add("status-rejected");
+        
+        if ("SIGNED".equals(statusStr)) {
+            statusBadge.setStyle("-fx-background-color: #f0fdf4; -fx-text-fill: #166534;");
+        } else if ("SENT_TO_PARTNER".equals(statusStr)) {
+            statusBadge.setStyle("-fx-background-color: #fef9c3; -fx-text-fill: #854d0e;");
         } else {
-            statusBadge.setStyle("-fx-background-color: #94a3b8;");
+            statusBadge.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #475569;");
         }
         
-        statusBadge.setMinWidth(110);
+        statusBadge.setMinWidth(130);
         statusBadge.setAlignment(Pos.CENTER);
 
-        // Effective Date
-        Label dateLabel = new Label(c.getStartDate() != null ? c.getStartDate().toString().split(" ")[0] : "24/04/2026");
-        dateLabel.setPrefWidth(200);
+        // Date
+        String dateStr = c.getStartDate() != null ? c.getStartDate().toString() : "N/A";
+        Label dateLabel = new Label(dateStr);
+        dateLabel.setPrefWidth(180);
         dateLabel.getStyleClass().add("card-subtitle");
-        dateLabel.setStyle("-fx-font-size: 13px;");
 
         // Actions
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Hyperlink viewBtn = new Hyperlink("View");
-        viewBtn.getStyleClass().add("action-link");
+        Button viewBtn = new Button("View");
+        viewBtn.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #7c3aed; -fx-font-weight: bold; -fx-cursor: hand;");
         viewBtn.setOnAction(e -> {
-            if (onViewRequested != null) onViewRequested.accept(c);
+            if (onViewRequested != null) {
+                System.out.println("DisplayContractController: View requested for contract " + c.getContractNumber());
+                onViewRequested.accept(c);
+            } else {
+                System.err.println("DisplayContractController: onViewRequested callback is NULL!");
+            }
         });
 
         cell.getChildren().addAll(info, domainLabel, statusBadge, dateLabel, spacer, viewBtn);

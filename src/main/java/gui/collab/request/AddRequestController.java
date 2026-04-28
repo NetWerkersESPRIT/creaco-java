@@ -36,6 +36,7 @@ public class AddRequestController {
     private final CollaboratorService collaboratorService = new CollaboratorService();
     private final services.GroupService groupService = new services.GroupService();
     private final AiAssistLogService aiAssistLogService = new AiAssistLogService();
+    private final services.NotificationService notificationService = new services.NotificationService();
 
     private Runnable onCancelCallback;
     private Runnable onSaveCallback;
@@ -158,6 +159,10 @@ public class AddRequestController {
             req.setCreatorId(creatorId);
             req.setRevisorId(revisorId);
             requestService.ajouter(req);
+
+            // Notify Admin & Manager of new request
+            notificationService.notifyNewCollabRequest(req.getId());
+            notificationService.notifyManagerOfNewRequest(revisorId, req.getId(), (currentUser != null ? currentUser.getUsername() : "A creator"));
 
             if (onSaveCallback != null) onSaveCallback.run();
         } catch (Exception e) {

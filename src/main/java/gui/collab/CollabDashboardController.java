@@ -187,6 +187,7 @@ public class CollabDashboardController {
             gui.collab.contract.DisplayContractController controller = loader.getController();
             
             controller.setOnViewRequested(contract -> {
+                System.out.println("CollabDashboardController: showContracts -> showContractConsultation for " + contract.getContractNumber());
                 showContractConsultation(contract);
             });
             
@@ -202,8 +203,12 @@ public class CollabDashboardController {
             Parent root = loader.load();
             gui.collab.contract.ViewContractController controller = loader.getController();
             
+            System.out.println("CollabDashboardController: Loading viewContract.fxml for " + contract.getContractNumber());
             controller.setContract(contract);
-            controller.setOnBack(() -> showContracts());
+            controller.setOnBack(() -> {
+                System.out.println("CollabDashboardController: Back to list requested");
+                showContracts();
+            });
             
             contentArea.getChildren().setAll(root);
         } catch (IOException e) {

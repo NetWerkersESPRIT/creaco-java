@@ -3,20 +3,6 @@ package utils;
 import java.io.InputStream;
 import java.util.Properties;
 
-/**
- * Centralized configuration for the Groq API.
- *
- * The API key is loaded at runtime from src/main/resources/groq.properties
- * which is listed in .gitignore and is NEVER committed to the repository.
- *
- * SETUP (first time / new machine):
- *   1. Copy  src/main/resources/groq.properties.template
- *          → src/main/resources/groq.properties
- *   2. Paste your key (from https://console.groq.com/keys) as:
- *        groq.api.key=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
- *   That's it — both GroqAssistService and GroqContractAnalystService
- *   will pick up the value automatically.
- */
 public class GroqConfig {
 
     public static final String API_KEY;
