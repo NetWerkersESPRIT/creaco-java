@@ -14,19 +14,7 @@
         <URL value="@../../styles.css" />
     </stylesheets>
     <children>
-        <!-- Banner -->
-        <VBox styleClass="hero-banner" style="-fx-min-height: 180; -fx-background-color: linear-gradient(to right, #ec4899, #a855f7);">
-            <children>
-                <VBox style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 15; -fx-padding: 20;" maxWidth="950">
-                    <children>
-                        <Label styleClass="hero-title" text="Requests Review Center" style="-fx-text-fill: #1e293b; -fx-font-size: 28px;" />
-                    </children>
-                </VBox>
-            </children>
-            <padding>
-                <Insets left="40" top="80"/>
-            </padding>
-        </VBox>
+
 
         <!-- Main Content Card -->
         <VBox spacing="20.0" styleClass="card" VBox.vgrow="ALWAYS">

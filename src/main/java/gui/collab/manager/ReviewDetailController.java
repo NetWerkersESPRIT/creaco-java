@@ -95,7 +95,33 @@ public class ReviewDetailController {
 
     @FXML
     private void onRequestModif() {
-        updateStatus("MODIF_REQUESTED");
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog();
+        dialog.setTitle("Request Modification");
+        dialog.setHeaderText("Feedback for the Creator");
+        dialog.setContentText("Please specify what needs to be changed:");
+        
+        // Style the dialog a bit
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/gui/styles.css").toExternalForm());
+        dialog.getDialogPane().getStyleClass().add("card");
+
+        java.util.Optional<String> result = dialog.showAndWait();
+        result.ifPresent(feedback -> {
+            if (!feedback.trim().isEmpty()) {
+                currentRequest.setRejectionReason(feedback);
+                updateStatus("MODIF_REQUESTED");
+                
+                // Specific notification for modification with feedback
+                notificationService.notifyCollabRequestModification(
+                    currentRequest.getCreatorId(), 
+                    feedback, 
+                    partnerNameLabel.getText()
+                );
+            } else {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+                alert.setContentText("Feedback is required to request modifications.");
+                alert.show();
+            }
+        });
     }
 
     private void updateStatus(String status) {

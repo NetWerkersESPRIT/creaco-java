@@ -76,6 +76,14 @@ public class DocuSignService {
         return "NONE";
     }
 
+    public byte[] downloadCombinedDocument(String envelopeId) throws ApiException, IOException {
+        ApiClient apiClient = buildAuthenticatedClient();
+        EnvelopesApi envelopesApi = new EnvelopesApi(apiClient);
+        
+        // "combined" retrieves all documents in the envelope plus the summary/audit log
+        return envelopesApi.getDocument(DocuSignConfig.ACCOUNT_ID, envelopeId, "combined");
+    }
+
     private ApiClient buildAuthenticatedClient() throws ApiException, IOException {
         ApiClient apiClient = new ApiClient(DocuSignConfig.AUTH_BASE_URL);
         apiClient.setBasePath(DocuSignConfig.API_BASE_URL);

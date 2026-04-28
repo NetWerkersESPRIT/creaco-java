@@ -14,6 +14,10 @@ import services.DocuSignService;
 import utils.EnvelopeStore;
 import utils.SessionManager;
 import services.NotificationService;
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.io.FileOutputStream;
+import javafx.scene.control.Alert.AlertType;
 
 public class ViewContractController {
 
@@ -22,7 +26,7 @@ public class ViewContractController {
     @FXML private TextField partnerEmailField, partnerNameField;
     @FXML private Button btnSendDocuSign, btnSignContract, btnCheckStatus;
     @FXML private Label dsStatusLabel, dsEnvelopeIdLabel;
-    @FXML private VBox dsSentBox, dsReadyBox;
+    @FXML private VBox dsSentBox, dsReadyBox, heroBanner;
 
     private final CollaboratorService collaboratorService = new CollaboratorService();
     private final ContractService contractService = new ContractService();
@@ -63,6 +67,26 @@ public class ViewContractController {
         } else {
             showReadyState();
         }
+
+        // Generate AI Background
+        applyAiBackground();
+    }
+
+    private void applyAiBackground() {
+        new Thread(() -> {
+            javafx.scene.image.Image bg = utils.GeminiImageService.generateHeroBackground("Signing a professional digital contract on a tablet in a premium office environment");
+            if (bg != null) {
+                Platform.runLater(() -> {
+                    heroBanner.setBackground(new javafx.scene.layout.Background(
+                        new javafx.scene.layout.BackgroundImage(bg, 
+                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
+                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
+                            javafx.scene.layout.BackgroundPosition.CENTER, 
+                            new javafx.scene.layout.BackgroundSize(100, 100, true, true, true, true))
+                    ));
+                });
+            }
+        }).start();
     }
 
     @FXML
@@ -151,7 +175,7 @@ public class ViewContractController {
             // Get the request to find the manager (revisor_id)
             java.util.List<entities.CollabRequest> allReqs = requestService.afficher();
             for (entities.CollabRequest req : allReqs) {
-                if (req.getId() == c.getRequestId()) {
+                if (req.getId() == c.getCollabRequestId()) {
                     if ("COMPLETED".equals(type)) {
                         notificationService.createNotification(req.getRevisorId(), "🎉 Collaboration " + c.getContractNumber() + " is now fully signed!", "CONTRACT_COMPLETED", null, "manager/contracts");
                     } else {
@@ -215,8 +239,41 @@ public class ViewContractController {
         if (onBackRequested != null) onBackRequested.run(); 
     }
 
-    @FXML private void onDownload() {
-        System.out.println("Download PDF requested (Logic pending implementation)");
-        // Logic to generate/download PDF will go here
+    @FXML
+    private void onDownload() {
+        String envelopeId = EnvelopeStore.get(currentContract.getId());
+        if (envelopeId == null) {
+            showAlert(javafx.scene.control.Alert.AlertType.WARNING, "Not Ready", "The DocuSign envelope for this contract is not yet initialized.");
+            return;
+        }
+
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Save Signed Contract");
+        fileChooser.setInitialFileName("Contract_" + currentContract.getContractNumber() + ".pdf");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF Documents", "*.pdf"));
+        
+        java.io.File file = fileChooser.showSaveDialog(refLabel.getScene().getWindow());
+        if (file != null) {
+            new Thread(() -> {
+                try {
+                    byte[] pdfData = docuSignService.downloadCombinedDocument(envelopeId);
+                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+                        fos.write(pdfData);
+                    }
+                    Platform.runLater(() -> showAlert(javafx.scene.control.Alert.AlertType.INFORMATION, "Success", "Contract saved successfully to: " + file.getAbsolutePath()));
+                } catch (Exception e) {
+                    Platform.runLater(() -> showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Download Failed", "Could not retrieve the document from DocuSign: " + e.getMessage()));
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+    }
+
+    private void showAlert(javafx.scene.control.Alert.AlertType type, String title, String content) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

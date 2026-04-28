@@ -712,6 +712,41 @@
     -fx-alignment: CENTER_LEFT;
 }
 
+/* Modern List View Styles */
+.modern-list-view {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 10 0;
+}
+
+.modern-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 15 0; /* Space between cards */
+}
+
+.modern-list-view .list-cell:filled:selected, 
+.modern-list-view .list-cell:filled:hover {
+    -fx-background-color: transparent;
+}
+
+/* The actual card inside the cell */
+.list-row {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-padding: 18 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 10, 0, 0, 2);
+    -fx-border-color: transparent transparent transparent -fx-primary-pink;
+    -fx-border-width: 0 0 0 4; /* Left accent border */
+    -fx-alignment: CENTER_LEFT;
+}
+
+.list-row:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 4);
+    -fx-background-color: #fafbfc;
+    -fx-translate-y: -1;
+}
+
 /* Specific Buttons */
 .btn-delete {
     -fx-background-color: #f43f5e;
@@ -730,29 +765,29 @@
 
 /* Hero Banner Styling */
 .hero-banner {
-    -fx-background-color: linear-gradient(to right, #ce2d7c, #912dce);
+    -fx-background-color: #1e293b; /* Fallback dark slate */
     -fx-background-radius: 20;
     -fx-min-height: 220;
     -fx-alignment: BOTTOM_LEFT;
+    -fx-overflow: hidden;
 }
 
 .hero-overlay {
-    -fx-background-color: rgba(0, 0, 0, 0.1);
+    -fx-background-color: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
     -fx-background-radius: 20;
-    -fx-padding: 0 0 30 40;
+    -fx-padding: 0 0 40 40;
 }
 
 .hero-content-box {
-    -fx-background-color: rgba(255, 255, 255, 0.95);
-    -fx-background-radius: 15;
-    -fx-padding: 15 35;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 4);
+    -fx-background-color: transparent;
+    -fx-padding: 0;
 }
 
 .hero-title {
-    -fx-font-size: 26px;
+    -fx-font-size: 32px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 2);
 }
 
 /* Tab Navigation */
@@ -851,14 +886,22 @@
     -fx-background-color: #0f172a;
     -fx-background-radius: 20;
     -fx-min-height: 250;
-    -fx-alignment: CENTER_LEFT;
-    -fx-padding: 0 0 0 50;
+    -fx-alignment: BOTTOM_LEFT;
+}
+
+.hero-banner-dark > .VBox {
+    -fx-background-color: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
+    -fx-background-radius: 20;
+    -fx-padding: 0 0 50 50;
+    -fx-min-width: 10000;
+    -fx-min-height: 250;
 }
 
 .hero-title-white {
-    -fx-font-size: 32px;
+    -fx-font-size: 36px;
     -fx-font-weight: bold;
     -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 12, 0, 0, 3);
 }
 
 .hero-subtitle-white {
@@ -997,7 +1040,7 @@
 
 /* Contract Consultation Styles */
 .hero-banner-consultation {
-    -fx-background-color: linear-gradient(to right, #ec4899, #a855f7);
+    -fx-background-color: #1e293b;
     -fx-background-radius: 20;
     -fx-min-height: 200;
     -fx-alignment: BOTTOM_LEFT;

@@ -62,9 +62,9 @@
                                             <TextField fx:id="reqBudgetField" promptText="0.00" />
                                             <Label fx:id="reqBudgetError" managed="false" textFill="#e11d48" visible="false" style="-fx-font-size: 11px;" />
                                         </VBox>
-                                        <VBox spacing="8.0">
+                                        <VBox spacing="8.0" minWidth="150" maxWidth="150" HBox.hgrow="NEVER">
                                             <Label styleClass="form-label" text="Currency" />
-                                            <ComboBox fx:id="reqCurrencyBox" prefWidth="150.0" />
+                                            <ComboBox fx:id="reqCurrencyBox" maxWidth="1.7976931348623157E308" />
                                         </VBox>
                                     </children>
                                 </HBox>

@@ -105,6 +105,10 @@ public class NotificationService {
         createNotification(creatorId, icon + " Your collaboration request with " + partnerName + " has been " + status.toLowerCase() + ".", "COLLAB_REQUEST_UPDATE", null, "my_requests");
     }
 
+    public void notifyCollabRequestModification(int creatorId, String feedback, String partnerName) {
+        createNotification(creatorId, "🛠️ Modification requested for " + partnerName + ": \"" + feedback + "\"", "COLLAB_REQUEST_MODIF", null, "my_requests");
+    }
+
     public void notifyContractSent(int creatorId, String contractNum) {
         createNotification(creatorId, "📩 Contract " + contractNum + " has been sent to the partner for signature.", "CONTRACT_SENT", null, "contracts");
     }

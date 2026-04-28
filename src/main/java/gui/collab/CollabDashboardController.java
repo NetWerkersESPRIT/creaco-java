@@ -14,10 +14,29 @@ public class CollabDashboardController {
     @FXML private Button btnRequests;
     @FXML private Button btnContracts;
     @FXML private javafx.scene.control.Label bannerTitle;
+    @FXML private javafx.scene.layout.VBox heroBanner;
 
     @FXML
     public void initialize() {
         showPartners();
+        applyAiBackground();
+    }
+
+    private void applyAiBackground() {
+        new Thread(() -> {
+            javafx.scene.image.Image bg = utils.GeminiImageService.generateHeroBackground("Global strategic business partnership networks in a modern skyscraper lounge");
+            if (bg != null) {
+                javafx.application.Platform.runLater(() -> {
+                    heroBanner.setBackground(new javafx.scene.layout.Background(
+                        new javafx.scene.layout.BackgroundImage(bg, 
+                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
+                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
+                            javafx.scene.layout.BackgroundPosition.CENTER, 
+                            new javafx.scene.layout.BackgroundSize(100, 100, true, true, true, true))
+                    ));
+                });
+            }
+        }).start();
     }
 
     @FXML

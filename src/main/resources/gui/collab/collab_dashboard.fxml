@@ -16,7 +16,7 @@
     </padding>
     <children>
         <!-- Hero Banner -->
-        <VBox styleClass="hero-banner">
+        <VBox fx:id="heroBanner" styleClass="hero-banner">
             <children>
                 <StackPane VBox.vgrow="ALWAYS" styleClass="hero-overlay">
                     <children>
