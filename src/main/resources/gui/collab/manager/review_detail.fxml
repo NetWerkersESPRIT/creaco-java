@@ -126,7 +126,7 @@
                 </VBox>
 
                 <!-- Right Column -->
-                <VBox spacing="25.0" minWidth="380">
+                <VBox spacing="25.0" minWidth="420" maxWidth="420">
                     <children>
                         <!-- Review Decision -->
                         <VBox spacing="25.0" styleClass="card">

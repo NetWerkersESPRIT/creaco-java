@@ -16,12 +16,12 @@
     </padding>
     <children>
         <!-- Hero Banner -->
-        <VBox styleClass="hero-banner-dark">
+        <VBox fx:id="heroBanner" styleClass="hero-banner-dark">
             <children>
                 <VBox spacing="8.0">
                     <children>
-                        <Label styleClass="hero-title-white" text="Network Intelligence Central" />
-                        <Label styleClass="hero-subtitle-white" text="Overseeing the tactical alignment of creators and strategic partners, monitor velocity and contract lifecycle." />
+                        <Label fx:id="bannerTitle" styleClass="hero-title-white" text="Network Intelligence Central" />
+                        <Label fx:id="bannerSubtitle" styleClass="hero-subtitle-white" text="Overseeing the tactical alignment of creators and strategic partners." />
                     </children>
                 </VBox>
             </children>

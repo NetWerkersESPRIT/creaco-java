@@ -53,8 +53,7 @@
                 </HBox>
 
                 <!-- Contracts List -->
-                <ListView fx:id="contractsListView" VBox.vgrow="ALWAYS" minHeight="500.0" prefHeight="600.0"
-                          style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 10 0 0 0;"/>
+                <ListView fx:id="contractsListView" styleClass="modern-list-view" VBox.vgrow="ALWAYS" minHeight="500.0" prefHeight="600.0" />
             </children>
         </VBox>
     </children>

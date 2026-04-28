@@ -17,8 +17,7 @@
     <children>
 
         <!-- ── Hero Banner ──────────────────────────────────────────────── -->
-        <VBox styleClass="hero-banner"
-              style="-fx-background-image: url('@../../assets/hero_banner_partners.png');">
+        <VBox fx:id="heroBanner" styleClass="hero-banner">
             <children>
                 <VBox VBox.vgrow="ALWAYS" styleClass="hero-overlay">
                     <children>

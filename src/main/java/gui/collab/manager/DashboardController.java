@@ -15,9 +15,12 @@ import java.util.List;
 public class DashboardController {
 
     @FXML private StackPane contentArea;
+    @FXML private javafx.scene.layout.VBox heroBanner;
     @FXML private Button btnHub;
     @FXML private Button btnReview;
     @FXML private Button btnContracts;
+    @FXML private javafx.scene.control.Label bannerTitle;
+    @FXML private javafx.scene.control.Label bannerSubtitle;
 
     private final ContractService contractService = new ContractService();
     private final CollabRequestService requestService = new CollabRequestService();
@@ -25,6 +28,24 @@ public class DashboardController {
     @FXML
     public void initialize() {
         showHub();
+        applyAiBackground();
+    }
+
+    private void applyAiBackground() {
+        new Thread(() -> {
+            javafx.scene.image.Image bg = utils.GeminiImageService.generateHeroBackground("Advanced network intelligence, digital connection nodes, futuristic data visualization, cinematic photographic style");
+            if (bg != null) {
+                javafx.application.Platform.runLater(() -> {
+                    heroBanner.setBackground(new javafx.scene.layout.Background(
+                        new javafx.scene.layout.BackgroundImage(bg, 
+                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
+                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
+                            javafx.scene.layout.BackgroundPosition.CENTER, 
+                            new javafx.scene.layout.BackgroundSize(100, 100, true, true, true, true))
+                    ));
+                });
+            }
+        }).start();
     }
 
     @FXML
@@ -128,5 +149,40 @@ public class DashboardController {
         btnReview.getStyleClass().remove("tab-btn-active");
         btnContracts.getStyleClass().remove("tab-btn-active");
         if (activeBtn != null) activeBtn.getStyleClass().add("tab-btn-active");
+        
+        // Dynamic Banner Update
+        if (activeBtn == btnHub) {
+            updateBanner("Network Intelligence Central", 
+                         "Monitoring the global ecosystem and partnership velocity.", 
+                         "Advanced network intelligence, digital connection nodes, futuristic data visualization");
+        } else if (activeBtn == btnReview) {
+            updateBanner("Collaboration Review Center", 
+                         "Evaluate and optimize creator-partner proposals.", 
+                         "Professional business review, collaborative digital workspace, executive decision making");
+        } else if (activeBtn == btnContracts) {
+            updateBanner("Legal Registry & Protocols", 
+                         "Secure management of multi-party agreements and lifecycle.", 
+                         "Legal documents, architectural business setting, formal corporate agreement atmosphere");
+        }
+    }
+
+    private void updateBanner(String title, String subtitle, String aiPrompt) {
+        if (bannerTitle != null) bannerTitle.setText(title);
+        if (bannerSubtitle != null) bannerSubtitle.setText(subtitle);
+        
+        new Thread(() -> {
+            javafx.scene.image.Image bg = utils.GeminiImageService.generateHeroBackground(aiPrompt + ", cinematic photographic style");
+            if (bg != null) {
+                javafx.application.Platform.runLater(() -> {
+                    heroBanner.setBackground(new javafx.scene.layout.Background(
+                        new javafx.scene.layout.BackgroundImage(bg, 
+                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
+                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
+                            javafx.scene.layout.BackgroundPosition.CENTER, 
+                            new javafx.scene.layout.BackgroundSize(100, 100, true, true, true, true))
+                    ));
+                });
+            }
+        }).start();
     }
 }
