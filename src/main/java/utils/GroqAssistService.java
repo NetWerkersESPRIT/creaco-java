@@ -9,8 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GroqAssistService {
-    // API key and endpoint are managed centrally in GroqConfig.
-    // To update your key go to: utils/GroqConfig.java
     private static final String API_KEY = GroqConfig.API_KEY;
     private static final String API_URL = GroqConfig.API_URL;
 
@@ -69,11 +67,11 @@ public class GroqAssistService {
                 return "Failed to parse API response.";
             } else {
                 System.err.println("Groq API Error: " + response.statusCode() + " - " + response.body());
-                return originalText; // Return original if API fails
+                return originalText;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return originalText; // Return original on error
+            return originalText;
         }
     }
 }

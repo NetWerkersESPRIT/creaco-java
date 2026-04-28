@@ -31,8 +31,9 @@ public class ReviewDetailController {
 
     private final CollabRequestService requestService = new CollabRequestService();
     private final CollaboratorService partnerService = new CollaboratorService();
-    private final UserService userService = new UserService();
+    private final services.UserService userService = new services.UserService();
     private final services.ContractService contractService = new services.ContractService();
+    private final services.NotificationService notificationService = new services.NotificationService();
     
     private CollabRequest currentRequest;
     private Runnable onBackRequested;
@@ -109,6 +110,13 @@ public class ReviewDetailController {
                     generateContract(currentRequest);
                 }
             }
+
+            // Notify Creator of status change
+            notificationService.notifyCollabRequestStatus(
+                currentRequest.getCreatorId(), 
+                status, 
+                partnerNameLabel.getText()
+            );
             
             setRequest(currentRequest); // Refresh UI
             

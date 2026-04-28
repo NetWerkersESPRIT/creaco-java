@@ -10,10 +10,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-<VBox spacing="25.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.contract.ViewContractController">
+<VBox spacing="25.0" VBox.vgrow="ALWAYS"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="gui.collab.contract.ViewContractController">
     <children>
-        <!-- Hero Banner for Consultation -->
-        <VBox styleClass="hero-banner" style="-fx-background-image: url('@../../assets/hero_banner_partners.png');">
+
+        <!-- ── Hero Banner ──────────────────────────────────────────────── -->
+        <VBox styleClass="hero-banner"
+              style="-fx-background-image: url('@../../assets/hero_banner_partners.png');">
             <children>
                 <VBox VBox.vgrow="ALWAYS" styleClass="hero-overlay">
                     <children>
@@ -21,7 +26,7 @@
                             <children>
                                 <VBox styleClass="hero-content-box">
                                     <children>
-                                        <Label styleClass="hero-title" text="Contract Consultation" />
+                                        <Label styleClass="hero-title" text="Contract Consultation"/>
                                     </children>
                                 </VBox>
                             </children>
@@ -31,156 +36,321 @@
             </children>
         </VBox>
 
+        <!-- ── Main content row ─────────────────────────────────────────── -->
         <HBox spacing="25.0" VBox.vgrow="ALWAYS">
             <children>
-                <!-- Main Contractual Document Card -->
+
+                <!-- ── Left: Contractual Document card ──────────────────── -->
                 <VBox spacing="0.0" styleClass="card" HBox.hgrow="ALWAYS">
                     <children>
-                        <!-- Card Header -->
-                        <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-padding: 0 0 20 0;">
+
+                        <!-- Card header -->
+                        <HBox alignment="CENTER_LEFT" spacing="15.0"
+                              style="-fx-padding: 0 0 20 0;">
                             <children>
                                 <VBox spacing="2.0">
                                     <children>
-                                        <Label text="Contractual Document" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1e293b;" />
-                                        <Label text="Official collaboration record" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" />
+                                        <Label text="Contractual Document"
+                                               style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1e293b;"/>
+                                        <Label text="Official collaboration record"
+                                               style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;"/>
                                     </children>
                                 </VBox>
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Label fx:id="refLabel" text="REF: CONT-2026-..." style="-fx-background-color: #f1f5f9; -fx-padding: 5 15; -fx-background-radius: 5; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px; -fx-border-color: #e2e8f0; -fx-border-radius: 5;" />
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="refLabel" text="REF: CONT-2026-…"
+                                       style="-fx-background-color: #f1f5f9; -fx-padding: 5 15;
+                                              -fx-background-radius: 5; -fx-text-fill: #64748b;
+                                              -fx-font-weight: bold; -fx-font-size: 11px;
+                                              -fx-border-color: #e2e8f0; -fx-border-radius: 5;"/>
                             </children>
                         </HBox>
 
-                        <Separator />
+                        <Separator/>
 
-                        <!-- Contract Content Area -->
-                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 20 0 0 0;">
+                        <!-- Contract content -->
+                        <ScrollPane fitToWidth="true"
+                                    style="-fx-background-color: transparent;
+                                           -fx-background: transparent;
+                                           -fx-padding: 20 0 0 0;">
                             <content>
                                 <VBox spacing="30.0" style="-fx-padding: 10;">
                                     <children>
-                                        <!-- Document Header -->
+
+                                        <!-- Document header -->
                                         <HBox alignment="TOP_LEFT">
                                             <children>
                                                 <VBox spacing="5.0">
                                                     <children>
-                                                        <Label text="⚖ SERVICE CONTRACT" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #1e293b; -fx-letter-spacing: 1;" />
-                                                        <Label fx:id="protocolLabel" text="DIGITAL PROTOCOL #CONT-..." style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;" />
+                                                        <Label text="⚖ SERVICE CONTRACT"
+                                                               style="-fx-font-weight: bold; -fx-font-size: 15px;
+                                                                      -fx-text-fill: #1e293b;"/>
+                                                        <Label fx:id="protocolLabel"
+                                                               text="DIGITAL PROTOCOL #CONT-…"
+                                                               style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
                                                     </children>
                                                 </VBox>
-                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Region HBox.hgrow="ALWAYS"/>
                                                 <VBox alignment="TOP_RIGHT" spacing="2.0">
                                                     <children>
-                                                        <Label text="CreaCo Ecosystem" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" />
-                                                        <Label text="ISSUANCE DATE" style="-fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-font-size: 10px;" />
-                                                        <Label fx:id="issuanceDateLabel" text="22/04/2026" style="-fx-text-fill: #64748b; -fx-font-size: 12px;" />
+                                                        <Label text="CreaCo Ecosystem"
+                                                               style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;"/>
+                                                        <Label text="ISSUANCE DATE"
+                                                               style="-fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-font-size: 10px;"/>
+                                                        <Label fx:id="issuanceDateLabel" text="—"
+                                                               style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
                                                     </children>
                                                 </VBox>
                                             </children>
                                         </HBox>
 
-                                        <!-- The Provider -->
-                                        <VBox spacing="10.0" style="-fx-background-color: #fafafa; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #f1f5f9; -fx-border-radius: 10;">
+                                        <!-- Provider block -->
+                                        <VBox spacing="10.0"
+                                              style="-fx-background-color: #fafafa; -fx-padding: 20;
+                                                     -fx-background-radius: 10; -fx-border-color: #f1f5f9;
+                                                     -fx-border-radius: 10;">
                                             <children>
-                                                <Label text="THE PROVIDER" style="-fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-letter-spacing: 1;" />
-                                                <Label fx:id="providerNameLabel" text="Amazon" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;" />
-                                                <Label fx:id="providerRepLabel" text="Representative: Alex" style="-fx-text-fill: #64748b; -fx-font-size: 12px;" />
-                                                <Label text="Validated Partner Entity" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" />
+                                                <Label text="THE PROVIDER"
+                                                       style="-fx-font-weight: bold; -fx-text-fill: #94a3b8;
+                                                              -fx-font-size: 11px;"/>
+                                                <Label fx:id="providerNameLabel" text="—"
+                                                       style="-fx-font-weight: bold; -fx-font-size: 14px;
+                                                              -fx-text-fill: #1e293b;"/>
+                                                <Label fx:id="providerRepLabel" text="Representative: —"
+                                                       style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+                                                <Label text="Validated Partner Entity"
+                                                       style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;"/>
                                             </children>
                                         </VBox>
 
-                                        <!-- The Client -->
-                                        <VBox spacing="10.0" style="-fx-background-color: #fafafa; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #f1f5f9; -fx-border-radius: 10;">
+                                        <!-- Client block -->
+                                        <VBox spacing="10.0"
+                                              style="-fx-background-color: #fafafa; -fx-padding: 20;
+                                                     -fx-background-radius: 10; -fx-border-color: #f1f5f9;
+                                                     -fx-border-radius: 10;">
                                             <children>
-                                                <Label text="THE CLIENT / EMITTER" style="-fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-letter-spacing: 1;" />
-                                                <Label fx:id="clientNameLabel" text="creatorA" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;" />
-                                                <Label text="Platform Content Curator" style="-fx-text-fill: #64748b; -fx-font-size: 12px;" />
-                                                <Label text="CreaCo Verified Account" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" />
+                                                <Label text="THE CLIENT / EMITTER"
+                                                       style="-fx-font-weight: bold; -fx-text-fill: #94a3b8;
+                                                              -fx-font-size: 11px;"/>
+                                                <Label fx:id="clientNameLabel" text="—"
+                                                       style="-fx-font-weight: bold; -fx-font-size: 14px;
+                                                              -fx-text-fill: #1e293b;"/>
+                                                <Label text="Platform Content Curator"
+                                                       style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+                                                <Label text="CreaCo Verified Account"
+                                                       style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;"/>
                                             </children>
                                         </VBox>
 
-                                        <!-- Contract Sections -->
+                                        <!-- Terms -->
                                         <VBox spacing="15.0">
                                             <children>
-                                                <Label text="OBJECT OF THE CONTRACT" style="-fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-letter-spacing: 1;" />
-                                                <Text fx:id="termsText" wrappingWidth="600" style="-fx-fill: #475569; -fx-font-size: 13px;" text="Standard collaboration terms apply..." />
+                                                <Label text="OBJECT OF THE CONTRACT"
+                                                       style="-fx-font-weight: bold; -fx-text-fill: #94a3b8;
+                                                              -fx-font-size: 11px;"/>
+                                                <Text fx:id="termsText" wrappingWidth="600"
+                                                      style="-fx-fill: #475569; -fx-font-size: 13px;"
+                                                      text="Standard collaboration terms apply…"/>
                                             </children>
                                         </VBox>
+
                                     </children>
                                 </VBox>
                             </content>
                         </ScrollPane>
 
-                        <Region VBox.vgrow="ALWAYS" />
+                        <Region VBox.vgrow="ALWAYS"/>
 
                         <!-- Footer -->
-                        <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-padding: 20 0 0 0;">
+                        <HBox alignment="CENTER_LEFT" spacing="15.0"
+                              style="-fx-padding: 20 0 0 0;">
                             <children>
-                                <Button onAction="#onBack" styleClass="btn-cancel" text="BACK TO LIST" />
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Button onAction="#onDownload" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 8;" text="DOWNLOAD PDF" />
+                                <Button onAction="#onBack" styleClass="btn-cancel" text="BACK TO LIST"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button onAction="#onDownload"
+                                        style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569;
+                                               -fx-font-weight: bold; -fx-background-radius: 8;"
+                                        text="DOWNLOAD PDF"/>
                             </children>
                         </HBox>
+
                     </children>
                 </VBox>
 
-                <!-- Sharing Center Sidebar -->
-                <VBox spacing="20.0" prefWidth="300" minWidth="300" HBox.hgrow="NEVER">
+                <!-- ── Right: DocuSign e-Signature sidebar ───────────────── -->
+                <VBox spacing="16.0" prefWidth="300" minWidth="300" HBox.hgrow="NEVER">
                     <children>
                         <VBox spacing="15.0" styleClass="card">
                             <children>
+
+                                <!-- Sidebar header -->
                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
-                                        <VBox alignment="CENTER" style="-fx-background-color: -fx-primary-pink; -fx-background-radius: 8; -fx-padding: 5;">
+                                        <VBox alignment="CENTER"
+                                              style="-fx-background-color: -fx-primary-pink;
+                                                     -fx-background-radius: 8; -fx-padding: 6 8;">
                                             <children>
-                                                <Label text="📡" style="-fx-text-fill: white;" />
+                                                <Label text="✍" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
                                             </children>
                                         </VBox>
-                                        <Label text="Sharing Center" style="-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;" />
+                                        <VBox spacing="1.0">
+                                            <children>
+                                                <Label text="DocuSign e-Signature"
+                                                       style="-fx-font-weight: bold; -fx-text-fill: #334155;
+                                                              -fx-font-size: 14px;"/>
+                                                <Label text="Remote signing via email"
+                                                       style="-fx-text-fill: #94a3b8; -fx-font-size: 10px;"/>
+                                            </children>
+                                        </VBox>
                                     </children>
                                 </HBox>
 
-                                <Label text="Distribute this secure link to your collaborator. They can review and sign the document immediately upon access." wrapText="true" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;" />
+                                <Separator/>
 
-                                <VBox spacing="8.0">
+                                <!-- ── dsReadyBox: shown before sending ─── -->
+                                <VBox fx:id="dsReadyBox" spacing="12.0">
                                     <children>
-                                        <Label text="SECURE SIGNATURE URL" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" />
-                                        <HBox alignment="CENTER_LEFT" styleClass="search-bar">
+                                        <Label text="Send this contract for digital signature. DocuSign will email the Partner directly — no account required on their side."
+                                               wrapText="true"
+                                               style="-fx-text-fill: #64748b; -fx-font-size: 11px;"/>
+
+                                        <VBox spacing="5.0">
                                             <children>
-                                                <TextField fx:id="urlField" editable="false" style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" text="http://127.0.0.1:8000/public/..." />
-                                                <Label text="📋" style="-fx-cursor: hand;" />
+                                                <Label text="PARTNER NAME"
+                                                       style="-fx-font-weight: bold; -fx-text-fill: #64748b;
+                                                              -fx-font-size: 10px;"/>
+                                                <TextField fx:id="partnerNameField"
+                                                           promptText="Partner representative name"
+                                                           styleClass="form-field"/>
+                                            </children>
+                                        </VBox>
+
+                                        <VBox spacing="5.0">
+                                            <children>
+                                                <Label text="PARTNER EMAIL"
+                                                       style="-fx-font-weight: bold; -fx-text-fill: #64748b;
+                                                              -fx-font-size: 10px;"/>
+                                                <TextField fx:id="partnerEmailField"
+                                                           promptText="partner@company.com"
+                                                           styleClass="form-field"/>
+                                            </children>
+                                        </VBox>
+
+                                        <Button fx:id="btnSendDocuSign"
+                                                onAction="#onSendForSignature"
+                                                maxWidth="Infinity"
+                                                text="📩  SEND FOR SIGNATURE"
+                                                style="-fx-background-color: -fx-primary-gradient;
+                                                       -fx-text-fill: white; -fx-font-weight: bold;
+                                                       -fx-background-radius: 10; -fx-padding: 12;
+                                                       -fx-font-size: 12px;"/>
+                                    </children>
+                                </VBox>
+
+                                <!-- ── dsSentBox: shown after sending ──── -->
+                                <VBox fx:id="dsSentBox" spacing="12.0"
+                                      visible="false" managed="false">
+                                    <children>
+
+                                        <!-- Live status badge -->
+                                        <VBox spacing="6.0"
+                                              style="-fx-background-color: #f8fafc;
+                                                     -fx-border-color: #e2e8f0; -fx-border-radius: 8;
+                                                     -fx-background-radius: 8; -fx-padding: 12;">
+                                            <children>
+                                                <Label text="ENVELOPE STATUS"
+                                                       style="-fx-font-weight: bold; -fx-text-fill: #64748b;
+                                                              -fx-font-size: 10px;"/>
+                                                <Label fx:id="dsStatusLabel"
+                                                       text="🔄  Retrieving status…"
+                                                       wrapText="true"
+                                                       style="-fx-text-fill: #7c3aed; -fx-font-size: 12px;"/>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Envelope ID -->
+                                        <VBox spacing="4.0">
+                                            <children>
+                                                <Label text="ENVELOPE ID"
+                                                       style="-fx-font-weight: bold; -fx-text-fill: #94a3b8;
+                                                              -fx-font-size: 10px;"/>
+                                                <Label fx:id="dsEnvelopeIdLabel" text="—"
+                                                       wrapText="true"
+                                                       style="-fx-text-fill: #475569; -fx-font-size: 10px;
+                                                              -fx-font-family: monospace;"/>
+                                            </children>
+                                        </VBox>
+
+                                        <Button fx:id="btnSignContract"
+                                                onAction="#onSignContract"
+                                                maxWidth="Infinity"
+                                                text="✍  SIGN CONTRACT (YOU)"
+                                                style="-fx-background-color: #f1f5f9;
+                                                       -fx-text-fill: #475569; -fx-font-weight: bold;
+                                                       -fx-background-radius: 8; -fx-padding: 10;
+                                                       -fx-font-size: 11px;"/>
+
+                                        <!-- Manual refresh -->
+                                        <Button fx:id="btnCheckStatus"
+                                                onAction="#onCheckStatus"
+                                                maxWidth="Infinity"
+                                                text="↻  CHECK STATUS"
+                                                style="-fx-background-color: #f1f5f9;
+                                                       -fx-text-fill: #475569; -fx-font-weight: bold;
+                                                       -fx-background-radius: 8; -fx-padding: 10;
+                                                       -fx-font-size: 11px;"/>
+
+                                        <Label text="Status is polled automatically every 30 seconds."
+                                               wrapText="true"
+                                               style="-fx-text-fill: #94a3b8; -fx-font-size: 10px;"/>
+                                    </children>
+                                </VBox>
+
+                                <Separator/>
+
+                                <!-- How it works -->
+                                <VBox spacing="10.0"
+                                      style="-fx-background-color: #f8fafc; -fx-padding: 12;
+                                             -fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                                             -fx-border-radius: 8;">
+                                    <children>
+                                        <Label text="HOW IT WORKS"
+                                               style="-fx-font-weight: bold; -fx-text-fill: #64748b;
+                                                      -fx-font-size: 10px;"/>
+                                        <HBox spacing="8.0">
+                                            <children>
+                                                <Label text="1" style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;"/>
+                                                <Label text="Click Send — DocuSign emails the contract to the Partner."
+                                                       wrapText="true"
+                                                       style="-fx-text-fill: #64748b; -fx-font-size: 11px;"
+                                                       HBox.hgrow="ALWAYS"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox spacing="8.0">
+                                            <children>
+                                                <Label text="2" style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;"/>
+                                                <Label text="Partner clicks the link in the email and signs online."
+                                                       wrapText="true"
+                                                       style="-fx-text-fill: #64748b; -fx-font-size: 11px;"
+                                                       HBox.hgrow="ALWAYS"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox spacing="8.0">
+                                            <children>
+                                                <Label text="3" style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;"/>
+                                                <Label text="Status updates to Completed and the contract is marked as signed."
+                                                       wrapText="true"
+                                                       style="-fx-text-fill: #64748b; -fx-font-size: 11px;"
+                                                       HBox.hgrow="ALWAYS"/>
                                             </children>
                                         </HBox>
                                     </children>
                                 </VBox>
 
-                                <Button fx:id="previewBtn" maxWidth="Infinity" style="-fx-background-color: -fx-primary-gradient; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12;" text="🔗 PREVIEW SIGNATURE PAGE" />
-
-                                <VBox spacing="12.0" style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10;">
-                                    <children>
-                                        <Label text="ONBOARDING GUIDE" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 10px;" />
-                                        <HBox spacing="10.0">
-                                            <children>
-                                                <Label text="1" style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" />
-                                                <Label text="Transmit the link to your provider via your preferred channel." wrapText="true" style="-fx-text-fill: #64748b; -fx-font-size: 11px;" />
-                                            </children>
-                                        </HBox>
-                                        <HBox spacing="10.0">
-                                            <children>
-                                                <Label text="2" style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" />
-                                                <Label text="The provider verifies the details and applies their digital signature." wrapText="true" style="-fx-text-fill: #64748b; -fx-font-size: 11px;" />
-                                            </children>
-                                        </HBox>
-                                        <HBox spacing="10.0">
-                                            <children>
-                                                <Label text="3" style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" />
-                                                <Label text="The contract status updates automatically to Executed." wrapText="true" style="-fx-text-fill: #64748b; -fx-font-size: 11px;" />
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
                             </children>
                         </VBox>
                     </children>
                 </VBox>
+
             </children>
         </HBox>
     </children>
