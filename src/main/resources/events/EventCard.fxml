@@ -6,15 +6,23 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.layout.StackPane?>
 
 <HBox fx:id="cardRoot" alignment="CENTER_LEFT" spacing="15.0" styleClass="card" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.Events.EventCardController" onMouseClicked="#onCardClicked">
     <children>
-        <!-- Icon/Avatar Placeholder -->
-        <VBox alignment="CENTER" styleClass="card-icon-container">
+        <!-- Image/Icon Container -->
+        <StackPane prefHeight="90.0" prefWidth="90.0" styleClass="card-icon-container">
             <children>
-                <Label fx:id="lblIcon" style="-fx-text-fill: white; -fx-font-size: 20px;" text="📅" />
+                <Label fx:id="lblIcon" style="-fx-text-fill: white; -fx-font-size: 28px;" text="📅" />
+                <ImageView fx:id="imgEvent" fitHeight="90.0" fitWidth="90.0" preserveRatio="false">
+                    <clip>
+                        <Rectangle arcHeight="25.0" arcWidth="25.0" height="90.0" width="90.0" />
+                    </clip>
+                </ImageView>
             </children>
-        </VBox>
+        </StackPane>
 
         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
             <children>
@@ -34,6 +42,9 @@
                         <HBox alignment="CENTER_LEFT" spacing="5.0">
                             <Label style="-fx-text-fill: -fx-text-muted;" text="👥" />
                             <Label fx:id="lblCapacity" styleClass="card-subtitle" text="100" />
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="5.0">
+                            <Label fx:id="lblWeather" styleClass="card-subtitle" style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" text="" />
                         </HBox>
                     </children>
                 </HBox>
