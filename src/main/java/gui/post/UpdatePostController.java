@@ -405,23 +405,6 @@ public class UpdatePostController {
     }
 
     @FXML
-    private void onDictateTitle() { startDictation(titleField); }
-    @FXML
-    private void onDictateContent() { startDictation(contentArea); }
-
-    private void startDictation(javafx.scene.control.TextInputControl target) {
-        new Thread(() -> {
-            try {
-                String script = "$code = '[DllImport(\"user32.dll\")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);'; "
-                        + "$type = Add-Type -MemberDefinition $code -Name 'Win32' -Namespace 'External' -PassThru; "
-                        + "$type::keybd_event(0x5B, 0, 0, 0); $type::keybd_event(0x48, 0, 0, 0); "
-                        + "$type::keybd_event(0x48, 0, 2, 0); $type::keybd_event(0x5B, 0, 2, 0);";
-                new ProcessBuilder("powershell.exe", "-Command", script).start();
-            } catch (Exception e) { e.printStackTrace(); }
-        }).start();
-    }
-
-    @FXML
     public void onOpenProfile(javafx.scene.input.MouseEvent event) {
         try {
             StackPane area = findContentArea((Node) event.getSource());

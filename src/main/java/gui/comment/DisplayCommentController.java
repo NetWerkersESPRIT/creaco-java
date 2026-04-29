@@ -142,22 +142,32 @@ public class DisplayCommentController {
         commentsContainer.getChildren().clear();
         try {
             List<Comment> allComments = commentService.getCommentsByPost(currentPost.getId());
-            repliesBadge.setText("• " + allComments.size() + " comments");
             
-            if (allComments.isEmpty()) {
+            Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            int curUserId = (currentUser != null) ? currentUser.getId() : -1;
+            boolean isPostOwner = (currentPost.getUserId() == curUserId);
+
+            // Filter comments: Hide "HIDDEN" comments unless you are the owner or post owner
+            List<Comment> visibleComments = allComments.stream()
+                    .filter(c -> !"HIDDEN".equals(c.getStatus()) || c.getUserId() == curUserId || isPostOwner || isAdminMode)
+                    .collect(Collectors.toList());
+
+            repliesBadge.setText("• " + visibleComments.size() + " comments");
+            
+            if (visibleComments.isEmpty()) {
                 commentsContainer.getChildren().add(emptyState);
                 emptyState.setVisible(true);
                 return;
             }
             emptyState.setVisible(false);
 
-            List<Comment> roots = allComments.stream()
+            List<Comment> roots = visibleComments.stream()
                     .filter(c -> c.getParentCommentId() == null)
                     .sorted((c1, c2) -> c2.getCreatedAt().compareTo(c1.getCreatedAt()))
                     .collect(Collectors.toList());
 
             for (Comment root : roots) {
-                renderCommentThread(root, allComments, 0);
+                renderCommentThread(root, visibleComments, 0);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -221,8 +231,18 @@ public class DisplayCommentController {
         commentLine.setMaxWidth(Double.MAX_VALUE);
         javafx.scene.text.Text uTxt = new javafx.scene.text.Text(username + " ");
         uTxt.setStyle("-fx-font-weight: bold; -fx-fill: #1a1a2e; -fx-font-size: 13px;");
-        javafx.scene.text.Text bTxt = new javafx.scene.text.Text(textContent);
-        bTxt.setStyle("-fx-fill: #4a5568; -fx-font-size: 13px;");
+        
+        String finalContent = textContent;
+        if ("HIDDEN".equals(comment.getStatus())) {
+            finalContent = "[HIDDEN BY POST OWNER] " + textContent;
+        }
+        
+        javafx.scene.text.Text bTxt = new javafx.scene.text.Text(finalContent);
+        if ("HIDDEN".equals(comment.getStatus())) {
+            bTxt.setStyle("-fx-fill: #94a3b8; -fx-font-style: italic; -fx-font-size: 13px;");
+        } else {
+            bTxt.setStyle("-fx-fill: #4a5568; -fx-font-size: 13px;");
+        }
         commentLine.getChildren().addAll(uTxt, bTxt);
         contentCol.getChildren().add(commentLine);
 
@@ -309,14 +329,25 @@ public class DisplayCommentController {
             saveE.setOnAction(e -> { String nb = editTextArea.getText(); if (nb != null && !nb.trim().isEmpty()) submitEdit(comment, nb); });
         }
 
-        // Delete button
-        if (comment.getUserId() == curUserId || isAdminMode || isPostOwner) {
+        // Delete button (Only Comment Owner can delete now)
+        if (comment.getUserId() == curUserId) {
             Button deleteBtn = new Button("Delete");
             deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;");
             deleteBtn.setOnMouseEntered(e -> deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
             deleteBtn.setOnMouseExited(e -> deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
             deleteBtn.setOnAction(e -> deleteComment(comment.getId()));
             metaRow.getChildren().add(deleteBtn);
+        }
+
+        // Hide/Unhide button (Only Post Owner can hide)
+        if (isPostOwner && comment.getUserId() != curUserId) {
+            boolean isHidden = "HIDDEN".equals(comment.getStatus());
+            Button hideBtn = new Button(isHidden ? "Unhide" : "Hide");
+            hideBtn.setStyle("-fx-font-weight: bold; " + metaStyle);
+            hideBtn.setOnMouseEntered(e -> hideBtn.setStyle("-fx-font-weight: bold; " + metaHover));
+            hideBtn.setOnMouseExited(e -> hideBtn.setStyle("-fx-font-weight: bold; " + metaStyle));
+            hideBtn.setOnAction(e -> toggleHideComment(comment));
+            metaRow.getChildren().add(hideBtn);
         }
         contentCol.getChildren().add(metaRow);
 
@@ -631,6 +662,23 @@ public class DisplayCommentController {
         });
         
         new Thread(task).start();
+    }
+
+    private void toggleHideComment(Comment comment) {
+        String action = "HIDDEN".equals(comment.getStatus()) ? "Unhide" : "Hide";
+        if (gui.util.AlertHelper.showCustomAlert(action + "?", "Are you sure you want to " + action.toLowerCase() + " this comment?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+            try {
+                if ("HIDDEN".equals(comment.getStatus())) {
+                    comment.setStatus("APPROVED");
+                } else {
+                    comment.setStatus("HIDDEN");
+                }
+                commentService.modifier(comment.getId(), comment);
+                loadCommentsByPost();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void deleteComment(int id) {
