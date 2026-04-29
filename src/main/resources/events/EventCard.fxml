@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.layout.Region?>
+
+<HBox fx:id="cardRoot" alignment="CENTER_LEFT" spacing="15.0" styleClass="card" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.Events.EventCardController" onMouseClicked="#onCardClicked">
+    <children>
+        <!-- Icon/Avatar Placeholder -->
+        <VBox alignment="CENTER" styleClass="card-icon-container">
+            <children>
+                <Label fx:id="lblIcon" style="-fx-text-fill: white; -fx-font-size: 20px;" text="📅" />
+            </children>
+        </VBox>
+
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <children>
+                <Label fx:id="lblName" styleClass="card-title" text="Event Name" />
+                <HBox spacing="10.0">
+                    <children>
+                        <Label fx:id="lblType" styleClass="badge-pink" text="Type" />
+                        <Label fx:id="lblCategory" style="-fx-text-fill: -fx-text-muted; -fx-font-size: 12px;" text="Category" />
+                    </children>
+                </HBox>
+                <HBox spacing="15.0">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="5.0">
+                            <Label style="-fx-text-fill: -fx-text-muted;" text="📅" />
+                            <Label fx:id="lblDate" styleClass="card-subtitle" text="2024-05-10" />
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="5.0">
+                            <Label style="-fx-text-fill: -fx-text-muted;" text="👥" />
+                            <Label fx:id="lblCapacity" styleClass="card-subtitle" text="100" />
+                        </HBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <VBox alignment="CENTER_RIGHT" spacing="5.0">
+            <children>
+                <Label style="-fx-text-fill: -fx-text-muted; -fx-font-size: 11px;" text="ORGANIZER" />
+                <Label fx:id="lblOrganizer" style="-fx-font-weight: bold; -fx-text-fill: -fx-text-main;" text="John Doe" />
+            </children>
+        </VBox>
+    </children>
+    <padding>
+        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+    </padding>
+</HBox>
