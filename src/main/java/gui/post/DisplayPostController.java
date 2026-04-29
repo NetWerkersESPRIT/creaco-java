@@ -82,6 +82,8 @@ public class DisplayPostController {
     private boolean isAdminMode = false;
     private boolean initialized = false;
 
+    private Process currentSpeechProcess;
+
     /**
      * Tracks the current user's active reaction per post (postId → ReactionType or
      * null).
@@ -527,7 +529,12 @@ public class DisplayPostController {
             java.util.Map<ReactionType, Integer> counts = postService.getReactionCounts(postId);
             int total = counts.values().stream().mapToInt(Integer::intValue).sum();
             if (total > 0) {
-                lbl.setText(total + " reactions");
+                String summary = counts.entrySet().stream()
+                        .filter(e -> e.getValue() > 0)
+                        .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+                        .map(e -> e.getKey().getEmoji() + " " + capitalize(e.getKey().name()))
+                        .collect(Collectors.joining(", "));
+                lbl.setText(summary + " (" + total + ")");
             } else {
                 lbl.setText("");
             }
@@ -565,6 +572,10 @@ public class DisplayPostController {
     }
 
     private void speak(String text) {
+        if (currentSpeechProcess != null && currentSpeechProcess.isAlive()) {
+            currentSpeechProcess.destroyForcibly();
+        }
+
         new Thread(() -> {
             try {
                 // Escape single quotes for PowerShell
@@ -572,7 +583,7 @@ public class DisplayPostController {
                 String script = "Add-Type -AssemblyName System.Speech; "
                         + "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
                         + "$speak.Speak('" + escapedText + "')";
-                new ProcessBuilder("powershell.exe", "-Command", script).start();
+                currentSpeechProcess = new ProcessBuilder("powershell.exe", "-Command", script).start();
             } catch (Exception e) {
                 e.printStackTrace();
             }

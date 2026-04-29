@@ -507,48 +507,6 @@ public class AddPostController {
         gui.util.AlertHelper.showCustomAlert(title, content, customType);
     }
     @FXML
-    private void onDictateTitle() {
-        startDictation(titleField);
-    }
-
-    @FXML
-    private void onDictateContent() {
-        startDictation(contentArea);
-    }
-
-    private void startDictation(Object target) {
-        new Thread(() -> {
-            try {
-                String command = "Add-Type -AssemblyName System.Speech; " +
-                        "$sim = New-Object System.Speech.Recognition.SpeechRecognitionEngine; " +
-                        "$sim.SetInputToDefaultAudioDevice(); " +
-                        "$sim.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar)); " +
-                        "$result = $sim.Recognize(); " +
-                        "if ($result -ne $null) { $result.Text }";
-
-                ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-Command", command);
-                Process p = pb.start();
-
-                try (Scanner s = new Scanner(p.getInputStream()).useDelimiter("\\A")) {
-                    String result = s.hasNext() ? s.next().trim() : "";
-
-                    if (!result.isEmpty()) {
-                        Platform.runLater(() -> {
-                            if (target instanceof TextField) {
-                                ((TextField) target).setText(result);
-                            } else if (target instanceof TextArea) {
-                                ((TextArea) target).setText(result);
-                            }
-                        });
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println("Speech recognition error: " + e.getMessage());
-            }
-        }).start();
-    }
-
-    @FXML
     public void onOpenProfile(javafx.scene.input.MouseEvent event) {
         try {
             StackPane area = findContentArea((Node) event.getSource());
