@@ -228,15 +228,33 @@ public class DisplayCommentController {
 
         // GIF (if any)
         if (gifUrl != null) {
-            ImageView gifView = new ImageView(new Image(gifUrl, true));
-            gifView.setFitWidth(200);
+            ImageView gifView = new ImageView();
+            gifView.setFitWidth(350); // Final size for better impact
             gifView.setPreserveRatio(true);
+            gifView.setSmooth(true);
+            
+            // Placeholder background
+            gifView.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 15;");
+            
+            // Use background loading
+            Image img = new Image(gifUrl, true);
+            gifView.setImage(img);
+
+            // Rounded corners clip
             javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
-            clip.setArcWidth(16); clip.setArcHeight(16);
-            gifView.imageProperty().addListener((obs, o, nv) -> {
-                if (nv != null) { clip.setWidth(gifView.getFitWidth()); clip.setHeight(nv.getHeight() * (gifView.getFitWidth() / nv.getWidth())); }
+            clip.setArcWidth(20);
+            clip.setArcHeight(20);
+            
+            // Sync clip size
+            gifView.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+                clip.setWidth(newBounds.getWidth());
+                clip.setHeight(newBounds.getHeight());
             });
+            
             gifView.setClip(clip);
+            
+            // Spacing
+            VBox.setMargin(gifView, new Insets(8, 0, 8, 0));
             contentCol.getChildren().add(gifView);
         }
 
@@ -742,6 +760,13 @@ public class DisplayCommentController {
             controller.setOnGifSelected(gifUrl -> {
                 gifPreview.setImage(new Image(gifUrl, true));
                 gifPreview.setUserData(gifUrl);
+                
+                // Add rounded corners to preview
+                javafx.scene.shape.Rectangle previewClip = new javafx.scene.shape.Rectangle(gifPreview.getFitWidth(), gifPreview.getFitHeight());
+                previewClip.setArcWidth(12);
+                previewClip.setArcHeight(12);
+                gifPreview.setClip(previewClip);
+                
                 attachmentPreview.setVisible(true);
                 attachmentPreview.setManaged(true);
             });

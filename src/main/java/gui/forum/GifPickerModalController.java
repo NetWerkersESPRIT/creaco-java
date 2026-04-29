@@ -57,8 +57,12 @@ public class GifPickerModalController {
     }
 
     private void performSearch(String query) {
+        System.out.println("🔍 UI: Performing search for: " + query);
         showLoading(true);
-        gifService.searchGifs(query).thenAccept(this::displayGifs);
+        gifService.searchGifs(query).thenAccept(urls -> {
+            System.out.println("🔍 UI: Received " + urls.size() + " GIFs for query: " + query);
+            displayGifs(urls);
+        });
     }
 
     private void displayGifs(List<String> urls) {

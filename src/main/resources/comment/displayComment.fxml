@@ -122,19 +122,20 @@
                     <!-- Current User Avatar -->
                     <StackPane fx:id="currentUserAvatarContainer" />
 
-                    <!-- Emoji Button -->
-                    <Button onAction="#openEmojiPicker"
-                            style="-fx-background-color: transparent; -fx-font-size: 22px; -fx-cursor: hand; -fx-padding: 0;"
-                            text="😊" />
-
-                    <!-- Pill text field -->
+                    <!-- Pill text field with Emoji and GIF inside -->
                     <HBox alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS"
                           style="-fx-background-color: #f1f5f9; -fx-background-radius: 22; -fx-padding: 8 14 8 14;">
                         <children>
+                            <!-- Emoji Button inside pill -->
+                            <Button onAction="#openEmojiPicker"
+                                    style="-fx-background-color: transparent; -fx-font-size: 18px; -fx-cursor: hand; -fx-padding: 0;"
+                                    text="😊" />
+
                             <TextArea fx:id="commentArea" prefHeight="32.0" maxHeight="80.0"
                                       promptText="Add a comment..."
                                       style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent; -fx-text-fill: #1a1a2e; -fx-font-size: 13px; -fx-prompt-text-fill: #94a3b8;"
                                       wrapText="true" HBox.hgrow="ALWAYS" />
+
                             <!-- GIF inside pill -->
                             <Button onAction="#openGifPicker"
                                     style="-fx-background-color: #e2e8f0; -fx-background-radius: 8; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 4 8; -fx-cursor: hand;"
