@@ -14,7 +14,7 @@ public class FxApplication extends Application {
     public void start(Stage stage) throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader(
-                FxApplication.class.getResource("/Users/SignIn.fxml")
+                FxApplication.class.getResource("/Users/Welcome.fxml")
         );
 
         Parent root = fxmlLoader.load();

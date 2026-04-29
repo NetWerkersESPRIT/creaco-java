@@ -57,4 +57,12 @@ public class NotificationDAO {
         ps.setInt(1, notificationId);
         ps.executeUpdate();
     }
+
+    public void updateStatus(int id, String status) throws SQLException {
+        String sql = "UPDATE notification SET status = ? WHERE id = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, status);
+        ps.setInt(2, id);
+        ps.executeUpdate();
+    }
 }
