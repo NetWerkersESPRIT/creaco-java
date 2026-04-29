@@ -12,7 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import services.forum.PostService;
 import services.UserService;
-import services.forum.SpamDetectionService;
+import utils.SpamDetectionService;
 import services.NotificationService;
 
 import java.sql.SQLException;
@@ -178,7 +178,7 @@ public class PostModerationController {
         String date = (post.getCreatedAt() != null) ? post.getCreatedAt().format(metaFormatter).toUpperCase() : "-";
         detailDateLabel.setText(date);
 
-        detailStatusLabel.setText("PENDING");
+        detailStatusLabel.setText(post.getStatus());
         detailContentLabel.setText(post.getContent());
 
         boolean hasPinReq = postService.isPinRequested(post.getId());
@@ -233,7 +233,7 @@ public class PostModerationController {
                 } else {
                     postService.rejectPinRequest(selectedPost.getId());
                 }
-                selectedPost.setStatus("ACCEPTED");
+                selectedPost.setStatus("APPROVED");
                 postService.updatePostStatus(selectedPost);
                 
                 // Notify User
@@ -247,7 +247,7 @@ public class PostModerationController {
         } else {
             if (gui.util.AlertHelper.showCustomAlert("Approve?", "Make this post public?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
                 try {
-                    selectedPost.setStatus("ACCEPTED");
+                    selectedPost.setStatus("APPROVED");
                     postService.updatePostStatus(selectedPost);
                     
                     // Notify User

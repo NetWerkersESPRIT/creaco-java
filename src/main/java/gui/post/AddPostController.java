@@ -32,7 +32,9 @@ import javafx.scene.paint.Color;
 import services.forum.UserPostValidator;
 import entities.forum.SentimentResult;
 import gui.forum.CatMatchGame;
-import services.forum.SpamDetectionService;
+import utils.SpamDetectionService;
+import utils.TextCorrectionService;
+import utils.DetectBadWordService;
 
 public class AddPostController {
 
@@ -160,9 +162,9 @@ public class AddPostController {
         icon.setStyle("-fx-font-size: 28px; -fx-text-fill: #475569; -fx-font-weight: bold;");
 
         VBox titles = new VBox(8);
-        Label title = new Label("It seems you're feeling a bit frustrated...");
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #334155;");
-        Label sub = new Label("Your words carry some heat. Take a moment to breathe! This advice is not a substitute for professional help.");
+        Label title = new Label("Whoa! It seems you're feeling quite angry...");
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #b91c1c;"); // Redder text for angry
+        Label sub = new Label("Your words carry a lot of heat! Why not cool down with a quick game before posting? It might help you feel better!");
         sub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px;");
         sub.setWrapText(true);
         titles.getChildren().addAll(title, sub);
@@ -280,21 +282,30 @@ public class AddPostController {
         Task<Post> saveTask = new Task<>() {
             @Override
             protected Post call() throws Exception {
-                // 1. Text Correction (External API - Blocking)
-                String title = services.forum.TextCorrectionService.correctText(titleRaw);
-                String content = services.forum.TextCorrectionService.correctText(contentRaw);
+                // 1. Text Correction (External API - Spelling/Grammar)
+                String titleCorrected = TextCorrectionService.correctText(titleRaw);
+                String contentCorrected = TextCorrectionService.correctText(contentRaw);
 
-                // 2. Spam Detection (Blocking)
-                int spamScore = spamService.calculateSpamScore(title + " " + content);
+                // 2. Content Moderation (TextGears - Profanity Masking)
+                DetectBadWordService.ModerationResult titleMod = DetectBadWordService.moderate(titleCorrected).join();
+                DetectBadWordService.ModerationResult contentMod = DetectBadWordService.moderate(contentCorrected).join();
+
+                // 3. Spam Detection (Blocking)
+                int spamScore = spamService.calculateSpamScore(titleMod.moderatedText + " " + contentMod.moderatedText);
 
                 Post post = new Post();
-                post.setTitle(title);
-                post.setContent(content);
+                post.setTitle(titleMod.moderatedText);
+                post.setContent(contentMod.moderatedText);
                 post.setSpamScore(spamScore);
                 post.setSpam(spamScore >= 40);
+                post.setProfane(titleMod.isProfane || contentMod.isProfane);
+                post.setProfaneWords(titleMod.profaneWordsCount + contentMod.profaneWordsCount);
+                post.setGrammarErrors(titleMod.grammarErrorsCount + contentMod.grammarErrorsCount);
 
                 if (isAdminMode) {
-                    post.setStatus("ACCEPTED");
+                    post.setStatus("APPROVED");
+                } else if (post.isProfane() || post.isSpam()) {
+                    post.setStatus("FLAGGED");
                 } else {
                     post.setStatus("PENDING");
                 }
