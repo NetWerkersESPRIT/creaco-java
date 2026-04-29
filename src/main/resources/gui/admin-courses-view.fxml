@@ -81,11 +81,11 @@
                             </children>
                         </VBox>
 
-                        <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+                        <HBox spacing="20.0" VBox.vgrow="ALWAYS" alignment="TOP_LEFT">
                             <!-- Left: Grid -->
                             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="true" style="-fx-background: transparent; -fx-background-color: transparent;" HBox.hgrow="ALWAYS">
                                 <content>
-                                    <FlowPane fx:id="coursesContainer" hgap="24.0" vgap="24.0" prefWrapLength="1000">
+                                    <FlowPane fx:id="coursesContainer" alignment="TOP_CENTER" hgap="24.0" vgap="24.0" prefWrapLength="1000">
                                         <padding>
                                             <Insets bottom="20.0" left="5.0" right="5.0" top="10.0" />
                                         </padding>
@@ -94,7 +94,7 @@
                             </ScrollPane>
 
                             <!-- Right: AI Course Studio -->
-                            <VBox styleClass="card" prefWidth="320" minWidth="320" maxWidth="320" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #ffffff, #f8fafc); -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5); -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-border-width: 1;">
+                            <VBox styleClass="card" prefWidth="350" minWidth="350" maxWidth="350" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #ffffff, #f8fafc); -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5); -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-border-width: 1;">
                                 <HBox spacing="10" alignment="CENTER_LEFT">
                                     <Label text="✨" style="-fx-font-size: 20px;"/>
                                     <VBox>

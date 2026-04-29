@@ -241,8 +241,8 @@ public class MainController {
     private Node buildCourseCard(Course course) {
         VBox card = new VBox(15);
         card.getStyleClass().add("card");
-        card.setPrefWidth(320);
-        card.setMinWidth(320);
+        card.setPrefWidth(390);
+        card.setMinWidth(390);
 
         HBox header = new HBox(15);
         header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
