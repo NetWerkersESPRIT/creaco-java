@@ -188,7 +188,9 @@ public class CoursesController {
         categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 10px;");
         titleBox.getChildren().addAll(categoryLabel, titleLabel);
 
-        Label descriptionLabel = new Label(course.getDescription() != null ? course.getDescription() : "No description available.");
+        String descText = course.getDescription() != null ? stripHtmlTags(course.getDescription()) : "No description available.";
+        if (descText.isBlank()) descText = "No description available.";
+        Label descriptionLabel = new Label(descText);
         descriptionLabel.setWrapText(true);
         descriptionLabel.setMinHeight(40);
         descriptionLabel.setMaxHeight(40);
@@ -478,5 +480,10 @@ public class CoursesController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String stripHtmlTags(String html) {
+        if (html == null) return "";
+        return html.replaceAll("<[^>]*>", "").replace("&nbsp;", " ").trim();
     }
 }

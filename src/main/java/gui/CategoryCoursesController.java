@@ -143,7 +143,7 @@ public class CategoryCoursesController {
         title.setWrapText(true);
         title.getStyleClass().add("card-title");
 
-        Label description = new Label(shorten(safeText(course.getDescription()), 95));
+        Label description = new Label(shorten(stripHtmlTags(safeText(course.getDescription())), 95));
         description.setMinWidth(430);
         description.setWrapText(true);
         description.getStyleClass().add("card-subtitle");
@@ -161,8 +161,6 @@ public class CategoryCoursesController {
         Button resourcesButton = createIconButton("fas-layer-group", "btn-action-dark");
         Button editButton = createIconButton("fas-edit", "btn-action-dark");
         Button deleteButton = createIconButton("fas-trash-alt", "btn-action-light");
-        
-        deleteButton.setStyle("-fx-text-fill: #ef4444;");
 
         resourcesButton.setOnAction(event -> openResources(course, row));
         editButton.setOnAction(event -> openEditForm(course, row));
@@ -189,21 +187,19 @@ public class CategoryCoursesController {
     private Button createIconButton(String iconCode, String colorClass) {
         Button button = new Button();
         FontIcon icon = new FontIcon(iconCode);
-        icon.setIconSize(18);
+        icon.setIconSize(20);
+        
+        String baseStyle = "-fx-min-width: 44px; -fx-min-height: 44px; -fx-max-width: 44px; -fx-max-height: 44px; -fx-background-radius: 12px; -fx-cursor: hand; -fx-alignment: center; -fx-padding: 0;";
         
         if ("btn-action-dark".equals(colorClass)) {
             icon.setIconColor(Color.WHITE);
+            button.setStyle(baseStyle + " -fx-background-color: #2d3748;");
+        } else {
+            icon.setIconColor(Color.BLACK);
+            button.setStyle(baseStyle + " -fx-background-color: #f1f5f9;");
         }
         
         button.setGraphic(icon);
-        button.getStyleClass().addAll("btn-action", colorClass);
-        button.setPadding(new Insets(5, 10, 5, 10));
-        return button;
-    }
-
-    private Button createActionButton(String text, String colorClass) {
-        Button button = new Button(text);
-        button.getStyleClass().addAll("btn-action", colorClass);
         return button;
     }
 
@@ -262,6 +258,11 @@ public class CategoryCoursesController {
 
     private String safeText(String value) {
         return value == null || value.isBlank() ? "-" : value;
+    }
+
+    private String stripHtmlTags(String html) {
+        if (html == null) return "";
+        return html.replaceAll("<[^>]*>", "").replace("&nbsp;", " ").trim();
     }
 
     private String shorten(String value, int maxLength) {

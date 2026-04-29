@@ -98,7 +98,7 @@ public class CourseCategoryListController {
         slugLabel.getStyleClass().add("card-subtitle");
         nameBox.getChildren().addAll(nameLabel, slugLabel);
 
-        Label descriptionLabel = new Label(safeText(category.getDescription()));
+        Label descriptionLabel = new Label(stripHtmlTags(safeText(category.getDescription())));
         descriptionLabel.setWrapText(true);
         descriptionLabel.setMinWidth(360);
         descriptionLabel.getStyleClass().add("card-subtitle");
@@ -116,9 +116,9 @@ public class CourseCategoryListController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actionsBox = new HBox(10);
-        Button coursesButton = createActionButton("Courses", "btn-action-dark");
-        Button editButton = createActionButton("Edit", "btn-action-dark");
-        Button deleteButton = createActionButton("Delete", "btn-action-light");
+        Button coursesButton = createIconButton("fas-layer-group", "btn-action-dark");
+        Button editButton = createIconButton("fas-edit", "btn-action-dark");
+        Button deleteButton = createIconButton("fas-trash-alt", "btn-action-light");
 
         coursesButton.setOnAction(event -> openScene("/gui/category-courses-view.fxml", controller -> {
             CategoryCoursesController coursesController = (CategoryCoursesController) controller;
@@ -148,26 +148,22 @@ public class CourseCategoryListController {
         return row;
     }
 
-    private Button createActionButton(String text, String colorClass) {
-        String displayText = text;
-        if ("Edit".equalsIgnoreCase(text)) displayText = "✏";
-        else if ("Delete".equalsIgnoreCase(text)) displayText = "🗑";
+    private Button createIconButton(String iconCode, String colorClass) {
+        Button button = new Button();
+        org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon(iconCode);
+        icon.setIconSize(20);
         
-        Button button = new Button(displayText);
-        button.getStyleClass().addAll("btn-action", colorClass);
-        button.setMinWidth(40);
+        String baseStyle = "-fx-min-width: 44px; -fx-min-height: 44px; -fx-max-width: 44px; -fx-max-height: 44px; -fx-background-radius: 12px; -fx-cursor: hand; -fx-alignment: center; -fx-padding: 0;";
         
-        // Custom styling for smaller, grey buttons
-        String baseStyle = "-fx-font-size: 13px; -fx-padding: 6 12; -fx-background-radius: 8;";
         if ("btn-action-dark".equals(colorClass)) {
-            button.setStyle(baseStyle + " -fx-background-color: #4b5563; -fx-text-fill: white;");
+            icon.setIconColor(javafx.scene.paint.Color.WHITE);
+            button.setStyle(baseStyle + " -fx-background-color: #2d3748;");
         } else {
-            button.setStyle(baseStyle + " -fx-background-color: #f1f5f9; -fx-text-fill: #4b5563;");
+            icon.setIconColor(javafx.scene.paint.Color.BLACK);
+            button.setStyle(baseStyle + " -fx-background-color: #f1f5f9;");
         }
         
-        if ("✏".equals(displayText)) button.setTooltip(new javafx.scene.control.Tooltip("Edit"));
-        if ("🗑".equals(displayText)) button.setTooltip(new javafx.scene.control.Tooltip("Delete"));
-        
+        button.setGraphic(icon);
         return button;
     }
 
@@ -196,6 +192,11 @@ public class CourseCategoryListController {
 
     private String safeText(String value) {
         return value == null || value.isBlank() ? "-" : value;
+    }
+
+    private String stripHtmlTags(String html) {
+        if (html == null) return "";
+        return html.replaceAll("<[^>]*>", "").replace("&nbsp;", " ").trim();
     }
 
     @FunctionalInterface

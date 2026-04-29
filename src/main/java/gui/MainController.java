@@ -43,6 +43,11 @@ public class MainController {
     @FXML private StackPane contentArea;
     @FXML private VBox dashboardView;
 
+    @FXML private TextField aiTopicField;
+    @FXML private Button btnGenerateIdea;
+    @FXML private javafx.scene.control.TextArea aiResultArea;
+    @FXML private Button btnDraftCourse;
+
     @FXML
     private void initialize() {
         instance = this;
@@ -244,9 +249,35 @@ public class MainController {
 
         StackPane iconContainer = new StackPane();
         iconContainer.getStyleClass().add("card-icon-container");
-        Label iconLabel = new Label("📦"); 
-        iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
-        iconContainer.getChildren().add(iconLabel);
+        iconContainer.setMinWidth(48);
+        iconContainer.setMinHeight(48);
+        iconContainer.setMaxWidth(48);
+        iconContainer.setMaxHeight(48);
+
+        if (course.getImage() != null && !course.getImage().isBlank()) {
+            try {
+                javafx.scene.image.ImageView courseImg = new javafx.scene.image.ImageView(new javafx.scene.image.Image(course.getImage(), true));
+                courseImg.setFitWidth(48);
+                courseImg.setFitHeight(48);
+                courseImg.setPreserveRatio(false);
+                
+                javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(48, 48);
+                clip.setArcWidth(12);
+                clip.setArcHeight(12);
+                courseImg.setClip(clip);
+                
+                iconContainer.getChildren().add(courseImg);
+                iconContainer.setStyle("-fx-background-color: transparent; -fx-padding: 0;");
+            } catch (Exception e) {
+                Label iconLabel = new Label("📦"); 
+                iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
+                iconContainer.getChildren().add(iconLabel);
+            }
+        } else {
+            Label iconLabel = new Label("📦"); 
+            iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
+            iconContainer.getChildren().add(iconLabel);
+        }
 
         VBox titleBox = new VBox(2);
         Label titleLabel = new Label(course.getTitre());
@@ -265,7 +296,7 @@ public class MainController {
         Label updatedLabel = new Label("Updated " + safeText(course.getDateDeModification()));
         updatedLabel.getStyleClass().add("card-subtitle");
 
-        Label descriptionLabel = new Label(safeText(course.getDescription()));
+        Label descriptionLabel = new Label(stripHtmlTags(safeText(course.getDescription())));
         descriptionLabel.setWrapText(true);
         descriptionLabel.setMinHeight(60);
         descriptionLabel.getStyleClass().add("subtitle-label");
@@ -315,6 +346,87 @@ public class MainController {
 
     private String safeText(String value) {
         return value == null || value.isBlank() ? "-" : value;
+    }
+
+    private String stripHtmlTags(String html) {
+        if (html == null) return "";
+        return html.replaceAll("<[^>]*>", "").replace("&nbsp;", " ").trim();
+    }
+
+    @FXML
+    private void onGenerateCourseIdea() {
+        if (aiTopicField == null || aiTopicField.getText().trim().isEmpty()) {
+            gui.AlertHelper.showError("Missing Topic", "Please enter a topic or keyword first.");
+            return;
+        }
+        String topic = aiTopicField.getText().trim();
+        btnGenerateIdea.setText("Generating...");
+        btnGenerateIdea.setDisable(true);
+        aiResultArea.setText("Thinking... Powered by Groq AI 🚀");
+        
+        new Thread(() -> {
+            String result = utils.GroqService.generateCourseIdea(topic);
+            javafx.application.Platform.runLater(() -> {
+                aiResultArea.setText(result);
+                btnGenerateIdea.setText("Generate Draft");
+                btnGenerateIdea.setDisable(false);
+                if (result != null && result.contains("TITLE:") && result.contains("DESCRIPTION:")) {
+                    if (btnDraftCourse != null) btnDraftCourse.setDisable(false);
+                } else {
+                    if (btnDraftCourse != null) btnDraftCourse.setDisable(true);
+                }
+            });
+        }).start();
+    }
+
+    @FXML
+    private void onDraftCourse() {
+        if (aiResultArea == null || aiResultArea.getText().trim().isEmpty()) return;
+        String content = aiResultArea.getText();
+        
+        String title = "AI Draft Course";
+        String description = content;
+        
+        try {
+            int titleStart = content.indexOf("TITLE:");
+            int descStart = content.indexOf("DESCRIPTION:");
+            
+            if (titleStart != -1 && descStart != -1) {
+                title = content.substring(titleStart + 6, descStart).trim();
+                description = content.substring(descStart + 12).trim();
+            }
+            
+            Course newCourse = new Course();
+            newCourse.setTitre(title);
+            newCourse.setDescription(description);
+            
+            // Generate a slug from the title
+            String slug = title.toLowerCase().replaceAll("[^a-z0-9\\s-]", "").replaceAll("\\s+", "-");
+            newCourse.setSlug(slug);
+            
+            // Assign to first category by default if any exist
+            if (categoryNames != null && !categoryNames.isEmpty()) {
+                newCourse.setCategorieId(categoryNames.keySet().iterator().next());
+            } else {
+                newCourse.setCategorieId(1);
+            }
+            
+            courseService.ajouter(newCourse);
+            
+            gui.AlertHelper.showInfo("Success", "Course drafted successfully! You can now edit it to add resources and an image.");
+            
+            // Refresh
+            loadCourses();
+            
+            // Reset
+            aiTopicField.clear();
+            aiResultArea.clear();
+            btnDraftCourse.setDisable(true);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            gui.AlertHelper.showError("Error", "Failed to draft course: " + e.getMessage());
+        }
     }
 
     @javafx.fxml.FXML

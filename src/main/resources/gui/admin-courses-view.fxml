@@ -81,15 +81,43 @@
                             </children>
                         </VBox>
 
-                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="true" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                            <content>
-                                <FlowPane fx:id="coursesContainer" hgap="24.0" vgap="24.0" prefWrapLength="1000">
-                                    <padding>
-                                        <Insets bottom="20.0" left="5.0" right="5.0" top="10.0" />
-                                    </padding>
-                                </FlowPane>
-                            </content>
-                        </ScrollPane>
+                        <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+                            <!-- Left: Grid -->
+                            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="true" style="-fx-background: transparent; -fx-background-color: transparent;" HBox.hgrow="ALWAYS">
+                                <content>
+                                    <FlowPane fx:id="coursesContainer" hgap="24.0" vgap="24.0" prefWrapLength="1000">
+                                        <padding>
+                                            <Insets bottom="20.0" left="5.0" right="5.0" top="10.0" />
+                                        </padding>
+                                    </FlowPane>
+                                </content>
+                            </ScrollPane>
+
+                            <!-- Right: AI Course Studio -->
+                            <VBox styleClass="card" prefWidth="320" minWidth="320" maxWidth="320" spacing="15" style="-fx-background-color: linear-gradient(to bottom right, #ffffff, #f8fafc); -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5); -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-border-width: 1;">
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="✨" style="-fx-font-size: 20px;"/>
+                                    <VBox>
+                                        <Label text="AI Course Studio" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;"/>
+                                        <Label text="Powered by Groq" style="-fx-font-size: 10px; -fx-text-fill: #ec4899; -fx-font-weight: bold;"/>
+                                    </VBox>
+                                </HBox>
+                                <Label text="Generate complete course outlines instantly. Just type a topic!" styleClass="subtitle-label" wrapText="true"/>
+                                
+                                <VBox spacing="8">
+                                    <Label text="Topic or Keywords" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 11px;" />
+                                    <TextField fx:id="aiTopicField" promptText="e.g. Next.js for Beginners" styleClass="input-field" style="-fx-padding: 8 12;"/>
+                                    <Button fx:id="btnGenerateIdea" text="Generate Draft" onAction="#onGenerateCourseIdea" styleClass="btn-primary" prefWidth="Infinity" style="-fx-background-color: #2d3748; -fx-padding: 10;"/>
+                                </VBox>
+                                
+                                <VBox spacing="8" VBox.vgrow="ALWAYS">
+                                    <Label text="Generated Content" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 11px;" />
+                                    <javafx.scene.control.TextArea fx:id="aiResultArea" promptText="AI response will appear here..." wrapText="true" VBox.vgrow="ALWAYS" style="-fx-font-size: 12px; -fx-text-fill: #334155;" />
+                                </VBox>
+                                
+                                <Button fx:id="btnDraftCourse" text="Draft this Course" onAction="#onDraftCourse" styleClass="btn-primary" prefWidth="Infinity" style="-fx-background-color: #ec4899; -fx-padding: 10; -fx-font-weight: bold;" disable="true" />
+                            </VBox>
+                        </HBox>
                     </children>
                 </VBox>
             </children>
