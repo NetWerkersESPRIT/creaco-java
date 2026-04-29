@@ -176,6 +176,13 @@ public class PostService implements ForumInterface<Post> {
         psComments.executeUpdate();
         psComments.close();
 
+        // Delete all reactions associated with this post
+        String deleteReactionsSQL = "DELETE FROM `post_reaction` WHERE `post_id` = ?";
+        PreparedStatement psReactions = con.prepareStatement(deleteReactionsSQL);
+        psReactions.setInt(1, id);
+        psReactions.executeUpdate();
+        psReactions.close();
+
         // Then delete the post
         String sql = "DELETE FROM `post` WHERE `id` = ?";
         PreparedStatement ps = con.prepareStatement(sql);

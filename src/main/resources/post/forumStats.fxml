@@ -10,19 +10,7 @@
    <content>
       <VBox spacing="30.0" style="-fx-padding: 30;">
          <children>
-            <!-- Header Section -->
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-               <children>
-                  <VBox spacing="5.0">
-                     <children>
-                        <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="Forum Analytics" />
-                        <Label style="-fx-font-size: 14px; -fx-text-fill: #718096;" text="Global engagement metrics and top performance insights" />
-                     </children>
-                  </VBox>
-                  <Region HBox.hgrow="ALWAYS" />
-                  <Button onAction="#refreshStats" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;" text="🔄 Refresh Data" />
-               </children>
-            </HBox>
+
 
             <!-- Overview Cards -->
             <HBox spacing="25.0">
