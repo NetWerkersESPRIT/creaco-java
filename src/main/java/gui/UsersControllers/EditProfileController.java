@@ -11,6 +11,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 public class EditProfileController {
@@ -43,8 +47,20 @@ public class EditProfileController {
                 currentAvatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + currentUser.getUsername();
             }
             imgAvatar.setImage(new Image(currentAvatarUrl, true)); // true = load in background
+
+            // Handle Google accounts: lock password field
+            if ("GOOGLE_AUTH".equals(currentUser.getPassword())) {
+                txtPassword.setDisable(true);
+                txtPassword.setPromptText("Google Authenticated User");
+                txtPassword.setStyle("-fx-opacity: 0.8; -fx-background-color: #edf2f7;");
+            } else {
+                txtPassword.setDisable(false);
+                txtPassword.setPromptText("Enter new password to change");
+                txtPassword.setStyle("");
+            }
         }
     }
+
 
     @FXML
     public void saveProfile() {
@@ -136,6 +152,44 @@ public class EditProfileController {
         }
         
         imgAvatar.setImage(new Image(currentAvatarUrl, true));
+    }
+
+    @FXML
+    public void handleUploadImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Profile Image");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+
+        File selectedFile = fileChooser.showOpenDialog(txtUsername.getScene().getWindow());
+        
+        if (selectedFile != null) {
+            try {
+                // Ensure the uploads directory exists
+                File uploadDir = new File("src/main/resources/uploads");
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                // Create a unique name for the file to avoid collisions
+                String fileName = UUID.randomUUID().toString() + "_" + selectedFile.getName();
+                File destination = new File(uploadDir, fileName);
+
+                // Copy the file
+                Files.copy(selectedFile.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                // Update the avatar URL
+                currentAvatarUrl = destination.toURI().toString();
+                imgAvatar.setImage(new Image(currentAvatarUrl, true));
+                
+                showSuccess("✅ Image uploaded! (Save to apply)");
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                showError("❌ Failed to upload image: " + e.getMessage());
+            }
+        }
     }
 
     @FXML
