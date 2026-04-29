@@ -130,8 +130,21 @@ public class PostService implements ForumInterface<Post> {
         String sql = "INSERT INTO `post`(`title`, `content`, `status`, `user_id`, `image_name`, `pdf_name`, `likes`, `pinned`, `is_comment_locked`, `is_profane`, `is_spam`, `spam_score`, `profane_words`, `grammar_errors`, `refusal_reason`, `created_at`) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setString(1, post.getTitle());
-        ps.setString(2, post.getContent());
+        // Apply profanity filtering before saving
+        String filteredTitle = ModerationService.filterProfanity(post.getTitle());
+        String filteredContent = ModerationService.filterProfanity(post.getContent());
+        
+        ps.setString(1, filteredTitle);
+        ps.setString(2, filteredContent);
+        
+        // Update the post object with filtered content for consistency
+        post.setTitle(filteredTitle);
+        post.setContent(filteredContent);
+        
+        // Update profanity metadata
+        post.setProfane(ModerationService.containsProfanity(filteredTitle) || ModerationService.containsProfanity(filteredContent));
+        post.setProfaneWords(ModerationService.countProfaneWords(post.getTitle()) + ModerationService.countProfaneWords(post.getContent()));
+        
         ps.setString(3, post.getStatus());
         ps.setInt(4, post.getUserId());
         ps.setString(5, post.getImageName());
@@ -291,8 +304,17 @@ public class PostService implements ForumInterface<Post> {
     public void modifier(int id, Post post) throws SQLException {
         String sql = "UPDATE `post` SET `title`=?, `content`=?, `status`=?, `user_id`=?, `image_name`=?, `pdf_name`=?, `pinned`=?, `is_comment_locked`=?, `is_spam`=?, `spam_score`=?, `updated_at`=? WHERE `id`=?";
         PreparedStatement ps = con.prepareStatement(sql);
-        ps.setString(1, post.getTitle());
-        ps.setString(2, post.getContent());
+        // Apply profanity filtering before updating
+        String filteredTitle = ModerationService.filterProfanity(post.getTitle());
+        String filteredContent = ModerationService.filterProfanity(post.getContent());
+
+        ps.setString(1, filteredTitle);
+        ps.setString(2, filteredContent);
+        
+        // Update post object
+        post.setTitle(filteredTitle);
+        post.setContent(filteredContent);
+        
         ps.setString(3, post.getStatus());
         ps.setInt(4, post.getUserId());
         ps.setString(5, post.getImageName());

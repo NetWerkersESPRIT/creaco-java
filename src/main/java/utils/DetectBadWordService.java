@@ -82,8 +82,9 @@ public class DetectBadWordService {
                     JSONObject json = new JSONObject(response.body());
                     if ("ok".equals(json.getString("status"))) {
                         JSONObject data = json.getJSONObject("data");
-                        moderatedText = data.getString("filteredText");
-                        profanityCount = data.getInt("profaneWords");
+                        // Use optString and handle potential null in JSON
+                        moderatedText = data.isNull("filteredText") ? text : data.getString("filteredText");
+                        profanityCount = data.optInt("profaneWords", 0);
                         System.out.println("[DetectBadWordService] Found " + profanityCount + " bad words.");
                     }
                 }

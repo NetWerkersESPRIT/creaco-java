@@ -654,10 +654,10 @@ public class DisplayCommentController {
         copyItem.setOnAction(e -> {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();
-            String postUrl = "https://creaco.com/post/" + currentPost.getId();
-            content.putString(postUrl);
+            String shareInfo = "Creaco Forum - Post: " + currentPost.getTitle() + "\n(Local App ID: " + currentPost.getId() + ")";
+            content.putString(shareInfo);
             clipboard.setContent(content);
-            gui.util.AlertHelper.showCustomAlert("Copied", "Post link copied to clipboard!", gui.util.AlertHelper.AlertType.INFORMATION);
+            gui.util.AlertHelper.showCustomAlert("Copied", "Post information copied to clipboard!", gui.util.AlertHelper.AlertType.INFORMATION);
         });
 
         shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem);
@@ -666,9 +666,9 @@ public class DisplayCommentController {
 
     private void openSocialLink(String baseUrl) {
         try {
-            String postUrl = "https://creaco.com/post/" + currentPost.getId();
-            String encodedUrl = URLEncoder.encode(postUrl, StandardCharsets.UTF_8);
-            String url = baseUrl + encodedUrl;
+            String shareText = "Check out this post on Creaco: " + currentPost.getTitle();
+            String encodedText = URLEncoder.encode(shareText, StandardCharsets.UTF_8);
+            String url = baseUrl + encodedText;
 
             if (Desktop.isDesktopSupported()) {
                 Desktop.getDesktop().browse(new URI(url));

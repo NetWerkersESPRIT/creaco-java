@@ -62,25 +62,28 @@ public class TextCorrectionService {
             if (response.statusCode() == 200) {
                 JSONObject jsonResponse = new JSONObject(response.body());
                 if ("ok".equals(jsonResponse.getString("status"))) {
-                    JSONObject data = jsonResponse.getJSONObject("data");
-                    JSONArray corrections = data.getJSONArray("corrections");
-                    
-                    // Reconstruct text by applying corrections (from last to first to maintain indices)
-                    StringBuilder correctedText = new StringBuilder(text);
-                    for (int i = corrections.length() - 1; i >= 0; i--) {
-                        JSONObject corr = corrections.getJSONObject(i);
-                        String original = corr.getString("word");
-                        JSONArray suggestions = corr.getJSONArray("suggestions");
+                    Object dataObj = jsonResponse.get("data");
+                    if (dataObj instanceof JSONObject) {
+                        JSONObject data = (JSONObject) dataObj;
+                        JSONArray corrections = data.optJSONArray("corrections");
+                        if (corrections == null) return text;
                         
-                        if (suggestions.length() > 0) {
-                            String replacement = suggestions.getString(0);
-                            int lastIndex = correctedText.lastIndexOf(original);
-                            if (lastIndex != -1) {
-                                correctedText.replace(lastIndex, lastIndex + original.length(), replacement);
+                        StringBuilder correctedText = new StringBuilder(text);
+                        for (int i = corrections.length() - 1; i >= 0; i--) {
+                            JSONObject corr = corrections.getJSONObject(i);
+                            String original = corr.getString("word");
+                            JSONArray suggestions = corr.optJSONArray("suggestions");
+                            
+                            if (suggestions != null && suggestions.length() > 0) {
+                                String replacement = suggestions.getString(0);
+                                int lastIndex = correctedText.lastIndexOf(original);
+                                if (lastIndex != -1) {
+                                    correctedText.replace(lastIndex, lastIndex + original.length(), replacement);
+                                }
                             }
                         }
+                        return correctedText.toString();
                     }
-                    return correctedText.toString();
                 }
             }
         } catch (Exception e) {
