@@ -49,6 +49,29 @@ public class EventService implements EventInterface<Event> {
         System.out.println("Event supprimé avec succès!");
     }
 
+    public void deleteWithReservations(int id) throws SQLException {
+        con.setAutoCommit(false);
+        try {
+            String deleteResSql = "DELETE FROM `reservation` WHERE `event_id`=?";
+            PreparedStatement psRes = con.prepareStatement(deleteResSql);
+            psRes.setInt(1, id);
+            psRes.executeUpdate();
+
+            String deleteEventSql = "DELETE FROM `event` WHERE `id`=?";
+            PreparedStatement psEvent = con.prepareStatement(deleteEventSql);
+            psEvent.setInt(1, id);
+            psEvent.executeUpdate();
+
+            con.commit();
+            System.out.println("Event and its reservations deleted successfully!");
+        } catch (SQLException e) {
+            con.rollback();
+            throw e;
+        } finally {
+            con.setAutoCommit(true);
+        }
+    }
+
     @Override
     public List<Event> afficher() throws SQLException {
         List<Event> events = new ArrayList<>();

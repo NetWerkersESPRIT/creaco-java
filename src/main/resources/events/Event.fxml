@@ -65,7 +65,12 @@
                                 <TextField fx:id="txtCategory" promptText="e.g. Technology" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                 
                                 <Label text="Date:" styleClass="subtitle-label" GridPane.rowIndex="3" />
-                                <DatePicker fx:id="dpDate" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                    <children>
+                                        <DatePicker fx:id="dpDate" maxWidth="1.7976931348623157E308" onAction="#onDateSelected" />
+                                        <Label fx:id="lblWeather" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px; -fx-font-weight: bold;" text="" />
+                                    </children>
+                                </VBox>
                                 
                                 <Label text="Time:" styleClass="subtitle-label" GridPane.rowIndex="4" />
                                 <TextField fx:id="txtTime" promptText="HH:mm" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="4" />
@@ -75,11 +80,25 @@
                                 
                                 <Label text="Organizer:" styleClass="subtitle-label" GridPane.rowIndex="6" />
                                 <TextField fx:id="txtOrganizer" promptText="Organizer name" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                
+                                <Label text="Image:" styleClass="subtitle-label" GridPane.rowIndex="7" />
+                                <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                    <children>
+                                        <TextField fx:id="txtImagePath" editable="false" promptText="Upload image..." styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                                        <Button onAction="#onUploadImage" style="-fx-padding: 5 10; -fx-background-color: #4a5568;" styleClass="btn-primary" text="📁" />
+                                    </children>
+                                </HBox>
                             </children>
                         </GridPane>
                         
                         <VBox spacing="8.0">
-                            <Label text="Description:" styleClass="subtitle-label" />
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <children>
+                                    <Label styleClass="subtitle-label" text="Description:" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button onAction="#onGenerateAI" style="-fx-font-size: 10px; -fx-padding: 3 8; -fx-background-radius: 8;" styleClass="btn-primary" text="✨ AI Generate" />
+                                </children>
+                            </HBox>
                             <TextArea fx:id="txtDescription" prefHeight="100.0" promptText="Event description..." styleClass="search-bar" wrapText="true" />
                         </VBox>
                         

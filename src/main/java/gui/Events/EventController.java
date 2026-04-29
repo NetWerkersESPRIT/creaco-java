@@ -13,6 +13,12 @@ import services.EventService;
 
 import java.sql.SQLException;
 import java.util.List;
+import utils.GeminiService;
+import utils.ImgBBService;
+import java.io.File;
+import javafx.stage.FileChooser;
+import utils.WeatherService;
+import java.time.LocalDate;
 
 public class EventController {
 
@@ -38,6 +44,10 @@ public class EventController {
     private TextField txtOrganizer;
     @FXML
     private TextArea txtDescription;
+    @FXML
+    private TextField txtImagePath;
+    @FXML
+    private Label lblWeather;
 
     private EventService eventService = new EventService();
 
@@ -77,11 +87,13 @@ public class EventController {
             txtCategory.setText(event.getCategory());
             if (event.getDate() != null && !event.getDate().isEmpty()) {
                 dpDate.setValue(java.time.LocalDate.parse(event.getDate()));
+                onDateSelected(null); // Trigger weather fetch
             }
             txtTime.setText(event.getTime());
             txtCapacity.setText(String.valueOf(event.getCapacity()));
             txtOrganizer.setText(event.getOrganizer());
             txtDescription.setText(event.getDescription());
+            txtImagePath.setText(event.getImagePath() != null ? event.getImagePath() : "");
         }
     }
 
@@ -99,13 +111,11 @@ public class EventController {
             return false;
         }
 
-        // Name constraint: No numbers
         if (name.matches(".*\\d.*")) {
             showAlert("Validation Error", "Event name cannot contain numbers.", Alert.AlertType.WARNING);
             return false;
         }
 
-        // Organizer constraint: No numbers
         if (organizer.matches(".*\\d.*")) {
             showAlert("Validation Error", "Organizer name cannot contain numbers.", Alert.AlertType.WARNING);
             return false;
@@ -116,7 +126,6 @@ public class EventController {
             return false;
         }
 
-        // Basic Time format check (HH:mm or HH:mm:ss)
         if (!time.matches("^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$")) {
             showAlert("Validation Error", "Time must be in HH:mm or HH:mm:ss format.", Alert.AlertType.WARNING);
             return false;
@@ -149,6 +158,7 @@ public class EventController {
             e.setCapacity(Integer.parseInt(txtCapacity.getText()));
             e.setOrganizer(txtOrganizer.getText());
             e.setDescription(txtDescription.getText());
+            e.setImagePath(txtImagePath.getText());
             e.setCreatedAt(java.time.LocalDateTime.now().toString());
 
             eventService.ajouter(e);
@@ -178,12 +188,88 @@ public class EventController {
             selectedEvent.setCapacity(Integer.parseInt(txtCapacity.getText()));
             selectedEvent.setOrganizer(txtOrganizer.getText());
             selectedEvent.setDescription(txtDescription.getText());
+            selectedEvent.setImagePath(txtImagePath.getText());
 
             eventService.modifier(selectedEvent);
             showAlert("Success", "Event updated successfully!", Alert.AlertType.INFORMATION);
             showEvents();
         } catch (Exception ex) {
             showAlert("Error", "Could not update event: " + ex.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+
+    @FXML
+    void onDateSelected(ActionEvent event) {
+        LocalDate selectedDate = dpDate.getValue();
+        if (selectedDate != null) {
+            lblWeather.setText("Fetching weather...");
+            new Thread(() -> {
+                String weatherInfo = WeatherService.getWeatherForDate(selectedDate);
+                javafx.application.Platform.runLater(() -> {
+                    lblWeather.setText(weatherInfo);
+                });
+            }).start();
+        } else {
+            lblWeather.setText("");
+        }
+    }
+
+
+    @FXML
+    void onGenerateAI(ActionEvent event) {
+        String name = txtName.getText().trim();
+        String type = cbType.getValue();
+        String category = txtCategory.getText().trim();
+
+        if (name.isEmpty()) {
+            showAlert("Input Required", "Please enter an event name to generate a description.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        String prompt = String.format(
+            "Generate a professional and catchy description for an event named '%s'. " +
+            "Type: %s. Category: %s. " +
+            "Keep it concise (max 2 sentences).",
+            name, (type != null ? type : "unspecified"), (category.isEmpty() ? "general" : category)
+        );
+
+        txtDescription.setText("Generating description...");
+        
+        new Thread(() -> {
+            String response = GeminiService.getGeminiResponse(prompt);
+            javafx.application.Platform.runLater(() -> {
+                txtDescription.setText(response);
+            });
+        }).start();
+    }
+
+
+    @FXML
+    void onUploadImage(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Event Image");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+        
+        File selectedFile = fileChooser.showOpenDialog(txtName.getScene().getWindow());
+        
+        if (selectedFile != null) {
+            txtImagePath.setText("Uploading...");
+            new Thread(() -> {
+                try {
+                    String imageUrl = ImgBBService.uploadImage(selectedFile);
+                    javafx.application.Platform.runLater(() -> {
+                        txtImagePath.setText(imageUrl);
+                    });
+                } catch (Exception e) {
+                    javafx.application.Platform.runLater(() -> {
+                        txtImagePath.setText("");
+                        showAlert("Upload Error", "Failed to upload image: " + e.getMessage(), Alert.AlertType.ERROR);
+                    });
+                }
+            }).start();
         }
     }
 
@@ -206,13 +292,33 @@ public class EventController {
                 clearForm();
                 selectedEvent = null;
             } catch (SQLException ex) {
-                showAlert("Error", "Could not delete event: " + ex.getMessage(), Alert.AlertType.ERROR);
+                if (ex.getMessage().contains("foreign key constraint fails")) {
+                    Alert forceDelete = new Alert(Alert.AlertType.WARNING, 
+                        "This event has existing reservations. Do you want to delete the event and ALL its reservations?", 
+                        ButtonType.YES, ButtonType.NO);
+                    forceDelete.setTitle("Conflict Detected");
+                    forceDelete.setHeaderText("Reservations Found");
+                    forceDelete.showAndWait();
+                    
+                    if (forceDelete.getResult() == ButtonType.YES) {
+                        try {
+                            eventService.deleteWithReservations(selectedEvent.getId());
+                            showAlert("Success", "Event and its reservations deleted successfully!", Alert.AlertType.INFORMATION);
+                            showEvents();
+                            clearForm();
+                            selectedEvent = null;
+                        } catch (SQLException ex2) {
+                            showAlert("Error", "Force delete failed: " + ex2.getMessage(), Alert.AlertType.ERROR);
+                        }
+                    }
+                } else {
+                    showAlert("Error", "Could not delete event: " + ex.getMessage(), Alert.AlertType.ERROR);
+                }
             }
         }
     }
 
 
-    // selectEvent is now handled via setSelectedEvent from EventCardController
 
 
     private void clearForm() {
@@ -224,6 +330,8 @@ public class EventController {
         txtCapacity.clear();
         txtOrganizer.clear();
         txtDescription.clear();
+        txtImagePath.clear();
+        lblWeather.setText("");
     }
 
     private void showAlert(String title, String content, Alert.AlertType type) {
