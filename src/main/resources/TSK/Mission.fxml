@@ -5,56 +5,94 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.TSKControllers.MissionController" stylesheets="@../gui/styles.css">
-
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="gui.TSKControllers.MissionController" stylesheets="@../gui/styles.css">
     <center>
-        <VBox spacing="22.0">
-            <padding>
-                <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
-            </padding>
-            <children>
-
-                <!-- Missions Card -->
-                <VBox VBox.vgrow="ALWAYS" styleClass="card" spacing="15">
+        <!-- Outer ScrollPane — the whole page scrolls; inner content always fully visible -->
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+                    style="-fx-background-color: transparent; -fx-background: transparent;">
+            <content>
+                <VBox spacing="0" maxWidth="Infinity">
+                    <padding>
+                        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                    </padding>
                     <children>
-                        <HBox alignment="CENTER_LEFT">
-                            <children>
-                                <VBox spacing="5">
-                                    <Label text="Active Missions" styleClass="card-title" />
-                                    <Label text="Track project progress and milestones" styleClass="card-subtitle" />
-                                </VBox>
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Button mnemonicParsing="false" onAction="#handleAddMission" prefHeight="35.0" styleClass="btn-primary" text="＋ Create Mission" style="-fx-font-size: 12px;"/>
-                            </children>
-                        </HBox>
-                        
-                        <Separator />
-                        
-                        <!-- Header Row for the List -->
-                        <HBox spacing="15.0" style="-fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-background-radius: 10;">
-                            <children>
-                                <Label text="MISSION DETAILS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="300"/>
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Label text="STATUS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="120" alignment="CENTER"/>
-                                <Label text="DATE" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="150" alignment="CENTER"/>
-                                <Label text="ACTIONS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="180" alignment="CENTER"/>
-                            </children>
+
+                        <!-- Block 1: Gradient Header -->
+                        <VBox spacing="4" style="-fx-padding: 0 0 18 0;">
+                            <Label text="Missions" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #cb0c9f;" />
+                            <Label text="Track project progress and milestones" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;" />
+                        </VBox>
+
+                        <!-- Block 2: Search Bar -->
+                        <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 0 0 14 0;">
+                            <TextField fx:id="txtSearch" promptText="🔍  Search missions..." prefHeight="36"
+                                       style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 8 14; -fx-font-size: 13px;"
+                                       onKeyReleased="#onSearch" HBox.hgrow="ALWAYS" />
                         </HBox>
 
-                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
-                            <content>
-                                <VBox fx:id="missionsList" spacing="10.0" style="-fx-background-color: transparent;" />
-                            </content>
-                        </ScrollPane>
+                        <!-- Block 3: View Switcher -->
+                        <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 0 0 14 0;">
+                            <HBox spacing="4" style="-fx-background-color: #f1f5f9; -fx-background-radius: 12; -fx-padding: 4; -fx-border-color: #e2e8f0; -fx-border-radius: 12;">
+                                <Button fx:id="btnViewCalendar" text="📅 Calendar" onAction="#switchToCalendar"
+                                        style="-fx-background-color: white; -fx-text-fill: #cb0c9f; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 9; -fx-padding: 7 18; -fx-effect: dropshadow(three-pass-box,rgba(0,0,0,0.07),6,0,0,2); -fx-cursor: hand;" />
+                                <Button fx:id="btnViewList" text="☰ Browse All" onAction="#switchToList"
+                                        style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 9; -fx-padding: 7 18; -fx-cursor: hand;" />
+                            </HBox>
+                        </HBox>
+
+                        <!-- Block 4: Status Filters + New Mission Button (list mode only) -->
+                        <HBox fx:id="tableControls" alignment="CENTER_LEFT" spacing="8"
+                              style="-fx-padding: 0 0 14 0;" managed="false" visible="false">
+                            <Button fx:id="btnStatusNew" text="NEW" onAction="#toggleStatusNew"
+                                    style="-fx-background-color: #f8fafc; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 9; -fx-border-color: #e2e8f0; -fx-border-radius: 9; -fx-padding: 7 16; -fx-cursor: hand;" />
+                            <Button fx:id="btnStatusInProgress" text="IN PROGRESS" onAction="#toggleStatusInProgress"
+                                    style="-fx-background-color: #f8fafc; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 9; -fx-border-color: #e2e8f0; -fx-border-radius: 9; -fx-padding: 7 16; -fx-cursor: hand;" />
+                            <Button fx:id="btnStatusCompleted" text="COMPLETED" onAction="#toggleStatusCompleted"
+                                    style="-fx-background-color: #f8fafc; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 9; -fx-border-color: #e2e8f0; -fx-border-radius: 9; -fx-padding: 7 16; -fx-cursor: hand;" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button mnemonicParsing="false" onAction="#handleAddMission" prefHeight="35.0"
+                                    styleClass="btn-primary" text="＋ New Mission" style="-fx-font-size: 12px;" />
+                        </HBox>
+
+                        <!-- Block 5: Calendar Placeholder (Calendar view) -->
+                        <VBox fx:id="calendarPane" alignment="CENTER" spacing="20" minHeight="400"
+                              style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 40; -fx-effect: dropshadow(three-pass-box,rgba(0,0,0,0.06),15,0,0,8); -fx-border-color: #f1f5f9; -fx-border-radius: 20;">
+                            <Label text="📅" style="-fx-font-size: 48px;" />
+                            <Label text="Mission Calendar" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                            <Label text="Switch to Browse All to see the mission list" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;" />
+                            <Button text="Browse All Missions" onAction="#switchToList"
+                                    style="-fx-background-color: linear-gradient(to right, #cb0c9f, #6c2db1); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 12; -fx-padding: 10 24; -fx-cursor: hand;" />
+                        </VBox>
+
+                        <!-- Block 6: Column Headers (list mode) -->
+                        <HBox fx:id="columnHeaders" spacing="15.0"
+                              style="-fx-padding: 10 15 10 15; -fx-background-color: #f8fafc; -fx-background-radius: 10;"
+                              managed="false" visible="false">
+                            <Label text="MISSION DETAILS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="300"/>
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label text="IDEA" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="135" />
+                            <Label text="STATUS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="130" />
+                            <Label text="DATE" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="210" />
+                            <Label text="ACTIONS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="100" />
+                        </HBox>
+
+                        <!-- Block 7: Missions List — plain VBox, no fixed height, outer scroll handles overflow -->
+                        <VBox fx:id="missionsList" spacing="8.0"
+                              style="-fx-background-color: transparent; -fx-padding: 8 0 0 0;"
+                              managed="false" visible="false" maxHeight="Infinity" />
+
                     </children>
                 </VBox>
-            </children>
-        </VBox>
+            </content>
+        </ScrollPane>
     </center>
 </BorderPane>
