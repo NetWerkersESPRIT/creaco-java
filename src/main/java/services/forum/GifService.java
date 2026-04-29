@@ -20,7 +20,22 @@ import java.util.concurrent.CompletableFuture;
  */
 public class GifService {
     
-    private static final String APP_KEY = "y4LavDL6QqUDpgS7TaDj7ws7EkODDSMocfnsNhOBPjWdkqoTTW3NRaechtCTWCyE";
+    private static final String APP_KEY;
+    static {
+        java.util.Properties properties = new java.util.Properties();
+        String key = "y4LavDL6QqUDpgS7TaDj7ws7EkODDSMocfnsNhOBPjWdkqoTTW3NRaechtCTWCyE"; // Fallback
+        try (java.io.FileInputStream fis = new java.io.FileInputStream("config.properties")) {
+            properties.load(fis);
+            String propKey = properties.getProperty("KLIPY_API_KEY");
+            if (propKey != null && !propKey.trim().isEmpty()) {
+                key = propKey;
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("Error loading config.properties in GifService: " + e.getMessage());
+        }
+        APP_KEY = key;
+    }
+
     private static final String BASE_URL = "https://api.klipy.com/api/v1/" + APP_KEY;
     private final HttpClient client;
 
@@ -62,13 +77,25 @@ public class GifService {
                     List<String> urls = new ArrayList<>();
                     if (response.statusCode() == 200) {
                         try {
+                            System.out.println("📡 KLIPY Response: " + response.body());
                             JSONObject json = new JSONObject(response.body());
                             
-                            // Klipy often follows Tenor-like 'results' or Giphy-like 'data'
-                            JSONArray items = json.optJSONArray("data");
+                            // Klipy response variations: 
+                            // 1. {"data": {"data": [...]}}
+                            // 2. {"data": {"results": [...]}}
+                            // 3. {"data": [...]}
+                            JSONArray items = null;
+                            JSONObject dataObj = json.optJSONObject("data");
+                            if (dataObj != null) {
+                                items = dataObj.optJSONArray("data");
+                                if (items == null) items = dataObj.optJSONArray("results");
+                            }
+                            
+                            if (items == null) items = json.optJSONArray("data");
                             if (items == null) items = json.optJSONArray("results");
                             
                             if (items != null) {
+                                System.out.println("📡 KLIPY: Found " + items.length() + " items in response");
                                 for (int i = 0; i < items.length(); i++) {
                                     JSONObject item = items.getJSONObject(i);
                                     String gifUrl = parseItem(item);
@@ -76,9 +103,13 @@ public class GifService {
                                         urls.add(gifUrl);
                                     }
                                 }
+                                System.out.println("📡 KLIPY: Successfully parsed " + urls.size() + " GIF URLs");
+                            } else {
+                                System.out.println("⚠️ KLIPY: No items found in response (items is null)");
                             }
                         } catch (Exception e) {
                             System.err.println("❌ Error parsing KLIPY response: " + e.getMessage());
+                            e.printStackTrace();
                         }
                     } else {
                         System.err.println("❌ KLIPY API Error: " + response.statusCode() + " - " + response.body());
@@ -93,10 +124,22 @@ public class GifService {
 
     /**
      * Parses a single item to find a valid GIF URL.
-     * Supports both Tenor and Giphy response structures.
+     * Supports Klipy, Tenor, and Giphy response structures.
      */
     private String parseItem(JSONObject item) {
-        // 1. Try Giphy-like structure (images -> fixed_width -> url)
+        // 1. Klipy structure: file -> md -> gif -> url
+        JSONObject file = item.optJSONObject("file");
+        if (file != null) {
+            JSONObject md = file.optJSONObject("md");
+            if (md == null) md = file.optJSONObject("sm");
+            if (md == null) md = file.optJSONObject("hd");
+            if (md != null) {
+                JSONObject gif = md.optJSONObject("gif");
+                if (gif != null && gif.has("url")) return gif.getString("url");
+            }
+        }
+
+        // 2. Giphy-like structure (images -> fixed_width -> url)
         JSONObject images = item.optJSONObject("images");
         if (images != null) {
             JSONObject media = images.optJSONObject("fixed_width");
@@ -105,7 +148,7 @@ public class GifService {
             if (media != null && media.has("url")) return media.getString("url");
         }
 
-        // 2. Try Tenor-like structure (media_formats -> tinygif -> url)
+        // 3. Tenor-like structure (media_formats -> tinygif -> url)
         JSONObject mediaFormats = item.optJSONObject("media_formats");
         if (mediaFormats != null) {
             JSONObject media = mediaFormats.optJSONObject("tinygif");
@@ -113,7 +156,7 @@ public class GifService {
             if (media != null && media.has("url")) return media.getString("url");
         }
 
-        // 3. Fallback: Check for 'url' or 'slug' at root if it's a direct GIF item
+        // 4. Fallback: Check for 'url' at root
         if (item.has("url") && item.getString("url").contains(".gif")) {
             return item.getString("url");
         }
