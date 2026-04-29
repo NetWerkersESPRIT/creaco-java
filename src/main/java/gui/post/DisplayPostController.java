@@ -282,7 +282,7 @@ public class DisplayPostController {
         if (isAdminMode) {
             actionsRow.getChildren().add(createPinAction(post));
         }
-        
+
         HBox shareBtn = createSimpleAction("↪ Share", "");
         shareBtn.setOnMouseClicked(e -> onSharePost(post, shareBtn));
         shareBtn.setStyle("-fx-cursor: hand;");
@@ -351,7 +351,8 @@ public class DisplayPostController {
 
                 // Notify Post Owner
                 if (result != null && post.getUserId() != currentUserId) {
-                    new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                    new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(),
+                            postId);
                 }
 
                 triggerBtn.setText(buildMainLabel(result));
@@ -415,7 +416,8 @@ public class DisplayPostController {
 
                     // Notify Post Owner
                     if (result != null && post.getUserId() != currentUserId) {
-                        new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                        new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(),
+                                postId);
                     }
 
                     triggerBtn.setText(buildMainLabel(result));
@@ -610,11 +612,11 @@ public class DisplayPostController {
         VBox mainRoot = new VBox();
         mainRoot.setStyle(
                 "-fx-background-color: white; " +
-                "-fx-background-radius: 20; " +
-                "-fx-border-color: #e2e8f0; " +
-                "-fx-border-width: 1; " +
-                "-fx-border-radius: 20; " +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 50, 0, 0, 15);"); // Strong Black Shadow
+                        "-fx-background-radius: 20; " +
+                        "-fx-border-color: #e2e8f0; " +
+                        "-fx-border-width: 1; " +
+                        "-fx-border-radius: 20; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 50, 0, 0, 15);"); // Strong Black Shadow
         mainRoot.setMaxWidth(450);
         mainRoot.setPrefWidth(450);
         mainRoot.setAlignment(Pos.TOP_CENTER);
@@ -847,7 +849,8 @@ public class DisplayPostController {
                     circle.getChildren().add(imageView);
                     return circle;
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
@@ -864,23 +867,24 @@ public class DisplayPostController {
         ring.setMaxSize(size + 4, size + 4);
         ring.setStyle("-fx-background-radius: 50; " +
                 "-fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);");
-        
+
         StackPane inner = buildAvatar(user);
         inner.setPrefSize(size, size);
         inner.setMinSize(size, size);
         inner.setMaxSize(size, size);
-        
+
         if (!inner.getChildren().isEmpty() && inner.getChildren().get(0) instanceof ImageView) {
             ImageView iv = (ImageView) inner.getChildren().get(0);
-            iv.setFitWidth(size); iv.setFitHeight(size);
+            iv.setFitWidth(size);
+            iv.setFitHeight(size);
             iv.setClip(new javafx.scene.shape.Circle(size / 2.0, size / 2.0, size / 2.0));
         }
-        
+
         StackPane bg = new StackPane();
         bg.setStyle("-fx-background-color: white; -fx-background-radius: 50;");
         bg.setPrefSize(size + 1, size + 1);
         bg.getChildren().add(inner);
-        
+
         ring.getChildren().add(bg);
         return ring;
     }
@@ -978,8 +982,9 @@ public class DisplayPostController {
     }
 
     private void onSharePost(Post post, Node anchor) {
-        if (post == null) return;
-        
+        if (post == null)
+            return;
+
         ContextMenu shareMenu = new ContextMenu();
         shareMenu.setStyle("-fx-background-radius: 10; -fx-padding: 5;");
 
@@ -993,7 +998,7 @@ public class DisplayPostController {
         copyItem.setOnAction(e -> {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();
-            String postUrl = "https://creaco.com/post/" + post.getId();
+            String postUrl = generateShareUrl(post);
             content.putString(postUrl);
             clipboard.setContent(content);
             showAlert(Alert.AlertType.INFORMATION, "Copied", "Post link copied to clipboard!");
@@ -1003,9 +1008,28 @@ public class DisplayPostController {
         shareMenu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
     }
 
+    private String generateShareUrl(Post post) {
+        try {
+            String netlifyBase = "https://creaconetworkers.netlify.app/";
+            String title = URLEncoder.encode(post.getTitle(), StandardCharsets.UTF_8);
+            String content = URLEncoder.encode(post.getContent(), StandardCharsets.UTF_8);
+
+            // Get username
+            entities.Users author = userService.getUserById(post.getUserId());
+            String username = (author != null) ? URLEncoder.encode(author.getUsername(), StandardCharsets.UTF_8)
+                    : "Unknown";
+
+            return String.format("%s?title=%s&content=%s&username=%s",
+                    netlifyBase, title, content, username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "https://creaco-forum.netlify.app/index.html?id=" + post.getId();
+        }
+    }
+
     private void openSocialLink(Post post, String baseUrl) {
         try {
-            String postUrl = "https://creaco.com/post/" + post.getId();
+            String postUrl = generateShareUrl(post);
             String encodedUrl = URLEncoder.encode(postUrl, StandardCharsets.UTF_8);
             String url = baseUrl + encodedUrl;
 
@@ -1028,9 +1052,11 @@ public class DisplayPostController {
             if (target != null) {
                 // Highlight effect
                 String originalStyle = target.getStyle();
-                target.setStyle(originalStyle + "; -fx-border-color: #ce2d7c; -fx-border-width: 2; -fx-background-color: #fff1f2;");
-                
-                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                target.setStyle(originalStyle
+                        + "; -fx-border-color: #ce2d7c; -fx-border-width: 2; -fx-background-color: #fff1f2;");
+
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+                        javafx.util.Duration.seconds(3));
                 pause.setOnFinished(e -> target.setStyle(originalStyle));
                 pause.play();
 
@@ -1039,7 +1065,7 @@ public class DisplayPostController {
                 while (parent != null && !(parent instanceof javafx.scene.control.ScrollPane)) {
                     parent = parent.getParent();
                 }
-                
+
                 if (parent instanceof javafx.scene.control.ScrollPane) {
                     javafx.scene.control.ScrollPane scrollPane = (javafx.scene.control.ScrollPane) parent;
                     double scrollHeight = postsContainer.getBoundsInLocal().getHeight();
