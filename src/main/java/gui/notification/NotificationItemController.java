@@ -18,8 +18,14 @@ public class NotificationItemController {
     @FXML private Label messageLabel;
     @FXML private Label timeLabel;
     @FXML private Circle unreadDot;
+    @FXML private HBox actionButtons;
+
+    private Notification currentNotification;
+    private final services.NotificationDAO notificationDAO = new services.NotificationDAO();
+    private final services.GroupService groupService = new services.GroupService();
 
     public void setData(Notification n) {
+        this.currentNotification = n;
         messageLabel.setText(n.getMessage());
         timeLabel.setText(formatRelativeTime(n.getCreatedAt()));
         unreadDot.setVisible(!n.isRead());
@@ -29,12 +35,26 @@ public class NotificationItemController {
             itemRoot.setStyle(itemRoot.getStyle() + "; -fx-background-color: #fdf2f8;"); // Very light pink for unread
         }
 
+        // Show action buttons if it's a pending invitation
+        if ("GROUP_INVITATION".equals(n.getType()) && "ACTIVE".equals(n.getStatus())) {
+            actionButtons.setVisible(true);
+            actionButtons.setManaged(true);
+        } else {
+            actionButtons.setVisible(false);
+            actionButtons.setManaged(false);
+        }
+
         // Custom icons based on type
         switch (n.getType()) {
             case "WELCOME":
                 iconLabel.setText("🎉");
                 iconContainer.setPrefWidth(24);
                 iconContainer.setStyle("-fx-background-radius: 12; -fx-background-color: linear-gradient(to bottom, #a855f7, #ec4899);");
+                break;
+            case "GROUP_INVITATION":
+                iconLabel.setText("👥");
+                iconContainer.setPrefWidth(48);
+                iconContainer.setStyle("-fx-background-radius: 12; -fx-background-color: linear-gradient(to bottom, #10b981, #059669);");
                 break;
             case "POST_APPROVED":
                 iconLabel.setText("⋯");
@@ -76,6 +96,40 @@ public class NotificationItemController {
             default:
                 iconLabel.setText("🔔");
                 iconContainer.setPrefWidth(48);
+        }
+    }
+
+    @FXML
+    public void handleAccept() {
+        try {
+            // 1. Add user to group
+            if (currentNotification.getRelatedId() != null) {
+                groupService.addMemberToGroup(currentNotification.getUserId(), currentNotification.getRelatedId());
+                
+                // 2. Update notification
+                notificationDAO.updateStatus(currentNotification.getId(), "ACCEPTED");
+                notificationDAO.markAsRead(currentNotification.getId());
+                
+                messageLabel.setText("✅ You accepted the invitation!");
+                actionButtons.setVisible(false);
+                actionButtons.setManaged(false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleDecline() {
+        try {
+            notificationDAO.updateStatus(currentNotification.getId(), "DECLINED");
+            notificationDAO.markAsRead(currentNotification.getId());
+            
+            messageLabel.setText("❌ You declined the invitation.");
+            actionButtons.setVisible(false);
+            actionButtons.setManaged(false);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
