@@ -27,6 +27,15 @@
             </children>
         </VBox>
         
+        <HBox fx:id="actionButtons" spacing="10.0" visible="false" managed="false" alignment="CENTER_RIGHT">
+            <children>
+                <javafx.scene.control.Button text="Accept" onAction="#handleAccept" 
+                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 15; -fx-cursor: hand;" />
+                <javafx.scene.control.Button text="Decline" onAction="#handleDecline" 
+                        style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 15; -fx-cursor: hand;" />
+            </children>
+        </HBox>
+        
         <Circle fx:id="unreadDot" radius="5.0" fill="linear-gradient(to bottom right, #a855f7, #ec4899)" visible="false" />
     </children>
 </HBox>

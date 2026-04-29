@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<StackPane fx:id="mainRoot" prefHeight="800.0" prefWidth="1280.0" styleClass="welcome-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.UsersControllers.WelcomeController">
+   <children>
+      <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;">
+         <content>
+            <VBox alignment="TOP_CENTER" spacing="0.0">
+               <children>
+                  <!-- Navbar -->
+                  <HBox alignment="CENTER" maxWidth="1000.0" styleClass="welcome-navbar">
+                     <VBox.margin>
+                        <Insets top="30.0" />
+                     </VBox.margin>
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                           <children>
+                              <StackPane style="-fx-background-color: linear-gradient(to bottom right, #7c3aed, #db2777); -fx-background-radius: 12;">
+                                 <children>
+                                    <Label text="C" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 22px; -fx-padding: 5 12;" />
+                                 </children>
+                              </StackPane>
+                              <Label text="CreaCo" style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #1e293b;" />
+                           </children>
+                        </HBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#handleSignIn" text="Sign In" styleClass="btn-hero-secondary" />
+                     </children>
+                  </HBox>
+
+                  <!-- Hero Section -->
+                  <HBox alignment="CENTER" maxWidth="1100.0" spacing="50.0">
+                     <VBox.margin>
+                        <Insets top="80.0" bottom="80.0" />
+                     </VBox.margin>
+                     <children>
+                        <VBox alignment="CENTER_LEFT" spacing="25.0" prefWidth="550.0">
+                           <children>
+                              <Label text="CONNECT. CREATE. COLLABORATE." style="-fx-text-fill: #db2777; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
+                              <Label styleClass="hero-title" text="Transform Your&#10;Creative Flow." wrapText="true" />
+                              <Label styleClass="hero-subtitle" text="CreaCo is the ultimate platform for content creators and innovators. Ideate faster, manage missions with precision, and connect with a vibrant community." wrapText="true" />
+                              <HBox spacing="20.0">
+                                 <children>
+                                    <Button onAction="#handleSignIn" styleClass="btn-hero-primary" text="Join Us Now" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        
+                        <AnchorPane prefHeight="400.0" prefWidth="500.0">
+                           <children>
+                              <!-- Glass Hero Image Simulation -->
+                              <StackPane fx:id="heroVisual" layoutX="40.0" layoutY="40.0" prefHeight="300.0" prefWidth="420.0" styleClass="glass-card-premium">
+                                 <children>
+                                    <VBox alignment="CENTER" spacing="30.0">
+                                       <children>
+                                          <HBox alignment="CENTER" spacing="40.0">
+                                             <children>
+                                                <VBox alignment="CENTER" styleClass="icon-circle" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                                                   <children><Label text="🎨" style="-fx-font-size: 24px;" /></children>
+                                                </VBox>
+                                                <VBox alignment="CENTER" styleClass="icon-circle" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                                                   <children><Label text="⚙️" style="-fx-font-size: 24px;" /></children>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" spacing="40.0">
+                                             <children>
+                                                <VBox alignment="CENTER" styleClass="icon-circle" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                                                   <children><Label text="📷" style="-fx-font-size: 24px;" /></children>
+                                                </VBox>
+                                                <VBox alignment="CENTER" styleClass="icon-circle" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                                                   <children><Label text="🚀" style="-fx-font-size: 24px;" /></children>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </StackPane>
+
+                              <!-- Floating Badges -->
+                              <HBox fx:id="badge1" layoutX="10.0" layoutY="10.0" spacing="10.0" styleClass="floating-badge">
+                                 <children>
+                                    <VBox alignment="CENTER" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: #10b981; -fx-background-radius: 8;">
+                                       <children><Label text="✓" style="-fx-text-fill: white; -fx-font-weight: bold;" /></children>
+                                    </VBox>
+                                    <VBox>
+                                       <children>
+                                          <Label text="TASK COMPLETED" style="-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: #94a3b8;" />
+                                          <Label text="Project Design Live" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <HBox fx:id="badge2" layoutX="320.0" layoutY="320.0" spacing="10.0" styleClass="floating-badge">
+                                 <children>
+                                    <VBox alignment="CENTER" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: #ec4899; -fx-background-radius: 8;">
+                                       <children><Label text="🚀" style="-fx-text-fill: white;" /></children>
+                                    </VBox>
+                                    <VBox>
+                                       <children>
+                                          <Label text="NEW MISSION" style="-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: #94a3b8;" />
+                                          <Label text="Workflow Started" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </HBox>
+
+                  <!-- Features Section -->
+                  <VBox alignment="CENTER" spacing="50.0" style="-fx-padding: 80 0;">
+                     <children>
+                        <VBox alignment="CENTER" spacing="10.0">
+                           <children>
+                              <Label text="Powerful Features for Modern Creators" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                              <Label text="Everything you need to move from an idea to a finished masterpiece." style="-fx-font-size: 16px; -fx-text-fill: #64748b;" />
+                           </children>
+                        </VBox>
+                        
+                        <HBox alignment="CENTER" spacing="30.0">
+                           <children>
+                              <VBox prefWidth="300.0" spacing="15.0" styleClass="feature-box">
+                                 <children>
+                                    <VBox alignment="CENTER" styleClass="icon-circle" style="-fx-background-color: linear-gradient(to bottom right, #3b82f6, #06b6d4);">
+                                       <children><Label text="💡" style="-fx-font-size: 24px; -fx-text-fill: white;" /></children>
+                                    </VBox>
+                                    <Label text="Idea Management" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                    <Label text="Capture every spark of inspiration. Categorize and develop your concepts seamlessly." wrapText="true" style="-fx-text-fill: #64748b;" />
+                                 </children>
+                              </VBox>
+
+                              <VBox prefWidth="300.0" spacing="15.0" styleClass="feature-box">
+                                 <children>
+                                    <VBox alignment="CENTER" styleClass="icon-circle" style="-fx-background-color: linear-gradient(to bottom right, #7c3aed, #db2777);">
+                                       <children><Label text="📋" style="-fx-font-size: 24px; -fx-text-fill: white;" /></children>
+                                    </VBox>
+                                    <Label text="Workflow Systems" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                    <Label text="Built-in missions and tasks trackers designed specifically for creative content production." wrapText="true" style="-fx-text-fill: #64748b;" />
+                                 </children>
+                              </VBox>
+
+                              <VBox prefWidth="300.0" spacing="15.0" styleClass="feature-box">
+                                 <children>
+                                    <VBox alignment="CENTER" styleClass="icon-circle" style="-fx-background-color: linear-gradient(to bottom right, #10b981, #84cc16);">
+                                       <children><Label text="🎓" style="-fx-font-size: 24px; -fx-text-fill: white;" /></children>
+                                    </VBox>
+                                    <Label text="Learning Hub" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                    <Label text="Access premium courses and tutorials to level up your skills in design, tech, and marketing." wrapText="true" style="-fx-text-fill: #64748b;" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+
+                  <!-- Forum Section (Dark) -->
+                  <VBox alignment="CENTER" prefHeight="400.0" spacing="30.0" style="-fx-background-color: #0f172a; -fx-padding: 80 0;">
+                     <children>
+                        <Label text="Join the Conversation on Our" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                        <Label text="Creative Forum" style="-fx-font-size: 40px; -fx-font-weight: 900; -fx-text-fill: #ec4899;" />
+                        <Label maxWidth="600.0" alignment="CENTER" text="Don't struggle in isolation. Our forum is the heartbeat of CreaCo. Ask questions, share your work, and get feedback from creators worldwide." wrapText="true" style="-fx-font-size: 16px; -fx-text-fill: #94a3b8; -fx-text-alignment: center;" />
+                        <Button styleClass="btn-hero-primary" text="Explore the Forum →" />
+                     </children>
+                  </VBox>
+
+                  <!-- Footer -->
+                  <HBox alignment="CENTER" spacing="50.0" style="-fx-padding: 40 0; -fx-background-color: white;">
+                     <children>
+                        <HBox alignment="CENTER" spacing="10.0">
+                           <children>
+                              <Label text="CreaCo" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                           </children>
+                        </HBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label text="© 2026 NetWorkers. Distributed with ❤️." style="-fx-text-fill: #94a3b8;" />
+                     </children>
+                     <padding>
+                        <Insets left="100.0" right="100.0" />
+                     </padding>
+                  </HBox>
+               </children>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </children>
+</StackPane>

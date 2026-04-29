@@ -105,6 +105,10 @@ public class NotificationService {
         createNotification(recipientId, likerName + " liked your message ❤️", "LIKE_MESSAGE", conversationId, "chat/" + conversationId);
     }
 
+    public void notifyGroupInvitation(int recipientId, String creatorName, int groupId) {
+        createNotification(recipientId, creatorName + " invited you to join their Content Creator team!", "GROUP_INVITATION", groupId, "/Users/Invitations.fxml");
+    }
+
     private List<Users> getAllAdmins() throws SQLException {
         // We'll need to implement this in UsersService or here directly
         // For now, let's query directly to avoid modifying UsersService if possible, 
