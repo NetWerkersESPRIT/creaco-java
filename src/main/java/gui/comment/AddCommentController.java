@@ -12,6 +12,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
 import services.forum.CommentService;
+import utils.TextCorrectionService;
+import utils.DetectBadWordService;
+import javafx.concurrent.Task;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -67,26 +71,53 @@ public class AddCommentController {
             return;
         }
 
-        Comment c = new Comment();
-        c.setBody(body);
-        c.setStatus("Active");
-        c.setPostId(currentPost.getId());
-        
-        if (isAdminMode) {
-            c.setUserId(5); // Admin user
-        } else {
-            c.setUserId(1); // Default user
-        }
-        
-        c.setParentCommentId(parentCommentId);
+        Task<Comment> task = new Task<>() {
+            @Override
+            protected Comment call() throws Exception {
+                // 1. Correct spelling
+                String corrected = TextCorrectionService.correctText(body);
+                
+                // 2. Moderate
+                DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                
+                Comment c = new Comment();
+                c.setBody(mod.moderatedText);
+                c.setProfane(mod.isProfane);
+                c.setProfaneWords(mod.profaneWordsCount);
+                c.setGrammarErrors(mod.grammarErrorsCount);
+                
+                if (mod.isProfane) {
+                    c.setStatus("FLAGGED");
+                } else {
+                    c.setStatus("APPROVED");
+                }
+                
+                c.setPostId(currentPost.getId());
+                
+                entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
+                if (user != null) {
+                    c.setUserId(user.getId());
+                } else {
+                    c.setUserId(isAdminMode ? 5 : 1);
+                }
+                
+                c.setParentCommentId(parentCommentId);
+                
+                commentService.ajouter(c);
+                return c;
+            }
+        };
 
-        try {
-            commentService.ajouter(c);
+        task.setOnSucceeded(e -> {
             goBack(event);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Could not save the comment.");
-        }
+        });
+
+        task.setOnFailed(e -> {
+            task.getException().printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not save the comment.");
+        });
+
+        new Thread(task).start();
     }
 
     @FXML

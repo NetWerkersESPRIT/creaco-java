@@ -227,8 +227,8 @@ public class DisplayPostController {
         HBox aiTopBox = new HBox(8);
         aiTopBox.setAlignment(Pos.CENTER_RIGHT);
         aiTopBox.getChildren().addAll(
-                createAIAction("💡 Explain", "explain", post),
-                createAIAction("🔍 Solution", "solution", post));
+                createAIAction("Explain", "explain", post),
+                createAIAction("Solution", "solution", post));
         authorRow.getChildren().add(aiTopBox);
 
         // --- Title & Content ---
@@ -591,10 +591,10 @@ public class DisplayPostController {
 
     private void runAIAction(Post post, String actionType, String label) {
         // Show loading indicator
-        statusLabel.setText("AI is thinking... 🧠");
+        statusLabel.setText("AI is thinking...");
 
         new Thread(() -> {
-            String response = utils.OpenRouterService.getAIResponse(post.getContent(), actionType);
+            String response = utils.OpenRouter.getAIResponse(post.getContent(), actionType);
             javafx.application.Platform.runLater(() -> {
                 statusLabel.setText("AI finished processing.");
                 showAIDialog(label, response, post);
@@ -645,12 +645,13 @@ public class DisplayPostController {
         // Title Row
         HBox titleRow = new HBox(10);
         titleRow.setAlignment(Pos.CENTER_LEFT);
-        Label iconLabel = new Label(title.contains("Solution") ? "🔍" : "💡");
-        iconLabel.setStyle("-fx-font-size: 18px;");
-        Label mainTitle = new Label(title.toUpperCase());
+
+        // Clean title (remove emojis and extra text)
+        String cleanTitle = title.replaceAll("[^a-zA-Z]", "").trim().toUpperCase();
+        Label mainTitle = new Label(cleanTitle);
         mainTitle.setStyle(
                 "-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #1a202c; -fx-font-family: 'Segoe UI';");
-        titleRow.getChildren().addAll(iconLabel, mainTitle);
+        titleRow.getChildren().add(mainTitle);
 
         javafx.scene.control.Separator sep1 = new javafx.scene.control.Separator();
         sep1.setStyle("-fx-background-color: #edf2f7; -fx-opacity: 0.5;");
@@ -690,12 +691,13 @@ public class DisplayPostController {
             stage.close();
         });
 
+        Button closeBtn = createForumStyleButton("Close", "#64748b", false);
+        closeBtn.setOnAction(e -> stage.close());
+
         if (title.contains("Solution")) {
-            footer.getChildren().add(postBtn);
+            footer.getChildren().addAll(closeBtn, postBtn);
         } else {
-            Button okBtn = createForumStyleButton("Close", "#64748b", false);
-            okBtn.setOnAction(e -> stage.close());
-            footer.getChildren().add(okBtn);
+            footer.getChildren().add(closeBtn);
         }
 
         contentArea.getChildren().addAll(titleRow, sep1, scrollPane, sep2, footer);
@@ -740,7 +742,7 @@ public class DisplayPostController {
             }
 
             entities.Comment aiComment = new entities.Comment();
-            aiComment.setBody("🤖 AI Generated Solution:\n\n" + aiContent);
+            aiComment.setBody(aiContent);
             aiComment.setPostId(post.getId());
             aiComment.setUserId(currentUser.getId());
             aiComment.setStatus("ACCEPTED");

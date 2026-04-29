@@ -32,7 +32,9 @@ import javafx.scene.layout.Priority;
 import services.forum.UserPostValidator;
 import entities.forum.SentimentResult;
 import gui.forum.CatMatchGame;
-import services.forum.SpamDetectionService;
+import utils.SpamDetectionService;
+import utils.TextCorrectionService;
+import utils.DetectBadWordService;
 
 public class UpdatePostController {
 
@@ -142,9 +144,9 @@ public class UpdatePostController {
         icon.setStyle("-fx-font-size: 28px; -fx-text-fill: #475569; -fx-font-weight: bold;");
         
         VBox titles = new VBox(8);
-        Label title = new Label("It seems you're feeling a bit frustrated...");
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #334155;");
-        Label sub = new Label("Your words carry some heat. Take a moment to breathe! This advice is not a substitute for professional help.");
+        Label title = new Label("Whoa! It seems you're feeling quite angry...");
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #b91c1c;"); // Redder text for angry
+        Label sub = new Label("Your words carry a lot of heat! Why not cool down with a quick game before updating? It might help you feel better!");
         sub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px;");
         sub.setWrapText(true);
         titles.getChildren().addAll(title, sub);
@@ -270,26 +272,39 @@ public class UpdatePostController {
         }
 
         // Automatic Text Correction
-        title = services.forum.TextCorrectionService.correctText(title);
-        content = services.forum.TextCorrectionService.correctText(content);
+        String titleCorrected = TextCorrectionService.correctText(title);
+        String contentCorrected = TextCorrectionService.correctText(content);
+
+        // Content Moderation
+        DetectBadWordService.ModerationResult titleMod = DetectBadWordService.moderate(titleCorrected).join();
+        DetectBadWordService.ModerationResult contentMod = DetectBadWordService.moderate(contentCorrected).join();
 
         // Spam Detection
-        int spamScore = spamService.calculateSpamScore(title + " " + content);
+        int spamScore = spamService.calculateSpamScore(titleMod.moderatedText + " " + contentMod.moderatedText);
         if (spamScore >= 80) {
             showAlert(Alert.AlertType.ERROR, "Spam Detected", "Your changes have been blocked because the content was detected as spam (Score: " + spamScore + "/100).");
             return;
         }
 
-        postToUpdate.setTitle(title);
-        postToUpdate.setContent(content);
+        postToUpdate.setTitle(titleMod.moderatedText);
+        postToUpdate.setContent(contentMod.moderatedText);
         postToUpdate.setSpamScore(spamScore);
         postToUpdate.setSpam(spamScore >= 40);
+        postToUpdate.setProfane(titleMod.isProfane || contentMod.isProfane);
+        postToUpdate.setProfaneWords(titleMod.profaneWordsCount + contentMod.profaneWordsCount);
+        postToUpdate.setGrammarErrors(titleMod.grammarErrorsCount + contentMod.grammarErrorsCount);
+
         boolean requestPin = pinToggle.isSelected();
         
         if (!isAdminMode) {
-            postToUpdate.setStatus("PENDING");
+            if (postToUpdate.isProfane() || postToUpdate.isSpam()) {
+                postToUpdate.setStatus("FLAGGED");
+            } else {
+                postToUpdate.setStatus("PENDING");
+            }
             postToUpdate.setPinned(false);
         } else {
+            postToUpdate.setStatus("APPROVED");
             postToUpdate.setPinned(requestPin);
         }
 

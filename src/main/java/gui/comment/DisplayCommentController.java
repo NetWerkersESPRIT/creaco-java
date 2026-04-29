@@ -30,6 +30,10 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import gui.forum.GifPickerModalController;
 import services.NotificationService;
+import utils.TextCorrectionService;
+import utils.DetectBadWordService;
+import javafx.concurrent.Task;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -485,65 +489,130 @@ public class DisplayCommentController {
         if (body.isEmpty() && attachedGif == null) return;
 
         // Combine text and GIF
-        String finalBody = body;
+        String tempBody = body;
         if (attachedGif != null) {
-            finalBody = body + " [GIF]" + attachedGif;
+            tempBody = body + " [GIF]" + attachedGif;
         }
+        final String finalBodyToProcess = tempBody;
 
-        Comment comment = new Comment();
-        comment.setPostId(currentPost.getId());
-        
-        Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            gui.util.AlertHelper.showCustomAlert("Error", "You must be logged in to comment.", gui.util.AlertHelper.AlertType.ERROR);
-            return;
-        }
-        comment.setUserId(currentUser.getId());
-        comment.setBody(finalBody);
-        comment.setCreatedAt(LocalDateTime.now());
+        Task<Comment> task = new Task<>() {
+            @Override
+            protected Comment call() throws Exception {
+                // 1. Correct spelling
+                String corrected = TextCorrectionService.correctText(finalBodyToProcess);
+                
+                // 2. Moderate
+                DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                
+                Comment comment = new Comment();
+                comment.setPostId(currentPost.getId());
+                
+                Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+                if (currentUser != null) {
+                    comment.setUserId(currentUser.getId());
+                } else {
+                    comment.setUserId(1);
+                }
+                
+                comment.setBody(mod.moderatedText);
+                comment.setProfane(mod.isProfane);
+                comment.setProfaneWords(mod.profaneWordsCount);
+                comment.setGrammarErrors(mod.grammarErrorsCount);
+                
+                if (mod.isProfane) {
+                    comment.setStatus("FLAGGED");
+                } else {
+                    comment.setStatus("APPROVED");
+                }
+                
+                comment.setCreatedAt(LocalDateTime.now());
+                commentService.ajouter(comment);
+                return comment;
+            }
+        };
 
-        try {
-            commentService.ajouter(comment);
-            
+        task.setOnSucceeded(e -> {
+            Comment comment = task.getValue();
             // Notify Post Owner
-            if (currentPost.getUserId() != currentUser.getId()) {
+            Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            if (currentUser != null && currentPost.getUserId() != currentUser.getId()) {
                 new NotificationService().notifyComment(currentPost.getUserId(), currentUser.getUsername(), currentPost.getId());
             }
 
             commentArea.clear();
             removeAttachment();
             loadCommentsByPost();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
+
+        new Thread(task).start();
     }
 
     private void submitEdit(Comment comment, String newBody) {
-        try {
-            comment.setBody(newBody);
-            commentService.modifier(comment.getId(), comment);
-            loadCommentsByPost();
-        } catch (SQLException e) { e.printStackTrace(); }
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                String corrected = TextCorrectionService.correctText(newBody);
+                DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                
+                comment.setBody(mod.moderatedText);
+                comment.setProfane(mod.isProfane);
+                comment.setProfaneWords(mod.profaneWordsCount);
+                comment.setGrammarErrors(mod.grammarErrorsCount);
+                
+                if (mod.isProfane) {
+                    comment.setStatus("FLAGGED");
+                } else {
+                    comment.setStatus("APPROVED");
+                }
+                
+                commentService.modifier(comment.getId(), comment);
+                return null;
+            }
+        };
+        task.setOnSucceeded(e -> loadCommentsByPost());
+        new Thread(task).start();
     }
 
     private void submitReply(Comment parent, String body) {
-        Comment reply = new Comment();
-        reply.setPostId(currentPost.getId());
-        reply.setParentCommentId(parent.getId());
-        reply.setUserId(utils.SessionManager.getInstance().getCurrentUser().getId());
-        reply.setBody(body);
-        reply.setCreatedAt(LocalDateTime.now());
-        try {
-            commentService.ajouter(reply);
-            
+        Task<Comment> task = new Task<>() {
+            @Override
+            protected Comment call() throws Exception {
+                String corrected = TextCorrectionService.correctText(body);
+                DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                
+                Comment reply = new Comment();
+                reply.setPostId(currentPost.getId());
+                reply.setParentCommentId(parent.getId());
+                reply.setUserId(utils.SessionManager.getInstance().getCurrentUser().getId());
+                
+                reply.setBody(mod.moderatedText);
+                reply.setProfane(mod.isProfane);
+                reply.setProfaneWords(mod.profaneWordsCount);
+                reply.setGrammarErrors(mod.grammarErrorsCount);
+                
+                if (mod.isProfane) {
+                    reply.setStatus("FLAGGED");
+                } else {
+                    reply.setStatus("APPROVED");
+                }
+                
+                reply.setCreatedAt(LocalDateTime.now());
+                commentService.ajouter(reply);
+                return reply;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            Comment reply = task.getValue();
             // Notify Comment Owner
             if (parent.getUserId() != reply.getUserId()) {
                 Users replier = utils.SessionManager.getInstance().getCurrentUser();
                 new NotificationService().notifyReply(parent.getUserId(), replier.getUsername(), reply.getId(), currentPost.getId());
             }
-
             loadCommentsByPost();
-        } catch (SQLException e) { e.printStackTrace(); }
+        });
+        
+        new Thread(task).start();
     }
 
     private void deleteComment(int id) {
