@@ -288,7 +288,13 @@ public class FrontMainController {
     @FXML public void onShowEvents() { 
         if (txtWelcome != null) txtWelcome.setText("Events");
         if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Events");
-        System.out.println("Events section - Coming soon"); 
+        loadSubView("/events/Event.fxml");
+    }
+
+    @FXML public void onShowReservations() { 
+        if (txtWelcome != null) txtWelcome.setText("Reservations");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Reservations");
+        loadSubView("/events/Reservation.fxml");
     }
 
     @FXML public void onShowConnectedUsers() { 
