@@ -83,6 +83,7 @@ public class DisplayPostController {
     private boolean initialized = false;
 
     private Process currentSpeechProcess;
+    private String lastSpokenText = "";
 
     /**
      * Tracks the current user's active reaction per post (postId → ReactionType or
@@ -532,9 +533,9 @@ public class DisplayPostController {
                 String summary = counts.entrySet().stream()
                         .filter(e -> e.getValue() > 0)
                         .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-                        .map(e -> e.getKey().getEmoji() + " " + capitalize(e.getKey().name()))
+                        .map(e -> e.getKey().getEmoji() + " " + e.getValue())
                         .collect(Collectors.joining(", "));
-                lbl.setText(summary + " (" + total + ")");
+                lbl.setText(summary);
             } else {
                 lbl.setText("");
             }
@@ -574,8 +575,13 @@ public class DisplayPostController {
     private void speak(String text) {
         if (currentSpeechProcess != null && currentSpeechProcess.isAlive()) {
             currentSpeechProcess.destroyForcibly();
+            if (text.equals(lastSpokenText)) {
+                lastSpokenText = "";
+                return;
+            }
         }
 
+        lastSpokenText = text;
         new Thread(() -> {
             try {
                 // Escape single quotes for PowerShell
@@ -584,6 +590,9 @@ public class DisplayPostController {
                         + "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
                         + "$speak.Speak('" + escapedText + "')";
                 currentSpeechProcess = new ProcessBuilder("powershell.exe", "-Command", script).start();
+                currentSpeechProcess.onExit().thenRun(() -> {
+                    if (text.equals(lastSpokenText)) lastSpokenText = "";
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -1015,13 +1024,16 @@ public class DisplayPostController {
             showAlert(Alert.AlertType.INFORMATION, "Copied", "Post link copied to clipboard!");
         });
 
-        shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem);
+        MenuItem qrItem = new MenuItem("Generate QR Code");
+        qrItem.setOnAction(e -> showQRCode(post));
+
+        shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem, qrItem);
         shareMenu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
     }
 
     private String generateShareUrl(Post post) {
         try {
-            String netlifyBase = "https://creaconetworkers.netlify.app/";
+            String netlifyBase = "https://creaconetworkerss.netlify.app/";
             String title = URLEncoder.encode(post.getTitle(), StandardCharsets.UTF_8);
             String content = URLEncoder.encode(post.getContent(), StandardCharsets.UTF_8);
 
@@ -1035,6 +1047,71 @@ public class DisplayPostController {
         } catch (Exception e) {
             e.printStackTrace();
             return "https://creaco-forum.netlify.app/index.html?id=" + post.getId();
+        }
+    }
+
+    private void showQRCode(Post post) {
+        String url = generateShareUrl(post);
+        String qrApi = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + URLEncoder.encode(url, StandardCharsets.UTF_8);
+
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(javafx.stage.StageStyle.UTILITY);
+        stage.setTitle("Post QR Code");
+
+        VBox root = new VBox(20);
+        root.setAlignment(Pos.CENTER);
+        root.setPadding(new Insets(30));
+        root.setStyle("-fx-background-color: white; -fx-background-radius: 15;");
+
+        Label title = new Label(post.getTitle());
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2d3748;");
+        title.setWrapText(true);
+        title.setAlignment(Pos.CENTER);
+
+        ImageView qrView = new ImageView(new Image(qrApi));
+        qrView.setFitWidth(250);
+        qrView.setFitHeight(250);
+
+        Label info = new Label("Scan to view on CreaCo Mobile");
+        info.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+
+        Button saveBtn = new Button("💾 Save Image");
+        saveBtn.setOnAction(e -> saveQRCode(qrApi, post.getTitle()));
+        saveBtn.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-background-radius: 10; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        Button close = new Button("Done");
+        close.setOnAction(e -> stage.close());
+        close.setStyle("-fx-background-color: #ce2d7c; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 8 30; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        HBox btnBox = new HBox(15, saveBtn, close);
+        btnBox.setAlignment(Pos.CENTER);
+
+        root.getChildren().addAll(title, qrView, info, btnBox);
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void saveQRCode(String imageUrl, String title) {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Save QR Code");
+        fileChooser.setInitialFileName("QRCode_" + title.replaceAll("[^a-zA-Z0-9]", "_") + ".png");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PNG Files", "*.png"));
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            new Thread(() -> {
+                try (java.io.InputStream in = new java.net.URL(imageUrl).openStream()) {
+                    java.nio.file.Files.copy(in, file.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    javafx.application.Platform.runLater(() ->
+                        showAlert(Alert.AlertType.INFORMATION, "Success", "QR Code saved successfully!"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    javafx.application.Platform.runLater(() ->
+                        showAlert(Alert.AlertType.ERROR, "Error", "Could not save the image."));
+                }
+            }).start();
         }
     }
 
