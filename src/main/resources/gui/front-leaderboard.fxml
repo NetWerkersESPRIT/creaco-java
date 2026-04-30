@@ -35,49 +35,64 @@
                         <HBox alignment="CENTER" spacing="25">
                             <children>
                                 <!-- 2nd Place -->
-                                <VBox fx:id="secondPlaceCard" alignment="TOP_CENTER" prefWidth="280" styleClass="card" style="-fx-padding: 30 20; -fx-translate-y: 20;">
+                                <StackPane prefWidth="280">
                                     <children>
-                                        <Label text="2nd" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;" />
-                                        <StackPane>
-                                            <Circle radius="45" fill="WHITE" stroke="#cbd5e1" strokeWidth="3" />
-                                            <ImageView fx:id="imgSecond" fitHeight="80" fitWidth="80">
-                                                <clip><Circle radius="40" centerX="40" centerY="40"/></clip>
-                                            </ImageView>
-                                        </StackPane>
-                                        <Label fx:id="nameSecond" text="Loading..." style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
-                                        <Label fx:id="openedSecond" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-weight: bold;" />
+                                        <VBox fx:id="secondPlaceCard" alignment="TOP_CENTER" styleClass="card" style="-fx-padding: 30 20; -fx-translate-y: 20;">
+                                            <children>
+                                                <Label text="2nd" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;" />
+                                                <StackPane>
+                                                    <Circle radius="45" fill="WHITE" stroke="#cbd5e1" strokeWidth="3" />
+                                                    <ImageView fx:id="imgSecond" fitHeight="80" fitWidth="80">
+                                                        <clip><Circle radius="40" centerX="40" centerY="40"/></clip>
+                                                    </ImageView>
+                                                </StackPane>
+                                                <Label fx:id="nameSecond" text="Loading..." style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
+                                                <Label fx:id="openedSecond" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-weight: bold;" />
+                                            </children>
+                                        </VBox>
+                                        <ImageView fx:id="badgeSecond" fitHeight="70" fitWidth="70" StackPane.alignment="TOP_RIGHT" style="-fx-padding: -10 -10 0 0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 8, 0, 2, 2);" />
                                     </children>
-                                </VBox>
+                                </StackPane>
 
                                 <!-- 1st Place -->
-                                <VBox fx:id="firstPlaceCard" alignment="TOP_CENTER" prefWidth="320" styleClass="card" style="-fx-padding: 40 20; -fx-border-color: -fx-primary-pink; -fx-border-width: 2;">
+                                <StackPane prefWidth="320">
                                     <children>
-                                        <Label text="1st" style="-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: #fbbf24;" />
-                                        <StackPane>
-                                            <Circle radius="55" fill="WHITE" stroke="#fbbf24" strokeWidth="4" />
-                                            <ImageView fx:id="imgFirst" fitHeight="100" fitWidth="100">
-                                                <clip><Circle radius="50" centerX="50" centerY="50"/></clip>
-                                            </ImageView>
-                                        </StackPane>
-                                        <Label fx:id="nameFirst" text="Loading..." style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
-                                        <Label fx:id="openedFirst" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-size: 16px; -fx-font-weight: bold;" />
+                                        <VBox fx:id="firstPlaceCard" alignment="TOP_CENTER" styleClass="card" style="-fx-padding: 40 20; -fx-border-color: -fx-primary-pink; -fx-border-width: 2;">
+                                            <children>
+                                                <Label text="1st" style="-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: #fbbf24;" />
+                                                <StackPane>
+                                                    <Circle radius="55" fill="WHITE" stroke="#fbbf24" strokeWidth="4" />
+                                                    <ImageView fx:id="imgFirst" fitHeight="100" fitWidth="100">
+                                                        <clip><Circle radius="50" centerX="50" centerY="50"/></clip>
+                                                    </ImageView>
+                                                </StackPane>
+                                                <Label fx:id="nameFirst" text="Loading..." style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
+                                                <Label fx:id="openedFirst" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-size: 16px; -fx-font-weight: bold;" />
+                                            </children>
+                                        </VBox>
+                                        <ImageView fx:id="badgeFirst" fitHeight="85" fitWidth="85" StackPane.alignment="TOP_RIGHT" style="-fx-padding: -15 -15 0 0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 3, 3);" />
                                     </children>
-                                </VBox>
+                                </StackPane>
 
                                 <!-- 3rd Place -->
-                                <VBox fx:id="thirdPlaceCard" alignment="TOP_CENTER" prefWidth="280" styleClass="card" style="-fx-padding: 30 20; -fx-translate-y: 40;">
+                                <StackPane prefWidth="280">
                                     <children>
-                                        <Label text="3rd" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #92400e;" />
-                                        <StackPane>
-                                            <Circle radius="45" fill="WHITE" stroke="#92400e" strokeWidth="3" />
-                                            <ImageView fx:id="imgThird" fitHeight="80" fitWidth="80">
-                                                <clip><Circle radius="40" centerX="40" centerY="40"/></clip>
-                                            </ImageView>
-                                        </StackPane>
-                                        <Label fx:id="nameThird" text="Loading..." style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
-                                        <Label fx:id="openedThird" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-weight: bold;" />
+                                        <VBox fx:id="thirdPlaceCard" alignment="TOP_CENTER" styleClass="card" style="-fx-padding: 30 20; -fx-translate-y: 40;">
+                                            <children>
+                                                <Label text="3rd" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #92400e;" />
+                                                <StackPane>
+                                                    <Circle radius="45" fill="WHITE" stroke="#92400e" strokeWidth="3" />
+                                                    <ImageView fx:id="imgThird" fitHeight="80" fitWidth="80">
+                                                        <clip><Circle radius="40" centerX="40" centerY="40"/></clip>
+                                                    </ImageView>
+                                                </StackPane>
+                                                <Label fx:id="nameThird" text="Loading..." style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
+                                                <Label fx:id="openedThird" text="0 Resources" style="-fx-text-fill: #ec4899; -fx-font-weight: bold;" />
+                                            </children>
+                                        </VBox>
+                                        <ImageView fx:id="badgeThird" fitHeight="70" fitWidth="70" StackPane.alignment="TOP_RIGHT" style="-fx-padding: -10 -10 0 0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 8, 0, 2, 2);" />
                                     </children>
-                                </VBox>
+                                </StackPane>
                             </children>
                         </HBox>
 

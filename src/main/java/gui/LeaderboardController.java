@@ -23,6 +23,7 @@ public class LeaderboardController {
     @FXML private Label nameFirst, nameSecond, nameThird;
     @FXML private Label openedFirst, openedSecond, openedThird;
     @FXML private ImageView imgFirst, imgSecond, imgThird;
+    @FXML private ImageView badgeFirst, badgeSecond, badgeThird;
     @FXML private HBox categoryLeadersContainer;
     @FXML private VBox rankingContainer;
 
@@ -45,6 +46,11 @@ public class LeaderboardController {
             if (top3.size() >= 1) populateTopCard(top3.get(0), nameFirst, openedFirst, imgFirst);
             if (top3.size() >= 2) populateTopCard(top3.get(1), nameSecond, openedSecond, imgSecond);
             if (top3.size() >= 3) populateTopCard(top3.get(2), nameThird, openedThird, imgThird);
+            
+            // Load badges
+            loadBadge(badgeFirst, "first.png");
+            loadBadge(badgeSecond, "second.png");
+            loadBadge(badgeThird, "third.png");
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
@@ -56,19 +62,49 @@ public class LeaderboardController {
         countLbl.setText(data.get("count") + " Resources");
         
         String imgPath = (String) data.get("image");
-        if (imgPath != null && !imgPath.isEmpty()) {
-            try {
-                img.setImage(new Image(imgPath, true));
-            } catch (Exception e) {
-                setDefaultAvatar(img);
-            }
-        } else {
-            setDefaultAvatar(img);
-        }
+        loadAvatar(img, imgPath, name);
     }
 
-    private void setDefaultAvatar(ImageView img) {
-        img.setImage(new Image("https://ui-avatars.com/api/?name=User&background=ce2d7c&color=fff", true));
+    private void setDefaultAvatar(ImageView img, String userName) {
+        String safeName = (userName != null && !userName.isBlank()) ? userName : "User";
+        String encodedName = safeName.replace(" ", "+");
+        img.setImage(new Image("https://ui-avatars.com/api/?name=" + encodedName + "&background=ce2d7c&color=fff", true));
+    }
+
+    private void loadAvatar(ImageView img, String imagePath, String userName) {
+        if (imagePath != null && !imagePath.isBlank()) {
+            try {
+                Image image;
+                if (imagePath.startsWith("http://") || imagePath.startsWith("https://") || imagePath.startsWith("file:")) {
+                    image = new Image(imagePath, true);
+                } else {
+                    java.io.File file = new java.io.File(imagePath);
+                    if (!file.exists()) {
+                        file = new java.io.File("src/main/resources/uploads/images/" + imagePath);
+                    }
+                    if (file.exists()) {
+                        image = new Image(file.toURI().toString(), true);
+                    } else {
+                        image = new Image(imagePath, true);
+                    }
+                }
+                img.setImage(image);
+                return;
+            } catch (Exception e) {
+                // fall through to default avatar
+            }
+        }
+        setDefaultAvatar(img, userName);
+    }
+
+    private void loadBadge(ImageView badgeView, String badgeFileName) {
+        try {
+            Image badge = new Image(getClass().getResourceAsStream("/gui/images/badges/" + badgeFileName));
+            badgeView.setImage(badge);
+        } catch (Exception e) {
+            // Badge not found or error loading
+            System.err.println("Failed to load badge: " + badgeFileName);
+        }
     }
 
     private void loadCategoryLeaders() {
@@ -95,13 +131,8 @@ public class LeaderboardController {
         img.setFitWidth(50);
         img.setClip(new Circle(25, 25, 25));
         String imgPath = (String) data.get("userImage");
-        if (imgPath != null && !imgPath.isEmpty()) {
-            try { img.setImage(new Image(imgPath, true)); } catch (Exception e) { setDefaultAvatar(img); }
-        } else {
-            setDefaultAvatar(img);
-        }
-
         String userName = (String) data.get("userName");
+        loadAvatar(img, imgPath, userName);
         Label name = new Label(userName != null ? userName : "Unknown");
         name.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #2d3748;");
 
@@ -140,13 +171,8 @@ public class LeaderboardController {
         img.setFitWidth(35);
         img.setClip(new Circle(17.5, 17.5, 17.5));
         String imgPath = (String) data.get("image");
-        if (imgPath != null && !imgPath.isEmpty()) {
-            try { img.setImage(new Image(imgPath, true)); } catch (Exception e) { setDefaultAvatar(img); }
-        } else {
-            setDefaultAvatar(img);
-        }
-
         String userName = (String) data.get("name");
+        loadAvatar(img, imgPath, userName);
         Label name = new Label(userName != null ? userName : "Unknown User");
         name.setStyle("-fx-font-weight: bold; -fx-text-fill: #2d3748;");
         userBox.getChildren().addAll(img, name);
