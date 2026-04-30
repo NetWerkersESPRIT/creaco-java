@@ -212,7 +212,8 @@ public class MissionController {
 
     // ── CalendarFX Integration ────────────────────────────────────────────────
     private void renderCalendar() {
-        if (calendarPane == null) return;
+        if (calendarPane == null)
+            return;
         calendarPane.getChildren().clear();
         calendarPane.setAlignment(Pos.TOP_LEFT);
 
@@ -220,33 +221,35 @@ public class MissionController {
         HBox headerBox = new HBox();
         headerBox.setAlignment(Pos.CENTER_LEFT);
         headerBox.setStyle("-fx-padding: 0 0 20 0;");
-        
+
         VBox titleBox = new VBox(4);
         Label lblHeader = new Label("📅 Mission Calendar");
         lblHeader.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2d3748;");
         Label lblSub = new Label("Missions organized using CalendarFX");
         lblSub.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8;");
         titleBox.getChildren().addAll(lblHeader, lblSub);
-        
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        
+
         Button btnSwitch = new Button("Browse All Missions");
-        btnSwitch.setStyle("-fx-background-color: linear-gradient(to right, #cb0c9f, #6c2db1); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 12; -fx-padding: 10 24; -fx-cursor: hand;");
+        btnSwitch.setStyle(
+                "-fx-background-color: linear-gradient(to right, #cb0c9f, #6c2db1); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 12; -fx-padding: 10 24; -fx-cursor: hand;");
         btnSwitch.setOnAction(e -> switchToList());
-        
+
         headerBox.getChildren().addAll(titleBox, spacer, btnSwitch);
         calendarPane.getChildren().add(headerBox);
 
         try {
             com.calendarfx.view.CalendarView calendarView = new com.calendarfx.view.CalendarView();
-            
+
             com.calendarfx.model.Calendar missionCalendar = new com.calendarfx.model.Calendar("Missions");
             missionCalendar.setStyle(com.calendarfx.model.Calendar.Style.STYLE1);
 
-            com.calendarfx.model.CalendarSource myCalendarSource = new com.calendarfx.model.CalendarSource("My Missions");
+            com.calendarfx.model.CalendarSource myCalendarSource = new com.calendarfx.model.CalendarSource(
+                    "My Missions");
             myCalendarSource.getCalendars().addAll(missionCalendar);
-            
+
             calendarView.getCalendarSources().addAll(myCalendarSource);
             calendarView.setRequestedTime(java.time.LocalTime.now());
 
@@ -257,24 +260,28 @@ public class MissionController {
                     try {
                         String cleanDate = dateStr.trim();
                         if (cleanDate.contains(" ")) {
-                            cleanDate = cleanDate.split(" ")[0]; // remove time part if exists e.g. '2024-05-10 14:00:00'
+                            cleanDate = cleanDate.split(" ")[0]; // remove time part if exists e.g. '2024-05-10
+                                                                 // 14:00:00'
                         }
-                        
+
                         java.time.LocalDate date;
                         try {
                             date = java.time.LocalDate.parse(cleanDate);
                         } catch (Exception e1) {
                             try {
-                                date = java.time.LocalDate.parse(cleanDate, java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                                date = java.time.LocalDate.parse(cleanDate,
+                                        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                             } catch (Exception e2) {
-                                date = java.time.LocalDate.parse(cleanDate, java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                                date = java.time.LocalDate.parse(cleanDate,
+                                        java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                             }
                         }
-                        
+
                         com.calendarfx.model.Entry<Mission> entry = new com.calendarfx.model.Entry<>(m.getTitle());
+                        entry.setUserObject(m); // CRITICAL: Link the actual Mission object to the calendar entry
                         entry.changeStartDate(date);
                         entry.changeEndDate(date);
-                        entry.setFullDay(true); // Full day event to span across month view cells nicely
+                        entry.setFullDay(true);
                         missionCalendar.addEntry(entry);
                     } catch (Exception ex) {
                         System.err.println("Failed to map mission to Calendar due to date format: " + dateStr);
@@ -289,45 +296,24 @@ public class MissionController {
             calendarView.setShowSearchField(false);
             calendarView.setShowSourceTrayButton(false);
             calendarView.showMonthPage(); // Default to Month View
-            
-            // Custom Popover when clicking an entry in the calendar
-            calendarView.setEntryDetailsPopOverContentCallback(param -> {
+
+            // Prevent default popover entirely
+            calendarView.setEntryDetailsCallback(param -> true);
+
+            // Completely override the Context Menu to provide exactly the "Information" option
+            calendarView.setEntryContextMenuCallback(param -> {
+                javafx.scene.control.ContextMenu contextMenu = new javafx.scene.control.ContextMenu();
                 com.calendarfx.model.Entry<?> entry = param.getEntry();
-                Mission m = (Mission) entry.getUserObject();
-                if (m == null) return new Label("No details available.");
 
-                VBox popoverRoot = new VBox(15);
-                popoverRoot.setStyle("-fx-padding: 20; -fx-background-color: white;");
-                popoverRoot.setPrefWidth(350);
-
-                Label lblPopoverHeader = new Label(m.getTitle());
-                lblPopoverHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
-
-                String state = m.getState() != null ? m.getState().toLowerCase() : "new";
-                entities.Idea associatedIdea = (m.getImplement_idea_id() > 0) ? ideaService.getIdeaById(m.getImplement_idea_id()) : null;
-                
-                String details = "Description: " + (m.getDescription() != null ? m.getDescription() : "N/A") + "\n\n" +
-                                 "Status: " + state.replace("_", " ").toUpperCase() + "\n\n" +
-                                 "Date: " + (m.getMission_date() != null ? m.getMission_date() : "N/A");
-                                 
-                if (associatedIdea != null) {
-                    details += "\n\nImplemented Idea: " + associatedIdea.getTitle() + "\n" +
-                               "Category: " + (associatedIdea.getCategory() != null ? associatedIdea.getCategory() : "General");
+                // Now that UserObject is correctly set, this check will pass
+                if (entry != null && entry.getUserObject() instanceof Mission) {
+                    Mission m = (Mission) entry.getUserObject();
+                    javafx.scene.control.MenuItem infoItem = new javafx.scene.control.MenuItem("Information");
+                    infoItem.setStyle("-fx-font-size: 13px; -fx-padding: 5 15;");
+                    infoItem.setOnAction(e -> javafx.application.Platform.runLater(() -> showMissionDetailsDialog(m)));
+                    contextMenu.getItems().add(infoItem);
                 }
-
-                Label lblDetails = new Label(details);
-                lblDetails.setWrapText(true);
-                lblDetails.setStyle("-fx-font-size: 13px; -fx-text-fill: #475569; -fx-line-spacing: 5px;");
-
-                Button btnEdit = new Button("✎ Edit Mission");
-                btnEdit.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
-                btnEdit.setOnAction(e -> {
-                    param.getPopOver().hide();
-                    openEditMission(m);
-                });
-
-                popoverRoot.getChildren().addAll(lblPopoverHeader, lblDetails, btnEdit);
-                return popoverRoot;
+                return contextMenu;
             });
 
             VBox.setVgrow(calendarView, Priority.ALWAYS);
@@ -461,7 +447,8 @@ public class MissionController {
             javafx.scene.Node root = loader.load();
             EditMissionController ctrl = loader.getController();
             ctrl.setMission(m);
-            StackPane contentArea = (StackPane) (missionsList != null ? missionsList.getScene().lookup("#contentArea") : calendarPane.getScene().lookup("#contentArea"));
+            StackPane contentArea = (StackPane) (missionsList != null ? missionsList.getScene().lookup("#contentArea")
+                    : calendarPane.getScene().lookup("#contentArea"));
             if (contentArea != null)
                 contentArea.getChildren().setAll(root);
         } catch (Exception ex) {
@@ -475,24 +462,29 @@ public class MissionController {
         stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
 
         VBox root = new VBox(15);
-        root.setStyle("-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-border-radius: 15; -fx-border-color: #cbd5e1; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 0);");
+        root.setStyle(
+                "-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-border-radius: 15; -fx-border-color: #cbd5e1; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 0);");
         root.setPrefWidth(400);
 
         Label lblHeader = new Label("Mission Details");
         lblHeader.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
         String state = m.getState() != null ? m.getState().toLowerCase() : "new";
-        entities.Idea associatedIdea = (m.getImplement_idea_id() > 0) ? ideaService.getIdeaById(m.getImplement_idea_id()) : null;
-        
+        entities.Idea associatedIdea = (m.getImplement_idea_id() > 0)
+                ? ideaService.getIdeaById(m.getImplement_idea_id())
+                : null;
+
         String details = "Title: " + m.getTitle() + "\n\n" +
-                         "Description: " + (m.getDescription() != null ? m.getDescription() : "N/A") + "\n\n" +
-                         "Status: " + state.replace("_", " ").toUpperCase() + "\n\n" +
-                         "Date: " + (m.getMission_date() != null ? m.getMission_date() : "N/A");
-                         
+                "Description: " + (m.getDescription() != null ? m.getDescription() : "N/A") + "\n\n" +
+                "Status: " + state.replace("_", " ").toUpperCase() + "\n\n" +
+                "Date: " + (m.getMission_date() != null ? m.getMission_date() : "N/A");
+
         if (associatedIdea != null) {
             details += "\n\nImplemented Idea: " + associatedIdea.getTitle() + "\n" +
-                       "Idea Category: " + (associatedIdea.getCategory() != null ? associatedIdea.getCategory() : "General") + "\n" +
-                       "Idea Description: " + (associatedIdea.getDescription() != null ? associatedIdea.getDescription() : "N/A");
+                    "Idea Category: "
+                    + (associatedIdea.getCategory() != null ? associatedIdea.getCategory() : "General") + "\n" +
+                    "Idea Description: "
+                    + (associatedIdea.getDescription() != null ? associatedIdea.getDescription() : "N/A");
         }
 
         Label lblDetails = new Label(details);
@@ -503,14 +495,16 @@ public class MissionController {
         buttons.setAlignment(Pos.CENTER_RIGHT);
 
         Button btnEdit = new Button("✎ Edit Mission");
-        btnEdit.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
+        btnEdit.setStyle(
+                "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
         btnEdit.setOnAction(e -> {
             stage.close();
             openEditMission(m);
         });
 
         Button btnClose = new Button("Close");
-        btnClose.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
+        btnClose.setStyle(
+                "-fx-background-color: #e2e8f0; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
         btnClose.setOnAction(e -> stage.close());
 
         buttons.getChildren().addAll(btnEdit, btnClose);
