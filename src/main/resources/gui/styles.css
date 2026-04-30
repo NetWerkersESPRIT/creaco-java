@@ -229,6 +229,61 @@
     -fx-text-fill: #4a5568;
 }
 
+.custom-alert-backdrop {
+    -fx-background-color: rgba(15, 23, 42, 0.45);
+}
+
+.custom-alert-card {
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.16), 26, 0, 0, 16);
+}
+
+.custom-alert-icon-wrapper {
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 50;
+    -fx-border-width: 2;
+    -fx-background-color: #ffffff;
+}
+
+.custom-alert-icon {
+    -fx-font-size: 40px;
+    -fx-text-fill: #64748b;
+}
+
+.custom-alert-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.custom-alert-message {
+    -fx-font-size: 15px;
+    -fx-text-fill: #64748b;
+    -fx-text-alignment: center;
+}
+
+.custom-alert-button {
+    -fx-background-radius: 12;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-alert-primary {
+    -fx-background-color: -fx-primary-pink;
+    -fx-text-fill: white;
+}
+
+.btn-alert-secondary {
+    -fx-background-color: #94a3b8;
+    -fx-text-fill: white;
+}
+
+.btn-alert-error {
+    -fx-background-color: #e53e3e;
+    -fx-text-fill: white;
+}
+
 /* Inputs */
 .search-bar {
     -fx-background-color: white;

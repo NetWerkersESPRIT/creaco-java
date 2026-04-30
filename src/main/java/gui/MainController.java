@@ -451,7 +451,7 @@ public class MainController {
     @FXML
     private void onGenerateCourseIdea() {
         if (aiTopicField == null || aiTopicField.getText().trim().isEmpty()) {
-            gui.AlertHelper.showError("Missing Topic", "Please enter a topic or keyword first.");
+            gui.util.AlertHelper.showError("Missing Topic", "Please enter a topic or keyword first.");
             return;
         }
         String topic = aiTopicField.getText().trim();
@@ -508,7 +508,7 @@ public class MainController {
             
             courseService.ajouter(newCourse);
             
-            gui.AlertHelper.showInfo("Success", "Course drafted successfully! You can now edit it to add resources and an image.");
+gui.util.AlertHelper.showInfo("Success", "Course drafted successfully! You can now edit it to add resources and an image.");
             
             // Refresh
             loadCourses();
@@ -520,7 +520,7 @@ public class MainController {
             
         } catch (Exception e) {
             e.printStackTrace();
-            gui.AlertHelper.showError("Error", "Failed to draft course: " + e.getMessage());
+            gui.util.AlertHelper.showError("Error", "Failed to draft course: " + e.getMessage());
         }
     }
 

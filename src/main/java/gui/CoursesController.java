@@ -592,17 +592,15 @@ public class CoursesController {
 
     private void onDeleteTicket(HelpTicket t) {
         try {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete this request?", ButtonType.YES, ButtonType.NO);
-            alert.showAndWait().ifPresent(type -> {
-                if (type == ButtonType.YES) {
-                    try {
-                        ticketService.delete(t.getId());
-                        loadTickets();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+            if (!gui.util.AlertHelper.confirmDelete("request")) {
+                return;
+            }
+            try {
+                ticketService.delete(t.getId());
+                loadTickets();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

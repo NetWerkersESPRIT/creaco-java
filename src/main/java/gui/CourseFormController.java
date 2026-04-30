@@ -167,7 +167,7 @@ public class CourseFormController {
             }
             openCoursesPage();
         } catch (Exception exception) {
-            AlertHelper.showError("Save Error", "Unable to save the course: " + exception.getMessage());
+            gui.util.AlertHelper.showError("Save Error", "Unable to save the course: " + exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -241,7 +241,7 @@ public class CourseFormController {
         }
 
         if (!valid) {
-            AlertHelper.showError("Validation error", "Please correct the highlighted fields before saving.");
+            gui.util.AlertHelper.showError("Validation error", "Please correct the highlighted fields before saving.");
         }
 
         return valid;

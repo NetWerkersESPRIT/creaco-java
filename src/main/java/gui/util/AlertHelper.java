@@ -72,6 +72,8 @@ public class AlertHelper {
             
             Scene scene = new Scene(root);
             scene.setFill(Color.TRANSPARENT);
+            String stylesheet = AlertHelper.class.getResource("/gui/styles.css").toExternalForm();
+            scene.getStylesheets().add(stylesheet);
             stage.setScene(scene);
             
             // Animation logic
@@ -113,6 +115,22 @@ public class AlertHelper {
         }
         
         return confirmed.get();
+    }
+
+    public static boolean confirmDelete(String itemType) {
+        return showCustomAlert("Confirm delete", "Delete " + itemType + "? This action cannot be undone.", AlertType.CONFIRMATION);
+    }
+
+    public static void showInfo(String title, String message) {
+        showCustomAlert(title, message, AlertType.INFORMATION);
+    }
+
+    public static void showError(String title, String message) {
+        showCustomAlert(title, message, AlertType.ERROR);
+    }
+
+    public static void showWarning(String title, String message) {
+        showCustomAlert(title, message, AlertType.WARNING);
     }
 
     private static void animateOut(Stage stage, StackPane root, VBox dialogBox) {

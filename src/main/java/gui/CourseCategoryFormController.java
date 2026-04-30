@@ -103,7 +103,7 @@ public class CourseCategoryFormController {
             nameErrorLabel.setText("Category name is required.");
             nameErrorLabel.setVisible(true);
             nameErrorLabel.setManaged(true);
-            AlertHelper.showError("Validation error", "Please enter a category name before saving.");
+            gui.util.AlertHelper.showError("Validation error", "Please enter a category name before saving.");
             return false;
         }
 
@@ -113,14 +113,14 @@ public class CourseCategoryFormController {
                 nameErrorLabel.setText("A category with this name already exists.");
                 nameErrorLabel.setVisible(true);
                 nameErrorLabel.setManaged(true);
-                AlertHelper.showError("Validation error", "Category name must be unique.");
+                gui.util.AlertHelper.showError("Validation error", "Category name must be unique.");
                 return false;
             }
         } catch (SQLException exception) {
             nameErrorLabel.setText("Unable to validate category name uniqueness.");
             nameErrorLabel.setVisible(true);
             nameErrorLabel.setManaged(true);
-            AlertHelper.showError("Validation error", "Unable to verify if the category name is unique.");
+            gui.util.AlertHelper.showError("Validation error", "Unable to verify if the category name is unique.");
             return false;
         }
 
