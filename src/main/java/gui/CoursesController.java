@@ -525,7 +525,7 @@ public class CoursesController {
         // Content
         VBox contentBox = new VBox();
         contentBox.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-padding: 15;");
-        Label content = new Label(t.getMessage());
+        Label content = new Label(stripHtmlTags(t.getMessage()));
         content.setWrapText(true);
         content.setStyle("-fx-text-fill: #334155; -fx-font-size: 13px;");
         contentBox.getChildren().add(content);
@@ -538,7 +538,7 @@ public class CoursesController {
             replyBox.getStyleClass().add("reply-box");
             Label adminLabel = new Label("ADMIN RESPONSE");
             adminLabel.getStyleClass().add("admin-reply-label");
-            Label replyText = new Label(t.getAdminResponse());
+            Label replyText = new Label(stripHtmlTags(t.getAdminResponse()));
             replyText.setWrapText(true);
             replyText.setStyle("-fx-text-fill: #065f46; -fx-font-size: 13px;");
             replyBox.getChildren().addAll(adminLabel, replyText);

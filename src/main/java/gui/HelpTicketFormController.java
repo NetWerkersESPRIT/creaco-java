@@ -89,7 +89,7 @@ public class HelpTicketFormController {
         String priority = priorityComboBox.getValue();
         Course selectedCourse = courseComboBox.getValue();
 
-        if (subject.isEmpty() || message.isEmpty()) {
+        if (subject.isEmpty() || isEditorContentEmpty(message)) {
             showAlert("Error", "Please fill in both subject and message.");
             return;
         }
@@ -135,6 +135,12 @@ public class HelpTicketFormController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isEditorContentEmpty(String html) {
+        if (html == null) return true;
+        String stripped = html.replaceAll("<[^>]*>", "").replace("&nbsp;", " ").trim();
+        return stripped.isEmpty();
     }
 
     private void showAlert(String title, String content) {

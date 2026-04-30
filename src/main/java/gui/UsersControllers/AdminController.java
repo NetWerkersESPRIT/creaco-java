@@ -80,7 +80,7 @@ public class AdminController {
                     userCount, courseCount, postCount, commentCount, ideaCount, missionCount
                 );
 
-                return utils.GeminiService.getGeminiResponse(prompt);
+                return utils.GeminiService.getParaphrase(prompt);
             }
         };
 
@@ -125,7 +125,7 @@ public class AdminController {
                     userCount, courseCount, postCount, ideaCount
                 );
 
-                return utils.GeminiService.getGeminiResponse(context + query);
+                return utils.GeminiService.getParaphrase(context + query);
             }
         };
 
