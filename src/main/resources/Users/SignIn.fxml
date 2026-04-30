@@ -9,45 +9,53 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.web.WebView?>
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.Group?>
 
-<HBox
+<StackPane
     xmlns="http://javafx.com/javafx/21"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="gui.UsersControllers.SignInController"
     stylesheets="@../gui/styles.css"
     prefWidth="1280.0" prefHeight="800.0"
-    styleClass="main-container"
-    alignment="CENTER" spacing="0">
+    styleClass="main-container">
 
-    <!-- LEFT HERO PANEL (Gradient background) -->
-    <VBox alignment="CENTER" prefWidth="500" spacing="25" style="-fx-background-color: linear-gradient(to bottom right, #ce2d7c, #6c2db1); -fx-background-radius: 0 50 50 0;">
-        <padding><Insets bottom="40" left="40" right="40" top="40" /></padding>
-        
-        <HBox alignment="TOP_LEFT">
-            <Button text="← Back to Home" onAction="#goToWelcome" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" />
-        </HBox>
-        
-        <VBox VBox.vgrow="ALWAYS" />
-        
-        <StackPane prefHeight="80" prefWidth="80" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20;">
-            <Label style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="CreaCo" />
-        </StackPane>
+    <HBox alignment="CENTER" spacing="0">
+        <!-- LEFT HERO PANEL (Gradient background) -->
+        <VBox alignment="TOP_CENTER" prefWidth="500" spacing="25"
+              style="-fx-background-color: linear-gradient(to bottom right, #ce2d7c, #6c2db1); -fx-background-radius: 0 50 50 0;"
+              prefHeight="800.0">
+            <padding><Insets bottom="40" left="40" right="40" top="40" /></padding>
+
+            <!-- Back to Home button at the top -->
+            <HBox alignment="CENTER_LEFT">
+                <Button text="← Back to Home" onAction="#goToWelcome"
+                        style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 10; -fx-padding: 8 16;" />
+            </HBox>
+
+            <!-- Spacer -->
+            <VBox VBox.vgrow="ALWAYS" />
+
+            <!-- Logo -->
+            <StackPane prefHeight="80" prefWidth="80" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20;">
+                <Label style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="CreaCo" />
+            </StackPane>
 
             <VBox alignment="CENTER" spacing="10">
                 <Label style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" text="Welcome back!" />
-                <Label style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14px;" text="The most modern way to manage your creative projects and tasks." textAlignment="CENTER" wrapText="true" />
+                <Label style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14px;"
+                       text="The most modern way to manage your creative projects and tasks."
+                       textAlignment="CENTER" wrapText="true" />
             </VBox>
-            
+
+            <!-- Spacer -->
             <VBox VBox.vgrow="ALWAYS" />
             <Label style="-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 12px;" text="© 2025 Creaco - Soft UI Dashboard" />
         </VBox>
 
         <!-- RIGHT FORM PANEL -->
-        <VBox alignment="CENTER" style="-fx-background-color: -fx-background;" HBox.hgrow="ALWAYS">
+        <VBox alignment="CENTER" style="-fx-background-color: -fx-background;" HBox.hgrow="ALWAYS" prefHeight="800.0">
             <VBox maxWidth="380" spacing="20" styleClass="card">
                 <VBox spacing="5">
                     <Label styleClass="title-label" text="Sign In" />
@@ -68,7 +76,8 @@
                             <PasswordField fx:id="txtPassword" promptText="••••••••" styleClass="search-bar" />
                             <TextField fx:id="txtPasswordVisible" promptText="••••••••" styleClass="search-bar" visible="false" />
                         </StackPane>
-                        <Button fx:id="btnTogglePassword" onAction="#togglePassword" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #718096; -fx-font-size: 18px;" text="👁" />
+                        <Button fx:id="btnTogglePassword" onAction="#togglePassword"
+                                style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #718096; -fx-font-size: 18px;" text="👁" />
                     </HBox>
                 </VBox>
 
@@ -81,8 +90,10 @@
                 </VBox>
 
                 <Button maxWidth="Infinity" onAction="#handleLogin" prefHeight="45" styleClass="btn-primary" text="Sign In" />
-                
-                <Button maxWidth="Infinity" onAction="#handleGoogleLogin" prefHeight="45" style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-text-fill: #4A5568; -fx-font-weight: bold; -fx-cursor: hand;" text="Sign in with Google">
+
+                <Button maxWidth="Infinity" onAction="#handleGoogleLogin" prefHeight="45"
+                        style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-text-fill: #4A5568; -fx-font-weight: bold; -fx-cursor: hand;"
+                        text="Sign in with Google">
                     <graphic>
                         <HBox alignment="CENTER" spacing="10">
                             <Group scaleX="0.8" scaleY="0.8">
@@ -103,8 +114,11 @@
                     <Separator HBox.hgrow="ALWAYS" />
                 </HBox>
 
-                <Button maxWidth="Infinity" onAction="#goToRegister" prefHeight="45" style="-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-text-fill: -fx-text-main; -fx-font-weight: bold;" text="Create an Account" />
+                <Button maxWidth="Infinity" onAction="#goToRegister" prefHeight="45"
+                        style="-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-text-fill: -fx-text-main; -fx-font-weight: bold;"
+                        text="Create an Account" />
             </VBox>
-    </VBox>
+        </VBox>
+    </HBox>
 
-</HBox>
+</StackPane>
