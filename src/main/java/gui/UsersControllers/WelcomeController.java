@@ -43,15 +43,16 @@ public class WelcomeController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/SignIn.fxml"));
             Parent root = loader.load();
-            
-            // Get the current stage from the mainRoot
+
             Stage stage = (Stage) mainRoot.getScene().getWindow();
-            Scene scene = new Scene(root);
-            
-            // Re-apply common stylesheet
+            Scene scene = new Scene(root, 1280, 800);
             scene.getStylesheets().add(getClass().getResource("/gui/styles.css").toExternalForm());
-            
+
+            stage.setMaximized(false);
             stage.setScene(scene);
+            stage.setWidth(1280);
+            stage.setHeight(800);
+            stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

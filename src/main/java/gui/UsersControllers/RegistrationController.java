@@ -186,8 +186,9 @@ public class RegistrationController {
     public void goToWelcome() throws Exception {
         if (txtUsername.getScene() != null) {
             Stage stage = (Stage) txtUsername.getScene().getWindow();
+            stage.setMaximized(true);
             stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/Welcome.fxml")));
-            stage.setTitle("CreaCo JavaFX");
+            stage.setTitle("CreaCo - Welcome");
         }
     }
 }
