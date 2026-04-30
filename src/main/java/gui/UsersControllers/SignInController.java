@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
+
 import java.util.Properties;
 
 public class SignInController {
@@ -70,10 +70,10 @@ public class SignInController {
 
         final String finalSiteKey = siteKey;
 
-        // 2. Load the static HTML
-        URL url = getClass().getResource("/Users/recaptcha.html");
-        if (url != null) {
-            engine.load(url.toExternalForm());
+        // 2. Load the static HTML via XAMPP localhost (avoids file:// domain restriction for reCAPTCHA)
+        String recaptchaUrl = "http://localhost/recaptcha.html";
+        engine.load(recaptchaUrl);
+        {
 
             // 3. Inject the key once the page is loaded
             engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
