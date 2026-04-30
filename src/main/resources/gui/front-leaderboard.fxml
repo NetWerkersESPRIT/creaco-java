@@ -20,14 +20,14 @@
                 <VBox spacing="35" style="-fx-padding: 30;">
                     <children>
                         <!-- Header -->
-                        <HBox alignment="CENTER_LEFT">
+                        <HBox alignment="CENTER_LEFT" spacing="15">
                             <children>
+                                <Button onAction="#onBack" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
                                 <VBox>
                                     <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Gamification" />
                                     <Label styleClass="title-label" text="Learning Champions" />
                                 </VBox>
                                 <Region HBox.hgrow="ALWAYS" />
-                                <Button text="Back to Courses" onAction="#onBack" styleClass="btn-primary" />
                             </children>
                         </HBox>
 

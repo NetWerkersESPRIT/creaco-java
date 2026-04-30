@@ -134,16 +134,7 @@ public class RessourceFormController {
         Ressource target = editing ? ressource : new Ressource();
 
         if (selectedFile != null) {
-            try {
-                Dotenv dotenv = Dotenv.load();
-                Cloudinary cloudinary = new Cloudinary(dotenv.get("CLOUDINARY_URL"));
-                Map uploadResult = cloudinary.uploader().upload(selectedFile, ObjectUtils.emptyMap());
-                String secureUrl = (String) uploadResult.get("secure_url");
-                target.setUrl(secureUrl);
-            } catch (Exception e) {
-                AlertHelper.showError("Upload Error", "Failed to upload file to Cloudinary: " + e.getMessage());
-                return;
-            }
+            target.setUrl(selectedFile.toURI().toString());
         } else {
             target.setUrl(urlField.getText().trim());
         }

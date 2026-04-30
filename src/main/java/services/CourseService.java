@@ -259,8 +259,24 @@ public class CourseService {
         }
     }
 
+    public void unlikeCourse(int id) throws SQLException {
+        String sql = "UPDATE cours SET likes = likes - 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
     public void dislikeCourse(int id) throws SQLException {
         String sql = "UPDATE cours SET dislikes = dislikes + 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
+    public void undislikeCourse(int id) throws SQLException {
+        String sql = "UPDATE cours SET dislikes = dislikes - 1 WHERE id = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();

@@ -75,17 +75,69 @@ public class CoursesController {
 
     private void loadCourses() {
         if (coursesContainer == null) return;
-        try {
-            categoryNames = courseService.getCategoryNames();
-            courses = courseService.afficherPublie();
-            renderCourses();
-        } catch (SQLException e) {
-            courses = Collections.emptyList();
-            coursesContainer.getChildren().clear();
-            Label error = new Label("Error loading courses: " + e.getMessage());
-            error.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
-            coursesContainer.getChildren().add(error);
+        
+        // Show Skeleton Loaders first
+        coursesContainer.getChildren().clear();
+        for (int i = 0; i < 4; i++) {
+            coursesContainer.getChildren().add(buildSkeletonCard());
         }
+
+        // Simulate a tiny network delay for the skeleton loader to be visible
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(800));
+        pause.setOnFinished(e -> {
+            try {
+                categoryNames = courseService.getCategoryNames();
+                courses = courseService.afficherPublie();
+                renderCourses();
+            } catch (SQLException ex) {
+                courses = Collections.emptyList();
+                coursesContainer.getChildren().clear();
+                Label error = new Label("Error loading courses: " + ex.getMessage());
+                error.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+                coursesContainer.getChildren().add(error);
+            }
+        });
+        pause.play();
+    }
+
+    private Node buildSkeletonCard() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+        card.setPrefWidth(300);
+        card.setMinWidth(300);
+        card.setStyle("-fx-padding: 0; -fx-overflow: hidden; -fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);");
+
+        Region imageSkeleton = new Region();
+        imageSkeleton.setPrefHeight(160);
+        imageSkeleton.setStyle("-fx-background-color: #e2e8f0;");
+        
+        VBox infoBox = new VBox(12);
+        infoBox.setStyle("-fx-padding: 15;");
+        
+        Region titleSkeleton = new Region();
+        titleSkeleton.setPrefSize(200, 20);
+        titleSkeleton.setStyle("-fx-background-color: #e2e8f0; -fx-background-radius: 4;");
+        
+        Region descSkeleton1 = new Region();
+        descSkeleton1.setPrefSize(270, 10);
+        descSkeleton1.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 2;");
+        
+        Region descSkeleton2 = new Region();
+        descSkeleton2.setPrefSize(200, 10);
+        descSkeleton2.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 2;");
+        
+        infoBox.getChildren().addAll(titleSkeleton, descSkeleton1, descSkeleton2);
+        card.getChildren().addAll(imageSkeleton, infoBox);
+
+        // Pulsing skeleton animation
+        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(javafx.util.Duration.millis(800), card);
+        fade.setFromValue(0.5);
+        fade.setToValue(1.0);
+        fade.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        fade.setAutoReverse(true);
+        fade.play();
+
+        return card;
     }
 
     private void renderCourses() {
@@ -94,15 +146,30 @@ public class CoursesController {
         allCourseCards.clear();
 
         if (courses.isEmpty()) {
-            Label empty = new Label("No courses available.");
-            empty.setStyle("-fx-text-fill: #64748b; -fx-font-size: 16px;");
-            coursesContainer.getChildren().add(empty);
+            VBox emptyStateBox = new VBox(15);
+            emptyStateBox.setAlignment(Pos.CENTER);
+            emptyStateBox.setStyle("-fx-padding: 50;");
+            
+            Label iconEmpty = new Label("🍃");
+            iconEmpty.setStyle("-fx-font-size: 60px;");
+            
+            Label textEmpty = new Label("No courses available yet.");
+            textEmpty.setStyle("-fx-text-fill: #64748b; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            Label subEmpty = new Label("Check back later for exciting new content!");
+            subEmpty.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px;");
+            
+            emptyStateBox.getChildren().addAll(iconEmpty, textEmpty, subEmpty);
+            coursesContainer.getChildren().add(emptyStateBox);
+            
+            new FadeInUp(emptyStateBox).play();
             return;
         }
 
         for (Course course : courses) {
             Node card = buildCourseCard(course);
-            card.setUserData(course.getTitre().toLowerCase());
+            String title = course.getTitre();
+            card.setUserData(title != null ? title.toLowerCase() : "untitled");
             coursesContainer.getChildren().add(card);
             allCourseCards.add(card);
         }
@@ -176,15 +243,63 @@ public class CoursesController {
             showFallbackIcon(visualContainer, course);
         }
 
+        // Add NEW or UPDATED badge
+        HBox badgeContainer = new HBox();
+        badgeContainer.setAlignment(Pos.TOP_RIGHT);
+        badgeContainer.setStyle("-fx-padding: 10;");
+        
+        boolean isNew = false;
+        boolean isUpdated = false;
+        
+        try {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+            
+            if (course.getDateDeCreation() != null && !course.getDateDeCreation().isEmpty()) {
+                String cleanDate = course.getDateDeCreation().replace(" ", "T");
+                if (cleanDate.length() > 19) cleanDate = cleanDate.substring(0, 19);
+                java.time.LocalDateTime created = java.time.LocalDateTime.parse(cleanDate);
+                if (created.isAfter(now.minusDays(7))) {
+                    isNew = true;
+                }
+            }
+            
+            if (!isNew && course.getDateDeModification() != null && !course.getDateDeModification().isEmpty()) {
+                String cleanMod = course.getDateDeModification().replace(" ", "T");
+                if (cleanMod.length() > 19) cleanMod = cleanMod.substring(0, 19);
+                java.time.LocalDateTime modified = java.time.LocalDateTime.parse(cleanMod);
+                if (modified.isAfter(now.minusDays(3))) {
+                    isUpdated = true;
+                }
+            }
+        } catch (Exception e) {
+            // ignore parse errors
+        }
+
+        if (isNew) {
+            Label newBadge = new Label("NEW ✨");
+            newBadge.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 4 8; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(16,185,129,0.4), 5, 0, 0, 2);");
+            badgeContainer.getChildren().add(newBadge);
+            visualContainer.getChildren().add(badgeContainer);
+        } else if (isUpdated) {
+            Label upBadge = new Label("UPDATED");
+            upBadge.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 4 8; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.4), 5, 0, 0, 2);");
+            badgeContainer.getChildren().add(upBadge);
+            visualContainer.getChildren().add(badgeContainer);
+        }
+
         VBox infoBox = new VBox(12);
         infoBox.setStyle("-fx-padding: 15;");
         
         VBox titleBox = new VBox(2);
-        Label titleLabel = new Label(course.getTitre());
+        String titre = course.getTitre();
+        if (titre == null) titre = "Untitled Course";
+        Label titleLabel = new Label(titre);
         titleLabel.getStyleClass().add("card-title");
         titleLabel.setWrapText(true);
-        String catName = categoryNames.getOrDefault(course.getCategorieId(), "General").toUpperCase();
-        Label categoryLabel = new Label(catName);
+        String catName = categoryNames.getOrDefault(course.getCategorieId(), "General");
+        if (catName == null) catName = "Unassigned";
+        Label categoryLabel = new Label(catName.toUpperCase());
         categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 10px;");
         titleBox.getChildren().addAll(categoryLabel, titleLabel);
 
@@ -226,26 +341,70 @@ public class CoursesController {
         HBox interactionBox = new HBox(8);
         interactionBox.setAlignment(Pos.CENTER_RIGHT);
         
+        boolean[] interactionState = {false, false}; // [0] is hasLiked, [1] is hasDisliked
+
         Button likeBtn = new Button("👍 " + course.getLikes());
         likeBtn.getStyleClass().add("btn-action-light");
         likeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12;");
-        likeBtn.setOnAction(e -> {
-            e.consume(); // Prevent card click
-            try {
-                courseService.likeCourse(course.getId());
-                course.setLikes(course.getLikes() + 1);
-                likeBtn.setText("👍 " + course.getLikes());
-            } catch (SQLException ex) { ex.printStackTrace(); }
-        });
         
         Button dislikeBtn = new Button("👎 " + course.getDislikes());
         dislikeBtn.getStyleClass().add("btn-action-light");
         dislikeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12;");
+
+        likeBtn.setOnAction(e -> {
+            e.consume(); // Prevent card click
+            try {
+                if (interactionState[0]) {
+                    // Already liked -> Unlike
+                    courseService.unlikeCourse(course.getId());
+                    course.setLikes(course.getLikes() - 1);
+                    interactionState[0] = false;
+                    likeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12;");
+                } else {
+                    // Like it
+                    courseService.likeCourse(course.getId());
+                    course.setLikes(course.getLikes() + 1);
+                    interactionState[0] = true;
+                    likeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12; -fx-background-color: #fce7f3; -fx-text-fill: #db2777;");
+                    
+                    // If it was disliked, remove the dislike
+                    if (interactionState[1]) {
+                        courseService.undislikeCourse(course.getId());
+                        course.setDislikes(course.getDislikes() - 1);
+                        interactionState[1] = false;
+                        dislikeBtn.setText("👎 " + course.getDislikes());
+                        dislikeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12;");
+                    }
+                }
+                likeBtn.setText("👍 " + course.getLikes());
+            } catch (SQLException ex) { ex.printStackTrace(); }
+        });
+        
         dislikeBtn.setOnAction(e -> {
             e.consume(); // Prevent card click
             try {
-                courseService.dislikeCourse(course.getId());
-                course.setDislikes(course.getDislikes() + 1);
+                if (interactionState[1]) {
+                    // Already disliked -> Undislike
+                    courseService.undislikeCourse(course.getId());
+                    course.setDislikes(course.getDislikes() - 1);
+                    interactionState[1] = false;
+                    dislikeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12;");
+                } else {
+                    // Dislike it
+                    courseService.dislikeCourse(course.getId());
+                    course.setDislikes(course.getDislikes() + 1);
+                    interactionState[1] = true;
+                    dislikeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12; -fx-background-color: #f1f5f9; -fx-text-fill: #475569;");
+                    
+                    // If it was liked, remove the like
+                    if (interactionState[0]) {
+                        courseService.unlikeCourse(course.getId());
+                        course.setLikes(course.getLikes() - 1);
+                        interactionState[0] = false;
+                        likeBtn.setText("👍 " + course.getLikes());
+                        likeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 12;");
+                    }
+                }
                 dislikeBtn.setText("👎 " + course.getDislikes());
             } catch (SQLException ex) { ex.printStackTrace(); }
         });
@@ -259,8 +418,18 @@ public class CoursesController {
         card.setCursor(javafx.scene.Cursor.HAND);
         card.setOnMouseClicked(event -> openCourse(course));
 
-        // Hover animation
-        card.setOnMouseEntered(e -> new Pulse(card).setSpeed(2.0).play());
+        // Enhanced Hover animation
+        card.setOnMouseEntered(e -> {
+            card.setStyle("-fx-padding: 0; -fx-overflow: hidden; -fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(236,72,153,0.3), 15, 0, 0, 8);");
+            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(200), card);
+            st.setToX(1.02); st.setToY(1.02); st.play();
+        });
+        
+        card.setOnMouseExited(e -> {
+            card.setStyle("-fx-padding: 0; -fx-overflow: hidden; -fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);");
+            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(200), card);
+            st.setToX(1.0); st.setToY(1.0); st.play();
+        });
 
         return card;
     }

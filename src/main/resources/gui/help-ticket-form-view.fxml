@@ -19,6 +19,9 @@
                         <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
                     </padding>
                     <children>
+                        <HBox alignment="CENTER_LEFT">
+                            <Button onAction="#handleCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
+                        </HBox>
                         <VBox alignment="CENTER" spacing="8.0">
                             <children>
                                 <Label fx:id="formTitle" text="Send Help Request" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />

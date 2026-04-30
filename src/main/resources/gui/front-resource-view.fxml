@@ -32,6 +32,7 @@
 
                 <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
                     <children>
+                        <Button onAction="#goBack" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
                         <VBox>
                             <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Resources" />
                             <Label fx:id="courseTitleLabel" styleClass="title-label" text="Resources" style="-fx-font-size: 20px;"/>

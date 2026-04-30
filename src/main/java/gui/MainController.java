@@ -204,17 +204,72 @@ public class MainController {
     private void loadCourses() {
         if (coursesContainer == null) return;
         allCourseCards.clear();
-        try {
-            categoryNames = courseService.getCategoryNames();
-            courses = courseService.afficher();
-            if (statusLabel != null) statusLabel.setText(courses.size() + " course(s) loaded.");
-            renderCourses();
-        } catch (SQLException exception) {
-            courses = Collections.emptyList();
-            categoryNames = Collections.emptyMap();
-            if (statusLabel != null) statusLabel.setText("Database error.");
-            renderCourses();
+        
+        // Show Skeleton Loaders first
+        coursesContainer.getChildren().clear();
+        for (int i = 0; i < 6; i++) {
+            coursesContainer.getChildren().add(buildSkeletonCard());
         }
+
+        // Simulate tiny network delay for the skeleton loader to be visible
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(800));
+        pause.setOnFinished(e -> {
+            try {
+                categoryNames = courseService.getCategoryNames();
+                courses = courseService.afficher();
+                if (statusLabel != null) statusLabel.setText(courses.size() + " course(s) loaded.");
+                renderCourses();
+            } catch (SQLException exception) {
+                courses = Collections.emptyList();
+                categoryNames = Collections.emptyMap();
+                if (statusLabel != null) statusLabel.setText("Database error.");
+                renderCourses();
+            }
+        });
+        pause.play();
+    }
+
+    private Node buildSkeletonCard() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+        card.setPrefWidth(390);
+        card.setMinWidth(390);
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5); -fx-padding: 20;");
+
+        HBox header = new HBox(15);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        
+        Region iconSkeleton = new Region();
+        iconSkeleton.setPrefSize(48, 48);
+        iconSkeleton.setStyle("-fx-background-color: #e2e8f0; -fx-background-radius: 12;");
+        
+        VBox titleBox = new VBox(8);
+        Region titleSkeleton = new Region();
+        titleSkeleton.setPrefSize(200, 15);
+        titleSkeleton.setStyle("-fx-background-color: #e2e8f0; -fx-background-radius: 4;");
+        Region catSkeleton = new Region();
+        catSkeleton.setPrefSize(100, 10);
+        catSkeleton.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 4;");
+        titleBox.getChildren().addAll(titleSkeleton, catSkeleton);
+        header.getChildren().addAll(iconSkeleton, titleBox);
+        
+        Region descSkeleton1 = new Region();
+        descSkeleton1.setPrefSize(350, 10);
+        descSkeleton1.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 2;");
+        Region descSkeleton2 = new Region();
+        descSkeleton2.setPrefSize(250, 10);
+        descSkeleton2.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 2;");
+        
+        card.getChildren().addAll(header, descSkeleton1, descSkeleton2);
+
+        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(javafx.util.Duration.millis(800), card);
+        fade.setFromValue(0.5);
+        fade.setToValue(1.0);
+        fade.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        fade.setAutoReverse(true);
+        fade.play();
+
+        return card;
     }
 
     private void renderCourses() {
@@ -222,9 +277,23 @@ public class MainController {
         coursesContainer.getChildren().clear();
 
         if (courses.isEmpty()) {
-            Label emptyState = new Label("No courses available.");
-            emptyState.setStyle("-fx-font-size: 15px; -fx-text-fill: #6b7280;");
-            coursesContainer.getChildren().add(emptyState);
+            VBox emptyStateBox = new VBox(15);
+            emptyStateBox.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyStateBox.setStyle("-fx-padding: 50;");
+            
+            Label iconEmpty = new Label("🗂️");
+            iconEmpty.setStyle("-fx-font-size: 60px;");
+            
+            Label textEmpty = new Label("No courses to manage yet.");
+            textEmpty.setStyle("-fx-text-fill: #64748b; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            Label subEmpty = new Label("Click '+ Add Course' to create your first content.");
+            subEmpty.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px;");
+            
+            emptyStateBox.getChildren().addAll(iconEmpty, textEmpty, subEmpty);
+            coursesContainer.getChildren().add(emptyStateBox);
+            
+            new animatefx.animation.FadeInUp(emptyStateBox).play();
             saveAllCards();
             return;
         }
@@ -280,17 +349,30 @@ public class MainController {
         }
 
         VBox titleBox = new VBox(2);
-        Label titleLabel = new Label(course.getTitre());
+        String titre = course.getTitre();
+        if (titre == null) titre = "Untitled Course";
+        Label titleLabel = new Label(titre);
         titleLabel.getStyleClass().add("card-title");
         titleLabel.setWrapText(true);
 
-        Label categoryLabel = new Label(resolveCategoryName(course.getCategorieId()).toUpperCase());
+        String catName = resolveCategoryName(course.getCategorieId());
+        if (catName == null) catName = "Unassigned";
+        Label categoryLabel = new Label(catName.toUpperCase());
         categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 10px;");
 
         titleBox.getChildren().addAll(titleLabel, categoryLabel);
         HBox.setHgrow(titleBox, Priority.ALWAYS);
 
-        header.getChildren().addAll(iconContainer, titleBox);
+        // Status Badge (Draft/Published)
+        boolean isPublished = "Published".equalsIgnoreCase(course.getStatut());
+        Label statusBadge = new Label(isPublished ? "PUBLISHED" : "DRAFT");
+        statusBadge.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // Prevent truncation
+        String bgColor = "#e2e8f0"; // Light grey
+        String textColor = "#475569"; // Dark grey text
+        String shadowColor = "rgba(0,0,0,0.05)";
+        statusBadge.setStyle("-fx-background-color: " + bgColor + "; -fx-text-fill: " + textColor + "; -fx-font-weight: bold; -fx-font-size: 9px; -fx-padding: 4 8; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 4, 0, 0, 2);");
+
+        header.getChildren().addAll(iconContainer, titleBox, statusBadge);
 
         VBox contentBox = new VBox(6);
         Label updatedLabel = new Label("Updated " + safeText(course.getDateDeModification()));
@@ -322,6 +404,19 @@ public class MainController {
 
         card.setOnMouseClicked(event -> openRessources(course, card));
         card.setCursor(javafx.scene.Cursor.HAND);
+
+        // Enhanced Hover Micro-animations
+        card.setOnMouseEntered(e -> {
+            card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(236,72,153,0.3), 15, 0, 0, 8);");
+            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(200), card);
+            st.setToX(1.02); st.setToY(1.02); st.play();
+        });
+        
+        card.setOnMouseExited(e -> {
+            card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);");
+            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(200), card);
+            st.setToX(1.0); st.setToY(1.0); st.play();
+        });
 
         card.getChildren().addAll(header, contentBox, footer);
         return card;

@@ -37,11 +37,7 @@
                 <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10">
-                            <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-padding: 8 12; -fx-background-radius: 12;">
-                                <graphic>
-                                    <FontIcon iconLiteral="fas-arrow-left" iconSize="18" />
-                                </graphic>
-                            </Button>
+                            <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
                             <VBox>
                                 <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Edit" />
                                 <Label fx:id="titleLabel" styleClass="title-label" text="Add Course" />
