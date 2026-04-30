@@ -30,8 +30,8 @@
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
                             <VBox>
-                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Resources / Edit" />
-                                <Label fx:id="titleLabel" styleClass="title-label" text="Add Resource" />
+                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Resources / Add" />
+                                <Label fx:id="titleLabel" styleClass="title-label" text="Add resource" />
                                 <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a new resource." />
                             </VBox>
                         </HBox>
@@ -61,7 +61,7 @@
                                 <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Resource *" />
                                 <HBox spacing="10">
                                     <TextField fx:id="urlField" promptText="Upload a file or provide a URL" HBox.hgrow="ALWAYS" editable="false" />
-                                    <Button text="Browse" onAction="#onBrowseFile" styleClass="btn-secondary" />
+                                    <Button text="Browse" onAction="#onBrowseFile" styleClass="btn-primary" prefHeight="35" prefWidth="100" />
                                 </HBox>
                                 <Label fx:id="urlErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                             </children>
@@ -72,7 +72,7 @@
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Content" />
                                         <Region HBox.hgrow="ALWAYS" />
-                                        <Button fx:id="btnParaphrase" onAction="#onParaphrase" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-font-size: 11px;" text="✨ Paraphrase with AI" />
+                                        <Button fx:id="btnParaphrase" onAction="#onParaphrase" styleClass="btn-primary" prefHeight="35" prefWidth="170" text="✨ Paraphrase with AI" />
                                     </children>
                                 </HBox>
                                 <HTMLEditor fx:id="contentEditor" prefHeight="350.0" style="-fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10;" />
