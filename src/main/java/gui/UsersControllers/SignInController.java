@@ -239,6 +239,13 @@ public class SignInController {
         stage.setTitle("Create Account");
     }
 
+    @FXML
+    public void goToWelcome() throws Exception {
+        Stage stage = (Stage) txtEmail.getScene().getWindow();
+        stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/Welcome.fxml")));
+        stage.setTitle("CreaCo JavaFX");
+    }
+
     private void showError(String msg) {
         lblMessage.setStyle("-fx-text-fill: #EA0606;");
         lblMessage.setText(msg);
