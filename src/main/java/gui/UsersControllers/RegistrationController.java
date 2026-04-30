@@ -181,4 +181,13 @@ public class RegistrationController {
             stage.setTitle("CreaCo - Sign In");
         }
     }
+
+    @FXML
+    public void goToWelcome() throws Exception {
+        if (txtUsername.getScene() != null) {
+            Stage stage = (Stage) txtUsername.getScene().getWindow();
+            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/Welcome.fxml")));
+            stage.setTitle("CreaCo JavaFX");
+        }
+    }
 }
