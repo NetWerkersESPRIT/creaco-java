@@ -242,8 +242,9 @@ public class SignInController {
     @FXML
     public void goToWelcome() throws Exception {
         Stage stage = (Stage) txtEmail.getScene().getWindow();
+        stage.setMaximized(true);
         stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/Welcome.fxml")));
-        stage.setTitle("CreaCo JavaFX");
+        stage.setTitle("CreaCo - Welcome");
     }
 
     private void showError(String msg) {
