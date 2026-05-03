@@ -1,6 +1,5 @@
 package gui.forum;
 
-import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -11,7 +10,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import services.forum.GifService;
+import utils.GifService;
 
 import java.util.List;
 import java.util.function.Consumer;

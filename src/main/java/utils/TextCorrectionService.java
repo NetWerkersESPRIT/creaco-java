@@ -60,8 +60,13 @@ public class TextCorrectionService {
             System.out.println("[TextCorrectionService] API Response: " + response.body());
 
             if (response.statusCode() == 200) {
+                //convertir
                 JSONObject jsonResponse = new JSONObject(response.body());
+                //check api status
                 if ("ok".equals(jsonResponse.getString("status"))) {
+                    /**this contains:
+                    //corrections list
+                   words to fix */
                     Object dataObj = jsonResponse.get("data");
                     if (dataObj instanceof JSONObject) {
                         JSONObject data = (JSONObject) dataObj;

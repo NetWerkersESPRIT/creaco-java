@@ -10,7 +10,8 @@ import java.util.Scanner;
 
 public class QuoteService {
     private List<String> quotes = new ArrayList<>();
-
+    //It automatically loads quotes
+    //This method reads the JSON file
     public QuoteService() {
         loadQuotes();
     }
@@ -18,6 +19,7 @@ public class QuoteService {
     private void loadQuotes() {
         try (InputStream is = getClass().getResourceAsStream("/quotes.json")) {
             if (is != null) {
+                //This reads the whole file as one string
                 try (Scanner scanner = new Scanner(is, StandardCharsets.UTF_8)) {
                     String json = scanner.useDelimiter("\\A").next();
                     JSONArray array = new JSONArray(json);
@@ -29,7 +31,7 @@ public class QuoteService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         // Fallback if file not found or empty
         if (quotes.isEmpty()) {
             quotes.add("You are awesome, don't forget it!");
@@ -38,6 +40,7 @@ public class QuoteService {
         }
     }
 
+    //Picks random index
     public String getRandomQuote() {
         if (quotes.isEmpty()) return "Stay positive!";
         return quotes.get(new Random().nextInt(quotes.size()));

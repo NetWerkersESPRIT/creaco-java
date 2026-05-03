@@ -42,7 +42,7 @@ public class CourseServiceTest {
         try {
             List<Course> courses = courseService.afficher();
             Course inserted = courses.stream()
-                .filter(course -> "junit test course".equals(course.getTitre()))
+                .filter(course -> "junit test course".equals(Course.getTitre()))
                 .findFirst()
                 .orElse(null);
             

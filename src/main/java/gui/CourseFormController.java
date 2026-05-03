@@ -302,7 +302,7 @@ public class CourseFormController {
 
         // Set category
         String selectedCategory = categoryNameToId.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(course.getCategorieId()))
+                .filter(entry -> entry.getValue().equals(Course.getCategorieId()))
                 .map(Map.Entry::getKey)
                 .findFirst()
                 .orElse(null);
