@@ -31,13 +31,14 @@ public class ForumStatsController {
     @FXML private VBox topCommentedList;
 
     private final ForumStatsService statsService = new ForumStatsService();
-
+//automatically loads dashboard data
     @FXML
     public void initialize() {
         refreshStats();
     }
 
     private void refreshStats() {
+        //It builds the whole dashboard in one call
         System.out.println("[ForumStatsController] Refreshing stats...");
         try {
             loadOverview();

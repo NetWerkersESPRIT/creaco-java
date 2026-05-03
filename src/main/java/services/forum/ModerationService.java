@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 public class ModerationService {
     // Predefined list of bad words (can be expanded)
     private static final List<String> BAD_WORDS = Arrays.asList(
-        "test", "badword1", "badword2", "spam", "offensive", "profane", "toxic"
+        "test", "badword1", "badword2", "offensive", "profane", "toxic"
     );
 
     /**
@@ -19,14 +19,16 @@ public class ModerationService {
             return text;
         }
 
-        // 1. Local filter
+        // filter
         String cleanedText = text;
         for (String word : BAD_WORDS) {
+            // el maj w el min "toxic" matches, but "detoxical" won't
+            //protect other charecters
             String regex = "(?i)\\b" + Pattern.quote(word) + "\\b";
             cleanedText = cleanedText.replaceAll(regex, "***");
         }
 
-        // 2. API filter (additional check)
+        // api calls
         try {
             utils.DetectBadWordService.ModerationResult apiResult = utils.DetectBadWordService.moderate(cleanedText).join();
             if (apiResult != null && apiResult.moderatedText != null) {
@@ -39,9 +41,7 @@ public class ModerationService {
         return cleanedText;
     }
 
-    /**
-     * Checks if the text contains any profanity.
-     */
+    // does contain any bad words
     public static boolean containsProfanity(String text) {
         if (text == null || text.isEmpty()) {
             return false;
@@ -55,9 +55,7 @@ public class ModerationService {
         return false;
     }
 
-    /**
-     * Counts how many profane words are present in the text.
-     */
+   //This counts how many bad words exist
     public static int countProfaneWords(String text) {
         if (text == null || text.isEmpty()) {
             return 0;

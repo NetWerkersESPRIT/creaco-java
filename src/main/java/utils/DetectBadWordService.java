@@ -34,7 +34,7 @@ public class DetectBadWordService {
             System.err.println("[DetectBadWordService] config.properties NOT FOUND!");
         }
     }
-
+// results mta3 service moderation
     public static class ModerationResult {
         public String moderatedText;
         public int profaneWordsCount;
@@ -49,10 +49,9 @@ public class DetectBadWordService {
         }
     }
 
-    /**
-     * Moderates the text by detecting profanity and grammar errors.
-     * Replaces bad words with ****.
-     */
+
+     //Moderates the text by detecting profanity and grammar errors.
+     //Replaces bad words with ****.
     public static CompletableFuture<ModerationResult> moderate(String text) {
         if (text == null || text.trim().isEmpty()) {
             return CompletableFuture.completedFuture(new ModerationResult(text, 0, 0));
@@ -60,11 +59,12 @@ public class DetectBadWordService {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
+                //send a request
                 HttpClient client = HttpClient.newHttpClient();
-                
+                //Create JSON body
                 JSONObject bodyObj = new JSONObject();
                 bodyObj.put("text", text);
-
+                //buil request
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(API_URL))
                         .header("x-api-key", API_KEY)

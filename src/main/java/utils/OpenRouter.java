@@ -43,7 +43,7 @@ public class OpenRouter {
 
         try {
             String prompt = buildPrompt(content, action);
-
+            //Build JSON request
             ObjectNode body = mapper.createObjectNode();
             body.put("model", DEFAULT_MODEL);
 
@@ -96,7 +96,8 @@ public class OpenRouter {
                 return content;
         }
     }
-
+    //It takes the raw JSON response from the AI API
+    //And extracts only the useful text (AI answer)
     private static String extractContent(String responseBody) {
         try {
             JsonNode root = mapper.readTree(responseBody);
