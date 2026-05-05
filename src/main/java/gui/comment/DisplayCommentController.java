@@ -20,8 +20,7 @@ import services.UserService;
 import services.forum.PostService;
 import entities.ReactionType;
 import java.util.Map;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
+
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.image.Image;
@@ -30,6 +29,10 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import gui.forum.GifPickerModalController;
 import services.NotificationService;
+import utils.TextCorrectionService;
+import utils.DetectBadWordService;
+import javafx.concurrent.Task;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -46,26 +49,53 @@ public class DisplayCommentController {
 
     private static final DateTimeFormatter DISPLAY_DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    @FXML private VBox commentsContainer;
-    @FXML private Label postTitleLabel;
-    @FXML private Label postMetaLabel;
-    @FXML private Label postContentLabel;
-    @FXML private Label repliesBadge;
-    @FXML private TextArea commentArea;
-    @FXML private VBox emptyState;
-    @FXML private StackPane postAuthorAvatarContainer;
-    @FXML private Label likesBadge;
-    @FXML private Button btnEditPost;
-    @FXML private Button btnDeletePost;
-    @FXML private HBox attachmentPreview;
-    @FXML private ImageView gifPreview;
-    @FXML private StackPane currentUserAvatarContainer;
+    @FXML
+    private VBox commentsContainer;
+    @FXML
+    private Label postTitleLabel;
+    @FXML
+    private Label postMetaLabel;
+    @FXML
+    private Label postContentLabel;
+    @FXML
+    private Label repliesBadge;
+    @FXML
+    private TextArea commentArea;
+    @FXML
+    private VBox emptyState;
+    @FXML
+    private StackPane postAuthorAvatarContainer;
+    @FXML
+    private Label likesBadge;
+    @FXML
+    private Button btnEditPost;
+    @FXML
+    private Button btnDeletePost;
+    @FXML
+    private HBox attachmentPreview;
+    @FXML
+    private ImageView gifPreview;
+    @FXML
+    private StackPane currentUserAvatarContainer;
 
     private final CommentService commentService = new CommentService();
     private final UserService userService = new UserService();
     private final PostService postService = new PostService();
     private Post currentPost;
     private boolean isAdminMode = false;
+
+    @FXML
+    public void initialize() {
+        commentsContainer.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obs2, oldWin, newWin) -> {
+                    if (newWin instanceof Stage) ((Stage) newWin).setMaximized(true);
+                });
+                if (newScene.getWindow() instanceof Stage)
+                    ((Stage) newScene.getWindow()).setMaximized(true);
+            }
+        });
+    }
 
     public void setAdminMode(boolean isAdminMode) {
         this.isAdminMode = isAdminMode;
@@ -76,29 +106,60 @@ public class DisplayCommentController {
         if (post != null) {
             postTitleLabel.setText(safeText(post.getTitle()));
             postContentLabel.setText(safeText(post.getContent()));
-            
-            Users author = userService.getUserById(post.getUserId());
-            String username = (author != null) ? author.getUsername() : "Unknown";
-            String date = (post.getCreatedAt() != null) ? post.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "-";
+
+            int authorId = post.getUserId();
+            String username;
+            Users author = null;
+            if (authorId == 0) {
+                username = "Anonyme";
+            } else {
+                author = userService.getUserById(authorId);
+                username = (author != null) ? author.getUsername() : "Unknown";
+            }
+            String date = (post.getCreatedAt() != null)
+                    ? post.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    : "-";
             postMetaLabel.setText("Posted by " + username + " • " + date);
 
             // Set Author Avatar with Ring
-            if (author != null && postAuthorAvatarContainer != null) {
-                StackPane avatarWithRing = buildAvatarWithRing(author, 45);
+            if (postAuthorAvatarContainer != null) {
+                StackPane avatarWithRing;
+                if (authorId == 0) {
+                    Users anon = new Users();
+                    anon.setUsername("Anonyme");
+                    avatarWithRing = buildAvatarWithRing(anon, 45);
+                } else if (author != null) {
+                    avatarWithRing = buildAvatarWithRing(author, 45);
+                } else {
+                    avatarWithRing = new StackPane(); // Fallback
+                }
                 postAuthorAvatarContainer.getChildren().setAll(avatarWithRing);
                 postAuthorAvatarContainer.setStyle("-fx-background-color: transparent;");
             }
 
             // Set Current User Avatar in Input Bar
             Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-            if (currentUser != null && currentUserAvatarContainer != null) {
-                StackPane currentAvatar = buildAvatar(currentUser);
+            boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+            
+            StackPane currentAvatar;
+            if (isVisitor) {
+                Users anonUser = new Users();
+                anonUser.setUsername("Anonyme");
+                currentAvatar = buildAvatar(anonUser);
+            } else if (currentUser != null) {
+                currentAvatar = buildAvatar(currentUser);
+            } else {
+                currentAvatar = new StackPane(); // Empty
+            }
+
+            if (currentUserAvatarContainer != null) {
                 currentAvatar.setPrefSize(32, 32);
                 currentAvatar.setMinSize(32, 32);
                 currentAvatar.setMaxSize(32, 32);
                 if (!currentAvatar.getChildren().isEmpty() && currentAvatar.getChildren().get(0) instanceof ImageView) {
                     ImageView iv = (ImageView) currentAvatar.getChildren().get(0);
-                    iv.setFitWidth(32); iv.setFitHeight(32);
+                    iv.setFitWidth(32);
+                    iv.setFitHeight(32);
                     iv.setClip(new javafx.scene.shape.Circle(16, 16, 16));
                 }
                 currentUserAvatarContainer.getChildren().setAll(currentAvatar);
@@ -118,7 +179,7 @@ public class DisplayCommentController {
             // Visibility for Edit/Delete
             int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
             boolean isOwner = (post.getUserId() == currentUserId);
-            
+
             if (btnEditPost != null) {
                 btnEditPost.setVisible(isOwner);
                 btnEditPost.setManaged(isOwner);
@@ -127,39 +188,59 @@ public class DisplayCommentController {
                 btnDeletePost.setVisible(isOwner || isAdminMode);
                 btnDeletePost.setManaged(isOwner || isAdminMode);
             }
-            
+
             loadCommentsByPost();
         }
     }
 
     private void loadCommentsByPost() {
-        if (currentPost == null) return;
-        
+        if (currentPost == null)
+            return;
+
         commentsContainer.getChildren().clear();
         try {
             List<Comment> allComments = commentService.getCommentsByPost(currentPost.getId());
-            repliesBadge.setText("• " + allComments.size() + " comments");
+
+            boolean isVisitorMode = utils.SessionManager.getInstance().isVisitor();
+            Users curU = utils.SessionManager.getInstance().getCurrentUser();
+            int curUserId = (curU != null) ? curU.getId() : 0;
+            if (curUserId < 1 && !isVisitorMode)
+                return;
             
-            if (allComments.isEmpty()) {
+            boolean isPostOwner = (currentPost.getUserId() == curUserId);
+
+            // Filter comments: Hide "HIDDEN" comments unless you are the owner or post
+            // owner
+            List<Comment> visibleComments = allComments.stream()
+                    .filter(c -> !"HIDDEN".equals(c.getStatus()) || c.getUserId() == curUserId || isPostOwner
+                            || isAdminMode)
+                    .collect(Collectors.toList());
+
+            repliesBadge.setText("• " + visibleComments.size() + " comments");
+
+            if (visibleComments.isEmpty()) {
                 commentsContainer.getChildren().add(emptyState);
                 emptyState.setVisible(true);
                 return;
             }
             emptyState.setVisible(false);
 
-            List<Comment> roots = allComments.stream()
+            List<Comment> roots = visibleComments.stream()
                     .filter(c -> c.getParentCommentId() == null)
                     .sorted((c1, c2) -> c2.getCreatedAt().compareTo(c1.getCreatedAt()))
                     .collect(Collectors.toList());
 
             for (Comment root : roots) {
-                renderCommentThread(root, allComments, 0);
+                renderCommentThread(root, visibleComments, 0);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    // This method renders a "root" comment and then searches for any
+    // comments where parentCommentId == root.id to render them as replies
+    // underneath.
     private void renderCommentThread(Comment comment, List<Comment> allComments, int depth) {
         VBox card = createCommentCard(comment, depth);
         commentsContainer.getChildren().add(card);
@@ -183,8 +264,15 @@ public class DisplayCommentController {
         card.setStyle("-fx-background-color: transparent;");
         card.setPadding(new Insets(10, 0, 2, leftPad));
 
-        Users user = userService.getUserById(comment.getUserId());
-        String username = (user != null) ? user.getUsername() : "Unknown";
+        int commentUserId = comment.getUserId();
+        String username;
+        Users user = null;
+        if (commentUserId == 0) {
+            username = "Anonyme";
+        } else {
+            user = userService.getUserById(commentUserId);
+            username = (user != null) ? user.getUsername() : "Unknown";
+        }
         String dateStr = formatDate(comment.getCreatedAt());
 
         // ── Parse body ───────────────────────────────────────────────────────────
@@ -194,7 +282,8 @@ public class DisplayCommentController {
         if (bodyText.contains("[GIF]")) {
             String[] parts = bodyText.split("\\[GIF\\]");
             textContent = parts[0].trim();
-            if (parts.length > 1) gifUrl = parts[1].trim();
+            if (parts.length > 1)
+                gifUrl = parts[1].trim();
         } else if (bodyText.startsWith("http") && (bodyText.contains("klipy.com") || bodyText.endsWith(".gif"))) {
             gifUrl = bodyText;
             textContent = "";
@@ -202,7 +291,14 @@ public class DisplayCommentController {
 
         // ── Avatar ───────────────────────────────────────────────────────────────
         int avatarSize = depth > 0 ? 28 : 36;
-        StackPane avatarPane = buildAvatarWithRing(user, avatarSize);
+        StackPane avatarPane;
+        if (commentUserId == 0) {
+            Users anon = new Users();
+            anon.setUsername("Anonyme");
+            avatarPane = buildAvatarWithRing(anon, avatarSize);
+        } else {
+            avatarPane = buildAvatarWithRing(user, avatarSize);
+        }
 
         // ── Main row: avatar | content-col | heart ───────────────────────────────
         HBox mainRow = new HBox(10);
@@ -217,22 +313,50 @@ public class DisplayCommentController {
         commentLine.setMaxWidth(Double.MAX_VALUE);
         javafx.scene.text.Text uTxt = new javafx.scene.text.Text(username + " ");
         uTxt.setStyle("-fx-font-weight: bold; -fx-fill: #1a1a2e; -fx-font-size: 13px;");
-        javafx.scene.text.Text bTxt = new javafx.scene.text.Text(textContent);
-        bTxt.setStyle("-fx-fill: #4a5568; -fx-font-size: 13px;");
+
+        String finalContent = textContent;
+        if ("HIDDEN".equals(comment.getStatus())) {
+            finalContent = "[HIDDEN BY POST OWNER] " + textContent;
+        }
+
+        javafx.scene.text.Text bTxt = new javafx.scene.text.Text(finalContent);
+        if ("HIDDEN".equals(comment.getStatus())) {
+            bTxt.setStyle("-fx-fill: #94a3b8; -fx-font-style: italic; -fx-font-size: 13px;");
+        } else {
+            bTxt.setStyle("-fx-fill: #4a5568; -fx-font-size: 13px;");
+        }
         commentLine.getChildren().addAll(uTxt, bTxt);
         contentCol.getChildren().add(commentLine);
 
         // GIF (if any)
         if (gifUrl != null) {
-            ImageView gifView = new ImageView(new Image(gifUrl, true));
-            gifView.setFitWidth(200);
+            ImageView gifView = new ImageView();
+            gifView.setFitWidth(350); // Final size for better impact
             gifView.setPreserveRatio(true);
+            gifView.setSmooth(true);
+
+            // Placeholder background
+            gifView.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 15;");
+
+            // Use background loading
+            Image img = new Image(gifUrl, true);
+            gifView.setImage(img);
+
+            // Rounded corners clip
             javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
-            clip.setArcWidth(16); clip.setArcHeight(16);
-            gifView.imageProperty().addListener((obs, o, nv) -> {
-                if (nv != null) { clip.setWidth(gifView.getFitWidth()); clip.setHeight(nv.getHeight() * (gifView.getFitWidth() / nv.getWidth())); }
+            clip.setArcWidth(20);
+            clip.setArcHeight(20);
+
+            // Sync clip size
+            gifView.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+                clip.setWidth(newBounds.getWidth());
+                clip.setHeight(newBounds.getHeight());
             });
+
             gifView.setClip(clip);
+
+            // Spacing
+            VBox.setMargin(gifView, new Insets(8, 0, 8, 0));
             contentCol.getChildren().add(gifView);
         }
 
@@ -249,7 +373,8 @@ public class DisplayCommentController {
         metaRow.getChildren().add(timeLabel);
 
         // Reply button
-        int curUserId = utils.SessionManager.getInstance().getCurrentUser().getId();
+        Users curUserObj = utils.SessionManager.getInstance().getCurrentUser();
+        int curUserId = (curUserObj != null) ? curUserObj.getId() : 0;
         boolean isPostOwner = (currentPost != null && currentPost.getUserId() == curUserId);
 
         Button replyBtn = new Button("Reply");
@@ -272,54 +397,92 @@ public class DisplayCommentController {
             inlineEditBox.setVisible(false);
             inlineEditBox.setManaged(false);
             inlineEditBox.setPadding(new Insets(6, 0, 0, 0));
-            editTextArea.setPrefHeight(70); editTextArea.setWrapText(true);
-            editTextArea.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 12; -fx-text-fill: #1a1a2e; -fx-font-size: 13px; -fx-border-color: transparent;");
-            HBox editBtnRow = new HBox(8); editBtnRow.setAlignment(Pos.CENTER_RIGHT);
+            editTextArea.setPrefHeight(70);
+            editTextArea.setWrapText(true);
+            editTextArea.setStyle(
+                    "-fx-background-color: #f1f5f9; -fx-background-radius: 12; -fx-text-fill: #1a1a2e; -fx-font-size: 13px; -fx-border-color: transparent;");
+            HBox editBtnRow = new HBox(8);
+            editBtnRow.setAlignment(Pos.CENTER_RIGHT);
             Button cancelE = new Button("Cancel");
-            cancelE.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-cursor: hand;");
+            cancelE.setStyle(
+                    "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-cursor: hand;");
             Button saveE = new Button("Save");
-            saveE.setStyle("-fx-background-color: #ce2d7c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 5 16; -fx-cursor: hand;");
+            saveE.setStyle(
+                    "-fx-background-color: #ce2d7c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 5 16; -fx-cursor: hand;");
             editBtnRow.getChildren().addAll(cancelE, saveE);
             inlineEditBox.getChildren().addAll(editTextArea, editBtnRow);
 
-            editBtn.setOnAction(e -> { boolean v = !inlineEditBox.isVisible(); inlineEditBox.setVisible(v); inlineEditBox.setManaged(v); if (v) { editTextArea.setText(comment.getBody()); editTextArea.requestFocus(); } });
-            cancelE.setOnAction(e -> { inlineEditBox.setVisible(false); inlineEditBox.setManaged(false); });
-            saveE.setOnAction(e -> { String nb = editTextArea.getText(); if (nb != null && !nb.trim().isEmpty()) submitEdit(comment, nb); });
+            editBtn.setOnAction(e -> {
+                boolean v = !inlineEditBox.isVisible();
+                inlineEditBox.setVisible(v);
+                inlineEditBox.setManaged(v);
+                if (v) {
+                    editTextArea.setText(comment.getBody());
+                    editTextArea.requestFocus();
+                }
+            });
+            cancelE.setOnAction(e -> {
+                inlineEditBox.setVisible(false);
+                inlineEditBox.setManaged(false);
+            });
+            saveE.setOnAction(e -> {
+                String nb = editTextArea.getText();
+                if (nb != null && !nb.trim().isEmpty())
+                    submitEdit(comment, nb);
+            });
         }
 
-        // Delete button
-        if (comment.getUserId() == curUserId || isAdminMode || isPostOwner) {
+        // Delete button (Only Comment Owner can delete now)
+        if (comment.getUserId() == curUserId) {
             Button deleteBtn = new Button("Delete");
-            deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;");
-            deleteBtn.setOnMouseEntered(e -> deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
-            deleteBtn.setOnMouseExited(e -> deleteBtn.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
+            deleteBtn.setStyle(
+                    "-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;");
+            deleteBtn.setOnMouseEntered(e -> deleteBtn.setStyle(
+                    "-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
+            deleteBtn.setOnMouseExited(e -> deleteBtn.setStyle(
+                    "-fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
             deleteBtn.setOnAction(e -> deleteComment(comment.getId()));
             metaRow.getChildren().add(deleteBtn);
+        }
+
+        // Hide/Unhide button (Only Post Owner can hide)
+        if (isPostOwner && comment.getUserId() != curUserId) {
+            boolean isHidden = "HIDDEN".equals(comment.getStatus());
+            Button hideBtn = new Button(isHidden ? "Unhide" : "Hide");
+            hideBtn.setStyle("-fx-font-weight: bold; " + metaStyle);
+            hideBtn.setOnMouseEntered(e -> hideBtn.setStyle("-fx-font-weight: bold; " + metaHover));
+            hideBtn.setOnMouseExited(e -> hideBtn.setStyle("-fx-font-weight: bold; " + metaStyle));
+            hideBtn.setOnAction(e -> toggleHideComment(comment));
+            metaRow.getChildren().add(hideBtn);
         }
         contentCol.getChildren().add(metaRow);
 
         // ── Heart button (per-user like toggle) ──────────────────────────────────
-        int curUserIdForLike = utils.SessionManager.getInstance().getCurrentUser().getId();
+        Users curUObj = utils.SessionManager.getInstance().getCurrentUser();
+        int curUserIdForLike = (curUObj != null) ? curUObj.getId() : 0;
 
         // Check from DB if this user already liked this comment
         boolean alreadyLiked = false;
-        try { alreadyLiked = commentService.hasUserLiked(comment.getId(), curUserIdForLike); } catch (Exception ignored) {}
+        try {
+            alreadyLiked = commentService.hasUserLiked(comment.getId(), curUserIdForLike);
+        } catch (Exception ignored) {
+        }
 
-        final boolean[] liked = {alreadyLiked};
-        final int[] likeCount = {comment.getLikes()};
+        final boolean[] liked = { alreadyLiked };
+        final int[] likeCount = { comment.getLikes() };
 
         VBox heartBox = new VBox(1);
         heartBox.setAlignment(Pos.TOP_CENTER);
 
         Button heartBtn = new Button(liked[0] ? "♥" : "♡");
         heartBtn.setStyle(liked[0]
-            ? "-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;"
-            : "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+                ? "-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;"
+                : "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
 
         Label likeCountLbl = new Label(likeCount[0] > 0 ? String.valueOf(likeCount[0]) : "");
         likeCountLbl.setStyle(liked[0]
-            ? "-fx-text-fill: #ef4444; -fx-font-size: 10px;"
-            : "-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
+                ? "-fx-text-fill: #ef4444; -fx-font-size: 10px;"
+                : "-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
 
         heartBox.getChildren().addAll(heartBtn, likeCountLbl);
 
@@ -327,32 +490,39 @@ public class DisplayCommentController {
             try {
                 likeCount[0] = commentService.toggleCommentLike(comment.getId(), curUserIdForLike);
                 liked[0] = commentService.hasUserLiked(comment.getId(), curUserIdForLike);
-                
+
                 // Notify Comment Owner
-                if (liked[0] && comment.getUserId() != curUserIdForLike) {
+                if (liked[0] && comment.getUserId() != curUserIdForLike && curUserIdForLike != 0) {
                     Users liker = utils.SessionManager.getInstance().getCurrentUser();
-                    new NotificationService().notifyCommentLike(comment.getUserId(), liker.getUsername(), comment.getId(), currentPost.getId());
+                    new NotificationService().notifyCommentLike(comment.getUserId(), liker.getUsername(),
+                            comment.getId(), currentPost.getId());
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
             if (liked[0]) {
                 heartBtn.setText("♥");
-                heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+                heartBtn.setStyle(
+                        "-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
                 likeCountLbl.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 10px;");
             } else {
                 heartBtn.setText("♡");
-                heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+                heartBtn.setStyle(
+                        "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
                 likeCountLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
             }
             likeCountLbl.setText(likeCount[0] > 0 ? String.valueOf(likeCount[0]) : "");
         });
 
         heartBtn.setOnMouseEntered(e -> {
-            if (!liked[0]) heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+            if (!liked[0])
+                heartBtn.setStyle(
+                        "-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
         });
         heartBtn.setOnMouseExited(e -> {
-            if (!liked[0]) heartBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
+            if (!liked[0])
+                heartBtn.setStyle(
+                        "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-cursor: hand; -fx-padding: 0;");
         });
 
         mainRow.getChildren().addAll(avatarPane, contentCol, heartBox);
@@ -367,15 +537,27 @@ public class DisplayCommentController {
         replyInputRow.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 18; -fx-padding: 7 12;");
         TextField replyField = new TextField();
         replyField.setPromptText("Add a reply...");
-        replyField.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-text-fill: #1a1a2e; -fx-font-size: 13px; -fx-prompt-text-fill: #94a3b8;");
+        replyField.setStyle(
+                "-fx-background-color: transparent; -fx-border-color: transparent; -fx-text-fill: #1a1a2e; -fx-font-size: 13px; -fx-prompt-text-fill: #94a3b8;");
         HBox.setHgrow(replyField, Priority.ALWAYS);
         Button postReplyBtn = new Button("Post");
-        postReplyBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3897f0; -fx-font-weight: bold; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 0;");
+        postReplyBtn.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #3897f0; -fx-font-weight: bold; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 0;");
         replyInputRow.getChildren().addAll(replyField, postReplyBtn);
         inlineReplyBox.getChildren().add(replyInputRow);
 
-        replyBtn.setOnAction(e -> { boolean v = !inlineReplyBox.isVisible(); inlineReplyBox.setVisible(v); inlineReplyBox.setManaged(v); if (v) replyField.requestFocus(); });
-        postReplyBtn.setOnAction(e -> { String b = replyField.getText(); if (b != null && !b.trim().isEmpty()) submitReply(comment, b); });
+        replyBtn.setOnAction(e -> {
+            boolean v = !inlineReplyBox.isVisible();
+            inlineReplyBox.setVisible(v);
+            inlineReplyBox.setManaged(v);
+            if (v)
+                replyField.requestFocus();
+        });
+        postReplyBtn.setOnAction(e -> {
+            String b = replyField.getText();
+            if (b != null && !b.trim().isEmpty())
+                submitReply(comment, b);
+        });
 
         // ── Thin separator ───────────────────────────────────────────────────────
         javafx.scene.control.Separator sep = new javafx.scene.control.Separator();
@@ -388,9 +570,12 @@ public class DisplayCommentController {
 
     private Button createIconButton(String text) {
         Button btn = new Button(text);
-        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #636366; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;");
-        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #aeaeb2; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
-        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #636366; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
+        btn.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #636366; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;");
+        btn.setOnMouseEntered(e -> btn.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #aeaeb2; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
+        btn.setOnMouseExited(e -> btn.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #636366; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand; -fx-padding: 0;"));
         return btn;
     }
 
@@ -410,7 +595,8 @@ public class DisplayCommentController {
         inner.setMaxSize(size, size);
         if (!inner.getChildren().isEmpty() && inner.getChildren().get(0) instanceof ImageView) {
             ImageView iv = (ImageView) inner.getChildren().get(0);
-            iv.setFitWidth(size); iv.setFitHeight(size);
+            iv.setFitWidth(size);
+            iv.setFitHeight(size);
             iv.setClip(new javafx.scene.shape.Circle(size / 2.0, size / 2.0, size / 2.0));
         }
         // Dark gap between ring and photo (1 px)
@@ -434,7 +620,11 @@ public class DisplayCommentController {
         circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
 
         if (imageUrl == null || imageUrl.isEmpty()) {
-            imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+            if ("Anonyme".equals(username)) {
+                imageUrl = null; // Skip image to force AY initials
+            } else {
+                imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+            }
         }
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -448,7 +638,8 @@ public class DisplayCommentController {
                         img = new javafx.scene.image.Image(file.toURI().toString());
                     } else {
                         // If local file not found, use dicebear as fallback instead of initials
-                        img = new javafx.scene.image.Image("https://api.dicebear.com/7.x/avataaars/png?seed=" + username, true);
+                        img = new javafx.scene.image.Image(
+                                "https://api.dicebear.com/7.x/avataaars/png?seed=" + username, true);
                     }
                 }
 
@@ -457,20 +648,26 @@ public class DisplayCommentController {
                     imageView.setFitWidth(32);
                     imageView.setFitHeight(32);
                     imageView.setPreserveRatio(true);
-                    
+
                     // Clip to circle
                     javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(16, 16, 16);
                     imageView.setClip(clip);
-                    
+
                     circle.getChildren().add(imageView);
                     return circle;
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         // Final fallback: Initials (should rarely be reached now)
-        char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
-        Label initLabel = new Label(String.valueOf(initial));
+        String displayInit;
+        if ("Anonyme".equals(username)) {
+            displayInit = "AY";
+        } else {
+            displayInit = (username != null && !username.isEmpty()) ? String.valueOf(Character.toUpperCase(username.charAt(0))) : "V";
+        }
+        Label initLabel = new Label(displayInit);
         initLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
         circle.getChildren().add(initLabel);
 
@@ -481,77 +678,167 @@ public class DisplayCommentController {
     private void addComment() {
         String body = commentArea.getText().trim();
         String attachedGif = (String) gifPreview.getUserData();
-        
-        if (body.isEmpty() && attachedGif == null) return;
+
+        if (body.isEmpty() && attachedGif == null)
+            return;
 
         // Combine text and GIF
-        String finalBody = body;
+        String tempBody = body;
         if (attachedGif != null) {
-            finalBody = body + " [GIF]" + attachedGif;
+            tempBody = body + " [GIF]" + attachedGif;
         }
+        final String finalBodyToProcess = tempBody;
 
-        Comment comment = new Comment();
-        comment.setPostId(currentPost.getId());
-        
-        Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            gui.util.AlertHelper.showCustomAlert("Error", "You must be logged in to comment.", gui.util.AlertHelper.AlertType.ERROR);
-            return;
-        }
-        comment.setUserId(currentUser.getId());
-        comment.setBody(finalBody);
-        comment.setCreatedAt(LocalDateTime.now());
+        Task<Comment> task = new Task<>() {
+            @Override
+            protected Comment call() throws Exception {
+                String processedText = finalBodyToProcess;
+                boolean isProfane = false;
+                int pWords = 0;
+                int gErrors = 0;
 
-        try {
-            commentService.ajouter(comment);
-            
-            // Notify Post Owner
-            if (currentPost.getUserId() != currentUser.getId()) {
-                new NotificationService().notifyComment(currentPost.getUserId(), currentUser.getUsername(), currentPost.getId());
+                try {
+                    String corrected = TextCorrectionService.correctText(finalBodyToProcess);
+                    DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                    processedText = mod.moderatedText;
+                    isProfane = mod.isProfane;
+                    pWords = mod.profaneWordsCount;
+                    gErrors = mod.grammarErrorsCount;
+                } catch (Exception apiEx) {
+                    System.err.println("AI Moderation failed, posting raw comment: " + apiEx.getMessage());
+                }
+
+                Comment comment = new Comment();
+                comment.setPostId(currentPost.getId());
+
+                Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+                comment.setUserId(currentUser != null ? currentUser.getId() : 0);
+
+                comment.setBody(processedText);
+                comment.setProfane(isProfane);
+                comment.setProfaneWords(pWords);
+                comment.setGrammarErrors(gErrors);
+                comment.setStatus(isProfane ? "FLAGGED" : "APPROVED");
+                comment.setCreatedAt(LocalDateTime.now());
+
+                commentService.ajouter(comment);
+                return comment;
             }
+        };
 
+        task.setOnSucceeded(e -> {
+            Comment comment = task.getValue();
+            Users curU = utils.SessionManager.getInstance().getCurrentUser();
+            if (curU != null && currentPost.getUserId() != curU.getId()) {
+                new NotificationService().notifyComment(currentPost.getUserId(), curU.getUsername(),
+                        currentPost.getId());
+            } else if (curU == null && currentPost.getUserId() != 0) {
+                new NotificationService().notifyComment(currentPost.getUserId(), "Anonyme", currentPost.getId());
+            }
             commentArea.clear();
             removeAttachment();
             loadCommentsByPost();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
+
+        new Thread(task).start();
     }
 
     private void submitEdit(Comment comment, String newBody) {
-        try {
-            comment.setBody(newBody);
-            commentService.modifier(comment.getId(), comment);
-            loadCommentsByPost();
-        } catch (SQLException e) { e.printStackTrace(); }
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                String processedText = newBody;
+                boolean isProfane = false;
+                try {
+                    String corrected = TextCorrectionService.correctText(newBody);
+                    DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                    processedText = mod.moderatedText;
+                    isProfane = mod.isProfane;
+                } catch (Exception e) {}
+
+                comment.setBody(processedText);
+                comment.setProfane(isProfane);
+                comment.setStatus(isProfane ? "FLAGGED" : "APPROVED");
+                commentService.modifier(comment.getId(), comment);
+                return null;
+            }
+        };
+        task.setOnSucceeded(e -> loadCommentsByPost());
+        new Thread(task).start();
     }
 
     private void submitReply(Comment parent, String body) {
-        Comment reply = new Comment();
-        reply.setPostId(currentPost.getId());
-        reply.setParentCommentId(parent.getId());
-        reply.setUserId(utils.SessionManager.getInstance().getCurrentUser().getId());
-        reply.setBody(body);
-        reply.setCreatedAt(LocalDateTime.now());
-        try {
-            commentService.ajouter(reply);
-            
+        Task<Comment> task = new Task<>() {
+            @Override
+            protected Comment call() throws Exception {
+                String processedText = body;
+                boolean isProfane = false;
+                try {
+                    String corrected = TextCorrectionService.correctText(body);
+                    DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                    processedText = mod.moderatedText;
+                    isProfane = mod.isProfane;
+                } catch (Exception e) {}
+
+                Comment reply = new Comment();
+                reply.setPostId(currentPost.getId());
+                reply.setParentCommentId(parent.getId());
+                Users curU = utils.SessionManager.getInstance().getCurrentUser();
+                reply.setUserId(curU != null ? curU.getId() : 0);
+
+                reply.setBody(processedText);
+                reply.setProfane(isProfane);
+                reply.setStatus(isProfane ? "FLAGGED" : "APPROVED");
+
+                reply.setCreatedAt(LocalDateTime.now());
+                commentService.ajouter(reply);
+                return reply;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            Comment reply = task.getValue();
             // Notify Comment Owner
             if (parent.getUserId() != reply.getUserId()) {
                 Users replier = utils.SessionManager.getInstance().getCurrentUser();
-                new NotificationService().notifyReply(parent.getUserId(), replier.getUsername(), reply.getId(), currentPost.getId());
+                String replierName = (replier != null) ? replier.getUsername() : "Anonyme";
+                new NotificationService().notifyReply(parent.getUserId(), replierName, reply.getId(),
+                        currentPost.getId());
             }
-
             loadCommentsByPost();
-        } catch (SQLException e) { e.printStackTrace(); }
+        });
+
+        new Thread(task).start();
+    }
+
+    private void toggleHideComment(Comment comment) {
+        String action = "HIDDEN".equals(comment.getStatus()) ? "Unhide" : "Hide";
+        if (gui.util.AlertHelper.showCustomAlert(action + "?",
+                "Are you sure you want to " + action.toLowerCase() + " this comment?",
+                gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+            try {
+                if ("HIDDEN".equals(comment.getStatus())) {
+                    comment.setStatus("APPROVED");
+                } else {
+                    comment.setStatus("HIDDEN");
+                }
+                commentService.modifier(comment.getId(), comment);
+                loadCommentsByPost();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void deleteComment(int id) {
-        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Remove this comment?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Remove this comment?",
+                gui.util.AlertHelper.AlertType.CONFIRMATION)) {
             try {
                 commentService.supprimer(id);
                 loadCommentsByPost();
-            } catch (SQLException e) { e.printStackTrace(); }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -563,14 +850,23 @@ public class DisplayCommentController {
             DisplayPostController controller = loader.getController();
             controller.setAdminMode(this.isAdminMode);
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (IOException e) { e.printStackTrace(); }
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void onSharePost(ActionEvent event) {
-        if (currentPost == null) return;
-        
+        if (currentPost == null)
+            return;
+
         Button sourceBtn = (Button) event.getSource();
         ContextMenu shareMenu = new ContextMenu();
         shareMenu.setStyle("-fx-background-radius: 10; -fx-padding: 5;");
@@ -588,7 +884,8 @@ public class DisplayCommentController {
             String postUrl = "https://creaco.com/post/" + currentPost.getId();
             content.putString(postUrl);
             clipboard.setContent(content);
-            gui.util.AlertHelper.showCustomAlert("Copied", "Post link copied to clipboard!", gui.util.AlertHelper.AlertType.INFORMATION);
+            gui.util.AlertHelper.showCustomAlert("Copied", "Post link copied to clipboard!",
+                    gui.util.AlertHelper.AlertType.INFORMATION);
         });
 
         shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem);
@@ -606,13 +903,15 @@ public class DisplayCommentController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            gui.util.AlertHelper.showCustomAlert("Error", "Could not open share link.", gui.util.AlertHelper.AlertType.ERROR);
+            gui.util.AlertHelper.showCustomAlert("Error", "Could not open share link.",
+                    gui.util.AlertHelper.AlertType.ERROR);
         }
     }
 
     @FXML
     private void onPinPost() {
-        if (currentPost == null) return;
+        if (currentPost == null)
+            return;
         try {
             int userId = utils.SessionManager.getInstance().getCurrentUser().getId();
             String msg = postService.handleTogglePin(currentPost, isAdminMode, userId);
@@ -626,12 +925,14 @@ public class DisplayCommentController {
 
     @FXML
     private void onLockPost() {
-        if (currentPost == null) return;
+        if (currentPost == null)
+            return;
         try {
             currentPost.setCommentLocked(!currentPost.isCommentLocked());
             postService.modifier(currentPost.getId(), currentPost);
             String status = currentPost.isCommentLocked() ? "LOCKED" : "UNLOCKED";
-            gui.util.AlertHelper.showCustomAlert("Post Status", "Comments are now " + status, gui.util.AlertHelper.AlertType.INFORMATION);
+            gui.util.AlertHelper.showCustomAlert("Post Status", "Comments are now " + status,
+                    gui.util.AlertHelper.AlertType.INFORMATION);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -639,21 +940,27 @@ public class DisplayCommentController {
 
     @FXML
     private void onEditPost(ActionEvent event) {
-        if (currentPost == null) return;
+        if (currentPost == null)
+            return;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/updatePost.fxml"));
             Parent root = loader.load();
             gui.post.UpdatePostController controller = loader.getController();
             controller.setPost(currentPost);
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            if (contentArea != null) contentArea.getChildren().setAll(root);
-        } catch (IOException e) { e.printStackTrace(); }
+            if (contentArea != null)
+                contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void onDeletePost(ActionEvent event) {
-        if (currentPost == null) return;
-        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Are you sure you want to delete this post?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
+        if (currentPost == null)
+            return;
+        if (gui.util.AlertHelper.showCustomAlert("Delete?", "Are you sure you want to delete this post?",
+                gui.util.AlertHelper.AlertType.CONFIRMATION)) {
             try {
                 postService.supprimer(currentPost.getId());
                 goBackToPosts(event);
@@ -668,11 +975,19 @@ public class DisplayCommentController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/gif_picker.fxml"));
             Parent root = loader.load();
-            
+
             GifPickerModalController controller = loader.getController();
             controller.setOnGifSelected(gifUrl -> {
                 gifPreview.setImage(new Image(gifUrl, true));
                 gifPreview.setUserData(gifUrl);
+
+                // Add rounded corners to preview
+                javafx.scene.shape.Rectangle previewClip = new javafx.scene.shape.Rectangle(gifPreview.getFitWidth(),
+                        gifPreview.getFitHeight());
+                previewClip.setArcWidth(12);
+                previewClip.setArcHeight(12);
+                gifPreview.setClip(previewClip);
+
                 attachmentPreview.setVisible(true);
                 attachmentPreview.setManaged(true);
             });
@@ -684,7 +999,8 @@ public class DisplayCommentController {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            gui.util.AlertHelper.showCustomAlert("Error", "Could not open GIF picker.", gui.util.AlertHelper.AlertType.ERROR);
+            gui.util.AlertHelper.showCustomAlert("Error", "Could not open GIF picker.",
+                    gui.util.AlertHelper.AlertType.ERROR);
         }
     }
 
@@ -693,7 +1009,7 @@ public class DisplayCommentController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/emoji_picker.fxml"));
             Parent root = loader.load();
-            
+
             EmojiPickerModalController controller = loader.getController();
             controller.setOnEmojiSelected(emoji -> {
                 commentArea.appendText(emoji);
@@ -724,9 +1040,10 @@ public class DisplayCommentController {
                 // Highlight effect
                 String originalStyle = target.getStyle();
                 target.setStyle(originalStyle + "; -fx-background-color: #fff1f2;"); // Light pink highlight
-                
+
                 // Fade out highlight after 3 seconds
-                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+                        javafx.util.Duration.seconds(3));
                 pause.setOnFinished(e -> target.setStyle(originalStyle));
                 pause.play();
 
@@ -735,7 +1052,7 @@ public class DisplayCommentController {
                 while (parent != null && !(parent instanceof ScrollPane)) {
                     parent = parent.getParent();
                 }
-                
+
                 if (parent instanceof ScrollPane) {
                     ScrollPane scrollPane = (ScrollPane) parent;
                     double scrollHeight = commentsContainer.getBoundsInLocal().getHeight();

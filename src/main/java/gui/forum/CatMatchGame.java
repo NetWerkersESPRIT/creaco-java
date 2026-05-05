@@ -185,22 +185,35 @@ public class CatMatchGame extends StackPane {
     }
 
     private void showWinModal() {
+        Stage parentStage = (Stage) this.getScene().getWindow();
+        
         Stage modal = new Stage(StageStyle.TRANSPARENT);
         modal.initModality(Modality.APPLICATION_MODAL);
-        modal.initOwner(this.getScene().getWindow());
+        modal.initOwner(parentStage);
+
+        // Close the game window immediately when winning
+        if (parentStage != null) {
+            parentStage.close();
+        }
 
         VBox winLayout = new VBox(20);
         winLayout.setAlignment(Pos.CENTER);
         winLayout.setPadding(new Insets(40));
-        winLayout.setStyle("-fx-background-color: white; -fx-background-radius: 40;");
+        winLayout.setStyle("-fx-background-color: white; -fx-background-radius: 40; " +
+                "-fx-border-color: #e2e8f0; -fx-border-radius: 40; -fx-border-width: 2; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 30, 0, 0, 10);");
 
         Label winTitle = new Label("WOW Congratulations!");
         winTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #334155;");
+        winTitle.setScaleX(0); winTitle.setScaleY(0); // Start small
+
         Label winSub = new Label("You matched everything perfectly!");
         winSub.setStyle("-fx-font-size: 16px; -fx-text-fill: #94a3b8;");
+        winSub.setScaleX(0); winSub.setScaleY(0); // Start small
 
         Button continueBtn = new Button("Continue ✨");
         continueBtn.setStyle("-fx-background-color: #d81b60; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 12 60; -fx-cursor: hand;");
+        continueBtn.setScaleX(0); continueBtn.setScaleY(0); // Start small
         
         continueBtn.setOnAction(e -> {
             modal.close();
@@ -212,6 +225,29 @@ public class CatMatchGame extends StackPane {
         Scene scene = new Scene(winLayout);
         scene.setFill(Color.TRANSPARENT);
         modal.setScene(scene);
+        
+        // Sequential "Pop" animations
+        modal.setOnShown(e -> {
+            // 1. Title Pop
+            javafx.animation.ScaleTransition st1 = new javafx.animation.ScaleTransition(Duration.millis(400), winTitle);
+            st1.setToX(1.0); st1.setToY(1.0);
+            st1.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+            
+            // 2. Subtitle Pop (after 300ms)
+            javafx.animation.ScaleTransition st2 = new javafx.animation.ScaleTransition(Duration.millis(400), winSub);
+            st2.setToX(1.0); st2.setToY(1.0);
+            st2.setDelay(Duration.millis(300));
+            st2.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+            
+            // 3. Button Pop (after 600ms)
+            javafx.animation.ScaleTransition st3 = new javafx.animation.ScaleTransition(Duration.millis(400), continueBtn);
+            st3.setToX(1.0); st3.setToY(1.0);
+            st3.setDelay(Duration.millis(600));
+            st3.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+            
+            st1.play(); st2.play(); st3.play();
+        });
+
         modal.show();
     }
 
@@ -223,15 +259,19 @@ public class CatMatchGame extends StackPane {
         VBox quoteLayout = new VBox(30);
         quoteLayout.setAlignment(Pos.CENTER);
         quoteLayout.setPadding(new Insets(40));
-        quoteLayout.setStyle("-fx-background-color: white; -fx-background-radius: 40;");
+        quoteLayout.setStyle("-fx-background-color: white; -fx-background-radius: 40; " +
+                "-fx-border-color: #e2e8f0; -fx-border-radius: 40; -fx-border-width: 2; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 30, 0, 0, 10);");
 
         Label quoteLabel = new Label("\"" + quoteService.getRandomQuote() + "\"");
         quoteLabel.setWrapText(true);
         quoteLabel.setAlignment(Pos.CENTER);
         quoteLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #334155; -fx-font-style: italic;");
+        quoteLabel.setScaleX(0); quoteLabel.setScaleY(0);
 
         HBox btns = new HBox(20);
         btns.setAlignment(Pos.CENTER);
+        btns.setScaleX(0); btns.setScaleY(0);
 
         Button cancelBtn = new Button("Cancel");
         cancelBtn.setStyle("-fx-background-color: #78909c; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 12 40; -fx-cursor: hand;");
@@ -244,7 +284,8 @@ public class CatMatchGame extends StackPane {
         playAgainBtn.setStyle("-fx-background-color: #d81b60; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 12 40; -fx-cursor: hand;");
         playAgainBtn.setOnAction(e -> {
             modal.close();
-            resetGame();
+            // Re-launch since the original window was closed
+            CatMatchGame.launch(null, onComplete); 
         });
 
         btns.getChildren().addAll(cancelBtn, playAgainBtn);
@@ -253,6 +294,20 @@ public class CatMatchGame extends StackPane {
         Scene scene = new Scene(quoteLayout);
         scene.setFill(Color.TRANSPARENT);
         modal.setScene(scene);
+
+        modal.setOnShown(e -> {
+            javafx.animation.ScaleTransition st1 = new javafx.animation.ScaleTransition(Duration.millis(400), quoteLabel);
+            st1.setToX(1.0); st1.setToY(1.0);
+            st1.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+
+            javafx.animation.ScaleTransition st2 = new javafx.animation.ScaleTransition(Duration.millis(400), btns);
+            st2.setToX(1.0); st2.setToY(1.0);
+            st2.setDelay(Duration.millis(300));
+            st2.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+
+            st1.play(); st2.play();
+        });
+
         modal.show();
     }
 

@@ -12,7 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import services.forum.PostService;
 import services.UserService;
-import services.forum.SpamDetectionService;
+import utils.SpamDetectionService;
 import services.NotificationService;
 
 import java.sql.SQLException;
@@ -113,8 +113,13 @@ public class PostModerationController {
         }
 
         // Author
-        Users user = userService.getUserById(post.getUserId());
-        Label authorLabel = new Label(user != null ? user.getUsername() : "Unknown");
+        int postUserId = post.getUserId();
+        String authorName = (postUserId == 0) ? "Visitor" : "Unknown";
+        if (postUserId > 0) {
+            Users user = userService.getUserById(postUserId);
+            if (user != null) authorName = user.getUsername();
+        }
+        Label authorLabel = new Label(authorName);
         authorLabel.setPrefWidth(150);
         authorLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-font-size: 14px;");
 
@@ -172,13 +177,18 @@ public class PostModerationController {
         this.selectedPost = post;
         detailTitleLabel.setText(post.getTitle());
 
-        Users user = userService.getUserById(post.getUserId());
-        detailAuthorLabel.setText((user != null) ? user.getUsername().toUpperCase() : "UNKNOWN");
+        int postUserId = post.getUserId();
+        String authorName = (postUserId == 0) ? "VISITOR" : "UNKNOWN";
+        if (postUserId > 0) {
+            Users user = userService.getUserById(postUserId);
+            if (user != null) authorName = user.getUsername().toUpperCase();
+        }
+        detailAuthorLabel.setText(authorName);
 
         String date = (post.getCreatedAt() != null) ? post.getCreatedAt().format(metaFormatter).toUpperCase() : "-";
         detailDateLabel.setText(date);
 
-        detailStatusLabel.setText("PENDING");
+        detailStatusLabel.setText(post.getStatus());
         detailContentLabel.setText(post.getContent());
 
         boolean hasPinReq = postService.isPinRequested(post.getId());
@@ -233,11 +243,13 @@ public class PostModerationController {
                 } else {
                     postService.rejectPinRequest(selectedPost.getId());
                 }
-                selectedPost.setStatus("ACCEPTED");
+                selectedPost.setStatus("APPROVED");
                 postService.updatePostStatus(selectedPost);
                 
                 // Notify User
-                new NotificationService().notifyPostApproved(selectedPost.getUserId(), selectedPost.getId());
+                if (selectedPost.getUserId() > 0) {
+                    new NotificationService().notifyPostApproved(selectedPost.getUserId(), selectedPost.getId());
+                }
                 
                 gui.util.AlertHelper.showCustomAlert("Success", "Post approved!", gui.util.AlertHelper.AlertType.INFORMATION);
                 showList();
@@ -247,11 +259,13 @@ public class PostModerationController {
         } else {
             if (gui.util.AlertHelper.showCustomAlert("Approve?", "Make this post public?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
                 try {
-                    selectedPost.setStatus("ACCEPTED");
+                    selectedPost.setStatus("APPROVED");
                     postService.updatePostStatus(selectedPost);
                     
                     // Notify User
-                    new NotificationService().notifyPostApproved(selectedPost.getUserId(), selectedPost.getId());
+                    if (selectedPost.getUserId() > 0) {
+                        new NotificationService().notifyPostApproved(selectedPost.getUserId(), selectedPost.getId());
+                    }
                     
                     gui.util.AlertHelper.showCustomAlert("Success", "Post approved!", gui.util.AlertHelper.AlertType.INFORMATION);
                     showList();
@@ -312,8 +326,10 @@ public class PostModerationController {
                 postService.updatePostStatus(selectedPost);
                 
                 // Notify User
-                int adminId = utils.SessionManager.getInstance().getCurrentUser().getId();
-                new NotificationService().notifyPostRefused(selectedPost.getUserId(), selectedPost.getId(), reason, adminId);
+                if (selectedPost.getUserId() > 0) {
+                    int adminId = utils.SessionManager.getInstance().getCurrentUser().getId();
+                    new NotificationService().notifyPostRefused(selectedPost.getUserId(), selectedPost.getId(), reason, adminId);
+                }
                 
                 gui.util.AlertHelper.showCustomAlert("Refused", "Post has been rejected.", gui.util.AlertHelper.AlertType.INFORMATION);
                 showList();

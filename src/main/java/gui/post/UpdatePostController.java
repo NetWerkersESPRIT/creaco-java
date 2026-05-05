@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import services.forum.PostService;
 import utils.SessionManager;
 import entities.Users;
@@ -32,7 +33,9 @@ import javafx.scene.layout.Priority;
 import services.forum.UserPostValidator;
 import entities.forum.SentimentResult;
 import gui.forum.CatMatchGame;
-import services.forum.SpamDetectionService;
+import utils.SpamDetectionService;
+import utils.TextCorrectionService;
+import utils.DetectBadWordService;
 
 public class UpdatePostController {
 
@@ -73,15 +76,27 @@ public class UpdatePostController {
 
     @FXML
     private void initialize() {
+        javafx.application.Platform.runLater(() -> {
+            if (contentArea != null && contentArea.getScene() != null) {
+                Stage stage = (Stage) contentArea.getScene().getWindow();
+                if (stage != null) stage.setMaximized(true);
+            }
+        });
         gui.FrontMainController.setNavbarText("Edit Discussion", "Pages / Forum / Edit");
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
-        Users user = SessionManager.getInstance().getCurrentUser();
-        if (user != null) {
-            String displayName = user.getUsername() != null ? user.getUsername() : "User";
-            if (lblUsername != null) lblUsername.setText(displayName);
-            
-            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
-            if (lblUserRole != null) lblUserRole.setText(role);
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+        if (isVisitor) {
+            if (lblUsername != null) lblUsername.setText("Visitor");
+            if (lblUserRole != null) lblUserRole.setText("GUEST");
+        } else {
+            Users user = SessionManager.getInstance().getCurrentUser();
+            if (user != null) {
+                String displayName = user.getUsername() != null ? user.getUsername() : "User";
+                if (lblUsername != null) lblUsername.setText(displayName);
+                
+                String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+                if (lblUserRole != null) lblUserRole.setText(role);
+            }
         }
 
         setupSentimentAnalysis();
@@ -142,9 +157,9 @@ public class UpdatePostController {
         icon.setStyle("-fx-font-size: 28px; -fx-text-fill: #475569; -fx-font-weight: bold;");
         
         VBox titles = new VBox(8);
-        Label title = new Label("It seems you're feeling a bit frustrated...");
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #334155;");
-        Label sub = new Label("Your words carry some heat. Take a moment to breathe! This advice is not a substitute for professional help.");
+        Label title = new Label("Whoa! It seems you're feeling quite angry...");
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #b91c1c;"); // Redder text for angry
+        Label sub = new Label("Your words carry a lot of heat! Why not cool down with a quick game before updating? It might help you feel better!");
         sub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px;");
         sub.setWrapText(true);
         titles.getChildren().addAll(title, sub);
@@ -270,27 +285,45 @@ public class UpdatePostController {
         }
 
         // Automatic Text Correction
-        title = services.forum.TextCorrectionService.correctText(title);
-        content = services.forum.TextCorrectionService.correctText(content);
+        String titleCorrected = TextCorrectionService.correctText(title);
+        String contentCorrected = TextCorrectionService.correctText(content);
+
+        // Content Moderation
+        DetectBadWordService.ModerationResult titleMod = DetectBadWordService.moderate(titleCorrected).join();
+        DetectBadWordService.ModerationResult contentMod = DetectBadWordService.moderate(contentCorrected).join();
 
         // Spam Detection
-        int spamScore = spamService.calculateSpamScore(title + " " + content);
+        int spamScore = spamService.calculateSpamScore(titleMod.moderatedText + " " + contentMod.moderatedText);
         if (spamScore >= 80) {
             showAlert(Alert.AlertType.ERROR, "Spam Detected", "Your changes have been blocked because the content was detected as spam (Score: " + spamScore + "/100).");
             return;
         }
 
-        postToUpdate.setTitle(title);
-        postToUpdate.setContent(content);
+        postToUpdate.setTitle(titleMod.moderatedText);
+        postToUpdate.setContent(contentMod.moderatedText);
         postToUpdate.setSpamScore(spamScore);
         postToUpdate.setSpam(spamScore >= 40);
+        postToUpdate.setProfane(titleMod.isProfane || contentMod.isProfane);
+        postToUpdate.setProfaneWords(titleMod.profaneWordsCount + contentMod.profaneWordsCount);
+        postToUpdate.setGrammarErrors(titleMod.grammarErrorsCount + contentMod.grammarErrorsCount);
+
         boolean requestPin = pinToggle.isSelected();
         
-        if (!isAdminMode) {
-            postToUpdate.setStatus("PENDING");
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+        if (isAdminMode) {
+            postToUpdate.setStatus("APPROVED");
+            postToUpdate.setPinned(requestPin);
+        } else if (isVisitor) {
+            postToUpdate.setStatus("PENDING_VISITOR");
+            postToUpdate.setUserId(0); // Anonymous
             postToUpdate.setPinned(false);
         } else {
-            postToUpdate.setPinned(requestPin);
+            if (postToUpdate.isProfane() || postToUpdate.isSpam()) {
+                postToUpdate.setStatus("FLAGGED");
+            } else {
+                postToUpdate.setStatus("PENDING");
+            }
+            postToUpdate.setPinned(false);
         }
 
         if (imageFile != null) {
@@ -315,7 +348,9 @@ public class UpdatePostController {
             }
             
             if (!isAdminMode) {
-                if (requestPin) {
+                if (isVisitor) {
+                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your edits have been submitted for moderation. Changes will appear once approved by an administrator.");
+                } else if (requestPin) {
                     showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your edits and pin request have been submitted and are awaiting admin approval.");
                 } else {
                     showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your edits have been submitted and are awaiting admin approval.");
@@ -372,8 +407,14 @@ public class UpdatePostController {
             Parent root = loader.load();
             DisplayPostController controller = loader.getController();
             controller.setAdminMode(this.isAdminMode);
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            Node areaNode = ((Node) event.getSource()).getScene().lookup("#contentArea");
+            if (areaNode instanceof StackPane) {
+                StackPane contentArea = (StackPane) areaNode;
+                contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) { e.printStackTrace(); }
     }
 
@@ -387,23 +428,6 @@ public class UpdatePostController {
     private void showAlert(Alert.AlertType type, String title, String content) {
         gui.util.AlertHelper.AlertType ct = (type == Alert.AlertType.ERROR) ? gui.util.AlertHelper.AlertType.ERROR : gui.util.AlertHelper.AlertType.INFORMATION;
         gui.util.AlertHelper.showCustomAlert(title, content, ct);
-    }
-
-    @FXML
-    private void onDictateTitle() { startDictation(titleField); }
-    @FXML
-    private void onDictateContent() { startDictation(contentArea); }
-
-    private void startDictation(javafx.scene.control.TextInputControl target) {
-        new Thread(() -> {
-            try {
-                String script = "$code = '[DllImport(\"user32.dll\")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);'; "
-                        + "$type = Add-Type -MemberDefinition $code -Name 'Win32' -Namespace 'External' -PassThru; "
-                        + "$type::keybd_event(0x5B, 0, 0, 0); $type::keybd_event(0x48, 0, 0, 0); "
-                        + "$type::keybd_event(0x48, 0, 2, 0); $type::keybd_event(0x5B, 0, 2, 0);";
-                new ProcessBuilder("powershell.exe", "-Command", script).start();
-            } catch (Exception e) { e.printStackTrace(); }
-        }).start();
     }
 
     @FXML

@@ -57,6 +57,7 @@ public class FloatingChatController {
     @FXML
     public void initialize() {
         currentUser = SessionManager.getInstance().getCurrentUser();
+        //Auto-scroll chat
         messagesContainer.heightProperty().addListener((obs, oldVal, newVal) -> scrollPane.setVvalue(1.0));
         
         Circle clip = new Circle(18, 18, 18);
@@ -104,8 +105,10 @@ public class FloatingChatController {
     private void loadMessages() {
         messagesContainer.getChildren().clear();
         try {
+            //fetches all messages from DB
             List<Message> messages = messageService.getMessagesByConversation(conversationId);
             for (Message m : messages) {
+                //Each message becomes a UI bubble
                 messagesContainer.getChildren().add(createMessageBubble(m));
             }
             messageService.markMessagesAsRead(conversationId, currentUser.getId());

@@ -31,10 +31,6 @@
                                 <children>
                                     <HBox spacing="10" alignment="CENTER_LEFT">
                                         <Label text="Title" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
-                                        <HBox spacing="5" alignment="CENTER_LEFT" onMouseClicked="#onDictateTitle" style="-fx-cursor: hand;">
-                                            <Label text="🎤" style="-fx-font-size: 14px;" />
-                                            <Label text="Click to dictate" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
-                                        </HBox>
                                     </HBox>
                                     <TextField fx:id="titleField" promptText="Enter title..." 
                                                style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12;" />
@@ -45,12 +41,7 @@
                                 <children>
                                     <HBox alignment="CENTER_LEFT" spacing="10">
                                          <Label text="Content" style="-fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-font-size: 14px;" />
-                                         <HBox spacing="5" alignment="CENTER_LEFT" onMouseClicked="#onDictateContent" style="-fx-cursor: hand;">
-                                             <Label text="🎤" style="-fx-font-size: 14px;" />
-                                             <Label text="Click to dictate" style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
-                                         </HBox>
                                          <Region HBox.hgrow="ALWAYS" />
-                                         <Button text="✎ SWITCH TO ADVANCED EDITOR" style="-fx-background-color: white; -fx-border-color: #4a5568; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-padding: 5 12;" />
                                     </HBox>
                                     <TextArea fx:id="contentArea" prefHeight="180.0" promptText="Write something..." 
                                               style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;" wrapText="true" />

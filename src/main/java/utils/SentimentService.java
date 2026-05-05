@@ -5,16 +5,29 @@ import services.forum.AIAnalysisStrategy;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Properties;
 
 public class SentimentService implements AIAnalysisStrategy {
-    private static final String API_KEY = "apv_8cd7e298-3314-484b-b173-18ad37ce89f5";
+    private static String API_KEY;
     private static final String API_URL = "https://api.apiverve.com/v1/sentimentanalysis";
+
+    static {
+        Properties properties = new Properties();
+        try (FileInputStream fis = new FileInputStream("config.properties")) {
+            properties.load(fis);
+            API_KEY = properties.getProperty("APIVERVE_API_KEY");
+        } catch (IOException e) {
+            System.err.println("Error loading config.properties in SentimentService: " + e.getMessage());
+        }
+    }
 
     @Override
     public SentimentResult analyze(String text) {
@@ -59,6 +72,8 @@ public class SentimentService implements AIAnalysisStrategy {
                     String label = "POSITIVE";
                     if (sentiment.toLowerCase().contains("negative")) {
                         label = "NEGATIVE";
+                        // Boost score for negative sentiment to ensure it triggers the UI warning (which often checks for >= 0.5)
+                        score = Math.max(score, 0.85); 
                     } else if (sentiment.toLowerCase().contains("neutral")) {
                         label = "POSITIVE"; // Treat neutral as positive
                         score = 0.5; // Neutral is safe
