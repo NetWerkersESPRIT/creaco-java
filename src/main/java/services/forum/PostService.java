@@ -146,7 +146,11 @@ public class PostService implements ForumInterface<Post> {
         post.setProfaneWords(ModerationService.countProfaneWords(post.getTitle()) + ModerationService.countProfaneWords(post.getContent()));
         
         ps.setString(3, post.getStatus());
-        ps.setInt(4, post.getUserId());
+        if (post.getUserId() > 0) {
+            ps.setInt(4, post.getUserId());
+        } else {
+            ps.setNull(4, java.sql.Types.INTEGER);
+        }
         ps.setString(5, post.getImageName());
         ps.setString(6, post.getPdfName());
         ps.setInt(7, post.getLikes());
@@ -229,7 +233,7 @@ public class PostService implements ForumInterface<Post> {
      */
     public List<Post> getPendingPosts() throws SQLException {
         List<Post> posts = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE status IN ('PENDING', 'FLAGGED') ORDER BY created_at ASC";
+        String sql = "SELECT * FROM post WHERE status IN ('PENDING', 'FLAGGED', 'PENDING_VISITOR') ORDER BY created_at ASC";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
@@ -323,7 +327,11 @@ public class PostService implements ForumInterface<Post> {
         post.setContent(filteredContent);
         
         ps.setString(3, post.getStatus());
-        ps.setInt(4, post.getUserId());
+        if (post.getUserId() > 0) {
+            ps.setInt(4, post.getUserId());
+        } else {
+            ps.setNull(4, java.sql.Types.INTEGER);
+        }
         ps.setString(5, post.getImageName());
         ps.setString(6, post.getPdfName());
         ps.setBoolean(7, post.isPinned());

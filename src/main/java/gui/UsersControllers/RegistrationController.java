@@ -5,6 +5,8 @@ import entities.Group;
 import services.UsersService;
 import services.GroupService;
 import services.NotificationService;
+import utils.GoogleAuthService;
+import com.google.api.services.oauth2.model.Userinfo;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,6 +20,16 @@ public class RegistrationController {
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     String now = LocalDateTime.now().format(formatter);
+
+    @FXML
+    public void initialize() {
+        javafx.application.Platform.runLater(() -> {
+            if (txtUsername.getScene() != null) {
+                Stage stage = (Stage) txtUsername.getScene().getWindow();
+                if (stage != null) stage.setMaximized(true);
+            }
+        });
+    }
 
     @FXML private TextField txtUsername, txtEmail, txtNumtel;
     @FXML private PasswordField txtPassword;
@@ -93,6 +105,65 @@ public class RegistrationController {
     }
 
     @FXML
+    public void handleGoogleRegister() {
+        try {
+            Userinfo googleUser = GoogleAuthService.authenticate();
+            String email = googleUser.getEmail();
+
+            if (email == null || email.isEmpty()) {
+                lblMessage.setStyle("-fx-text-fill: red;");
+                lblMessage.setText("❌ Failed to retrieve email from Google.");
+                return;
+            }
+
+            // Check if user already exists
+            if (usersService.findByEmail(email) != null) {
+                lblMessage.setStyle("-fx-text-fill: red;");
+                lblMessage.setText("❌ User already exists. Please sign in.");
+                return;
+            }
+
+            // Create new Google User
+            Users u = new Users();
+            String fullName = (googleUser.getGivenName() != null ? googleUser.getGivenName() : "") + 
+                             " " + (googleUser.getFamilyName() != null ? googleUser.getFamilyName() : "");
+            u.setUsername(fullName.trim().isEmpty() ? "GoogleUser" : fullName.trim());
+            u.setEmail(email);
+            u.setPassword("GOOGLE_AUTH");
+            u.setRole("ROLE_CONTENT_CREATOR");
+            u.setImage(googleUser.getPicture());
+            u.setNumtel("");
+            u.setPoints(0);
+            u.setCreated_at(now);
+
+            usersService.ajouter(u);
+            
+            Users dbUser = usersService.findByEmail(email);
+            if (dbUser != null) {
+                new NotificationService().notifyWelcome(dbUser);
+            }
+
+            lblMessage.setStyle("-fx-text-fill: green;");
+            lblMessage.setText("✅ Google account created! Redirecting...");
+
+            Stage stage = (Stage) lblMessage.getScene().getWindow();
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1.5));
+            pause.setOnFinished(e -> {
+                try {
+                    goBackWithStage(stage);
+                } catch (Exception ex) { ex.printStackTrace(); }
+            });
+            pause.play();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblMessage.setStyle("-fx-text-fill: red;");
+            lblMessage.setText("❌ Google Sign-Up failed: " + e.getMessage());
+        }
+    }
+
+
+    @FXML
     public void togglePassword() {
         if (txtPassword.isVisible()) {
             txtPasswordVisible.setText(txtPassword.getText());
@@ -116,8 +187,19 @@ public class RegistrationController {
 
     private void goBackWithStage(Stage stage) throws Exception {
         if (stage != null) {
+            stage.setMaximized(true);
             stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/SignIn.fxml")));
             stage.setTitle("CreaCo - Sign In");
+        }
+    }
+
+    @FXML
+    public void goToWelcome() throws Exception {
+        if (txtUsername.getScene() != null) {
+            Stage stage = (Stage) txtUsername.getScene().getWindow();
+            stage.setMaximized(true);
+            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/Welcome.fxml")));
+            stage.setTitle("CreaCo - Welcome");
         }
     }
 }

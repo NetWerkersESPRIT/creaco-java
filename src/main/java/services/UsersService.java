@@ -97,7 +97,11 @@ public class UsersService implements services.UsersInterface<Users> {
 
     @Override
     public void ajouter(Users users) throws SQLException {
-        String hashedPassword = bcryptHash(users.getPassword());
+        String passwordToStore = users.getPassword();
+        // Only hash if it's not a Google Auth placeholder
+        if (!"GOOGLE_AUTH".equals(passwordToStore)) {
+            passwordToStore = bcryptHash(passwordToStore);
+        }
         List<String> columns = new ArrayList<>();
         List<Object> values = new ArrayList<>();
 
@@ -106,7 +110,7 @@ public class UsersService implements services.UsersInterface<Users> {
         columns.add("email");
         values.add(users.getEmail());
         columns.add("password");
-        values.add(hashedPassword);
+        values.add(passwordToStore);
 
         if (usersTableHasColumn("role")) {
             columns.add("role");
@@ -145,14 +149,21 @@ public class UsersService implements services.UsersInterface<Users> {
 
     @Override
     public void supprimer(int id) throws SQLException {
+        // First, delete notifications associated with this user to avoid FK constraint error
+        String deleteNotificationsSql = "DELETE FROM `notification` WHERE `user_id_id`=?";
+        try (PreparedStatement psNotify = con.prepareStatement(deleteNotificationsSql)) {
+            psNotify.setInt(1, id);
+            psNotify.executeUpdate();
+        }
+
+        // Now delete the user
         String sql = "DELETE FROM `users` WHERE `id`=?";
         PreparedStatement preparedStatement = con.prepareStatement(sql);
         preparedStatement.setInt(1, id);
         preparedStatement.executeUpdate();
-        System.out.println("User Deleted");
-
-
+        System.out.println("User and associated notifications deleted");
     }
+
 
     @Override
     public List<Users> afficher() throws SQLException {
@@ -172,9 +183,11 @@ public class UsersService implements services.UsersInterface<Users> {
     public void modifier(Users users) throws SQLException {
         String pwd = users.getPassword();
         String storedPassword = pwd;
-        if (pwd != null && !pwd.isBlank() && !pwd.startsWith("$2")) {
+        // Only hash if it's not empty, not already hashed ($2), and not the Google Auth placeholder
+        if (pwd != null && !pwd.isBlank() && !pwd.startsWith("$2") && !"GOOGLE_AUTH".equals(pwd)) {
             storedPassword = bcryptHash(pwd);
         }
+
 
         List<String> assignments = new ArrayList<>();
         List<Object> values = new ArrayList<>();
@@ -251,5 +264,23 @@ public class UsersService implements services.UsersInterface<Users> {
             return mapUser(rs);
         }
         return null;
+    }
+
+    public List<Users> findByRoles(List<String> roles) throws SQLException {
+        List<Users> usersList = new ArrayList<>();
+        if (roles == null || roles.isEmpty()) return usersList;
+
+        String placeholders = String.join(", ", java.util.Collections.nCopies(roles.size(), "?"));
+        String sql = "SELECT * FROM users WHERE role IN (" + placeholders + ")";
+        PreparedStatement ps = con.prepareStatement(sql);
+        for (int i = 0; i < roles.size(); i++) {
+            ps.setString(i + 1, roles.get(i));
+        }
+
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            usersList.add(mapUser(rs));
+        }
+        return usersList;
     }
 }

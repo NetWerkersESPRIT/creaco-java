@@ -14,7 +14,7 @@ public class FxApplication extends Application {
     public void start(Stage stage) throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader(
-                FxApplication.class.getResource("/Users/SignIn.fxml")
+                FxApplication.class.getResource("/Users/Welcome.fxml")
         );
 
         Parent root = fxmlLoader.load();
@@ -24,8 +24,8 @@ public class FxApplication extends Application {
 
         stage.setTitle("Creaco JavaFX");
         stage.setScene(scene);
-        stage.setMaximized(true);
         stage.show();
+        stage.setMaximized(true);
     }
 
     public static void main(String[] args) {

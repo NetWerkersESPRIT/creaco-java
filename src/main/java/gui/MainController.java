@@ -84,7 +84,12 @@ public class MainController {
 
     @FXML
     private void onShowEvents() {
-        System.out.println("Events section - Coming soon");
+        loadSubView("/Event.fxml", "Events");
+    }
+
+    @FXML
+    private void onShowReservations() {
+        loadSubView("/Reservation.fxml", "Reservations");
     }
 
     @FXML

@@ -57,6 +57,8 @@
                                                    style="-fx-background-color: #f3f4f6; -fx-background-radius: 10; -fx-padding: 10; -fx-font-size: 13px;" HBox.hgrow="ALWAYS" />
                                         <Button text="🎨 Generate" onAction="#generateAvatar" 
                                                 style="-fx-background-color: -fx-primary-pink; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;" />
+                                        <Button text="📁 Upload" onAction="#handleUploadImage" 
+                                                style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-text-fill: #4a5568; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;" />
                                     </children>
                                 </HBox>
                                 

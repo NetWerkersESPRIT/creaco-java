@@ -19,6 +19,7 @@
         <!-- New Action Row: Recent Discussions + Search + Add Post -->
         <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="card" style="-fx-padding: 15 25;">
             <children>
+                <Button fx:id="btnBack" onAction="#goWelcome" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;" text="←" />
                 <Label text="Recent Discussions" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
                 <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="search-bar" HBox.hgrow="ALWAYS" maxWidth="Infinity">
                     <children>

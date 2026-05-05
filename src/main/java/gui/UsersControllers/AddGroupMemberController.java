@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Node;
+import javafx.scene.control.ListCell;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,9 +24,12 @@ public class AddGroupMemberController {
     @FXML private ComboBox<String> comboRole;
     @FXML private Label lblMessage;
 
+    private final services.NotificationService notificationService = new services.NotificationService();
     private final UsersService usersService = new UsersService();
     private final GroupService groupService = new GroupService();
     private int groupId;
+    @FXML private ComboBox<Users> comboInviteUser;
+    @FXML private javafx.scene.control.TabPane tabPane;
 
     @FXML
     public void initialize() {
@@ -33,8 +37,95 @@ public class AddGroupMemberController {
         comboRole.setValue("ROLE_MEMBER");
     }
 
+    private void setupInviteUserCombo() {
+        try {
+            java.util.List<String> roles = java.util.Arrays.asList("ROLE_MEMBER", "ROLE_MANAGER");
+            java.util.List<Users> users = usersService.findByRoles(roles);
+            
+            // Filter out existing members
+            if (groupId != 0) {
+                java.util.List<Users> existingMembers = groupService.getGroupMembers(groupId);
+                java.util.Set<Integer> existingIds = existingMembers.stream().map(Users::getId).collect(java.util.stream.Collectors.toSet());
+                users = users.stream().filter(u -> !existingIds.contains(u.getId())).collect(java.util.stream.Collectors.toList());
+            }
+
+            comboInviteUser.setItems(javafx.collections.FXCollections.observableArrayList(users));
+            
+            // Custom cell factory to show username and email
+            comboInviteUser.setCellFactory(lv -> new ListCell<Users>() {
+                @Override
+                protected void updateItem(Users item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(item.getUsername() + " (" + item.getEmail() + ")");
+                    }
+                }
+            });
+            
+            comboInviteUser.setButtonCell(new ListCell<Users>() {
+                @Override
+                protected void updateItem(Users item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(item.getUsername() + " (" + item.getEmail() + ")");
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleSendInvitation() {
+        Users selectedUser = comboInviteUser.getValue();
+        if (selectedUser == null) {
+            lblMessage.setStyle("-fx-text-fill: #e53e3e;");
+            lblMessage.setText("❌ Please select a user to invite.");
+            return;
+        }
+
+        try {
+            Users currentUser = SessionManager.getInstance().getCurrentUser();
+            if (currentUser == null) return;
+
+            // Ensure group exists
+            if (groupId == 0) {
+                Group g = groupService.getGroupByCreatorId(currentUser.getId());
+                if (g == null) {
+                    g = new Group();
+                    g.setName(currentUser.getUsername() + "'s Team");
+                    g.setCreatorId(currentUser.getId());
+                    groupService.createGroup(g);
+                }
+                groupId = g.getId();
+            }
+
+            // Send Notification
+            notificationService.notifyGroupInvitation(selectedUser.getId(), currentUser.getUsername(), groupId);
+
+            lblMessage.setStyle("-fx-text-fill: #38a169;");
+            lblMessage.setText("✅ Invitation sent to " + selectedUser.getUsername() + "!");
+
+            // Reset selection and refresh list
+            comboInviteUser.setValue(null);
+            setupInviteUserCombo();
+
+        } catch (Exception e) {
+            lblMessage.setStyle("-fx-text-fill: #e53e3e;");
+            lblMessage.setText("❌ Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     public void setGroupId(int groupId) {
         this.groupId = groupId;
+        setupInviteUserCombo(); // Refresh filtering now that we have the ID
     }
 
     private String validate() {
@@ -101,10 +192,13 @@ public class AddGroupMemberController {
                 lblMessage.setStyle("-fx-text-fill: #38a169;");
                 lblMessage.setText("✅ Member added successfully!");
                 
-                // Return after delay
-                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1.5));
-                pause.setOnFinished(e -> goBack());
-                pause.play();
+                // Clear fields
+                txtUsername.clear();
+                txtEmail.clear();
+                txtPassword.clear();
+                txtPasswordVisible.clear();
+                txtNumtel.clear();
+                setupInviteUserCombo(); // Refresh the invite list just in case
             }
         } catch (Exception e) {
             lblMessage.setStyle("-fx-text-fill: #e53e3e;");

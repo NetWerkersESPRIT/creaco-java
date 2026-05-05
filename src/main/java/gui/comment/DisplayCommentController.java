@@ -84,6 +84,19 @@ public class DisplayCommentController {
     private Post currentPost;
     private boolean isAdminMode = false;
 
+    @FXML
+    public void initialize() {
+        commentsContainer.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obs2, oldWin, newWin) -> {
+                    if (newWin instanceof Stage) ((Stage) newWin).setMaximized(true);
+                });
+                if (newScene.getWindow() instanceof Stage)
+                    ((Stage) newScene.getWindow()).setMaximized(true);
+            }
+        });
+    }
+
     public void setAdminMode(boolean isAdminMode) {
         this.isAdminMode = isAdminMode;
     }
@@ -94,24 +107,52 @@ public class DisplayCommentController {
             postTitleLabel.setText(safeText(post.getTitle()));
             postContentLabel.setText(safeText(post.getContent()));
 
-            Users author = userService.getUserById(post.getUserId());
-            String username = (author != null) ? author.getUsername() : "Unknown";
+            int authorId = post.getUserId();
+            String username;
+            Users author = null;
+            if (authorId == 0) {
+                username = "Anonyme";
+            } else {
+                author = userService.getUserById(authorId);
+                username = (author != null) ? author.getUsername() : "Unknown";
+            }
             String date = (post.getCreatedAt() != null)
                     ? post.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     : "-";
             postMetaLabel.setText("Posted by " + username + " • " + date);
 
             // Set Author Avatar with Ring
-            if (author != null && postAuthorAvatarContainer != null) {
-                StackPane avatarWithRing = buildAvatarWithRing(author, 45);
+            if (postAuthorAvatarContainer != null) {
+                StackPane avatarWithRing;
+                if (authorId == 0) {
+                    Users anon = new Users();
+                    anon.setUsername("Anonyme");
+                    avatarWithRing = buildAvatarWithRing(anon, 45);
+                } else if (author != null) {
+                    avatarWithRing = buildAvatarWithRing(author, 45);
+                } else {
+                    avatarWithRing = new StackPane(); // Fallback
+                }
                 postAuthorAvatarContainer.getChildren().setAll(avatarWithRing);
                 postAuthorAvatarContainer.setStyle("-fx-background-color: transparent;");
             }
 
             // Set Current User Avatar in Input Bar
             Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-            if (currentUser != null && currentUserAvatarContainer != null) {
-                StackPane currentAvatar = buildAvatar(currentUser);
+            boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+            
+            StackPane currentAvatar;
+            if (isVisitor) {
+                Users anonUser = new Users();
+                anonUser.setUsername("Anonyme");
+                currentAvatar = buildAvatar(anonUser);
+            } else if (currentUser != null) {
+                currentAvatar = buildAvatar(currentUser);
+            } else {
+                currentAvatar = new StackPane(); // Empty
+            }
+
+            if (currentUserAvatarContainer != null) {
                 currentAvatar.setPrefSize(32, 32);
                 currentAvatar.setMinSize(32, 32);
                 currentAvatar.setMaxSize(32, 32);
@@ -160,8 +201,12 @@ public class DisplayCommentController {
         try {
             List<Comment> allComments = commentService.getCommentsByPost(currentPost.getId());
 
-            Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-            int curUserId = (currentUser != null) ? currentUser.getId() : -1;
+            boolean isVisitorMode = utils.SessionManager.getInstance().isVisitor();
+            Users curU = utils.SessionManager.getInstance().getCurrentUser();
+            int curUserId = (curU != null) ? curU.getId() : 0;
+            if (curUserId < 1 && !isVisitorMode)
+                return;
+            
             boolean isPostOwner = (currentPost.getUserId() == curUserId);
 
             // Filter comments: Hide "HIDDEN" comments unless you are the owner or post
@@ -219,8 +264,15 @@ public class DisplayCommentController {
         card.setStyle("-fx-background-color: transparent;");
         card.setPadding(new Insets(10, 0, 2, leftPad));
 
-        Users user = userService.getUserById(comment.getUserId());
-        String username = (user != null) ? user.getUsername() : "Unknown";
+        int commentUserId = comment.getUserId();
+        String username;
+        Users user = null;
+        if (commentUserId == 0) {
+            username = "Anonyme";
+        } else {
+            user = userService.getUserById(commentUserId);
+            username = (user != null) ? user.getUsername() : "Unknown";
+        }
         String dateStr = formatDate(comment.getCreatedAt());
 
         // ── Parse body ───────────────────────────────────────────────────────────
@@ -239,7 +291,14 @@ public class DisplayCommentController {
 
         // ── Avatar ───────────────────────────────────────────────────────────────
         int avatarSize = depth > 0 ? 28 : 36;
-        StackPane avatarPane = buildAvatarWithRing(user, avatarSize);
+        StackPane avatarPane;
+        if (commentUserId == 0) {
+            Users anon = new Users();
+            anon.setUsername("Anonyme");
+            avatarPane = buildAvatarWithRing(anon, avatarSize);
+        } else {
+            avatarPane = buildAvatarWithRing(user, avatarSize);
+        }
 
         // ── Main row: avatar | content-col | heart ───────────────────────────────
         HBox mainRow = new HBox(10);
@@ -314,7 +373,8 @@ public class DisplayCommentController {
         metaRow.getChildren().add(timeLabel);
 
         // Reply button
-        int curUserId = utils.SessionManager.getInstance().getCurrentUser().getId();
+        Users curUserObj = utils.SessionManager.getInstance().getCurrentUser();
+        int curUserId = (curUserObj != null) ? curUserObj.getId() : 0;
         boolean isPostOwner = (currentPost != null && currentPost.getUserId() == curUserId);
 
         Button replyBtn = new Button("Reply");
@@ -398,7 +458,8 @@ public class DisplayCommentController {
         contentCol.getChildren().add(metaRow);
 
         // ── Heart button (per-user like toggle) ──────────────────────────────────
-        int curUserIdForLike = utils.SessionManager.getInstance().getCurrentUser().getId();
+        Users curUObj = utils.SessionManager.getInstance().getCurrentUser();
+        int curUserIdForLike = (curUObj != null) ? curUObj.getId() : 0;
 
         // Check from DB if this user already liked this comment
         boolean alreadyLiked = false;
@@ -431,7 +492,7 @@ public class DisplayCommentController {
                 liked[0] = commentService.hasUserLiked(comment.getId(), curUserIdForLike);
 
                 // Notify Comment Owner
-                if (liked[0] && comment.getUserId() != curUserIdForLike) {
+                if (liked[0] && comment.getUserId() != curUserIdForLike && curUserIdForLike != 0) {
                     Users liker = utils.SessionManager.getInstance().getCurrentUser();
                     new NotificationService().notifyCommentLike(comment.getUserId(), liker.getUsername(),
                             comment.getId(), currentPost.getId());
@@ -559,7 +620,11 @@ public class DisplayCommentController {
         circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
 
         if (imageUrl == null || imageUrl.isEmpty()) {
-            imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+            if ("Anonyme".equals(username)) {
+                imageUrl = null; // Skip image to force AY initials
+            } else {
+                imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+            }
         }
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -596,8 +661,13 @@ public class DisplayCommentController {
         }
 
         // Final fallback: Initials (should rarely be reached now)
-        char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
-        Label initLabel = new Label(String.valueOf(initial));
+        String displayInit;
+        if ("Anonyme".equals(username)) {
+            displayInit = "AY";
+        } else {
+            displayInit = (username != null && !username.isEmpty()) ? String.valueOf(Character.toUpperCase(username.charAt(0))) : "V";
+        }
+        Label initLabel = new Label(displayInit);
         initLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
         circle.getChildren().add(initLabel);
 
@@ -622,34 +692,35 @@ public class DisplayCommentController {
         Task<Comment> task = new Task<>() {
             @Override
             protected Comment call() throws Exception {
-                // 1. Correct spelling
-                String corrected = TextCorrectionService.correctText(finalBodyToProcess);
+                String processedText = finalBodyToProcess;
+                boolean isProfane = false;
+                int pWords = 0;
+                int gErrors = 0;
 
-                // 2. Moderate
-                DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                try {
+                    String corrected = TextCorrectionService.correctText(finalBodyToProcess);
+                    DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                    processedText = mod.moderatedText;
+                    isProfane = mod.isProfane;
+                    pWords = mod.profaneWordsCount;
+                    gErrors = mod.grammarErrorsCount;
+                } catch (Exception apiEx) {
+                    System.err.println("AI Moderation failed, posting raw comment: " + apiEx.getMessage());
+                }
 
                 Comment comment = new Comment();
                 comment.setPostId(currentPost.getId());
 
                 Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-                if (currentUser != null) {
-                    comment.setUserId(currentUser.getId());
-                } else {
-                    comment.setUserId(1);
-                }
+                comment.setUserId(currentUser != null ? currentUser.getId() : 0);
 
-                comment.setBody(mod.moderatedText);
-                comment.setProfane(mod.isProfane);
-                comment.setProfaneWords(mod.profaneWordsCount);
-                comment.setGrammarErrors(mod.grammarErrorsCount);
-
-                if (mod.isProfane) {
-                    comment.setStatus("FLAGGED");
-                } else {
-                    comment.setStatus("APPROVED");
-                }
-
+                comment.setBody(processedText);
+                comment.setProfane(isProfane);
+                comment.setProfaneWords(pWords);
+                comment.setGrammarErrors(gErrors);
+                comment.setStatus(isProfane ? "FLAGGED" : "APPROVED");
                 comment.setCreatedAt(LocalDateTime.now());
+
                 commentService.ajouter(comment);
                 return comment;
             }
@@ -657,13 +728,13 @@ public class DisplayCommentController {
 
         task.setOnSucceeded(e -> {
             Comment comment = task.getValue();
-            // Notify Post Owner
-            Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-            if (currentUser != null && currentPost.getUserId() != currentUser.getId()) {
-                new NotificationService().notifyComment(currentPost.getUserId(), currentUser.getUsername(),
+            Users curU = utils.SessionManager.getInstance().getCurrentUser();
+            if (curU != null && currentPost.getUserId() != curU.getId()) {
+                new NotificationService().notifyComment(currentPost.getUserId(), curU.getUsername(),
                         currentPost.getId());
+            } else if (curU == null && currentPost.getUserId() != 0) {
+                new NotificationService().notifyComment(currentPost.getUserId(), "Anonyme", currentPost.getId());
             }
-
             commentArea.clear();
             removeAttachment();
             loadCommentsByPost();
@@ -676,20 +747,18 @@ public class DisplayCommentController {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                String corrected = TextCorrectionService.correctText(newBody);
-                DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                String processedText = newBody;
+                boolean isProfane = false;
+                try {
+                    String corrected = TextCorrectionService.correctText(newBody);
+                    DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                    processedText = mod.moderatedText;
+                    isProfane = mod.isProfane;
+                } catch (Exception e) {}
 
-                comment.setBody(mod.moderatedText);
-                comment.setProfane(mod.isProfane);
-                comment.setProfaneWords(mod.profaneWordsCount);
-                comment.setGrammarErrors(mod.grammarErrorsCount);
-
-                if (mod.isProfane) {
-                    comment.setStatus("FLAGGED");
-                } else {
-                    comment.setStatus("APPROVED");
-                }
-
+                comment.setBody(processedText);
+                comment.setProfane(isProfane);
+                comment.setStatus(isProfane ? "FLAGGED" : "APPROVED");
                 commentService.modifier(comment.getId(), comment);
                 return null;
             }
@@ -702,24 +771,24 @@ public class DisplayCommentController {
         Task<Comment> task = new Task<>() {
             @Override
             protected Comment call() throws Exception {
-                String corrected = TextCorrectionService.correctText(body);
-                DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                String processedText = body;
+                boolean isProfane = false;
+                try {
+                    String corrected = TextCorrectionService.correctText(body);
+                    DetectBadWordService.ModerationResult mod = DetectBadWordService.moderate(corrected).join();
+                    processedText = mod.moderatedText;
+                    isProfane = mod.isProfane;
+                } catch (Exception e) {}
 
                 Comment reply = new Comment();
                 reply.setPostId(currentPost.getId());
                 reply.setParentCommentId(parent.getId());
-                reply.setUserId(utils.SessionManager.getInstance().getCurrentUser().getId());
+                Users curU = utils.SessionManager.getInstance().getCurrentUser();
+                reply.setUserId(curU != null ? curU.getId() : 0);
 
-                reply.setBody(mod.moderatedText);
-                reply.setProfane(mod.isProfane);
-                reply.setProfaneWords(mod.profaneWordsCount);
-                reply.setGrammarErrors(mod.grammarErrorsCount);
-
-                if (mod.isProfane) {
-                    reply.setStatus("FLAGGED");
-                } else {
-                    reply.setStatus("APPROVED");
-                }
+                reply.setBody(processedText);
+                reply.setProfane(isProfane);
+                reply.setStatus(isProfane ? "FLAGGED" : "APPROVED");
 
                 reply.setCreatedAt(LocalDateTime.now());
                 commentService.ajouter(reply);
@@ -732,7 +801,8 @@ public class DisplayCommentController {
             // Notify Comment Owner
             if (parent.getUserId() != reply.getUserId()) {
                 Users replier = utils.SessionManager.getInstance().getCurrentUser();
-                new NotificationService().notifyReply(parent.getUserId(), replier.getUsername(), reply.getId(),
+                String replierName = (replier != null) ? replier.getUsername() : "Anonyme";
+                new NotificationService().notifyReply(parent.getUserId(), replierName, reply.getId(),
                         currentPost.getId());
             }
             loadCommentsByPost();
@@ -780,8 +850,13 @@ public class DisplayCommentController {
             DisplayPostController controller = loader.getController();
             controller.setAdminMode(this.isAdminMode);
             StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            if (contentArea != null)
+            if (contentArea != null) {
                 contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

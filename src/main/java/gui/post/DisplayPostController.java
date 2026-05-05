@@ -1,6 +1,7 @@
 package gui.post;
 
 import entities.Post;
+import entities.Users;
 import entities.ReactionType;
 import gui.comment.DisplayCommentController;
 import javafx.animation.FadeTransition;
@@ -69,6 +70,9 @@ public class DisplayPostController {
     private TextField searchField;
 
     @FXML
+    private Button btnBack;
+
+    @FXML
     private Label lblUsername;
     @FXML
     private Label lblUserRole;
@@ -101,23 +105,50 @@ public class DisplayPostController {
 
     @FXML
     public void initialize() {
-        gui.FrontMainController.setNavbarText("Forum", "Pages / Forum");
+        // Force maximized window — scene property listener is the only reliable method
+        // because initialize() fires before the scene is attached to the stage.
+        postsContainer.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obs2, oldWin, newWin) -> {
+                    if (newWin instanceof Stage) {
+                        ((Stage) newWin).setMaximized(true);
+                    }
+                });
+                // In case the window is already set at this point
+                if (newScene.getWindow() instanceof Stage) {
+                    ((Stage) newScene.getWindow()).setMaximized(true);
+                }
+            }
+        });
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+        if (btnBack != null) {
+            btnBack.setVisible(isVisitor);
+            btnBack.setManaged(isVisitor);
+        }
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         initialized = true;
         loadPosts();
 
         // Populate User Profile
-        entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
-        if (user != null && lblUsername != null) {
-            String displayName = user.getUsername() != null ? user.getUsername() : "User";
-            lblUsername.setText(displayName);
+        if (isVisitor) {
+            if (lblUsername != null) lblUsername.setText("Visitor");
+            if (lblUserRole != null) {
+                lblUserRole.setText("GUEST");
+                lblUserRole.setStyle("-fx-background-color: #64748b;");
+            }
+        } else {
+            entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
+            if (user != null && lblUsername != null) {
+                String displayName = user.getUsername() != null ? user.getUsername() : "User";
+                lblUsername.setText(displayName);
 
-            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
-            lblUserRole.setText(role);
+                String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+                lblUserRole.setText(role);
 
-            // Special styling for ADMIN
-            if ("ADMIN".equals(role)) {
-                lblUserRole.setStyle("-fx-background-color: #434a75;");
+                // Special styling for ADMIN
+                if ("ADMIN".equals(role)) {
+                    lblUserRole.setStyle("-fx-background-color: #434a75;");
+                }
             }
         }
     }
@@ -126,12 +157,22 @@ public class DisplayPostController {
         try {
             allPosts = postService.getAcceptedPosts();
             // Pre-load this user's reactions for all posts
-            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-            int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
-            if (currentUserId > 0) {
+            boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+            if (isVisitor) {
                 for (Post p : allPosts) {
-                    ReactionType rt = postService.getUserReaction(currentUserId, p.getId());
-                    userReactions.put(p.getId(), rt);
+                    ReactionType rt = utils.SessionManager.getInstance().getVisitorReaction(p.getId());
+                    if (rt != null) {
+                        userReactions.put(p.getId(), rt);
+                    }
+                }
+            } else {
+                entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+                int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
+                if (currentUserId > 0) {
+                    for (Post p : allPosts) {
+                        ReactionType rt = postService.getUserReaction(currentUserId, p.getId());
+                        userReactions.put(p.getId(), rt);
+                    }
                 }
             }
             renderPosts(allPosts);
@@ -204,15 +245,33 @@ public class DisplayPostController {
         card.setAlignment(javafx.geometry.Pos.TOP_LEFT);
 
         // --- Author Row ---
-        entities.Users author = userService.getUserById(post.getUserId());
-        String username = (author != null) ? author.getUsername() : "Unknown";
+        int postUserId = post.getUserId();
+        boolean isAnonymous = (postUserId == 0);
+        String username;
+        if (isAnonymous) {
+            username = "Anonyme";
+        } else {
+            entities.Users author = userService.getUserById(postUserId);
+            username = (author != null) ? author.getUsername() : "Unknown";
+        }
+
         HBox authorRow = new HBox(12);
         authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        StackPane avatar = buildAvatarWithRing(author, 35);
         Label usernameLabel = new Label(username);
         usernameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;");
-        authorRow.getChildren().addAll(avatar, usernameLabel);
+
+        if (!isAnonymous) {
+            entities.Users author = userService.getUserById(postUserId);
+            StackPane avatar = buildAvatarWithRing(author, 35);
+            authorRow.getChildren().addAll(avatar, usernameLabel);
+        } else {
+            // Create a temporary "Anonyme" user for the avatar
+            entities.Users anonUser = new entities.Users();
+            anonUser.setUsername("Anonyme");
+            StackPane avatar = buildAvatarWithRing(anonUser, 35);
+            authorRow.getChildren().addAll(avatar, usernameLabel);
+        }
 
         if (post.isPinned()) {
             Label pinnedBadge = new Label("📌 PINNED");
@@ -265,6 +324,7 @@ public class DisplayPostController {
                 createReadAction(post));
 
         entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
         int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
         boolean isOwner = (post.getUserId() == currentUserId);
 
@@ -341,26 +401,44 @@ public class DisplayPostController {
 
         // Click to Like/Unlike directly
         triggerBtn.setOnMouseClicked(ev -> {
-            if (currentUserId < 1)
+            boolean isVisitorMode = utils.SessionManager.getInstance().isVisitor();
+            entities.Users u = utils.SessionManager.getInstance().getCurrentUser();
+            int uid = (u != null) ? u.getId() : 0;
+            if (uid < 1 && !isVisitorMode)
                 return;
             try {
-                // If already reacted, clicking the main button toggles it off.
-                // If not reacted, clicking the main button defaults to LIKE.
-                ReactionType current = userReactions.get(postId);
-                ReactionType typeToApply = (current != null) ? current : ReactionType.LIKE;
+                if (isVisitorMode) {
+                    utils.SessionManager.getInstance().toggleVisitorLike(postId);
+                    boolean hasLiked = utils.SessionManager.getInstance().hasVisitorLiked(postId);
+                    ReactionType result = hasLiked ? ReactionType.LIKE : null;
+                    userReactions.put(postId, result);
+                    
+                    // Update database likes count (optional, but requested "Ability to like a post")
+                    // Since it's a visitor, we just update the count in DB
+                    post.setLikes(post.getLikes() + (hasLiked ? 1 : -1));
+                    postService.likePost(postId, post.getLikes());
+                    
+                    triggerBtn.setText(buildMainLabel(result));
+                    triggerBtn.setStyle(buildMainBtnStyle(result));
+                    refreshCountSummary(countSummary, postId);
+                } else {
+                    // Existing authenticated logic
+                    ReactionType current = userReactions.get(postId);
+                    ReactionType typeToApply = (current != null) ? current : ReactionType.LIKE;
 
-                ReactionType result = postService.handleReaction(currentUserId, postId, typeToApply);
-                userReactions.put(postId, result);
+                    ReactionType result = postService.handleReaction(uid, postId, typeToApply);
+                    userReactions.put(postId, result);
 
-                // Notify Post Owner
-                if (result != null && post.getUserId() != currentUserId) {
-                    new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(),
-                            postId);
+                    // Notify Post Owner
+                    if (result != null && post.getUserId() != uid) {
+                        new services.NotificationService().notifyPostLike(post.getUserId(), u.getUsername(),
+                                postId);
+                    }
+
+                    triggerBtn.setText(buildMainLabel(result));
+                    triggerBtn.setStyle(buildMainBtnStyle(result));
+                    refreshCountSummary(countSummary, postId);
                 }
-
-                triggerBtn.setText(buildMainLabel(result));
-                triggerBtn.setStyle(buildMainBtnStyle(result));
-                refreshCountSummary(countSummary, postId);
 
                 // Bounce animation
                 ScaleTransition up = new ScaleTransition(Duration.millis(100), triggerBtn);
@@ -411,15 +489,26 @@ public class DisplayPostController {
 
             // Click handling
             emoji.setOnMouseClicked(ev -> {
-                if (currentUserId < 1)
+                boolean isVisitorMode = utils.SessionManager.getInstance().isVisitor();
+                entities.Users u = utils.SessionManager.getInstance().getCurrentUser();
+                int uid = (u != null) ? u.getId() : 0;
+                
+                if (uid < 1 && !isVisitorMode)
                     return;
                 try {
-                    ReactionType result = postService.handleReaction(currentUserId, postId, rt);
+                    ReactionType result;
+                    if (isVisitorMode) {
+                        utils.SessionManager.getInstance().setVisitorReaction(postId, rt);
+                        result = rt;
+                    } else {
+                        result = postService.handleReaction(uid, postId, rt);
+                    }
                     userReactions.put(postId, result);
 
                     // Notify Post Owner
-                    if (result != null && post.getUserId() != currentUserId) {
-                        new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(),
+                    if (result != null && post.getUserId() != 0 && (u != null || isVisitorMode)) {
+                        String name = (u != null) ? u.getUsername() : "Anonyme";
+                        new services.NotificationService().notifyPostLike(post.getUserId(), name,
                                 postId);
                     }
 
@@ -830,7 +919,7 @@ public class DisplayPostController {
     }
 
     private StackPane buildAvatar(entities.Users user) {
-        String username = (user != null) ? user.getUsername() : "Unknown";
+        String username = (user != null) ? user.getUsername() : "Visitor";
         String imageUrl = (user != null) ? user.getImage() : null;
 
         StackPane circle = new StackPane();
@@ -841,7 +930,9 @@ public class DisplayPostController {
 
         // Use Dicebear fallback if no image (matches Profile view)
         if (imageUrl == null || imageUrl.isEmpty()) {
-            imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+            if (!"Anonyme".equals(username)) {
+                imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+            }
         }
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -873,8 +964,13 @@ public class DisplayPostController {
             }
         }
 
-        char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
-        Label initLabel = new Label(String.valueOf(initial));
+        String displayInit;
+        if ("Anonyme".equals(username)) {
+            displayInit = "AY";
+        } else {
+            displayInit = (username != null && !username.isEmpty()) ? String.valueOf(Character.toUpperCase(username.charAt(0))) : "V";
+        }
+        Label initLabel = new Label(displayInit);
         initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
         circle.getChildren().add(initLabel);
         return circle;
@@ -930,9 +1026,10 @@ public class DisplayPostController {
     }
 
     private StackPane findContentArea(Node source) {
-        StackPane area = (StackPane) source.getScene().lookup("#contentArea");
-        if (area != null)
-            return area;
+        Node areaNode = source.getScene().lookup("#contentArea");
+        if (areaNode instanceof StackPane) {
+            return (StackPane) areaNode;
+        }
         Node parent = source.getParent();
         while (parent != null) {
             if (parent instanceof StackPane && "contentArea".equals(parent.getId()))
@@ -951,8 +1048,14 @@ public class DisplayPostController {
             if (controller != null)
                 controller.setAdminMode(this.isAdminMode);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null)
+            if (contentArea != null) {
                 contentArea.getChildren().setAll(root);
+            } else {
+                // Visitor mode loaded directly - replace root
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error", "Could not load Add Post.");
@@ -967,8 +1070,13 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null)
+            if (contentArea != null) {
                 contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -982,8 +1090,13 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null)
+            if (contentArea != null) {
                 contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1190,5 +1303,18 @@ public class DisplayPostController {
     @FXML
     public void logout(ActionEvent event) {
         gui.SessionHelper.logout(event);
+    }
+
+    @FXML
+    private void goWelcome(ActionEvent event) {
+        try {
+            utils.SessionManager.getInstance().logout(); // Reset visitor state
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Welcome.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root); // keep same scene → stage stays maximized
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
