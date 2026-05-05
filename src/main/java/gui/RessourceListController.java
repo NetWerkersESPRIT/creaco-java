@@ -135,9 +135,11 @@ public class RessourceListController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actionsBox = new HBox(10);
+        Button quizButton = createIconButton("fas-question-circle", "btn-action-dark");
         Button editButton = createIconButton("fas-edit", "btn-action-dark");
         Button deleteButton = createIconButton("fas-trash-alt", "btn-action-light");
 
+        quizButton.setOnAction(event -> openQuizCreation(ressource));
         editButton.setOnAction(event -> openScene("/gui/resource-form-view.fxml", controller -> {
             RessourceFormController formController = (RessourceFormController) controller;
             formController.setContext(course, ressource);
@@ -157,7 +159,7 @@ public class RessourceListController {
             }
         });
 
-        actionsBox.getChildren().addAll(editButton, deleteButton);
+        actionsBox.getChildren().addAll(quizButton, editButton, deleteButton);
         row.getChildren().addAll(nameLabel, typeLabel, createdAtBox, spacer, actionsBox);
         return row;
     }
@@ -209,6 +211,20 @@ public class RessourceListController {
             statusLabel.setText("This resource has no valid URL to open.");
         } catch (Exception exception) {
             statusLabel.setText("Open failed: " + exception.getMessage());
+        }
+    }
+
+    private void openQuizCreation(Ressource ressource) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/quiz-creation-view.fxml"));
+            Parent root = loader.load();
+            QuizCreationController controller = loader.getController();
+            controller.setContext(course, ressource);
+            Stage stage = (Stage) titleLabel.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+            AlertHelper.showError("Navigation Error", "Unable to open quiz creation view: " + exception.getMessage());
         }
     }
 

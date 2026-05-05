@@ -1,6 +1,9 @@
 package gui;
 
 import entities.Course;
+import entities.Question;
+import entities.Quiz;
+import entities.QuizResult;
 import entities.Ressource;
 import entities.Users;
 import javafx.fxml.FXML;
@@ -15,13 +18,18 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import services.QuestionService;
+import services.QuizResultService;
+import services.QuizService;
 import services.RessourceService;
 import utils.SessionManager;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import javafx.application.Platform;
@@ -45,9 +53,14 @@ import animatefx.animation.*;
 public class FrontResourceController {
 
     private final RessourceService ressourceService = new RessourceService();
+    private final QuizService quizService = new QuizService();
+    private final QuestionService questionService = new QuestionService();
+    private final QuizResultService quizResultService = new QuizResultService();
     private final services.UserCourseProgressService progressService = new services.UserCourseProgressService();
     private Course currentCourse;
     private List<Ressource> ressources = Collections.emptyList();
+    private Quiz activeQuiz;
+    private Ressource activeResource;
 
     @FXML private Label courseTitleLabel;
     @FXML private TilePane resourcesContainer;
@@ -70,6 +83,15 @@ public class FrontResourceController {
     @FXML private StackPane resourceModal;
     @FXML private Label modalResourceTitle;
     @FXML private Label modalResourceDesc;
+
+    // Quiz Modal UI
+    @FXML private StackPane quizModal;
+    @FXML private Label quizModalTitle;
+    @FXML private VBox quizQuestionsContainer;
+    @FXML private HBox quizResultCard;
+    @FXML private Label quizResultIcon;
+    @FXML private Label quizResultLabel;
+    @FXML private Button submitQuizButton;
 
     @FXML
     public void initialize() {
@@ -165,8 +187,8 @@ public class FrontResourceController {
         desc.setPrefHeight(60);
         desc.getStyleClass().add("card-subtitle");
 
-        HBox actions = new HBox(10);
-        actions.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        HBox topActions = new HBox(10);
+        topActions.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Button openBtn = new Button("Open");
         openBtn.getStyleClass().add("btn-primary");
@@ -179,10 +201,55 @@ public class FrontResourceController {
         downloadIconBtn.setStyle("-fx-font-size: 18px; -fx-padding: 5 12; -fx-background-radius: 10;");
         downloadIconBtn.setPrefHeight(40);
         downloadIconBtn.setOnAction(e -> onDownloadResource(ressource));
-        
-        actions.getChildren().addAll(openBtn, downloadIconBtn);
 
-        card.getChildren().addAll(name, type, desc, actions);
+        topActions.getChildren().addAll(openBtn, downloadIconBtn);
+
+        VBox bottomActions = new VBox(10);
+        bottomActions.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        try {
+            if (quizService.hasQuizForResource(ressource.getId())) {
+                Button assessmentBtn = new Button("Start Assessment");
+                assessmentBtn.getStyleClass().add("btn-primary");
+                assessmentBtn.setPrefWidth(150);
+                assessmentBtn.setPrefHeight(36);
+
+                // Vérifier si l'utilisateur a déjà répondu au quiz
+                Users quizUser = SessionManager.getInstance().getCurrentUser();
+                boolean hasCompleted = false;
+                if (quizUser != null) {
+                    try {
+                        List<Quiz> quizzes = quizService.afficherParRessource(ressource.getId());
+                        if (!quizzes.isEmpty()) {
+                            hasCompleted = quizResultService.hasUserCompletedQuiz(quizUser.getId(), quizzes.get(0).getId());
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (hasCompleted) {
+                    // Bouton gris pour voir l'historique
+                    assessmentBtn.setText("View Results");
+                    assessmentBtn.setStyle("-fx-background-color: #e5e7eb; -fx-text-fill: #6b7280; -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;");
+                    assessmentBtn.setOnAction(e -> onViewQuizResults(ressource));
+                } else {
+                    // Bouton normal pour commencer le quiz
+                    assessmentBtn.setOnAction(e -> onStartAssessment(ressource));
+                }
+
+                bottomActions.getChildren().add(assessmentBtn);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        card.setMinHeight(230);
+        card.setMaxWidth(340);
+        card.getChildren().addAll(name, type, desc, topActions);
+        if (!bottomActions.getChildren().isEmpty()) {
+            card.getChildren().add(bottomActions);
+        }
         return card;
     }
 
@@ -208,6 +275,291 @@ public class FrontResourceController {
         }
     }
 
+    private void onStartAssessment(Ressource ressource) {
+        openQuizModal(ressource);
+    }
+
+    private void onViewQuizResults(Ressource ressource) {
+        try {
+            Users user = SessionManager.getInstance().getCurrentUser();
+            if (user == null) return;
+
+            List<Quiz> quizzes = quizService.afficherParRessource(ressource.getId());
+            if (quizzes.isEmpty()) return;
+
+            Quiz quiz = quizzes.get(0);
+            QuizResult result = quizResultService.getUserQuizResult(user.getId(), quiz.getId());
+            if (result != null) {
+                showQuizResultsModal(ressource, quiz, result);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            gui.util.AlertHelper.showError("Erreur", "Impossible de charger les résultats : " + e.getMessage());
+        }
+    }
+
+    private void showQuizResultsModal(Ressource ressource, Quiz quiz, QuizResult result) {
+        try {
+            List<Question> questions = questionService.afficherParQuiz(quiz.getId());
+
+            quizModalTitle.setText("Quiz Results: " + ressource.getNom());
+            quizQuestionsContainer.getChildren().clear();
+
+            // Afficher le score global
+            Label scoreLabel = new Label(String.format("Your Score: %.0f%%", result.getScore()));
+            scoreLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: " +
+                (result.getScore() >= 50 ? "#16a34a" : "#dc2626") + "; -fx-padding: 0 0 20 0;");
+            quizQuestionsContainer.getChildren().add(scoreLabel);
+
+            // Afficher chaque question avec la réponse de l'utilisateur
+            for (int i = 0; i < questions.size(); i++) {
+                Question question = questions.get(i);
+                Integer userAnswerIndex = result.getAnswers().get(question.getId());
+
+                VBox questionCard = new VBox(10);
+                questionCard.setStyle("-fx-background-color: #f8fafc; -fx-padding: 16; -fx-border-radius: 12; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-text-fill: #1f2937;");
+
+                Label questionLabel = new Label((i + 1) + ". " + question.getQuestionText());
+                questionLabel.setWrapText(true);
+                questionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
+
+                VBox optionsBox = new VBox(8);
+                for (int optionIndex = 0; optionIndex < question.getOptions().size(); optionIndex++) {
+                    String optionText = question.getOptions().get(optionIndex);
+                    Label optionLabel = new Label(optionText);
+                    optionLabel.setWrapText(true);
+                    optionLabel.setStyle("-fx-font-size: 13px; -fx-padding: 8 10; -fx-background-radius: 10;");
+
+                    if (optionIndex == question.getCorrectAnswerIndex()) {
+                        // Bonne réponse en vert
+                        optionLabel.setStyle(optionLabel.getStyle() + " -fx-text-fill: #16a34a; -fx-font-weight: bold; -fx-background-color: #ecfdf5;");
+                    } else if (userAnswerIndex != null && optionIndex == userAnswerIndex) {
+                        // Réponse de l'utilisateur incorrecte en rouge
+                        optionLabel.setStyle(optionLabel.getStyle() + " -fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-background-color: #fef2f2;");
+                    } else {
+                        optionLabel.setStyle(optionLabel.getStyle() + " -fx-text-fill: #334155;");
+                    }
+
+                    optionsBox.getChildren().add(optionLabel);
+                }
+
+                questionCard.getChildren().addAll(questionLabel, optionsBox);
+                quizQuestionsContainer.getChildren().add(questionCard);
+            }
+
+            // Masquer le bouton de soumission et les résultats
+            if (quizResultCard != null) {
+                quizResultCard.setVisible(false);
+                quizResultCard.setManaged(false);
+            }
+            submitQuizButton.setVisible(false);
+            submitQuizButton.setManaged(false);
+
+            quizModal.setVisible(true);
+            new animatefx.animation.ZoomIn(quizModal).setSpeed(1.5).play();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            gui.util.AlertHelper.showError("Erreur", "Impossible de charger les détails du quiz : " + e.getMessage());
+        }
+    }
+
+    private void openQuizModal(Ressource ressource) {
+        try {
+            Users user = SessionManager.getInstance().getCurrentUser();
+            List<Quiz> quizzes = quizService.afficherParRessource(ressource.getId());
+            if (quizzes.isEmpty()) {
+                gui.util.AlertHelper.showError("No Quiz", "Aucun quiz n'est disponible pour cette ressource.");
+                return;
+            }
+
+            activeResource = ressource;
+            activeQuiz = quizzes.get(0);
+
+            if (user != null && quizResultService.hasUserCompletedQuiz(user.getId(), activeQuiz.getId())) {
+                QuizResult existingResult = quizResultService.getUserQuizResult(user.getId(), activeQuiz.getId());
+                if (existingResult != null) {
+                    showQuizResultsModal(activeResource, activeQuiz, existingResult);
+                    return;
+                }
+            }
+
+            List<Question> questions = questionService.afficherParQuiz(activeQuiz.getId());
+            if (questions.isEmpty()) {
+                gui.util.AlertHelper.showError("No Questions", "Ce quiz ne contient aucune question.");
+                return;
+            }
+
+            quizModalTitle.setText("Assessment: " + ressource.getNom());
+            quizQuestionsContainer.getChildren().clear();
+            if (quizResultCard != null) {
+                quizResultCard.setVisible(false);
+                quizResultCard.setManaged(false);
+            }
+            quizResultLabel.setText("");
+            submitQuizButton.setVisible(true);
+            submitQuizButton.setManaged(true);
+
+            for (int i = 0; i < questions.size(); i++) {
+                Question question = questions.get(i);
+                VBox questionCard = new VBox(10);
+                questionCard.setStyle("-fx-background-color: #f8fafc; -fx-padding: 16; -fx-border-radius: 12; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-text-fill: #1f2937;");
+
+                Label questionLabel = new Label((i + 1) + ". " + question.getQuestionText());
+                questionLabel.setWrapText(true);
+                questionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
+
+                javafx.scene.control.ToggleGroup toggleGroup = new javafx.scene.control.ToggleGroup();
+                VBox optionsBox = new VBox(8);
+                for (int optionIndex = 0; optionIndex < question.getOptions().size(); optionIndex++) {
+                    String optionText = question.getOptions().get(optionIndex);
+                    javafx.scene.control.RadioButton optionButton = new javafx.scene.control.RadioButton(optionText);
+                    optionButton.setToggleGroup(toggleGroup);
+                    optionButton.setUserData(optionIndex);
+                    optionButton.setWrapText(true);
+                    optionButton.setStyle("-fx-font-size: 13px; -fx-padding: 8 10; -fx-background-radius: 10; -fx-text-fill: #334155;");
+                    optionsBox.getChildren().add(optionButton);
+                }
+
+                questionCard.getChildren().addAll(questionLabel, optionsBox);
+                quizQuestionsContainer.getChildren().add(questionCard);
+            }
+
+            quizModal.setVisible(true);
+            new animatefx.animation.ZoomIn(quizModal).setSpeed(1.5).play();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            gui.util.AlertHelper.showError("Erreur", "Impossible de charger le quiz : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void submitQuizAnswers() {
+        try {
+            Users user = SessionManager.getInstance().getCurrentUser();
+            if (user == null) {
+                gui.util.AlertHelper.showError("Erreur", "Utilisateur non connecté");
+                return;
+            }
+
+            int questionCount = quizQuestionsContainer.getChildren().size();
+            if (questionCount == 0) {
+                gui.util.AlertHelper.showError("Erreur", "Aucune question à évaluer.");
+                return;
+            }
+
+            int correctCount = 0;
+            Map<Integer, Integer> userAnswers = new HashMap<>();
+
+            for (int i = 0; i < questionCount; i++) {
+                VBox questionCard = (VBox) quizQuestionsContainer.getChildren().get(i);
+                VBox optionsBox = (VBox) questionCard.getChildren().get(1);
+                int selectedIndex = -1;
+                javafx.scene.control.RadioButton selectedButton = null;
+
+                // Trouver la réponse sélectionnée
+                for (int j = 0; j < optionsBox.getChildren().size(); j++) {
+                    javafx.scene.control.RadioButton optionButton = (javafx.scene.control.RadioButton) optionsBox.getChildren().get(j);
+                    if (optionButton.isSelected()) {
+                        selectedIndex = (int) optionButton.getUserData();
+                        selectedButton = optionButton;
+                        break;
+                    }
+                }
+
+                try {
+                    Question question = questionService.afficherParQuiz(activeQuiz.getId()).get(i);
+                    userAnswers.put(question.getId(), selectedIndex);
+                    boolean isCorrect = selectedIndex == question.getCorrectAnswerIndex();
+
+                    if (isCorrect) {
+                        correctCount++;
+                        if (selectedButton != null) {
+                            selectedButton.setStyle("-fx-font-size: 13px; -fx-padding: 8 10; -fx-background-radius: 10; -fx-text-fill: #16a34a; -fx-font-weight: bold;");
+                        }
+                    } else {
+                        // Marquer la réponse incorrecte en rouge
+                        if (selectedButton != null) {
+                            selectedButton.setStyle("-fx-font-size: 13px; -fx-padding: 8 10; -fx-background-radius: 10; -fx-text-fill: #dc2626; -fx-font-weight: bold;");
+                        }
+
+                        // Ajouter l'explication juste en dessous de la réponse choisie
+                        String correctOption = question.getOptions().get(question.getCorrectAnswerIndex());
+                        String selectedOption = selectedIndex >= 0 && selectedIndex < question.getOptions().size()
+                                ? question.getOptions().get(selectedIndex)
+                                : "Aucune réponse sélectionnée";
+
+                        Label explanationLabel = new Label(String.format("❌ Incorrect. La bonne réponse est : \"%s\"", correctOption));
+                        explanationLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #dc2626; -fx-padding: 4 0 0 20; -fx-font-style: italic;");
+                        explanationLabel.setWrapText(true);
+
+                        // Insérer l'explication après la réponse sélectionnée
+                        int insertIndex = optionsBox.getChildren().indexOf(selectedButton) + 1;
+                        optionsBox.getChildren().add(insertIndex, explanationLabel);
+                    }
+
+                    // Désactiver tous les boutons radio après soumission
+                    for (int j = 0; j < optionsBox.getChildren().size(); j++) {
+                        if (optionsBox.getChildren().get(j) instanceof javafx.scene.control.RadioButton) {
+                            ((javafx.scene.control.RadioButton) optionsBox.getChildren().get(j)).setDisable(true);
+                        }
+                    }
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            double score = questionCount == 0 ? 0 : ((double) correctCount / questionCount) * 100.0;
+
+            // Vérifier si l'utilisateur a déjà un résultat pour ce quiz
+            if (quizResultService.hasUserCompletedQuiz(user.getId(), activeQuiz.getId())) {
+                QuizResult existingResult = quizResultService.getUserQuizResult(user.getId(), activeQuiz.getId());
+                if (existingResult != null) {
+                        showQuizResultsModal(activeResource, activeQuiz, existingResult);
+
+            // Sauvegarder le résultat
+            QuizResult quizResult = new QuizResult(
+                user.getId(),
+                activeQuiz.getId(),
+                score,
+                java.time.LocalDateTime.now().toString(),
+                userAnswers
+            );
+            quizResultService.ajouter(quizResult);
+
+            // Afficher les résultats
+            boolean success = score >= 50.0;
+            String verdict = success ? "Réussi" : "Échoué";
+            quizResultIcon.setText(success ? "✔" : "✖");
+            quizResultIcon.setStyle(success ? "-fx-text-fill: #16a34a; -fx-font-size: 22px; -fx-font-weight: bold;" : "-fx-text-fill: #dc2626; -fx-font-size: 22px; -fx-font-weight: bold;");
+            quizResultLabel.setText(String.format("Score: %.0f%% — %d/%d corrects. %s", score, correctCount, questionCount, verdict));
+            quizResultLabel.setStyle(success ? "-fx-text-fill: #0f172a;" : "-fx-text-fill: #0f172a;");
+            if (quizResultCard != null) {
+                quizResultCard.setStyle(success ? "-fx-background-color: #ecfdf5; -fx-padding: 18; -fx-background-radius: 18; -fx-border-color: transparent; -fx-effect: dropshadow(three-pass-box, rgba(16, 185, 129, 0.15), 18, 0, 0, 10);"
+                        : "-fx-background-color: #fef2f2; -fx-padding: 18; -fx-background-radius: 18; -fx-border-color: transparent; -fx-effect: dropshadow(three-pass-box, rgba(239, 68, 68, 0.15), 18, 0, 0, 10);"
+                );
+                quizResultCard.setVisible(true);
+                quizResultCard.setManaged(true);
+                new animatefx.animation.FadeIn(quizResultCard).setSpeed(1.5).play();
+            }
+
+            submitQuizButton.setVisible(false);
+            submitQuizButton.setManaged(false);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            gui.util.AlertHelper.showError("Erreur", "Impossible de sauvegarder les résultats : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void closeQuizModal() {
+        animatefx.animation.ZoomOut zoomOut = new animatefx.animation.ZoomOut(quizModal);
+        zoomOut.setSpeed(1.5);
+        zoomOut.setOnFinished(e -> quizModal.setVisible(false));
+        zoomOut.play();
+    }
 
     @FXML
     private void closeResourceModal() {

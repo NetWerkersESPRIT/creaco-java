@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+
+<BorderPane prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="gui.QuizCreationController">
+    <left>
+        <fx:include source="sidebar.fxml" />
+    </left>
+    <center>
+        <VBox alignment="TOP_CENTER" spacing="24.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+            </padding>
+            <children>
+                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Button onAction="#onCancel" styleClass="btn-action-light" style="-fx-font-size: 20px; -fx-padding: 5 12; -fx-background-radius: 12;" text="⬅" />
+                            <VBox>
+                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / Resources / Quiz" />
+                                <Label fx:id="titleLabel" styleClass="title-label" text="Create Quiz" />
+                                <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Create a quiz for the resource." />
+                            </VBox>
+                        </HBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#logout" styleClass="btn-logout">
+                            <graphic>
+                                <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                            </graphic>
+                        </Button>
+                    </children>
+                </HBox>
+                <VBox maxWidth="860.0" spacing="20.0" styleClass="card">
+                    <padding>
+                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                    </padding>
+                    <children>
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Quiz Title *" />
+                                <TextField fx:id="titleField" promptText="Enter quiz title" />
+                                <Label fx:id="titleErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Creation Method" />
+                                <HBox spacing="20.0">
+                                    <children>
+                                        <RadioButton fx:id="manualRadio" text="Manual Creation" selected="true">
+                                            <toggleGroup>
+                                                <ToggleGroup fx:id="toggleGroup" />
+                                            </toggleGroup>
+                                        </RadioButton>
+                                        <RadioButton fx:id="aiRadio" text="AI Generated" toggleGroup="$toggleGroup" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <VBox fx:id="manualSection" spacing="15.0">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Questions" />
+                                <VBox fx:id="questionsContainer" spacing="10.0">
+                                    <!-- Questions will be added dynamically -->
+                                </VBox>
+                                <Button onAction="#onAddQuestion" styleClass="btn-primary" text="Add Question" />
+                            </children>
+                        </VBox>
+
+                        <VBox fx:id="aiSection" spacing="10.0" visible="false" managed="false">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="AI Generation Settings" />
+                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label text="Number of questions:" />
+                                        <Spinner fx:id="numQuestionsSpinner" min="1" max="20" initialValue="5" />
+                                    </children>
+                                </HBox>
+                                <Button fx:id="generateAiButton" onAction="#onGenerateAI" styleClass="btn-primary" text="✨ Generate with AI" />
+                            </children>
+                        </VBox>
+
+                        <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                            <children>
+                                <Button mnemonicParsing="false" onAction="#onSave"
+                                        styleClass="btn-primary" prefWidth="150" prefHeight="40"
+                                        text="Save Quiz" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,11 +1,18 @@
 package utils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.github.cdimascio.dotenv.Dotenv;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 public class GroqService {
     private static String API_KEY;
@@ -14,15 +21,26 @@ public class GroqService {
     static {
         try {
             Dotenv dotenv = Dotenv.load();
-            API_KEY = dotenv.get("SMART_TUTOR");
+            API_KEY = dotenv.get("GROQ_API_KEY");
         } catch (Exception e) {
             System.err.println("Error loading .env file: " + e.getMessage());
+        }
+        
+        if (API_KEY == null) {
+            Properties properties = new Properties();
+            try (FileInputStream fis = new FileInputStream("config.properties")) {
+                properties.load(fis);
+                API_KEY = properties.getProperty("GROQ_API_KEY");
+            } catch (IOException e) {
+                // Fallback to system environment
+                API_KEY = System.getenv("GROQ_API_KEY");
+            }
         }
     }
 
     public static String getParaphrase(String text) {
         if (API_KEY == null || API_KEY.isEmpty()) {
-            return "Error: SMART_TUTOR API key not found in .env";
+            return "Error: GROQ_API_KEY not found in .env";
         }
 
         try {
@@ -70,7 +88,7 @@ public class GroqService {
     }
     public static String generateCourseIdea(String topic) {
         if (API_KEY == null || API_KEY.isEmpty()) {
-            return "Error: SMART_TUTOR API key not found in .env";
+            return "Error: GROQ_API_KEY not found in .env";
         }
 
         try {
@@ -108,5 +126,86 @@ public class GroqService {
             e.printStackTrace();
             return "Failed to connect to AI: " + e.getMessage();
         }
+    }
+
+    public static String generateQuiz(String resourceContent, int numQuestions) {
+        if (API_KEY == null || API_KEY.isEmpty()) {
+            return "Error: GROQ_API_KEY not found in .env";
+        }
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+
+            String prompt = "Generate a quiz with " + numQuestions + " multiple-choice questions based on the following content. " +
+                           "Each question should have 4 options (A, B, C, D) and one correct answer. " +
+                           "Format the response as a JSON array of objects, each with 'question', 'options' (array of 4 strings), and 'correctAnswer' (index 0-3).\n\n" +
+                           "Content: " + resourceContent;
+
+            String jsonBody = "{"
+                + "\"model\": \"llama-3.1-8b-instant\","
+                + "\"messages\": [{\"role\": \"user\", \"content\": \"" + prompt.replace("\"", "\\\"").replace("\n", "\\n") + "\"}]"
+                + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_URL))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + API_KEY)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                String responseBody = response.body();
+                try {
+                    JsonObject root = JsonParser.parseString(responseBody).getAsJsonObject();
+                    String content = extractResponseContent(root);
+                    String cleaned = cleanJsonArrayString(content);
+                    return cleaned;
+                } catch (Exception e) {
+                    // If the API response is not strictly JSON, fall back to the raw body.
+                    return responseBody;
+                }
+            } else {
+                return "API Error: " + response.statusCode() + " - " + response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to connect to Groq: " + e.getMessage();
+        }
+    }
+
+    private static String extractResponseContent(JsonObject root) {
+        if (root.has("choices") && root.get("choices").isJsonArray()) {
+            JsonArray choices = root.getAsJsonArray("choices");
+            if (choices.size() > 0) {
+                JsonObject firstChoice = choices.get(0).getAsJsonObject();
+                if (firstChoice.has("message") && firstChoice.get("message").isJsonObject()) {
+                    JsonObject message = firstChoice.getAsJsonObject("message");
+                    if (message.has("content")) {
+                        return message.get("content").getAsString();
+                    }
+                }
+                if (firstChoice.has("content")) {
+                    return firstChoice.get("content").getAsString();
+                }
+            }
+        }
+        if (root.has("content")) {
+            return root.get("content").getAsString();
+        }
+        return root.toString();
+    }
+
+    private static String cleanJsonArrayString(String text) {
+        if (text == null) {
+            return "";
+        }
+        int start = text.indexOf('[');
+        int end = text.lastIndexOf(']');
+        if (start >= 0 && end > start) {
+            return text.substring(start, end + 1);
+        }
+        return text;
     }
 }

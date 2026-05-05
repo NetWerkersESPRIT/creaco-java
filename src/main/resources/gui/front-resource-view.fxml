@@ -5,6 +5,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <StackPane fx:id="rootStack" prefHeight="760.0" prefWidth="1280.0" styleClass="main-container"
            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -71,9 +72,15 @@
     </BorderPane>
 
     <!-- Floating Button (Bottom Right) -->
-    <Button fx:id="askTutorBtn" text="Ask Smart Tutor ✨" onAction="#openTutorModal"
-            style="-fx-background-color: linear-gradient(to right, #ec4899, #8b5cf6); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 25; -fx-padding: 12 24; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 5); -fx-cursor: hand;"
+    <Button fx:id="askTutorBtn" onAction="#openTutorModal"
+            style="-fx-background-color: linear-gradient(to right, #ec4899, #8b5cf6); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 16 18; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 5); -fx-cursor: hand;"
             StackPane.alignment="BOTTOM_RIGHT" >
+        <graphic>
+            <VBox alignment="CENTER" spacing="8">
+                <FontIcon iconLiteral="fas-robot" iconSize="36" iconColor="white" />
+                <Label text="Ask Smart Tutor" style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;" />
+            </VBox>
+        </graphic>
         <StackPane.margin>
             <Insets bottom="30" right="30" />
         </StackPane.margin>
@@ -120,6 +127,28 @@
             <HBox alignment="CENTER_RIGHT" spacing="15">
                 <Button text="Close Window" onAction="#closeResourceModal" 
                         style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 12 30; -fx-cursor: hand;" />
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- Quiz Modal -->
+    <StackPane fx:id="quizModal" visible="false" style="-fx-background-color: rgba(0,0,0,0.72);">
+        <VBox maxWidth="840" maxHeight="680" spacing="20" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 35, 0, 0, 18);">
+            <HBox alignment="CENTER_LEFT">
+                <Label fx:id="quizModalTitle" text="Assessment" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="✕" onAction="#closeQuizModal" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 0;" />
+            </HBox>
+            <Separator style="-fx-opacity: 0.5;" />
+            <ScrollPane fitToWidth="true" prefHeight="420" style="-fx-background: transparent; -fx-background-color: transparent;">
+                <VBox fx:id="quizQuestionsContainer" spacing="18" style="-fx-padding: 10;" />
+            </ScrollPane>
+            <HBox fx:id="quizResultCard" alignment="CENTER_LEFT" spacing="14" style="-fx-background-color: #f8fafc; -fx-padding: 18; -fx-background-radius: 18; -fx-border-color: transparent; -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.08), 18, 0, 0, 8);" visible="false" managed="false">
+                <Label fx:id="quizResultIcon" text="✔" style="-fx-font-size: 22px; -fx-text-fill: #16a34a; -fx-font-weight: bold;" />
+                <Label fx:id="quizResultLabel" text="" wrapText="true" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Button text="Submit Assessment" fx:id="submitQuizButton" onAction="#submitQuizAnswers" styleClass="btn-primary" prefWidth="180" prefHeight="42" />
             </HBox>
         </VBox>
     </StackPane>
