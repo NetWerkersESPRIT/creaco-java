@@ -1,0 +1,7 @@
+{
+  "event": {
+    "token": "TOKEN",
+    "expectedAction": "LOGIN",
+    "siteKey": "6LfEfNAsAAAAAAMtRP2CvVFSK1wzh593gDWdkcta"
+  }
+}

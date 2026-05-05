@@ -10,6 +10,9 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import java.sql.SQLException;
 
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
+
 public class EditMissionController {
     @FXML private TextField txtTitle;
     @FXML private TextArea txtDescription;
@@ -56,7 +59,22 @@ public class EditMissionController {
 
     @FXML
     public void goBack() throws Exception {
-        Stage stage = (Stage) txtTitle.getScene().getWindow();
-        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/TSK/Mission.fxml"))));
+        switchScene("/TSK/Mission.fxml");
+    }
+
+    private void switchScene(String fxml) throws Exception {
+        StackPane contentArea = (StackPane) txtTitle.getScene().lookup("#contentArea");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+        javafx.scene.Parent root = loader.load();
+        javafx.scene.Node view = root;
+        if (root instanceof BorderPane) {
+            view = ((BorderPane) root).getCenter();
+        }
+        if (contentArea != null) {
+            contentArea.getChildren().setAll(view);
+        } else {
+            Stage stage = (Stage) txtTitle.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        }
     }
 }

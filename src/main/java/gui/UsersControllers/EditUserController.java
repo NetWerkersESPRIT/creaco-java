@@ -42,7 +42,19 @@ public class EditUserController {
         txtNumtel.setText(u.getNumtel());
         if (txtPoints != null) txtPoints.setText(String.valueOf(u.getPoints()));
         if (lblTitle != null) lblTitle.setText("Account Details: " + u.getUsername());
+
+        // Handle Google accounts: lock password field
+        if ("GOOGLE_AUTH".equals(u.getPassword())) {
+            txtPassword.setDisable(true);
+            txtPassword.setPromptText("Google Authenticated User");
+            txtPassword.setStyle("-fx-opacity: 0.8; -fx-background-color: #edf2f7;");
+        } else {
+            txtPassword.setDisable(false);
+            txtPassword.setPromptText("Enter new password to change");
+            txtPassword.setStyle("");
+        }
     }
+
 
     @FXML
     public void updateUser() {

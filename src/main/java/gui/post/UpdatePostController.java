@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import services.forum.PostService;
 import utils.SessionManager;
 import entities.Users;
@@ -75,15 +76,27 @@ public class UpdatePostController {
 
     @FXML
     private void initialize() {
+        javafx.application.Platform.runLater(() -> {
+            if (contentArea != null && contentArea.getScene() != null) {
+                Stage stage = (Stage) contentArea.getScene().getWindow();
+                if (stage != null) stage.setMaximized(true);
+            }
+        });
         gui.FrontMainController.setNavbarText("Edit Discussion", "Pages / Forum / Edit");
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
-        Users user = SessionManager.getInstance().getCurrentUser();
-        if (user != null) {
-            String displayName = user.getUsername() != null ? user.getUsername() : "User";
-            if (lblUsername != null) lblUsername.setText(displayName);
-            
-            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
-            if (lblUserRole != null) lblUserRole.setText(role);
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+        if (isVisitor) {
+            if (lblUsername != null) lblUsername.setText("Visitor");
+            if (lblUserRole != null) lblUserRole.setText("GUEST");
+        } else {
+            Users user = SessionManager.getInstance().getCurrentUser();
+            if (user != null) {
+                String displayName = user.getUsername() != null ? user.getUsername() : "User";
+                if (lblUsername != null) lblUsername.setText(displayName);
+                
+                String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+                if (lblUserRole != null) lblUserRole.setText(role);
+            }
         }
 
         setupSentimentAnalysis();
@@ -296,16 +309,21 @@ public class UpdatePostController {
 
         boolean requestPin = pinToggle.isSelected();
         
-        if (!isAdminMode) {
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+        if (isAdminMode) {
+            postToUpdate.setStatus("APPROVED");
+            postToUpdate.setPinned(requestPin);
+        } else if (isVisitor) {
+            postToUpdate.setStatus("PENDING_VISITOR");
+            postToUpdate.setUserId(0); // Anonymous
+            postToUpdate.setPinned(false);
+        } else {
             if (postToUpdate.isProfane() || postToUpdate.isSpam()) {
                 postToUpdate.setStatus("FLAGGED");
             } else {
                 postToUpdate.setStatus("PENDING");
             }
             postToUpdate.setPinned(false);
-        } else {
-            postToUpdate.setStatus("APPROVED");
-            postToUpdate.setPinned(requestPin);
         }
 
         if (imageFile != null) {
@@ -330,7 +348,9 @@ public class UpdatePostController {
             }
             
             if (!isAdminMode) {
-                if (requestPin) {
+                if (isVisitor) {
+                    showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your edits have been submitted for moderation. Changes will appear once approved by an administrator.");
+                } else if (requestPin) {
                     showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your edits and pin request have been submitted and are awaiting admin approval.");
                 } else {
                     showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", "Your edits have been submitted and are awaiting admin approval.");
@@ -387,8 +407,14 @@ public class UpdatePostController {
             Parent root = loader.load();
             DisplayPostController controller = loader.getController();
             controller.setAdminMode(this.isAdminMode);
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            Node areaNode = ((Node) event.getSource()).getScene().lookup("#contentArea");
+            if (areaNode instanceof StackPane) {
+                StackPane contentArea = (StackPane) areaNode;
+                contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) { e.printStackTrace(); }
     }
 
