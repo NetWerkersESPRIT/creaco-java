@@ -52,9 +52,9 @@
                         
                         <VBox fx:id="geminiResponseContainer" managed="false" spacing="10" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-border-color: #f1f5f9; -fx-border-width: 1;" visible="false">
                             <children>
-                                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-max-height: 300;">
+                                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent; -fx-max-height: 400;">
                                     <content>
-                                        <Label fx:id="lblGeminiResponse" lineSpacing="1.5" style="-fx-font-size: 14px; -fx-text-fill: #334155;" text="Gemini is thinking..." wrapText="true" />
+                                        <Label fx:id="lblGeminiResponse" lineSpacing="1.5" style="-fx-font-size: 14px; -fx-text-fill: #334155;" text="Gemini is thinking..." wrapText="true" maxWidth="Infinity" />
                                     </content>
                                 </ScrollPane>
                             </children>

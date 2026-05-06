@@ -3,7 +3,6 @@ package gui.UsersControllers;
 import entities.Users;
 import services.UsersService;
 import utils.SessionManager;
-import utils.RecaptchaService;
 import utils.GoogleAuthService;
 import com.google.api.services.oauth2.model.Userinfo;
 import javafx.concurrent.Worker;
@@ -20,7 +19,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
+
 import java.util.Properties;
 
 public class SignInController {
@@ -76,36 +75,47 @@ public class SignInController {
 
         final String finalSiteKey = siteKey;
 
-        // 2. Load the static HTML
-        URL url = getClass().getResource("/Users/recaptcha.html");
-        if (url != null) {
-            engine.load(url.toExternalForm());
+        // 2. Load the static HTML via XAMPP localhost (avoids file:// domain restriction for reCAPTCHA)
+        String recaptchaUrl = "http://localhost/recaptcha.html";
+        engine.load(recaptchaUrl);
 
-            // 3. Inject the key once the page is loaded
-            engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
-                if (newState == Worker.State.SUCCEEDED) {
-                    System.out.println("[reCAPTCHA] Page loaded, injecting key...");
-                    try {
-                        engine.executeScript("initRecaptcha('" + finalSiteKey + "')");
-                    } catch (Exception e) {
-                        System.err.println("[reCAPTCHA] JS Injection failed: " + e.getMessage());
-                    }
-                }
-            });
+        // 3. Once the page loads: register Java bridge + inject site key
+        engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                System.out.println("[reCAPTCHA] Page loaded, registering Java bridge...");
+                try {
+                    // Expose this controller to JavaScript as window.javaApp
+                    netscape.javascript.JSObject window =
+                            (netscape.javascript.JSObject) engine.executeScript("window");
+                    window.setMember("javaApp", this);
 
-            // 4. Listen for verification token
-            engine.locationProperty().addListener((obs, oldLocation, newLocation) -> {
-                if (newLocation != null) {
-                    if (newLocation.contains("recaptcha-verify:")) {
-                        recaptchaToken = newLocation.substring(newLocation.indexOf(":") + 1);
-                        showSuccess("✅ Verification successful!");
-                    } else if (newLocation.contains("recaptcha-expired:")) {
-                        recaptchaToken = null;
-                        showError("❌ Verification expired. Please try again.");
-                    }
+                    // Inject site key into the widget
+                    engine.executeScript("initRecaptcha('" + finalSiteKey + "')");
+                    System.out.println("[reCAPTCHA] Bridge registered and key injected.");
+                } catch (Exception e) {
+                    System.err.println("[reCAPTCHA] Bridge setup failed: " + e.getMessage());
                 }
-            });
-        }
+            }
+        });
+    }
+
+    /**
+     * Called by JavaScript (window.javaApp.onToken) when reCAPTCHA is solved.
+     * Must be public so the JS bridge can invoke it via reflection.
+     */
+    public void onToken(String token) {
+        System.out.println("[reCAPTCHA] Token received via bridge, length=" + token.length());
+        recaptchaToken = token;
+        javafx.application.Platform.runLater(() -> showSuccess("✅ Verification successful!"));
+    }
+
+    /**
+     * Called by JavaScript (window.javaApp.onExpired) when reCAPTCHA expires.
+     */
+    public void onExpired() {
+        System.out.println("[reCAPTCHA] Token expired.");
+        recaptchaToken = null;
+        javafx.application.Platform.runLater(() -> showError("❌ Verification expired. Please try again."));
     }
 
     @FXML
@@ -117,20 +127,12 @@ public class SignInController {
             showError("❌ Please fill in all fields.");
             return;
         }
-
-
-        /*
+ 
+        
         if (recaptchaToken == null || recaptchaToken.isEmpty()) {
             showError("❌ Please complete the security verification.");
             return;
         }
-
-        // Verify token with Google reCAPTCHA Enterprise
-        if (!RecaptchaService.verifyToken(recaptchaToken, "LOGIN")) {
-            showError("❌ Security verification failed. Please try again.");
-            return;
-        }
-        */
 
         if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
             showError("❌ Invalid email address format.");
