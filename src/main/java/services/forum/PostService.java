@@ -130,10 +130,27 @@ public class PostService implements ForumInterface<Post> {
         String sql = "INSERT INTO `post`(`title`, `content`, `status`, `user_id`, `image_name`, `pdf_name`, `likes`, `pinned`, `is_comment_locked`, `is_profane`, `is_spam`, `spam_score`, `profane_words`, `grammar_errors`, `refusal_reason`, `created_at`) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setString(1, post.getTitle());
-        ps.setString(2, post.getContent());
+        // Apply profanity filtering before saving
+        String filteredTitle = ModerationService.filterProfanity(post.getTitle());
+        String filteredContent = ModerationService.filterProfanity(post.getContent());
+        
+        ps.setString(1, filteredTitle);
+        ps.setString(2, filteredContent);
+        
+        // Update the post object with filtered content for consistency
+        post.setTitle(filteredTitle);
+        post.setContent(filteredContent);
+        
+        // Update profanity metadata
+        post.setProfane(ModerationService.containsProfanity(filteredTitle) || ModerationService.containsProfanity(filteredContent));
+        post.setProfaneWords(ModerationService.countProfaneWords(post.getTitle()) + ModerationService.countProfaneWords(post.getContent()));
+        
         ps.setString(3, post.getStatus());
-        ps.setInt(4, post.getUserId());
+        if (post.getUserId() > 0) {
+            ps.setInt(4, post.getUserId());
+        } else {
+            ps.setNull(4, java.sql.Types.INTEGER);
+        }
         ps.setString(5, post.getImageName());
         ps.setString(6, post.getPdfName());
         ps.setInt(7, post.getLikes());
@@ -162,6 +179,13 @@ public class PostService implements ForumInterface<Post> {
         psComments.setInt(1, id);
         psComments.executeUpdate();
         psComments.close();
+
+        // Delete all reactions associated with this post
+        String deleteReactionsSQL = "DELETE FROM `post_reaction` WHERE `post_id` = ?";
+        PreparedStatement psReactions = con.prepareStatement(deleteReactionsSQL);
+        psReactions.setInt(1, id);
+        psReactions.executeUpdate();
+        psReactions.close();
 
         // Then delete the post
         String sql = "DELETE FROM `post` WHERE `id` = ?";
@@ -209,7 +233,7 @@ public class PostService implements ForumInterface<Post> {
      */
     public List<Post> getPendingPosts() throws SQLException {
         List<Post> posts = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE status = 'PENDING' ORDER BY created_at ASC";
+        String sql = "SELECT * FROM post WHERE status IN ('PENDING', 'FLAGGED', 'PENDING_VISITOR') ORDER BY created_at ASC";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
@@ -242,7 +266,7 @@ public class PostService implements ForumInterface<Post> {
      */
     public List<Post> getAcceptedPosts() throws SQLException {
         List<Post> posts = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE status = 'ACCEPTED' ORDER BY pinned DESC, created_at DESC";
+        String sql = "SELECT * FROM post WHERE status IN ('ACCEPTED', 'APPROVED') ORDER BY pinned DESC, created_at DESC";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
@@ -291,10 +315,23 @@ public class PostService implements ForumInterface<Post> {
     public void modifier(int id, Post post) throws SQLException {
         String sql = "UPDATE `post` SET `title`=?, `content`=?, `status`=?, `user_id`=?, `image_name`=?, `pdf_name`=?, `pinned`=?, `is_comment_locked`=?, `is_spam`=?, `spam_score`=?, `updated_at`=? WHERE `id`=?";
         PreparedStatement ps = con.prepareStatement(sql);
-        ps.setString(1, post.getTitle());
-        ps.setString(2, post.getContent());
+        // Apply profanity filtering before updating
+        String filteredTitle = ModerationService.filterProfanity(post.getTitle());
+        String filteredContent = ModerationService.filterProfanity(post.getContent());
+
+        ps.setString(1, filteredTitle);
+        ps.setString(2, filteredContent);
+        
+        // Update post object
+        post.setTitle(filteredTitle);
+        post.setContent(filteredContent);
+        
         ps.setString(3, post.getStatus());
-        ps.setInt(4, post.getUserId());
+        if (post.getUserId() > 0) {
+            ps.setInt(4, post.getUserId());
+        } else {
+            ps.setNull(4, java.sql.Types.INTEGER);
+        }
         ps.setString(5, post.getImageName());
         ps.setString(6, post.getPdfName());
         ps.setBoolean(7, post.isPinned());

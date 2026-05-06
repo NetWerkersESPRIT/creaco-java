@@ -6,7 +6,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -23,6 +22,12 @@ public class WelcomeController {
 
     @FXML
     public void initialize() {
+        javafx.application.Platform.runLater(() -> {
+            if (mainRoot != null && mainRoot.getScene() != null) {
+                Stage stage = (Stage) mainRoot.getScene().getWindow();
+                if (stage != null) stage.setMaximized(true);
+            }
+        });
         // Floating animations for visual elements
         addFloatingAnimation(heroVisual, 0);
         addFloatingAnimation(badge1, 500);
@@ -43,17 +48,20 @@ public class WelcomeController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/SignIn.fxml"));
             Parent root = loader.load();
-
             Stage stage = (Stage) mainRoot.getScene().getWindow();
-            Scene scene = new Scene(root, 1280, 800);
-            scene.getStylesheets().add(getClass().getResource("/gui/styles.css").toExternalForm());
-
-            stage.setMaximized(false);
-            stage.setScene(scene);
-            stage.setWidth(1280);
-            stage.setHeight(800);
-            stage.centerOnScreen();
-            stage.show();
+            stage.getScene().setRoot(root); // keep same scene → stage stays maximized
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    private void handleExploreForum() {
+        try {
+            utils.SessionManager.getInstance().setVisitor(true);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/post/displayPost.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) mainRoot.getScene().getWindow();
+            stage.getScene().setRoot(root); // keep same scene → stage stays maximized
         } catch (IOException e) {
             e.printStackTrace();
         }

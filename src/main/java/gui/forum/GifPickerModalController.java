@@ -1,6 +1,5 @@
 package gui.forum;
 
-import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -11,7 +10,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import services.forum.GifService;
+import utils.GifService;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -57,8 +56,12 @@ public class GifPickerModalController {
     }
 
     private void performSearch(String query) {
+        System.out.println("🔍 UI: Performing search for: " + query);
         showLoading(true);
-        gifService.searchGifs(query).thenAccept(this::displayGifs);
+        gifService.searchGifs(query).thenAccept(urls -> {
+            System.out.println("🔍 UI: Received " + urls.size() + " GIFs for query: " + query);
+            displayGifs(urls);
+        });
     }
 
     private void displayGifs(List<String> urls) {

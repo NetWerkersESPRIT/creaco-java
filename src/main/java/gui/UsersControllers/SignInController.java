@@ -43,6 +43,12 @@ public class SignInController {
 
     @FXML
     public void initialize() {
+        javafx.application.Platform.runLater(() -> {
+            if (txtEmail.getScene() != null) {
+                Stage stage = (Stage) txtEmail.getScene().getWindow();
+                if (stage != null) stage.setMaximized(true);
+            }
+        });
         setupRecaptcha();
     }
 
@@ -235,6 +241,7 @@ public class SignInController {
     @FXML
     public void goToRegister() throws Exception {
         Stage stage = (Stage) txtEmail.getScene().getWindow();
+        stage.setMaximized(true);
         stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/CreateAccount.fxml")));
         stage.setTitle("Create Account");
     }

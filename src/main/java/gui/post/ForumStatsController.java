@@ -31,21 +31,24 @@ public class ForumStatsController {
     @FXML private VBox topCommentedList;
 
     private final ForumStatsService statsService = new ForumStatsService();
-
+//automatically loads dashboard data
     @FXML
     public void initialize() {
         refreshStats();
     }
 
-    @FXML
     private void refreshStats() {
+        //It builds the whole dashboard in one call
+        System.out.println("[ForumStatsController] Refreshing stats...");
         try {
             loadOverview();
             loadActivityChart();
             loadTopPosts();
             loadTopCommentedPosts();
             loadContentBreakdown();
+            System.out.println("[ForumStatsController] Stats refreshed successfully.");
         } catch (SQLException e) {
+            System.err.println("[ForumStatsController] Error refreshing stats: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -56,7 +59,7 @@ public class ForumStatsController {
         if (!topUsers.isEmpty()) {
             ForumStatsService.UserActivity top = topUsers.get(0);
             topInfluencerName.setText(top.username);
-            topInfluencerStats.setText(top.totalActivity + " total activities (" + top.postCount + " posts, " + top.commentCount + " comments)");
+            topInfluencerStats.setText(top.totalActivity + " activities (" + top.postCount + "p, " + top.commentCount + "c, " + top.reactionCount + "r)");
         }
 
         // Most Liked Post

@@ -1,6 +1,7 @@
 package gui.post;
 
 import entities.Post;
+import entities.Users;
 import entities.ReactionType;
 import gui.comment.DisplayCommentController;
 import javafx.animation.FadeTransition;
@@ -69,6 +70,9 @@ public class DisplayPostController {
     private TextField searchField;
 
     @FXML
+    private Button btnBack;
+
+    @FXML
     private Label lblUsername;
     @FXML
     private Label lblUserRole;
@@ -81,6 +85,9 @@ public class DisplayPostController {
 
     private boolean isAdminMode = false;
     private boolean initialized = false;
+
+    private Process currentSpeechProcess;
+    private String lastSpokenText = "";
 
     /**
      * Tracks the current user's active reaction per post (postId → ReactionType or
@@ -98,23 +105,50 @@ public class DisplayPostController {
 
     @FXML
     public void initialize() {
-        gui.FrontMainController.setNavbarText("Forum", "Pages / Forum");
+        // Force maximized window — scene property listener is the only reliable method
+        // because initialize() fires before the scene is attached to the stage.
+        postsContainer.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obs2, oldWin, newWin) -> {
+                    if (newWin instanceof Stage) {
+                        ((Stage) newWin).setMaximized(true);
+                    }
+                });
+                // In case the window is already set at this point
+                if (newScene.getWindow() instanceof Stage) {
+                    ((Stage) newScene.getWindow()).setMaximized(true);
+                }
+            }
+        });
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+        if (btnBack != null) {
+            btnBack.setVisible(isVisitor);
+            btnBack.setManaged(isVisitor);
+        }
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         initialized = true;
         loadPosts();
 
         // Populate User Profile
-        entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
-        if (user != null && lblUsername != null) {
-            String displayName = user.getUsername() != null ? user.getUsername() : "User";
-            lblUsername.setText(displayName);
+        if (isVisitor) {
+            if (lblUsername != null) lblUsername.setText("Visitor");
+            if (lblUserRole != null) {
+                lblUserRole.setText("GUEST");
+                lblUserRole.setStyle("-fx-background-color: #64748b;");
+            }
+        } else {
+            entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
+            if (user != null && lblUsername != null) {
+                String displayName = user.getUsername() != null ? user.getUsername() : "User";
+                lblUsername.setText(displayName);
 
-            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
-            lblUserRole.setText(role);
+                String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+                lblUserRole.setText(role);
 
-            // Special styling for ADMIN
-            if ("ADMIN".equals(role)) {
-                lblUserRole.setStyle("-fx-background-color: #434a75;");
+                // Special styling for ADMIN
+                if ("ADMIN".equals(role)) {
+                    lblUserRole.setStyle("-fx-background-color: #434a75;");
+                }
             }
         }
     }
@@ -123,12 +157,22 @@ public class DisplayPostController {
         try {
             allPosts = postService.getAcceptedPosts();
             // Pre-load this user's reactions for all posts
-            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
-            int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
-            if (currentUserId > 0) {
+            boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+            if (isVisitor) {
                 for (Post p : allPosts) {
-                    ReactionType rt = postService.getUserReaction(currentUserId, p.getId());
-                    userReactions.put(p.getId(), rt);
+                    ReactionType rt = utils.SessionManager.getInstance().getVisitorReaction(p.getId());
+                    if (rt != null) {
+                        userReactions.put(p.getId(), rt);
+                    }
+                }
+            } else {
+                entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+                int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
+                if (currentUserId > 0) {
+                    for (Post p : allPosts) {
+                        ReactionType rt = postService.getUserReaction(currentUserId, p.getId());
+                        userReactions.put(p.getId(), rt);
+                    }
                 }
             }
             renderPosts(allPosts);
@@ -201,15 +245,33 @@ public class DisplayPostController {
         card.setAlignment(javafx.geometry.Pos.TOP_LEFT);
 
         // --- Author Row ---
-        entities.Users author = userService.getUserById(post.getUserId());
-        String username = (author != null) ? author.getUsername() : "Unknown";
+        int postUserId = post.getUserId();
+        boolean isAnonymous = (postUserId == 0);
+        String username;
+        if (isAnonymous) {
+            username = "Anonyme";
+        } else {
+            entities.Users author = userService.getUserById(postUserId);
+            username = (author != null) ? author.getUsername() : "Unknown";
+        }
+
         HBox authorRow = new HBox(12);
         authorRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        StackPane avatar = buildAvatarWithRing(author, 35);
         Label usernameLabel = new Label(username);
         usernameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #334155;");
-        authorRow.getChildren().addAll(avatar, usernameLabel);
+
+        if (!isAnonymous) {
+            entities.Users author = userService.getUserById(postUserId);
+            StackPane avatar = buildAvatarWithRing(author, 35);
+            authorRow.getChildren().addAll(avatar, usernameLabel);
+        } else {
+            // Create a temporary "Anonyme" user for the avatar
+            entities.Users anonUser = new entities.Users();
+            anonUser.setUsername("Anonyme");
+            StackPane avatar = buildAvatarWithRing(anonUser, 35);
+            authorRow.getChildren().addAll(avatar, usernameLabel);
+        }
 
         if (post.isPinned()) {
             Label pinnedBadge = new Label("📌 PINNED");
@@ -227,8 +289,8 @@ public class DisplayPostController {
         HBox aiTopBox = new HBox(8);
         aiTopBox.setAlignment(Pos.CENTER_RIGHT);
         aiTopBox.getChildren().addAll(
-                createAIAction("💡 Explain", "explain", post),
-                createAIAction("🔍 Solution", "solution", post));
+                createAIAction("Explain", "explain", post),
+                createAIAction("Solution", "solution", post));
         authorRow.getChildren().add(aiTopBox);
 
         // --- Title & Content ---
@@ -262,6 +324,7 @@ public class DisplayPostController {
                 createReadAction(post));
 
         entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
         int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
         boolean isOwner = (post.getUserId() == currentUserId);
 
@@ -282,7 +345,7 @@ public class DisplayPostController {
         if (isAdminMode) {
             actionsRow.getChildren().add(createPinAction(post));
         }
-        
+
         HBox shareBtn = createSimpleAction("↪ Share", "");
         shareBtn.setOnMouseClicked(e -> onSharePost(post, shareBtn));
         shareBtn.setStyle("-fx-cursor: hand;");
@@ -338,25 +401,44 @@ public class DisplayPostController {
 
         // Click to Like/Unlike directly
         triggerBtn.setOnMouseClicked(ev -> {
-            if (currentUserId < 1)
+            boolean isVisitorMode = utils.SessionManager.getInstance().isVisitor();
+            entities.Users u = utils.SessionManager.getInstance().getCurrentUser();
+            int uid = (u != null) ? u.getId() : 0;
+            if (uid < 1 && !isVisitorMode)
                 return;
             try {
-                // If already reacted, clicking the main button toggles it off.
-                // If not reacted, clicking the main button defaults to LIKE.
-                ReactionType current = userReactions.get(postId);
-                ReactionType typeToApply = (current != null) ? current : ReactionType.LIKE;
+                if (isVisitorMode) {
+                    utils.SessionManager.getInstance().toggleVisitorLike(postId);
+                    boolean hasLiked = utils.SessionManager.getInstance().hasVisitorLiked(postId);
+                    ReactionType result = hasLiked ? ReactionType.LIKE : null;
+                    userReactions.put(postId, result);
+                    
+                    // Update database likes count (optional, but requested "Ability to like a post")
+                    // Since it's a visitor, we just update the count in DB
+                    post.setLikes(post.getLikes() + (hasLiked ? 1 : -1));
+                    postService.likePost(postId, post.getLikes());
+                    
+                    triggerBtn.setText(buildMainLabel(result));
+                    triggerBtn.setStyle(buildMainBtnStyle(result));
+                    refreshCountSummary(countSummary, postId);
+                } else {
+                    // Existing authenticated logic
+                    ReactionType current = userReactions.get(postId);
+                    ReactionType typeToApply = (current != null) ? current : ReactionType.LIKE;
 
-                ReactionType result = postService.handleReaction(currentUserId, postId, typeToApply);
-                userReactions.put(postId, result);
+                    ReactionType result = postService.handleReaction(uid, postId, typeToApply);
+                    userReactions.put(postId, result);
 
-                // Notify Post Owner
-                if (result != null && post.getUserId() != currentUserId) {
-                    new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                    // Notify Post Owner
+                    if (result != null && post.getUserId() != uid) {
+                        new services.NotificationService().notifyPostLike(post.getUserId(), u.getUsername(),
+                                postId);
+                    }
+
+                    triggerBtn.setText(buildMainLabel(result));
+                    triggerBtn.setStyle(buildMainBtnStyle(result));
+                    refreshCountSummary(countSummary, postId);
                 }
-
-                triggerBtn.setText(buildMainLabel(result));
-                triggerBtn.setStyle(buildMainBtnStyle(result));
-                refreshCountSummary(countSummary, postId);
 
                 // Bounce animation
                 ScaleTransition up = new ScaleTransition(Duration.millis(100), triggerBtn);
@@ -407,15 +489,27 @@ public class DisplayPostController {
 
             // Click handling
             emoji.setOnMouseClicked(ev -> {
-                if (currentUserId < 1)
+                boolean isVisitorMode = utils.SessionManager.getInstance().isVisitor();
+                entities.Users u = utils.SessionManager.getInstance().getCurrentUser();
+                int uid = (u != null) ? u.getId() : 0;
+                
+                if (uid < 1 && !isVisitorMode)
                     return;
                 try {
-                    ReactionType result = postService.handleReaction(currentUserId, postId, rt);
+                    ReactionType result;
+                    if (isVisitorMode) {
+                        utils.SessionManager.getInstance().setVisitorReaction(postId, rt);
+                        result = rt;
+                    } else {
+                        result = postService.handleReaction(uid, postId, rt);
+                    }
                     userReactions.put(postId, result);
 
                     // Notify Post Owner
-                    if (result != null && post.getUserId() != currentUserId) {
-                        new services.NotificationService().notifyPostLike(post.getUserId(), currentUser.getUsername(), postId);
+                    if (result != null && post.getUserId() != 0 && (u != null || isVisitorMode)) {
+                        String name = (u != null) ? u.getUsername() : "Anonyme";
+                        new services.NotificationService().notifyPostLike(post.getUserId(), name,
+                                postId);
                     }
 
                     triggerBtn.setText(buildMainLabel(result));
@@ -525,7 +619,12 @@ public class DisplayPostController {
             java.util.Map<ReactionType, Integer> counts = postService.getReactionCounts(postId);
             int total = counts.values().stream().mapToInt(Integer::intValue).sum();
             if (total > 0) {
-                lbl.setText(total + " reactions");
+                String summary = counts.entrySet().stream()
+                        .filter(e -> e.getValue() > 0)
+                        .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+                        .map(e -> e.getKey().getEmoji() + " " + e.getValue())
+                        .collect(Collectors.joining(", "));
+                lbl.setText(summary);
             } else {
                 lbl.setText("");
             }
@@ -563,6 +662,15 @@ public class DisplayPostController {
     }
 
     private void speak(String text) {
+        if (currentSpeechProcess != null && currentSpeechProcess.isAlive()) {
+            currentSpeechProcess.destroyForcibly();
+            if (text.equals(lastSpokenText)) {
+                lastSpokenText = "";
+                return;
+            }
+        }
+
+        lastSpokenText = text;
         new Thread(() -> {
             try {
                 // Escape single quotes for PowerShell
@@ -570,7 +678,10 @@ public class DisplayPostController {
                 String script = "Add-Type -AssemblyName System.Speech; "
                         + "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
                         + "$speak.Speak('" + escapedText + "')";
-                new ProcessBuilder("powershell.exe", "-Command", script).start();
+                currentSpeechProcess = new ProcessBuilder("powershell.exe", "-Command", script).start();
+                currentSpeechProcess.onExit().thenRun(() -> {
+                    if (text.equals(lastSpokenText)) lastSpokenText = "";
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -591,10 +702,10 @@ public class DisplayPostController {
 
     private void runAIAction(Post post, String actionType, String label) {
         // Show loading indicator
-        statusLabel.setText("AI is thinking... 🧠");
+        statusLabel.setText("AI is thinking...");
 
         new Thread(() -> {
-            String response = utils.OpenRouterService.getAIResponse(post.getContent(), actionType);
+            String response = utils.OpenRouter.getAIResponse(post.getContent(), actionType);
             javafx.application.Platform.runLater(() -> {
                 statusLabel.setText("AI finished processing.");
                 showAIDialog(label, response, post);
@@ -610,11 +721,11 @@ public class DisplayPostController {
         VBox mainRoot = new VBox();
         mainRoot.setStyle(
                 "-fx-background-color: white; " +
-                "-fx-background-radius: 20; " +
-                "-fx-border-color: #e2e8f0; " +
-                "-fx-border-width: 1; " +
-                "-fx-border-radius: 20; " +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 50, 0, 0, 15);"); // Strong Black Shadow
+                        "-fx-background-radius: 20; " +
+                        "-fx-border-color: #e2e8f0; " +
+                        "-fx-border-width: 1; " +
+                        "-fx-border-radius: 20; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 50, 0, 0, 15);"); // Strong Black Shadow
         mainRoot.setMaxWidth(450);
         mainRoot.setPrefWidth(450);
         mainRoot.setAlignment(Pos.TOP_CENTER);
@@ -645,12 +756,13 @@ public class DisplayPostController {
         // Title Row
         HBox titleRow = new HBox(10);
         titleRow.setAlignment(Pos.CENTER_LEFT);
-        Label iconLabel = new Label(title.contains("Solution") ? "🔍" : "💡");
-        iconLabel.setStyle("-fx-font-size: 18px;");
-        Label mainTitle = new Label(title.toUpperCase());
+
+        // Clean title (remove emojis and extra text)
+        String cleanTitle = title.replaceAll("[^a-zA-Z]", "").trim().toUpperCase();
+        Label mainTitle = new Label(cleanTitle);
         mainTitle.setStyle(
                 "-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #1a202c; -fx-font-family: 'Segoe UI';");
-        titleRow.getChildren().addAll(iconLabel, mainTitle);
+        titleRow.getChildren().add(mainTitle);
 
         javafx.scene.control.Separator sep1 = new javafx.scene.control.Separator();
         sep1.setStyle("-fx-background-color: #edf2f7; -fx-opacity: 0.5;");
@@ -690,12 +802,13 @@ public class DisplayPostController {
             stage.close();
         });
 
+        Button closeBtn = createForumStyleButton("Close", "#64748b", false);
+        closeBtn.setOnAction(e -> stage.close());
+
         if (title.contains("Solution")) {
-            footer.getChildren().add(postBtn);
+            footer.getChildren().addAll(closeBtn, postBtn);
         } else {
-            Button okBtn = createForumStyleButton("Close", "#64748b", false);
-            okBtn.setOnAction(e -> stage.close());
-            footer.getChildren().add(okBtn);
+            footer.getChildren().add(closeBtn);
         }
 
         contentArea.getChildren().addAll(titleRow, sep1, scrollPane, sep2, footer);
@@ -740,7 +853,7 @@ public class DisplayPostController {
             }
 
             entities.Comment aiComment = new entities.Comment();
-            aiComment.setBody("🤖 AI Generated Solution:\n\n" + aiContent);
+            aiComment.setBody(aiContent);
             aiComment.setPostId(post.getId());
             aiComment.setUserId(currentUser.getId());
             aiComment.setStatus("ACCEPTED");
@@ -806,7 +919,7 @@ public class DisplayPostController {
     }
 
     private StackPane buildAvatar(entities.Users user) {
-        String username = (user != null) ? user.getUsername() : "Unknown";
+        String username = (user != null) ? user.getUsername() : "Visitor";
         String imageUrl = (user != null) ? user.getImage() : null;
 
         StackPane circle = new StackPane();
@@ -817,7 +930,9 @@ public class DisplayPostController {
 
         // Use Dicebear fallback if no image (matches Profile view)
         if (imageUrl == null || imageUrl.isEmpty()) {
-            imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+            if (!"Anonyme".equals(username)) {
+                imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
+            }
         }
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -845,11 +960,17 @@ public class DisplayPostController {
                     circle.getChildren().add(imageView);
                     return circle;
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
-        char initial = (username != null && !username.isEmpty()) ? Character.toUpperCase(username.charAt(0)) : '?';
-        Label initLabel = new Label(String.valueOf(initial));
+        String displayInit;
+        if ("Anonyme".equals(username)) {
+            displayInit = "AY";
+        } else {
+            displayInit = (username != null && !username.isEmpty()) ? String.valueOf(Character.toUpperCase(username.charAt(0))) : "V";
+        }
+        Label initLabel = new Label(displayInit);
         initLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
         circle.getChildren().add(initLabel);
         return circle;
@@ -862,23 +983,24 @@ public class DisplayPostController {
         ring.setMaxSize(size + 4, size + 4);
         ring.setStyle("-fx-background-radius: 50; " +
                 "-fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);");
-        
+
         StackPane inner = buildAvatar(user);
         inner.setPrefSize(size, size);
         inner.setMinSize(size, size);
         inner.setMaxSize(size, size);
-        
+
         if (!inner.getChildren().isEmpty() && inner.getChildren().get(0) instanceof ImageView) {
             ImageView iv = (ImageView) inner.getChildren().get(0);
-            iv.setFitWidth(size); iv.setFitHeight(size);
+            iv.setFitWidth(size);
+            iv.setFitHeight(size);
             iv.setClip(new javafx.scene.shape.Circle(size / 2.0, size / 2.0, size / 2.0));
         }
-        
+
         StackPane bg = new StackPane();
         bg.setStyle("-fx-background-color: white; -fx-background-radius: 50;");
         bg.setPrefSize(size + 1, size + 1);
         bg.getChildren().add(inner);
-        
+
         ring.getChildren().add(bg);
         return ring;
     }
@@ -904,9 +1026,10 @@ public class DisplayPostController {
     }
 
     private StackPane findContentArea(Node source) {
-        StackPane area = (StackPane) source.getScene().lookup("#contentArea");
-        if (area != null)
-            return area;
+        Node areaNode = source.getScene().lookup("#contentArea");
+        if (areaNode instanceof StackPane) {
+            return (StackPane) areaNode;
+        }
         Node parent = source.getParent();
         while (parent != null) {
             if (parent instanceof StackPane && "contentArea".equals(parent.getId()))
@@ -925,8 +1048,14 @@ public class DisplayPostController {
             if (controller != null)
                 controller.setAdminMode(this.isAdminMode);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null)
+            if (contentArea != null) {
                 contentArea.getChildren().setAll(root);
+            } else {
+                // Visitor mode loaded directly - replace root
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error", "Could not load Add Post.");
@@ -941,8 +1070,13 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null)
+            if (contentArea != null) {
                 contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -956,8 +1090,13 @@ public class DisplayPostController {
             controller.setAdminMode(this.isAdminMode);
             controller.setPost(post);
             StackPane contentArea = findContentArea((Node) event.getSource());
-            if (contentArea != null)
+            if (contentArea != null) {
                 contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -976,8 +1115,9 @@ public class DisplayPostController {
     }
 
     private void onSharePost(Post post, Node anchor) {
-        if (post == null) return;
-        
+        if (post == null)
+            return;
+
         ContextMenu shareMenu = new ContextMenu();
         shareMenu.setStyle("-fx-background-radius: 10; -fx-padding: 5;");
 
@@ -991,19 +1131,106 @@ public class DisplayPostController {
         copyItem.setOnAction(e -> {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();
-            String postUrl = "https://creaco.com/post/" + post.getId();
+            String postUrl = generateShareUrl(post);
             content.putString(postUrl);
             clipboard.setContent(content);
             showAlert(Alert.AlertType.INFORMATION, "Copied", "Post link copied to clipboard!");
         });
 
-        shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem);
+        MenuItem qrItem = new MenuItem("Generate QR Code");
+        qrItem.setOnAction(e -> showQRCode(post));
+
+        shareMenu.getItems().addAll(twitterItem, whatsappItem, copyItem, qrItem);
         shareMenu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
+    }
+
+    private String generateShareUrl(Post post) {
+        try {
+            String netlifyBase = "https://creaconetworkerss.netlify.app/";
+            String title = URLEncoder.encode(post.getTitle(), StandardCharsets.UTF_8);
+            String content = URLEncoder.encode(post.getContent(), StandardCharsets.UTF_8);
+
+            // Get username
+            entities.Users author = userService.getUserById(post.getUserId());
+            String username = (author != null) ? URLEncoder.encode(author.getUsername(), StandardCharsets.UTF_8)
+                    : "Unknown";
+
+            return String.format("%s?title=%s&content=%s&username=%s",
+                    netlifyBase, title, content, username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "https://creaco-forum.netlify.app/index.html?id=" + post.getId();
+        }
+    }
+
+    private void showQRCode(Post post) {
+        String url = generateShareUrl(post);
+        String qrApi = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + URLEncoder.encode(url, StandardCharsets.UTF_8);
+
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(javafx.stage.StageStyle.UTILITY);
+        stage.setTitle("Post QR Code");
+
+        VBox root = new VBox(20);
+        root.setAlignment(Pos.CENTER);
+        root.setPadding(new Insets(30));
+        root.setStyle("-fx-background-color: white; -fx-background-radius: 15;");
+
+        Label title = new Label(post.getTitle());
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2d3748;");
+        title.setWrapText(true);
+        title.setAlignment(Pos.CENTER);
+
+        ImageView qrView = new ImageView(new Image(qrApi));
+        qrView.setFitWidth(250);
+        qrView.setFitHeight(250);
+
+        Label info = new Label("Scan to view on CreaCo Mobile");
+        info.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+
+        Button saveBtn = new Button("💾 Save Image");
+        saveBtn.setOnAction(e -> saveQRCode(qrApi, post.getTitle()));
+        saveBtn.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-background-radius: 10; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        Button close = new Button("Done");
+        close.setOnAction(e -> stage.close());
+        close.setStyle("-fx-background-color: #ce2d7c; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 8 30; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        HBox btnBox = new HBox(15, saveBtn, close);
+        btnBox.setAlignment(Pos.CENTER);
+
+        root.getChildren().addAll(title, qrView, info, btnBox);
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void saveQRCode(String imageUrl, String title) {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Save QR Code");
+        fileChooser.setInitialFileName("QRCode_" + title.replaceAll("[^a-zA-Z0-9]", "_") + ".png");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PNG Files", "*.png"));
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            new Thread(() -> {
+                try (java.io.InputStream in = new java.net.URL(imageUrl).openStream()) {
+                    java.nio.file.Files.copy(in, file.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    javafx.application.Platform.runLater(() ->
+                        showAlert(Alert.AlertType.INFORMATION, "Success", "QR Code saved successfully!"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    javafx.application.Platform.runLater(() ->
+                        showAlert(Alert.AlertType.ERROR, "Error", "Could not save the image."));
+                }
+            }).start();
+        }
     }
 
     private void openSocialLink(Post post, String baseUrl) {
         try {
-            String postUrl = "https://creaco.com/post/" + post.getId();
+            String postUrl = generateShareUrl(post);
             String encodedUrl = URLEncoder.encode(postUrl, StandardCharsets.UTF_8);
             String url = baseUrl + encodedUrl;
 
@@ -1026,9 +1253,11 @@ public class DisplayPostController {
             if (target != null) {
                 // Highlight effect
                 String originalStyle = target.getStyle();
-                target.setStyle(originalStyle + "; -fx-border-color: #ce2d7c; -fx-border-width: 2; -fx-background-color: #fff1f2;");
-                
-                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                target.setStyle(originalStyle
+                        + "; -fx-border-color: #ce2d7c; -fx-border-width: 2; -fx-background-color: #fff1f2;");
+
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+                        javafx.util.Duration.seconds(3));
                 pause.setOnFinished(e -> target.setStyle(originalStyle));
                 pause.play();
 
@@ -1037,7 +1266,7 @@ public class DisplayPostController {
                 while (parent != null && !(parent instanceof javafx.scene.control.ScrollPane)) {
                     parent = parent.getParent();
                 }
-                
+
                 if (parent instanceof javafx.scene.control.ScrollPane) {
                     javafx.scene.control.ScrollPane scrollPane = (javafx.scene.control.ScrollPane) parent;
                     double scrollHeight = postsContainer.getBoundsInLocal().getHeight();
@@ -1074,5 +1303,18 @@ public class DisplayPostController {
     @FXML
     public void logout(ActionEvent event) {
         gui.SessionHelper.logout(event);
+    }
+
+    @FXML
+    private void goWelcome(ActionEvent event) {
+        try {
+            utils.SessionManager.getInstance().logout(); // Reset visitor state
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Users/Welcome.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root); // keep same scene → stage stays maximized
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

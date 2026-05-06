@@ -20,7 +20,17 @@ public class CommentService implements ForumInterface<Comment> {
         String sql = "INSERT INTO `comment`(`body`, `status`, `likes`, `post_id`, `user_id`, `parent_comment_id`, `is_profane`, `profane_words`, `grammar_errors`, `created_at`, `updated_at`) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = con.prepareStatement(sql);
-        ps.setString(1, comment.getBody());
+        // Apply profanity filtering
+        String filteredBody = ModerationService.filterProfanity(comment.getBody());
+        ps.setString(1, filteredBody);
+        
+        // Update comment object for consistency
+        comment.setBody(filteredBody);
+        
+        // Update profanity metadata
+        comment.setProfane(ModerationService.containsProfanity(filteredBody));
+        comment.setProfaneWords(ModerationService.countProfaneWords(filteredBody));
+        
         ps.setString(2, comment.getStatus());
         ps.setInt(3, comment.getLikes());
         ps.setInt(4, comment.getPostId());
@@ -80,7 +90,13 @@ public class CommentService implements ForumInterface<Comment> {
     public void modifier(int id, Comment comment) throws SQLException {
         String sql = "UPDATE `comment` SET `body`=?, `status`=?, `post_id`=?, `user_id`=?, `updated_at`=? WHERE `id`=?";
         PreparedStatement ps = con.prepareStatement(sql);
-        ps.setString(1, comment.getBody());
+        // Apply profanity filtering before updating
+        String filteredBody = ModerationService.filterProfanity(comment.getBody());
+        ps.setString(1, filteredBody);
+        
+        // Update comment object
+        comment.setBody(filteredBody);
+        
         ps.setString(2, comment.getStatus());
         ps.setInt(3, comment.getPostId());
         ps.setInt(4, comment.getUserId());
