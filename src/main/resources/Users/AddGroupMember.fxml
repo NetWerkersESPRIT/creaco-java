@@ -38,97 +38,96 @@
 
                                 <Separator style="-fx-opacity: 0.4;" />
 
-                                <javafx.scene.control.TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" styleClass="floating-tabs">
+                                <javafx.scene.control.TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" styleClass="floating-tabs" style="-fx-tab-min-width: 180;">
                                     <tabs>
-                                        <!-- CREATE NEW USER TAB -->
-                                        <javafx.scene.control.Tab text="Create New Member">
+                                        <!-- CREATE NEW MEMBER TAB -->
+                                        <javafx.scene.control.Tab text="👤 Create New Member">
                                             <content>
-                                                <VBox spacing="18.0" style="-fx-padding: 20 0 0 0;">
+                                                <VBox spacing="20.0" style="-fx-padding: 25 0 0 0;">
                                                     <children>
-                                                        <VBox spacing="6.0">
+                                                        <VBox spacing="8.0">
                                                             <children>
-                                                                <Label text="USERNAME" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #a0aec0; -fx-letter-spacing: 1;" />
-                                                                <TextField fx:id="txtUsername" promptText="Enter username..."
-                                                                           style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12; -fx-font-size: 14px;" />
+                                                                <Label text="USERNAME" styleClass="form-label" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-letter-spacing: 0.5;" />
+                                                                <TextField fx:id="txtUsername" promptText="Enter username..." />
                                                             </children>
                                                         </VBox>
-                                                        <VBox spacing="6.0">
+                                                        <VBox spacing="8.0">
                                                             <children>
-                                                                <Label text="EMAIL ADDRESS" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #a0aec0; -fx-letter-spacing: 1;" />
-                                                                <TextField fx:id="txtEmail" promptText="Enter email address..."
-                                                                           style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12; -fx-font-size: 14px;" />
+                                                                <Label text="EMAIL ADDRESS" styleClass="form-label" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-letter-spacing: 0.5;" />
+                                                                <TextField fx:id="txtEmail" promptText="Enter email address..." />
                                                             </children>
                                                         </VBox>
-                                                        <VBox spacing="6.0">
+                                                        <VBox spacing="8.0">
                                                             <children>
-                                                                <Label text="PASSWORD" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #a0aec0; -fx-letter-spacing: 1;" />
+                                                                <Label text="PASSWORD" styleClass="form-label" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-letter-spacing: 0.5;" />
                                                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                                                                     <children>
                                                                         <StackPane HBox.hgrow="ALWAYS">
                                                                             <children>
-                                                                                <TextField fx:id="txtPasswordVisible" managed="false" visible="false" promptText="Enter password..."
-                                                                                           style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12; -fx-font-size: 14px;" />
-                                                                                <PasswordField fx:id="txtPassword" promptText="Enter password..."
-                                                                                               style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12; -fx-font-size: 14px;" />
+                                                                                <TextField fx:id="txtPasswordVisible" managed="false" visible="false" promptText="Enter password..." />
+                                                                                <PasswordField fx:id="txtPassword" promptText="Enter password..." />
                                                                             </children>
                                                                         </StackPane>
                                                                         <Button fx:id="btnTogglePassword" onAction="#togglePassword" text="👁"
-                                                                                style="-fx-background-color: #f3f4f6; -fx-background-radius: 10; -fx-min-width: 45; -fx-min-height: 45; -fx-cursor: hand;" />
+                                                                                style="-fx-background-color: #f1f5f9; -fx-background-radius: 12; -fx-min-width: 48; -fx-min-height: 48; -fx-cursor: hand;" />
                                                                     </children>
                                                                 </HBox>
                                                             </children>
                                                         </VBox>
-                                                        <VBox spacing="6.0">
+                                                        <VBox spacing="8.0">
                                                             <children>
-                                                                <Label text="PHONE NUMBER" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #a0aec0; -fx-letter-spacing: 1;" />
-                                                                <TextField fx:id="txtNumtel" promptText="Enter phone number (8 digits)..."
-                                                                           style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12; -fx-font-size: 14px;" />
+                                                                <Label text="PHONE NUMBER" styleClass="form-label" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-letter-spacing: 0.5;" />
+                                                                <TextField fx:id="txtNumtel" promptText="Enter phone number (8 digits)..." />
                                                             </children>
                                                         </VBox>
-                                                        <VBox spacing="6.0">
+                                                        <VBox spacing="8.0">
                                                             <children>
-                                                                <Label text="TEAM ROLE" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #a0aec0; -fx-letter-spacing: 1;" />
-                                                                <ComboBox fx:id="comboRole" maxWidth="Infinity"
-                                                                          style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 8; -fx-font-size: 14px;" />
+                                                                <Label text="TEAM ROLE" styleClass="form-label" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-letter-spacing: 0.5;" />
+                                                                <ComboBox fx:id="comboRole" maxWidth="Infinity" promptText="Select Role" />
                                                             </children>
                                                         </VBox>
                                                         <Button text="👤 Create &amp; Add Member" onAction="#saveMember"
-                                                                maxWidth="Infinity" styleClass="btn-primary" prefHeight="48" />
+                                                                maxWidth="Infinity" styleClass="btn-primary" prefHeight="50" />
                                                     </children>
                                                 </VBox>
                                             </content>
                                         </javafx.scene.control.Tab>
 
                                         <!-- INVITE EXISTING USER TAB -->
-                                        <javafx.scene.control.Tab text="Invite Existing User">
+                                        <javafx.scene.control.Tab text="✉  Invite Existing User">
                                             <content>
                                                 <VBox spacing="25.0" style="-fx-padding: 25 0 0 0;">
                                                     <children>
                                                         <VBox spacing="8.0">
                                                             <children>
-                                                                <Label text="SEARCH USER" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #a0aec0; -fx-letter-spacing: 1;" />
-                                                                <ComboBox fx:id="comboInviteUser" maxWidth="Infinity" promptText="Select a user to invite..."
-                                                                          style="-fx-background-color: white; -fx-border-color: #dbe4f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10; -fx-font-size: 14px;" />
-                                                                <Label text="Only showing users with ROLE_MEMBER or ROLE_MANAGER." style="-fx-font-size: 11px; -fx-text-fill: #a0aec0;" />
+                                                                <Label text="SEARCH USER" styleClass="form-label" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-letter-spacing: 0.5;" />
+                                                                <ComboBox fx:id="comboInviteUser" maxWidth="Infinity" promptText="Select a user to invite..." />
+                                                                <Label text="Only showing users with ROLE_MEMBER or ROLE_MANAGER." style="-fx-font-size: 12px; -fx-text-fill: #94a3b8; -fx-font-style: italic;" />
                                                             </children>
                                                         </VBox>
 
-                                                        <VBox spacing="8.0" style="-fx-background-color: #f7fafc; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #edf2f7; -fx-border-radius: 10;">
+                                                        <VBox spacing="10.0" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15;">
                                                             <children>
-                                                                <Label text="Invitation Message" style="-fx-font-weight: bold; -fx-text-fill: #4a5568;" />
+                                                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                                                    <children>
+                                                                        <Label text="✉" style="-fx-font-size: 18px; -fx-text-fill: -fx-primary-pink;" />
+                                                                        <Label text="Invitation Message" style="-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 15px;" />
+                                                                    </children>
+                                                                </HBox>
                                                                 <Label text="An invitation will be sent to the user. They must accept it before being added to your team." 
-                                                                       wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #718096;" />
+                                                                       wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-line-spacing: 1.4;" />
                                                             </children>
                                                         </VBox>
 
                                                         <Button text="✉  Send Invitation" onAction="#handleSendInvitation"
-                                                                maxWidth="Infinity" styleClass="btn-primary" prefHeight="48" />
+                                                                maxWidth="Infinity" styleClass="btn-primary" prefHeight="50" />
                                                     </children>
                                                 </VBox>
                                             </content>
                                         </javafx.scene.control.Tab>
                                     </tabs>
                                 </javafx.scene.control.TabPane>
+
 
                                 <Label fx:id="lblMessage" text="" wrapText="true" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
 

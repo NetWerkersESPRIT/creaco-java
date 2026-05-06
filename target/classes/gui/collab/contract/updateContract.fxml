@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" styleClass="main-container"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="gui.collab.contract.UpdateContractController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <children>
+        <VBox maxWidth="550" spacing="20.0" styleClass="card">
+            <children>
+                <Label styleClass="title-label" text="Terminate Contract" style="-fx-text-fill: #e11d48;" />
+                <Label styleClass="subtitle-label" text="Please provide a valid reason for terminating this contract." />
+                <TextArea fx:id="contractTermReasonArea" prefRowCount="4" promptText="Reason for termination..." wrapText="true" />
+                <Label fx:id="contractTermReasonError" managed="false" textFill="#e11d48" visible="false" />
+                <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                    <children>
+                        <Button onAction="#onCancelTerminateContract" styleClass="btn-secondary" text="CANCEL" prefWidth="100.0" />
+                        <Button onAction="#onConfirmTerminateContract" styleClass="btn-primary" text="CONFIRM TERMINATION" style="-fx-background-color: #e11d48;" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</VBox>
