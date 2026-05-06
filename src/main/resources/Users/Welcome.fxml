@@ -176,7 +176,7 @@
                         <Label text="Join the Conversation on Our" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;" />
                         <Label text="Creative Forum" style="-fx-font-size: 40px; -fx-font-weight: 900; -fx-text-fill: #ec4899;" />
                         <Label maxWidth="600.0" alignment="CENTER" text="Don't struggle in isolation. Our forum is the heartbeat of CreaCo. Ask questions, share your work, and get feedback from creators worldwide." wrapText="true" style="-fx-font-size: 16px; -fx-text-fill: #94a3b8; -fx-text-alignment: center;" />
-                        <Button styleClass="btn-hero-primary" text="Explore the Forum →" />
+                        <Button onAction="#handleExploreForum" styleClass="btn-hero-primary" text="Explore the Forum →" />
                      </children>
                   </VBox>
 

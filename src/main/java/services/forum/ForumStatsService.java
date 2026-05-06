@@ -18,12 +18,16 @@ public class ForumStatsService {
 
     public List<Post> getTopLikedPosts(int limit) throws SQLException {
         List<Post> posts = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE status = 'ACCEPTED' ORDER BY likes DESC LIMIT ?";
+        String sql = "SELECT p.*, (SELECT COUNT(*) FROM post_reaction WHERE post_id = p.id) as real_likes " +
+                     "FROM post p WHERE p.status IN ('ACCEPTED', 'APPROVED') " +
+                     "ORDER BY real_likes DESC LIMIT ?";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setInt(1, limit);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
-            posts.add(mapResultSetToPost(rs));
+            Post post = mapResultSetToPost(rs);
+            post.setLikes(rs.getInt("real_likes")); // Override with count from reaction table
+            posts.add(post);
         }
         return posts;
     }
@@ -33,7 +37,7 @@ public class ForumStatsService {
         String sql = "SELECT p.*, COUNT(c.id) as comment_count " +
                      "FROM post p " +
                      "LEFT JOIN comment c ON p.id = c.post_id " +
-                     "WHERE p.status = 'ACCEPTED' " +
+                     "WHERE p.status IN ('ACCEPTED', 'APPROVED') " +
                      "GROUP BY p.id " +
                      "ORDER BY comment_count DESC " +
                      "LIMIT ?";
@@ -50,33 +54,38 @@ public class ForumStatsService {
 
     public List<UserActivity> getMostActiveUsers(int limit) throws SQLException {
         List<UserActivity> results = new ArrayList<>();
-        String sql = "SELECT u.username, u.image, " +
-                     "COALESCE(pa.cnt, 0) as post_count, " +
-                     "COALESCE(ca.cnt, 0) as comment_count, " +
-                     "(COALESCE(pa.cnt, 0) + COALESCE(ca.cnt, 0)) as total_activity " +
+        // Simple subquery approach to avoid join issues
+        String sql = "SELECT u.username, " +
+                     "(SELECT COUNT(*) FROM post WHERE user_id = u.id AND status IN ('ACCEPTED', 'APPROVED')) as post_count, " +
+                     "(SELECT COUNT(*) FROM comment WHERE user_id = u.id AND post_id IN (SELECT id FROM post WHERE status IN ('ACCEPTED', 'APPROVED'))) as comment_count, " +
+                     "(SELECT COUNT(*) FROM post_reaction WHERE user_id = u.id) as reaction_count " +
                      "FROM users u " +
-                     "LEFT JOIN (SELECT user_id, COUNT(*) as cnt FROM post GROUP BY user_id) pa ON u.id = pa.user_id " +
-                     "LEFT JOIN (SELECT user_id, COUNT(*) as cnt FROM comment GROUP BY user_id) ca ON u.id = ca.user_id " +
-                     "WHERE u.role != 'ROLE_ADMIN' " +
-                     "ORDER BY total_activity DESC " +
+                     "WHERE u.id IN (SELECT user_id FROM post UNION SELECT user_id FROM comment UNION SELECT user_id FROM post_reaction) " +
+                     "ORDER BY (post_count + comment_count + reaction_count) DESC " +
                      "LIMIT ?";
+                     
+        System.out.println("[ForumStatsService] Executing query: " + sql);
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setInt(1, limit);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
+            int pc = rs.getInt("post_count");
+            int cc = rs.getInt("comment_count");
+            int rc = 0; // Simplified for now
             results.add(new UserActivity(
                     rs.getString("username"),
-                    rs.getString("image"),
-                    rs.getInt("post_count"),
-                    rs.getInt("comment_count"),
-                    rs.getInt("total_activity")
+                    pc,
+                    cc,
+                    rc,
+                    pc + cc + rc
             ));
         }
+        System.out.println("[ForumStatsService] Found " + results.size() + " active users.");
         return results;
     }
 
     public int getTotalPosts() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM post WHERE status = 'ACCEPTED'";
+        String sql = "SELECT COUNT(*) FROM post WHERE status IN ('ACCEPTED', 'APPROVED')";
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(sql);
         return rs.next() ? rs.getInt(1) : 0;
@@ -118,15 +127,15 @@ public class ForumStatsService {
 
     public static class UserActivity {
         public String username;
-        public String image;
         public int postCount;
         public int commentCount;
+        public int reactionCount;
         public int totalActivity;
-        public UserActivity(String username, String image, int postCount, int commentCount, int totalActivity) {
+        public UserActivity(String username, int postCount, int commentCount, int reactionCount, int totalActivity) {
             this.username = username;
-            this.image = image;
             this.postCount = postCount;
             this.commentCount = commentCount;
+            this.reactionCount = reactionCount;
             this.totalActivity = totalActivity;
         }
     }

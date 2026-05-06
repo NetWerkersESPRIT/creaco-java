@@ -21,6 +21,16 @@ public class RegistrationController {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     String now = LocalDateTime.now().format(formatter);
 
+    @FXML
+    public void initialize() {
+        javafx.application.Platform.runLater(() -> {
+            if (txtUsername.getScene() != null) {
+                Stage stage = (Stage) txtUsername.getScene().getWindow();
+                if (stage != null) stage.setMaximized(true);
+            }
+        });
+    }
+
     @FXML private TextField txtUsername, txtEmail, txtNumtel;
     @FXML private PasswordField txtPassword;
     @FXML private TextField     txtPasswordVisible;
@@ -177,6 +187,7 @@ public class RegistrationController {
 
     private void goBackWithStage(Stage stage) throws Exception {
         if (stage != null) {
+            stage.setMaximized(true);
             stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/Users/SignIn.fxml")));
             stage.setTitle("CreaCo - Sign In");
         }

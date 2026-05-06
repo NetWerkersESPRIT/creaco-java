@@ -9,7 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import services.forum.PostService;
 import utils.SessionManager;
 import entities.Users;
@@ -32,7 +32,9 @@ import javafx.scene.paint.Color;
 import services.forum.UserPostValidator;
 import entities.forum.SentimentResult;
 import gui.forum.CatMatchGame;
-import services.forum.SpamDetectionService;
+import utils.SpamDetectionService;
+import utils.TextCorrectionService;
+import utils.DetectBadWordService;
 
 public class AddPostController {
 
@@ -40,6 +42,9 @@ public class AddPostController {
     private TextField titleField;
     @FXML
     private TextArea contentArea;
+
+    @FXML
+    private Button btnBack;
 
     @FXML
     private ToggleButton pinToggle;
@@ -78,6 +83,15 @@ public class AddPostController {
 
     @FXML
     private void initialize() {
+        titleField.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obs2, oldWin, newWin) -> {
+                    if (newWin instanceof Stage) ((Stage) newWin).setMaximized(true);
+                });
+                if (newScene.getWindow() instanceof Stage)
+                    ((Stage) newScene.getWindow()).setMaximized(true);
+            }
+        });
         gui.FrontMainController.setNavbarText("Create New Discussion", "Pages / Forum / Post");
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         
@@ -91,14 +105,23 @@ public class AddPostController {
                 parent.setManaged(isAdminMode);
             }
         }
+        boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
+        if (isVisitor) {
+            if (lblUsername != null) lblUsername.setText("Visitor");
+            if (lblUserRole != null) lblUserRole.setText("GUEST");
+        } else {
+            Users user = SessionManager.getInstance().getCurrentUser();
+            if (user != null) {
+                String displayName = user.getUsername() != null ? user.getUsername() : "User";
+                if (lblUsername != null) lblUsername.setText(displayName);
 
-        Users user = SessionManager.getInstance().getCurrentUser();
-        if (user != null) {
-            String displayName = user.getUsername() != null ? user.getUsername() : "User";
-            if (lblUsername != null) lblUsername.setText(displayName);
-
-            String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
-            if (lblUserRole != null) lblUserRole.setText(role);
+                String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
+                if (lblUserRole != null) lblUserRole.setText(role);
+            }
+        }
+        if (btnBack != null) {
+            btnBack.setVisible(isVisitor);
+            btnBack.setManaged(isVisitor);
         }
 
         setupSentimentAnalysis();
@@ -160,9 +183,9 @@ public class AddPostController {
         icon.setStyle("-fx-font-size: 28px; -fx-text-fill: #475569; -fx-font-weight: bold;");
 
         VBox titles = new VBox(8);
-        Label title = new Label("It seems you're feeling a bit frustrated...");
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #334155;");
-        Label sub = new Label("Your words carry some heat. Take a moment to breathe! This advice is not a substitute for professional help.");
+        Label title = new Label("Whoa! It seems you're feeling quite angry...");
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #b91c1c;"); // Redder text for angry
+        Label sub = new Label("Your words carry a lot of heat! Why not cool down with a quick game before posting? It might help you feel better!");
         sub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px;");
         sub.setWrapText(true);
         titles.getChildren().addAll(title, sub);
@@ -280,21 +303,53 @@ public class AddPostController {
         Task<Post> saveTask = new Task<>() {
             @Override
             protected Post call() throws Exception {
-                // 1. Text Correction (External API - Blocking)
-                String title = services.forum.TextCorrectionService.correctText(titleRaw);
-                String content = services.forum.TextCorrectionService.correctText(contentRaw);
+                String titleFinal = titleRaw;
+                String contentFinal = contentRaw;
+                boolean isProfane = false;
+                int pWords = 0;
+                int gErrors = 0;
 
-                // 2. Spam Detection (Blocking)
-                int spamScore = spamService.calculateSpamScore(title + " " + content);
+                try {
+                    // 1. Text Correction (External API - Spelling/Grammar)
+                    String titleCorrected = TextCorrectionService.correctText(titleRaw);
+                    String contentCorrected = TextCorrectionService.correctText(contentRaw);
+
+                    // 2. Content Moderation (TextGears - Profanity Masking)
+                    DetectBadWordService.ModerationResult titleMod = DetectBadWordService.moderate(titleCorrected).join();
+                    DetectBadWordService.ModerationResult contentMod = DetectBadWordService.moderate(contentCorrected).join();
+                    
+                    titleFinal = titleMod.moderatedText;
+                    contentFinal = contentMod.moderatedText;
+                    isProfane = titleMod.isProfane || contentMod.isProfane;
+                    pWords = titleMod.profaneWordsCount + contentMod.profaneWordsCount;
+                    gErrors = titleMod.grammarErrorsCount + contentMod.grammarErrorsCount;
+                } catch (Exception e) {
+                    System.err.println("AI Services failed during post creation, using raw text.");
+                }
+
+                // 3. Spam Detection (Blocking)
+                int spamScore = 0;
+                try {
+                    spamScore = spamService.calculateSpamScore(titleFinal + " " + contentFinal);
+                } catch (Exception e) {}
 
                 Post post = new Post();
-                post.setTitle(title);
-                post.setContent(content);
+                post.setTitle(titleFinal);
+                post.setContent(contentFinal);
                 post.setSpamScore(spamScore);
                 post.setSpam(spamScore >= 40);
+                post.setProfane(isProfane);
+                post.setProfaneWords(pWords);
+                post.setGrammarErrors(gErrors);
 
+                boolean isVisitor = SessionManager.getInstance().isVisitor();
                 if (isAdminMode) {
-                    post.setStatus("ACCEPTED");
+                    post.setStatus("APPROVED");
+                } else if (isVisitor) {
+                    post.setStatus("PENDING_VISITOR");
+                    post.setUserId(0); // Visitor/Anonymous ID
+                } else if (post.isProfane() || post.isSpam()) {
+                    post.setStatus("FLAGGED");
                 } else {
                     post.setStatus("PENDING");
                 }
@@ -305,6 +360,8 @@ public class AddPostController {
                 Users currentUser = SessionManager.getInstance().getCurrentUser();
                 if (currentUser != null) {
                     post.setUserId(currentUser.getId());
+                } else if (isVisitor) {
+                    post.setUserId(0);
                 } else {
                     post.setUserId(5);
                 }
@@ -347,9 +404,12 @@ public class AddPostController {
                 }
 
                 if (!isAdminMode) {
-                    String msg = requestPin
-                            ? "Your post and pin request have been submitted and are awaiting admin approval."
-                            : "Your post has been submitted and is awaiting admin approval.";
+                    boolean isVisitor = SessionManager.getInstance().isVisitor();
+                    String msg = isVisitor 
+                            ? "Your post has been submitted for moderation and will appear as anonymous once approved."
+                            : (requestPin
+                                ? "Your post and pin request have been submitted and are awaiting admin approval."
+                                : "Your post has been submitted and is awaiting admin approval.");
                     showAlert(Alert.AlertType.INFORMATION, "Submitted for Review", msg);
                 }
 
@@ -432,8 +492,15 @@ public class AddPostController {
             DisplayPostController controller = loader.getController();
             controller.setAdminMode(this.isAdminMode);
 
-            StackPane contentArea = (StackPane) ((Node) event.getSource()).getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(root);
+            Node areaNode = ((Node) event.getSource()).getScene().lookup("#contentArea");
+            if (areaNode instanceof StackPane) {
+                StackPane contentArea = (StackPane) areaNode;
+                contentArea.getChildren().setAll(root);
+            } else {
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setMaximized(true);
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -495,48 +562,6 @@ public class AddPostController {
 
         gui.util.AlertHelper.showCustomAlert(title, content, customType);
     }
-    @FXML
-    private void onDictateTitle() {
-        startDictation(titleField);
-    }
-
-    @FXML
-    private void onDictateContent() {
-        startDictation(contentArea);
-    }
-
-    private void startDictation(Object target) {
-        new Thread(() -> {
-            try {
-                String command = "Add-Type -AssemblyName System.Speech; " +
-                        "$sim = New-Object System.Speech.Recognition.SpeechRecognitionEngine; " +
-                        "$sim.SetInputToDefaultAudioDevice(); " +
-                        "$sim.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar)); " +
-                        "$result = $sim.Recognize(); " +
-                        "if ($result -ne $null) { $result.Text }";
-
-                ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-Command", command);
-                Process p = pb.start();
-
-                try (Scanner s = new Scanner(p.getInputStream()).useDelimiter("\\A")) {
-                    String result = s.hasNext() ? s.next().trim() : "";
-
-                    if (!result.isEmpty()) {
-                        Platform.runLater(() -> {
-                            if (target instanceof TextField) {
-                                ((TextField) target).setText(result);
-                            } else if (target instanceof TextArea) {
-                                ((TextArea) target).setText(result);
-                            }
-                        });
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println("Speech recognition error: " + e.getMessage());
-            }
-        }).start();
-    }
-
     @FXML
     public void onOpenProfile(javafx.scene.input.MouseEvent event) {
         try {
