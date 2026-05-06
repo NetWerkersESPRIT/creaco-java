@@ -74,6 +74,17 @@ public class GroupService {
         return joinedGroups;
     }
 
+    private boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columns = rsmd.getColumnCount();
+        for (int x = 1; x <= columns; x++) {
+            if (columnName.equalsIgnoreCase(rsmd.getColumnLabel(x))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Users getGroupOwner(int ownerId) throws SQLException {
         String sql = "SELECT * FROM users WHERE id = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -84,9 +95,10 @@ public class GroupService {
                     u.setId(rs.getInt("id"));
                     u.setUsername(rs.getString("username"));
                     u.setEmail(rs.getString("email"));
-                    u.setRole(rs.getString("role"));
-                    u.setNumtel(rs.getString("numtel"));
-                    u.setImage(rs.getString("image"));
+                    if (hasColumn(rs, "role")) u.setRole(rs.getString("role"));
+                    if (hasColumn(rs, "numtel")) u.setNumtel(rs.getString("numtel"));
+                    if (hasColumn(rs, "image")) u.setImage(rs.getString("image"));
+                    if (hasColumn(rs, "points")) u.setPoints(rs.getInt("points"));
                     return u;
                 }
             }
@@ -128,10 +140,10 @@ public class GroupService {
                     u.setId(rs.getInt("id"));
                     u.setUsername(rs.getString("username"));
                     u.setEmail(rs.getString("email"));
-                    u.setRole(rs.getString("role"));
-                    u.setNumtel(rs.getString("numtel"));
-                    u.setImage(rs.getString("image"));
-                    u.setPoints(rs.getInt("points"));
+                    if (hasColumn(rs, "role")) u.setRole(rs.getString("role"));
+                    if (hasColumn(rs, "numtel")) u.setNumtel(rs.getString("numtel"));
+                    if (hasColumn(rs, "image")) u.setImage(rs.getString("image"));
+                    if (hasColumn(rs, "points")) u.setPoints(rs.getInt("points"));
                     members.add(u);
                 }
             }

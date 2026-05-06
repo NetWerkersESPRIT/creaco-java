@@ -98,6 +98,11 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.36</version>
         </dependency>
+        <dependency>
+            <groupId>com.docusign</groupId>
+            <artifactId>docusign-esign-java</artifactId>
+            <version>3.22.0</version>
+        </dependency>
     </dependencies>
 
     <build>

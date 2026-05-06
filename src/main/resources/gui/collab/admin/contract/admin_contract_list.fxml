@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.admin.contract.AdminContractListController">
+    <stylesheets>
+        <URL value="@../../../styles.css" />
+    </stylesheets>
+    <children>
+        <VBox spacing="20.0" styleClass="card">
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label styleClass="card-title" text="Contracts Registry" />
+                                <Label styleClass="subtitle-label" text="Monitor agreements, update validity status, and verify signatures." />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="search-bar" maxWidth="400">
+                            <children>
+                                <Label text="🔍" style="-fx-text-fill: -fx-text-muted; -fx-font-size: 16px;" />
+                                <TextField fx:id="searchField" promptText="Search by title, reference or partner..."
+                                           style="-fx-background-color: transparent; -fx-padding: 0; -fx-font-size: 14px;" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+                    </children>
+                </HBox>
+
+                <!-- Column Headers -->
+                <HBox spacing="10.0" style="-fx-padding: 30 0 15 0; -fx-border-color: transparent transparent #f1f5f9 transparent; -fx-border-width: 0 0 1 0;">
+                    <children>
+                        <Label prefWidth="250" styleClass="list-header-label" text="CONTRACT REF &amp; TITLE" />
+                        <Label prefWidth="200" styleClass="list-header-label" text="PARTNER ENTITY" />
+                        <Label prefWidth="150" styleClass="list-header-label" text="BUDGET" />
+                        <Label prefWidth="120" styleClass="list-header-label" text="STATUS" />
+                        <Label prefWidth="120" styleClass="list-header-label" text="SIGNATURES" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label styleClass="list-header-label" text="ADMIN ACTIONS" />
+                    </children>
+                </HBox>
+
+                <!-- Contracts List -->
+                <ListView fx:id="contractsListView" VBox.vgrow="ALWAYS" minHeight="500.0" prefHeight="650.0"
+                          style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 10 0 0 0;"/>
+            </children>
+        </VBox>
+    </children>
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+</VBox>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.admin.partner.AdminPartnerListController">
+    <stylesheets>
+        <URL value="@../../../styles.css" />
+    </stylesheets>
+    <children>
+        <!-- Card Header Area -->
+        <VBox spacing="20.0" styleClass="card">
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label styleClass="card-title" text="Partner Ecosystem Administration" />
+                                <Label styleClass="subtitle-label" text="Manage strategic partners, verify credentials, and control platform access." />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="search-bar" maxWidth="400">
+                            <children>
+                                <Label text="🔍" style="-fx-text-fill: -fx-text-muted; -fx-font-size: 16px;" />
+                                <TextField fx:id="searchField" promptText="Search by company, email or domain..."
+                                           style="-fx-background-color: transparent; -fx-padding: 0; -fx-font-size: 14px;" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+                        <Button onAction="#onAddPartner" styleClass="btn-primary" text="+ REGISTER NEW PARTNER" prefHeight="45.0" />
+                    </children>
+                </HBox>
+
+                <!-- Column Headers -->
+                <HBox spacing="10.0" style="-fx-padding: 30 0 15 0; -fx-border-color: transparent transparent #f1f5f9 transparent; -fx-border-width: 0 0 1 0;">
+                    <children>
+                        <Label prefWidth="320" styleClass="list-header-label" text="PARTNER ENTITY" />
+                        <Label prefWidth="220" styleClass="list-header-label" text="DOMAIN &amp; SECTOR" />
+                        <Label prefWidth="150" styleClass="list-header-label" text="STATUS" />
+                        <Label prefWidth="180" styleClass="list-header-label" text="ONBOARDING DATE" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label styleClass="list-header-label" text="ADMIN ACTIONS" />
+                    </children>
+                </HBox>
+
+                <!-- Partners List -->
+                <ListView fx:id="partnersListView" VBox.vgrow="ALWAYS" minHeight="500.0" prefHeight="650.0"
+                          style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 10 0 0 0;"/>
+            </children>
+        </VBox>
+    </children>
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+</VBox>
