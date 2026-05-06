@@ -11,16 +11,23 @@ import java.util.Properties;
 
 public class RecaptchaService {
     private static String API_KEY;
-    private static final String PROJECT_ID = "java-1777469158652";
-    private static final String SITE_KEY = "6LfEfNAsAAAAAAMtRP2CvVFSK1wzh593gDWdkcta";
-    private static final String API_URL = "https://recaptchaenterprise.googleapis.com/v1/projects/" + PROJECT_ID + "/assessments?key=";
+    private static String PROJECT_ID = "java-1777469158652";
+    private static String SITE_KEY = "6LfEfNAsAAAAAAMtRP2CvVFSK1wzh593gDWdkcta";
+    private static String API_URL;
 
     static {
         Properties properties = new Properties();
         try (FileInputStream fis = new FileInputStream("config.properties")) {
             properties.load(fis);
-            // We use the same Google Cloud API key defined for Gemini
             API_KEY = properties.getProperty("GEMINI_API_KEY");
+            // Load project id and site key from config, fallback to hardcoded if missing
+            String configProjectId = properties.getProperty("RECAPTCHA_PROJECT_ID");
+            if (configProjectId != null) PROJECT_ID = configProjectId;
+            
+            String configSiteKey = properties.getProperty("RECAPTCHA_SITE_KEY");
+            if (configSiteKey != null) SITE_KEY = configSiteKey;
+            
+            API_URL = "https://recaptchaenterprise.googleapis.com/v1/projects/" + PROJECT_ID + "/assessments?key=";
         } catch (IOException e) {
             System.err.println("[RecaptchaService] Error loading config.properties: " + e.getMessage());
         }
@@ -55,11 +62,22 @@ public class RecaptchaService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                System.out.println("[RecaptchaService] Assessment response: " + response.body());
-                // For Enterprise, you should check the "riskAnalysis" -> "score"
-                // A score > 0.5 is usually considered safe.
-                return response.body().contains("\"score\":") && !response.body().contains("\"score\": 0."); 
-                // Note: Simple check for demo. In production, parse JSON and check score >= 0.7
+                String body = response.body();
+                System.out.println("[RecaptchaService] Assessment response: " + body);
+                
+                // Better score check: Look for scores that indicate a human (e.g., 0.6, 0.7, 0.8, 0.9, 1.0)
+                // A very simple way without a full JSON parser:
+                boolean isHuman = body.contains("\"score\": 0.6") || 
+                                 body.contains("\"score\": 0.7") || 
+                                 body.contains("\"score\": 0.8") || 
+                                 body.contains("\"score\": 0.9") || 
+                                 body.contains("\"score\": 1.0") ||
+                                 body.contains("\"score\": 1");
+
+                if (!isHuman) {
+                    System.err.println("[RecaptchaService] Low score or bot detected. Response: " + body);
+                }
+                return isHuman;
             } else {
                 System.err.println("[RecaptchaService] API Error: " + response.statusCode() + " - " + response.body());
                 return false;
