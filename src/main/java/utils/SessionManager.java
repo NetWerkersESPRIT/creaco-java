@@ -64,7 +64,11 @@ public class SessionManager {
     public boolean isContentCreator() {
         return currentUser != null && "ROLE_CONTENT_CREATOR".equals(currentUser.getRole());
     }
-
+    public boolean isManager() {
+        if (currentUser == null || currentUser.getRole() == null) return false;
+        String role = currentUser.getRole().toUpperCase();
+        return role.contains("MANAGER");
+    }
     public void logout() { 
         currentUser = null; 
         isVisitor = false;

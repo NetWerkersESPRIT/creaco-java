@@ -89,7 +89,7 @@ public class FrontMainController {
 
             updateNavbarProfile();
 
-            boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+            boolean isAdmin = SessionManager.getInstance().isAdmin();
             lblAdminHeader.setVisible(isAdmin);
             lblAdminHeader.setManaged(isAdmin);
             boxAdmin.setVisible(isAdmin);
@@ -100,13 +100,13 @@ public class FrontMainController {
                 boxAdminActions.setManaged(isAdmin);
             }
 
-            boolean isContentCreator = "ROLE_CONTENT_CREATOR".equals(user.getRole());
+            boolean isContentCreator = SessionManager.getInstance().isContentCreator();
             if (btnMyTeam != null) {
                 btnMyTeam.setVisible(isContentCreator);
                 btnMyTeam.setManaged(isContentCreator);
             }
 
-            boolean isTeamMember = "ROLE_MANAGER".equals(user.getRole()) || "ROLE_MEMBER".equals(user.getRole());
+            boolean isTeamMember = SessionManager.getInstance().isManager() || "ROLE_MEMBER".equals(user.getRole());
             if (btnUserGroups != null) {
                 btnUserGroups.setVisible(isTeamMember);
                 btnUserGroups.setManaged(isTeamMember);
@@ -334,9 +334,16 @@ public class FrontMainController {
     }
 
     @FXML public void onShowCollaborations() { 
-        if (txtWelcome != null) txtWelcome.setText("Collaborations");
+        if (txtWelcome != null) txtWelcome.setText("Collaborations Hub");
         if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Collaborations");
-        loadSubView("/collaborator/ListCollaborator.fxml"); 
+        
+        if (SessionManager.getInstance().isAdmin()) {
+            loadSubView("/gui/collab/admin/dashboard.fxml");
+        } else if (SessionManager.getInstance().isManager()) {
+            loadSubView("/gui/collab/manager/dashboard.fxml");
+        } else {
+            loadSubView("/gui/collab/collab_dashboard.fxml");
+        }
     }
 
     @FXML public void onShowMyTeam() {

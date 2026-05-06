@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="gui.collab.manager.ContractController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+    <children>
+        <!-- Hero Banner -->
+        <VBox styleClass="hero-banner-manager-contract">
+            <children>
+                <HBox styleClass="hero-title-box">
+                    <children>
+                        <Label styleClass="hero-title" text="Contracts Registry" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+
+        <!-- Tabs -->
+        <HBox spacing="15.0" styleClass="tab-container">
+            <children>
+                <Button styleClass="tab-btn" text="📊 Ecosystem Hub" />
+                <Button styleClass="tab-btn" text="📝 Review Dashboard" />
+                <Button styleClass="tab-btn, tab-btn-active" text="📕 Managed Contracts" />
+            </children>
+        </HBox>
+
+        <!-- Main Content Card -->
+        <VBox VBox.vgrow="ALWAYS" styleClass="card">
+            <children>
+                <!-- Card Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <children>
+                        <Label styleClass="card-title" text="Managed Collaboration Contracts" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label text="🔒 Official Records" styleClass="list-header-label" />
+                    </children>
+                </HBox>
+
+                <!-- Column Headers -->
+                <HBox spacing="10.0" style="-fx-padding: 20 0 10 0;">
+                    <children>
+                        <Label prefWidth="300" styleClass="list-header-label" text="CONTRACT # / TITLE" />
+                        <Label prefWidth="180" styleClass="list-header-label" text="PARTNER" />
+                        <Label prefWidth="150" styleClass="list-header-label" text="AMOUNT" />
+                        <Label prefWidth="120" styleClass="list-header-label" text="STATUS" />
+                        <Label prefWidth="150" styleClass="list-header-label" text="EFFECTIVE DATE" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label styleClass="list-header-label" text="Details" />
+                    </children>
+                </HBox>
+
+                <!-- Contracts List -->
+                <ListView fx:id="contractsListView" VBox.vgrow="ALWAYS" />
+            </children>
+        </VBox>
+    </children>
+</VBox>

@@ -111,7 +111,11 @@ public class MainController {
 
     @FXML
     private void onShowCollaborations() {
-        loadSubView("/collaborator/ListCollaborator.fxml", "Collaborations");
+        if (utils.SessionManager.getInstance().isAdmin()) {
+            loadSubView("/gui/collab/admin/dashboard.fxml", "Collaboration Backoffice");
+        } else {
+            loadSubView("/gui/collab/collab_dashboard.fxml", "Collaborations");
+        }
     }
 
     @FXML
