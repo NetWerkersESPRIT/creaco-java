@@ -4,13 +4,20 @@
     <title>reCAPTCHA Enterprise Verification</title>
     <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
     <script type="text/javascript">
-        // This function is called automatically when the user solves the reCAPTCHA
+        // Called by reCAPTCHA when the user solves the challenge
         function onRecaptchaSuccess(token) {
-            window.location.href = "recaptcha-verify:" + token;
+            if (window.javaApp) {
+                window.javaApp.onToken(token);
+            } else {
+                console.error('[reCAPTCHA] javaApp bridge not registered yet');
+            }
         }
-        
+
+        // Called by reCAPTCHA when the token expires
         function onRecaptchaExpired() {
-            window.location.href = "recaptcha-expired:true";
+            if (window.javaApp) {
+                window.javaApp.onExpired();
+            }
         }
 
         // Keep this for compatibility with your Controller's injection logic
