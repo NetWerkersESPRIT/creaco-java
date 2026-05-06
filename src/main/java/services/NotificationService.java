@@ -109,6 +109,41 @@ public class NotificationService {
         createNotification(recipientId, creatorName + " invited you to join their Content Creator team!", "GROUP_INVITATION", groupId, "/Users/Invitations.fxml");
     }
 
+    public void notifyNewCollabRequest(int requestId) {
+        try {
+            List<Users> admins = getAllAdmins();
+            for (Users admin : admins) {
+                createNotification(admin.getId(), "A new collaboration request has been submitted and is pending review.", "COLLAB_REQUEST", requestId, "collab/request/" + requestId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void notifyManagerOfNewRequest(int managerId, int requestId, String creatorName) {
+        createNotification(managerId, creatorName + " created a new collaboration request that needs your review.", "COLLAB_MANAGER_REVIEW", requestId, "collab/request/" + requestId);
+    }
+
+    public void notifyCollabRequestModification(int creatorId, String feedback, String partnerName) {
+        createNotification(creatorId, "Manager requested modifications for your collaboration with " + partnerName + ". Feedback: " + feedback, "COLLAB_MODIF_REQUESTED", null, "/collab/creator/dashboard");
+    }
+
+    public void notifyCollabRequestStatus(int creatorId, String status, String partnerName) {
+        createNotification(creatorId, "Your collaboration request with " + partnerName + " has been " + status.toLowerCase() + ".", "COLLAB_STATUS_UPDATE", null, "/collab/creator/dashboard");
+    }
+
+    public void notifyContractSent(int userId, String contractNumber) {
+        createNotification(userId, "Contract " + contractNumber + " has been successfully sent for signatures via DocuSign.", "CONTRACT_SENT", null, "/collab/creator/dashboard");
+    }
+
+    public void notifyContractCompleted(int userId, String contractNumber) {
+        createNotification(userId, "🎉 Contract " + contractNumber + " is now fully signed by all parties!", "CONTRACT_COMPLETED", null, "/collab/creator/dashboard");
+    }
+
+    public void notifyContractSignature(int userId, String contractNumber, String signerType) {
+        createNotification(userId, "📝 Contract " + contractNumber + " signature progress: " + signerType + " signed.", "CONTRACT_PROGRESS", null, "/collab/creator/dashboard");
+    }
+
     private List<Users> getAllAdmins() throws SQLException {
         // We'll need to implement this in UsersService or here directly
         // For now, let's query directly to avoid modifying UsersService if possible, 

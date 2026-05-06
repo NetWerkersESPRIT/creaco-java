@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" styleClass="dashboard-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.admin.AdminDashboardController">
+    <stylesheets>
+        <URL value="@../../styles.css" />
+    </stylesheets>
+    <content>
+        <VBox spacing="30.0">
+            <padding>
+                <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+            </padding>
+            <children>
+                <!-- Top Row: Summary Stats -->
+                <GridPane hgap="25.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                    </columnConstraints>
+                    <children>
+                        <!-- Partners Card -->
+                        <VBox spacing="15.0" styleClass="stat-card" GridPane.columnIndex="0" onMouseClicked="#onViewPartners" style="-fx-cursor: hand;">
+                            <children>
+                                <HBox alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label styleClass="stat-title" text="Partners" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <StackPane styleClass="stat-icon-bg">
+                                            <children>
+                                                <Label text="🌐" />
+                                            </children>
+                                        </StackPane>
+                                    </children>
+                                </HBox>
+                                <Label fx:id="totalPartnersLabel" styleClass="stat-value" text="38" />
+                                <HBox spacing="10.0">
+                                    <children>
+                                        <VBox spacing="5.0" styleClass="stat-badge, stat-badge-green">
+                                            <children>
+                                                <Label text="ACTIVE" style="-fx-font-size: 9px;" />
+                                                <Label fx:id="activePartnersLabel" text="31" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="5.0" styleClass="stat-badge, stat-badge-gray">
+                                            <children>
+                                                <Label text="INACTIVE" style="-fx-font-size: 9px;" />
+                                                <Label fx:id="inactivePartnersLabel" text="7" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Contracts Card -->
+                        <VBox spacing="15.0" styleClass="stat-card" GridPane.columnIndex="1" onMouseClicked="#onViewContracts" style="-fx-cursor: hand;">
+                            <children>
+                                <HBox alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label styleClass="stat-title" text="Contracts" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <StackPane styleClass="stat-icon-bg">
+                                            <children>
+                                                <Label text="📄" />
+                                            </children>
+                                        </StackPane>
+                                    </children>
+                                </HBox>
+                                <Label fx:id="totalContractsLabel" styleClass="stat-value" text="54" />
+                                <HBox spacing="10.0">
+                                    <children>
+                                        <VBox spacing="5.0" styleClass="stat-badge, stat-badge-green">
+                                            <children>
+                                                <Label text="SIGNED" style="-fx-font-size: 9px;" />
+                                                <Label fx:id="signedContractsLabel" text="32" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="5.0" styleClass="stat-badge, stat-badge-orange">
+                                            <children>
+                                                <Label text="PENDING" style="-fx-font-size: 9px;" />
+                                                <Label fx:id="pendingContractsLabel" text="14" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="5.0" styleClass="stat-badge, stat-badge-red">
+                                            <children>
+                                                <Label text="EXPIRED" style="-fx-font-size: 9px;" />
+                                                <Label fx:id="expiredContractsLabel" text="8" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Requests Card -->
+                        <VBox spacing="15.0" styleClass="stat-card" GridPane.columnIndex="2" onMouseClicked="#onViewRequests" style="-fx-cursor: hand;">
+                            <children>
+                                <HBox alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label styleClass="stat-title" text="Collab Requests" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <StackPane styleClass="stat-icon-bg">
+                                            <children>
+                                                <Label text="👥" />
+                                            </children>
+                                        </StackPane>
+                                    </children>
+                                </HBox>
+                                <Label fx:id="totalRequestsLabel" styleClass="stat-value" text="27" />
+                                <HBox spacing="8.0">
+                                    <children>
+                                        <VBox spacing="4.0" styleClass="stat-badge, stat-badge-orange">
+                                            <children>
+                                                <Label text="PEND." style="-fx-font-size: 8px;" />
+                                                <Label fx:id="pendingRequestsLabel" text="8" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="4.0" styleClass="stat-badge, stat-badge-green">
+                                            <children>
+                                                <Label text="APPR." style="-fx-font-size: 8px;" />
+                                                <Label fx:id="approvedRequestsLabel" text="12" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="4.0" styleClass="stat-badge, stat-badge-red">
+                                            <children>
+                                                <Label text="REJ." style="-fx-font-size: 8px;" />
+                                                <Label fx:id="rejectedRequestsLabel" text="4" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="4.0" styleClass="stat-badge, stat-badge-blue">
+                                            <children>
+                                                <Label text="REV." style="-fx-font-size: 8px;" />
+                                                <Label fx:id="revisionRequestsLabel" text="3" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+
+                <!-- Middle Row: KPIs -->
+                <GridPane hgap="25.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                    </columnConstraints>
+                    <children>
+                        <VBox spacing="10.0" styleClass="kpi-card" GridPane.columnIndex="0">
+                            <children>
+                                <Label styleClass="stat-title" text="Total Revenue Secured" />
+                                <Label fx:id="totalRevenueLabel" styleClass="stat-value" text="128,400 DT" />
+                                <Label styleClass="kpi-trend-up" text="▲ 12% vs last month" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0" styleClass="kpi-card" GridPane.columnIndex="1">
+                            <children>
+                                <Label styleClass="stat-title" text="Avg. Time to Sign" />
+                                <Label styleClass="stat-value" text="36 hrs" />
+                                <Label styleClass="kpi-trend-down" text="▼ 8% faster than last month" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0" styleClass="action-needed-card" GridPane.columnIndex="2">
+                            <children>
+                                <Label text="ACTION NEEDED" style="-fx-font-weight: bold; -fx-text-fill: #92400e; -fx-font-size: 11px;" />
+                                <Label fx:id="actionNeededCountLabel" styleClass="stat-value" text="11" style="-fx-text-fill: #92400e;" />
+                                <Label fx:id="actionNeededDescLabel" wrapText="true" text="8 pending requests · 3 expiring contracts" style="-fx-text-fill: #b45309; -fx-font-size: 13px;" />
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+
+                <!-- Bottom Row: Detailed Lists -->
+                <GridPane hgap="25.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                    </columnConstraints>
+                    <children>
+                        <!-- Recent Partners List -->
+                        <VBox spacing="15.0" styleClass="dashboard-list-card" GridPane.columnIndex="0">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Region styleClass="section-indicator" style="-fx-background-color: #6366f1;" />
+                                        <Label text="Recent partners" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                    </children>
+                                </HBox>
+                                <VBox fx:id="partnersList" spacing="5.0" />
+                            </children>
+                        </VBox>
+
+                        <!-- Recent Contracts List -->
+                        <VBox spacing="15.0" styleClass="dashboard-list-card" GridPane.columnIndex="1">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Region styleClass="section-indicator" style="-fx-background-color: #10b981;" />
+                                        <Label text="Recent contracts" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                    </children>
+                                </HBox>
+                                <VBox fx:id="contractsList" spacing="5.0" />
+                            </children>
+                        </VBox>
+
+                        <!-- Requests to Review List -->
+                        <VBox spacing="15.0" styleClass="dashboard-list-card" GridPane.columnIndex="2" style="-fx-border-color: #f59e0b; -fx-border-width: 0 0 0 1.5;">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Region styleClass="section-indicator" style="-fx-background-color: #f59e0b;" />
+                                        <Label text="Requests to review" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                                    </children>
+                                </HBox>
+                                <VBox fx:id="requestsList" spacing="5.0" />
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>
