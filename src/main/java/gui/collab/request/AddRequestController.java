@@ -1,0 +1,297 @@
+package gui.collab.request;
+
+import entities.Collaborator;
+import entities.CollabRequest;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import services.CollabRequestService;
+import services.CollaboratorService;
+import services.AiAssistLogService;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Date;
+
+public class AddRequestController {
+
+    @FXML private TextField reqTitleField;
+    @FXML private TextArea reqDescArea;
+    @FXML private TextField reqBudgetField;
+    @FXML private ComboBox<String> reqCurrencyBox;
+    @FXML private DatePicker reqStartDatePicker;
+    @FXML private DatePicker reqEndDatePicker;
+    @FXML private TextArea reqDeliverablesArea;
+    @FXML private TextArea reqPaymentTermsArea;
+    @FXML private ComboBox<entities.Users> reqManagerBox;
+    @FXML private ComboBox<Collaborator> reqPartnerBox;
+
+    @FXML private Label reqTitleError;
+    @FXML private Label reqBudgetError;
+    @FXML private Label reqStartDateError;
+    @FXML private Label reqEndDateError;
+    @FXML private Label reqManagerError;
+    @FXML private Label reqPartnerError;
+
+    private final CollabRequestService requestService = new CollabRequestService();
+    private final CollaboratorService collaboratorService = new CollaboratorService();
+    private final services.GroupService groupService = new services.GroupService();
+    private final AiAssistLogService aiAssistLogService = new AiAssistLogService();
+    private final services.NotificationService notificationService = new services.NotificationService();
+
+    private Runnable onCancelCallback;
+    private Runnable onSaveCallback;
+
+    public void setOnCancel(Runnable callback) { this.onCancelCallback = callback; }
+    public void setOnSave(Runnable callback) { this.onSaveCallback = callback; }
+
+    @FXML
+    public void initialize() {
+        reqCurrencyBox.setItems(FXCollections.observableArrayList("TND", "EUR"));
+        reqCurrencyBox.getSelectionModel().selectFirst();
+
+        setupPartnerBox();
+        setupManagerBox();
+        loadPartners();
+        loadManagers();
+    }
+
+    private void setupManagerBox() {
+        reqManagerBox.setCellFactory(p -> new ListCell<entities.Users>() {
+            @Override
+            protected void updateItem(entities.Users item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getUsername());
+            }
+        });
+        reqManagerBox.setButtonCell(new ListCell<entities.Users>() {
+            @Override
+            protected void updateItem(entities.Users item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getUsername());
+            }
+        });
+    }
+
+    private void loadManagers() {
+        try {
+            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                System.err.println("AddRequestController: Current user is null, cannot load managers.");
+                return;
+            }
+
+            // Get the group owned by this creator
+            entities.Group team = groupService.getGroupByCreatorId(currentUser.getId());
+            if (team == null) {
+                System.out.println("AddRequestController: No team found for creator " + currentUser.getId() + " (" + currentUser.getUsername() + ")");
+                return;
+            }
+
+            System.out.println("AddRequestController: Loading managers for team: " + team.getName() + " (ID: " + team.getId() + ")");
+
+            // Get members and filter for managers
+            java.util.List<entities.Users> teamMembers = groupService.getGroupMembers(team.getId());
+            java.util.List<entities.Users> managers = new java.util.ArrayList<>();
+            
+            System.out.println("AddRequestController: Found " + teamMembers.size() + " total members in team.");
+
+            for (entities.Users member : teamMembers) {
+                String role = member.getRole();
+                if (role != null) {
+                    role = role.toUpperCase();
+                    // Check for various manager role formats (simple string or JSON array)
+                    if (role.contains("MANAGER") || role.contains("ADMIN")) {
+                        managers.add(member);
+                        System.out.println("AddRequestController: Found manager: " + member.getUsername() + " (Role: " + role + ")");
+                    }
+                }
+            }
+
+            reqManagerBox.setItems(FXCollections.observableArrayList(managers));
+            if (!managers.isEmpty()) {
+                reqManagerBox.getSelectionModel().selectFirst();
+            } else {
+                System.out.println("AddRequestController: No members with MANAGER role found in team.");
+            }
+        } catch (Exception e) { 
+            System.err.println("AddRequestController: Error loading team managers: " + e.getMessage());
+            e.printStackTrace(); 
+        }
+    }
+
+
+    private void setupPartnerBox() {
+        reqPartnerBox.setCellFactory(p -> new ListCell<Collaborator>() {
+            @Override
+            protected void updateItem(Collaborator item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getCompanyName());
+            }
+        });
+        reqPartnerBox.setButtonCell(new ListCell<Collaborator>() {
+            @Override
+            protected void updateItem(Collaborator item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getCompanyName());
+            }
+        });
+    }
+
+    private void loadPartners() {
+        try {
+            reqPartnerBox.setItems(FXCollections.observableArrayList(collaboratorService.afficher()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onSaveRequest() {
+        resetErrors();
+        if (!validate()) return;
+
+        try {
+            BigDecimal budget = new BigDecimal(reqBudgetField.getText().trim());
+            Date startDate = java.sql.Date.valueOf(reqStartDatePicker.getValue());
+            Date endDate = java.sql.Date.valueOf(reqEndDatePicker.getValue());
+            int partnerId = reqPartnerBox.getSelectionModel().getSelectedItem().getId();
+            int revisorId = reqManagerBox.getSelectionModel().getSelectedItem().getId();
+
+            entities.Users currentUser = utils.SessionManager.getInstance().getCurrentUser();
+            int creatorId = (currentUser != null) ? currentUser.getId() : 1;
+
+            CollabRequest req = new CollabRequest(
+                    reqTitleField.getText().trim(),
+                    reqDescArea.getText().trim(),
+                    budget,
+                    startDate,
+                    endDate,
+                    "PENDING",
+                    reqDeliverablesArea.getText().trim(),
+                    reqPaymentTermsArea.getText().trim(),
+                    partnerId
+            );
+            req.setCreatorId(creatorId);
+            req.setRevisorId(revisorId);
+            requestService.ajouter(req);
+
+            // Notify Admin & Manager of new request
+            notificationService.notifyNewCollabRequest(req.getId());
+            notificationService.notifyManagerOfNewRequest(revisorId, req.getId(), (currentUser != null ? currentUser.getUsername() : "A creator"));
+
+            if (onSaveCallback != null) onSaveCallback.run();
+        } catch (Exception e) {
+            showAlert("Save Error", "Could not save request: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onCancelRequest() {
+        if (onCancelCallback != null) onCancelCallback.run();
+    }
+
+    private boolean validate() {
+        boolean isValid = true;
+        if (reqTitleField.getText().trim().isEmpty()) { showError(reqTitleError, "Title is required."); isValid = false; }
+
+        try {
+            BigDecimal budget = new BigDecimal(reqBudgetField.getText().trim());
+            if (budget.compareTo(BigDecimal.ZERO) <= 0) { showError(reqBudgetError, "Budget must be positive."); isValid = false; }
+        } catch(Exception e) {
+            showError(reqBudgetError, "Invalid number."); isValid = false;
+        }
+
+        LocalDate sd = reqStartDatePicker.getValue();
+        LocalDate ed = reqEndDatePicker.getValue();
+        if (sd == null) { showError(reqStartDateError, "Start Date is required."); isValid = false; }
+        if (ed == null) { showError(reqEndDateError, "End Date is required."); isValid = false; }
+        if (sd != null && ed != null && !ed.isAfter(sd)) { showError(reqEndDateError, "End Date must be after Start Date."); isValid = false; }
+        if (reqManagerBox.getSelectionModel().getSelectedItem() == null) { showError(reqManagerError, "Manager is required."); isValid = false; }
+        if (reqPartnerBox.getSelectionModel().getSelectedItem() == null) { showError(reqPartnerError, "Partner is required."); isValid = false; }
+
+        return isValid;
+    }
+
+    private void resetErrors() {
+        reqTitleError.setVisible(false); reqTitleError.setManaged(false);
+        reqBudgetError.setVisible(false); reqBudgetError.setManaged(false);
+        reqStartDateError.setVisible(false); reqStartDateError.setManaged(false);
+        reqEndDateError.setVisible(false); reqEndDateError.setManaged(false);
+        reqManagerError.setVisible(false); reqManagerError.setManaged(false);
+        reqPartnerError.setVisible(false); reqPartnerError.setManaged(false);
+    }
+
+    private void showError(Label label, String msg) {
+        label.setText("⚠ " + msg);
+        label.setVisible(true);
+        label.setManaged(true);
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void onAssistDescription() {
+        String original = reqDescArea.getText();
+        if (original == null || original.trim().isEmpty()) return;
+        
+        // Show loading state
+        reqDescArea.setDisable(true);
+        reqDescArea.setPromptText("Generating formal business text...");
+        
+        new Thread(() -> {
+            String rephrased = utils.GroqAssistService.getFormalBusinessText("description", original);
+            javafx.application.Platform.runLater(() -> {
+                reqDescArea.setText(rephrased);
+                reqDescArea.setDisable(false);
+            });
+            if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
+                aiAssistLogService.logUsage("description", original, rephrased);
+            }
+        }).start();
+    }
+
+    @FXML
+    private void onAssistDeliverables() {
+        String original = reqDeliverablesArea.getText();
+        if (original == null || original.trim().isEmpty()) return;
+        
+        reqDeliverablesArea.setDisable(true);
+        reqDeliverablesArea.setPromptText("Generating formal deliverables text...");
+        
+        new Thread(() -> {
+            String rephrased = utils.GroqAssistService.getFormalBusinessText("deliverables", original);
+            javafx.application.Platform.runLater(() -> {
+                reqDeliverablesArea.setText(rephrased);
+                reqDeliverablesArea.setDisable(false);
+            });
+            if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
+                aiAssistLogService.logUsage("deliverables", original, rephrased);
+            }
+        }).start();
+    }
+
+    @FXML
+    private void onAssistPaymentTerms() {
+        String original = reqPaymentTermsArea.getText();
+        if (original == null || original.trim().isEmpty()) return;
+        
+        reqPaymentTermsArea.setDisable(true);
+        reqPaymentTermsArea.setPromptText("Generating formal payment terms...");
+        
+        new Thread(() -> {
+            String rephrased = utils.GroqAssistService.getFormalBusinessText("payment_terms", original);
+            javafx.application.Platform.runLater(() -> {
+                reqPaymentTermsArea.setText(rephrased);
+                reqPaymentTermsArea.setDisable(false);
+            });
+            if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
+                aiAssistLogService.logUsage("payment_terms", original, rephrased);
+            }
+        }).start();
+    }
+}
