@@ -6,8 +6,9 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import services.EventService;
 
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 import utils.GeminiService;
 import utils.ImgBBService;
+import utils.MeetingLinkGenerator;
 import java.io.File;
 import javafx.stage.FileChooser;
 import utils.WeatherService;
@@ -48,6 +50,12 @@ public class EventController {
     private TextField txtImagePath;
     @FXML
     private Label lblWeather;
+    @FXML
+    private TextField txtMeetingLink;
+    @FXML
+    private Label lblMeetingLink;
+    @FXML
+    private HBox hboxMeetingLink;
 
     private EventService eventService = new EventService();
 
@@ -94,6 +102,18 @@ public class EventController {
             txtOrganizer.setText(event.getOrganizer());
             txtDescription.setText(event.getDescription());
             txtImagePath.setText(event.getImagePath() != null ? event.getImagePath() : "");
+            // Restore meeting link visibility and value when editing an Online event
+            boolean isOnline = "Online".equals(event.getType());
+            lblMeetingLink.setVisible(isOnline);
+            lblMeetingLink.setManaged(isOnline);
+            hboxMeetingLink.setVisible(isOnline);
+            hboxMeetingLink.setManaged(isOnline);
+            if (isOnline) {
+                String link = event.getMeetingLink();
+                txtMeetingLink.setText(link != null && !link.isBlank() ? link : MeetingLinkGenerator.generateJitsiLink());
+            } else {
+                txtMeetingLink.clear();
+            }
         }
     }
 
@@ -145,6 +165,43 @@ public class EventController {
         return true;
     }
 
+    // ── Meeting link helpers ────────────────────────────────────────────────
+
+    /** Called when the user changes the Type ComboBox. */
+    @FXML
+    void onTypeChanged(ActionEvent event) {
+        boolean isOnline = "Online".equals(cbType.getValue());
+        lblMeetingLink.setVisible(isOnline);
+        lblMeetingLink.setManaged(isOnline);
+        hboxMeetingLink.setVisible(isOnline);
+        hboxMeetingLink.setManaged(isOnline);
+        if (isOnline && (txtMeetingLink.getText() == null || txtMeetingLink.getText().isBlank())) {
+            txtMeetingLink.setText(MeetingLinkGenerator.generateJitsiLink());
+        } else if (!isOnline) {
+            txtMeetingLink.clear();
+        }
+    }
+
+    /** Copies the meeting link to the system clipboard. */
+    @FXML
+    void onCopyMeetingLink(ActionEvent event) {
+        String link = txtMeetingLink.getText();
+        if (link != null && !link.isBlank()) {
+            ClipboardContent content = new ClipboardContent();
+            content.putString(link);
+            Clipboard.getSystemClipboard().setContent(content);
+            showAlert("Copied!", "Meeting link copied to clipboard.", Alert.AlertType.INFORMATION);
+        }
+    }
+
+    /** Generates a fresh Jitsi link replacing the current one. */
+    @FXML
+    void onRegenerateMeetingLink(ActionEvent event) {
+        txtMeetingLink.setText(MeetingLinkGenerator.generateJitsiLink());
+    }
+
+    // ── CRUD actions ────────────────────────────────────────────────────────
+
     @FXML
     void addEvent(ActionEvent event) {
         if (!validateForm()) return;
@@ -160,6 +217,8 @@ public class EventController {
             e.setDescription(txtDescription.getText());
             e.setImagePath(txtImagePath.getText());
             e.setCreatedAt(java.time.LocalDateTime.now().toString());
+            // Persist the auto-generated meeting link for Online events
+            e.setMeetingLink("Online".equals(cbType.getValue()) ? txtMeetingLink.getText() : null);
 
             eventService.ajouter(e);
             showAlert("Success", "Event added successfully!", Alert.AlertType.INFORMATION);
@@ -189,6 +248,7 @@ public class EventController {
             selectedEvent.setOrganizer(txtOrganizer.getText());
             selectedEvent.setDescription(txtDescription.getText());
             selectedEvent.setImagePath(txtImagePath.getText());
+            selectedEvent.setMeetingLink("Online".equals(cbType.getValue()) ? txtMeetingLink.getText() : null);
 
             eventService.modifier(selectedEvent);
             showAlert("Success", "Event updated successfully!", Alert.AlertType.INFORMATION);
@@ -331,7 +391,13 @@ public class EventController {
         txtOrganizer.clear();
         txtDescription.clear();
         txtImagePath.clear();
+        txtMeetingLink.clear();
         lblWeather.setText("");
+        // Hide the meeting link row when form is cleared
+        lblMeetingLink.setVisible(false);
+        lblMeetingLink.setManaged(false);
+        hboxMeetingLink.setVisible(false);
+        hboxMeetingLink.setManaged(false);
     }
 
     private void showAlert(String title, String content, Alert.AlertType type) {

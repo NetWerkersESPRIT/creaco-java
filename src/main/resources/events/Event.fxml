@@ -67,30 +67,40 @@
                                         <TextField fx:id="txtName" promptText="Enter event name" styleClass="search-bar" GridPane.columnIndex="1" />
 
                                         <Label text="Type:" styleClass="subtitle-label" GridPane.rowIndex="1" />
-                                        <ComboBox fx:id="cbType" promptText="Select type" maxWidth="Infinity" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <ComboBox fx:id="cbType" promptText="Select type" maxWidth="Infinity" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="1" onAction="#onTypeChanged" />
 
-                                        <Label text="Category:" styleClass="subtitle-label" GridPane.rowIndex="2" />
-                                        <TextField fx:id="txtCategory" promptText="e.g. Technology" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <!-- Meeting Link row – only visible for Online events -->
+                                        <Label fx:id="lblMeetingLink" text="Meeting Link:" styleClass="subtitle-label" GridPane.rowIndex="2" managed="false" visible="false" />
+                                        <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="hboxMeetingLink" managed="false" visible="false">
+                                            <children>
+                                                <TextField fx:id="txtMeetingLink" editable="false" promptText="Auto-generated link" styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#onCopyMeetingLink" style="-fx-padding: 5 10; -fx-background-color: #4a5568;" styleClass="btn-primary" text="📋" />
+                                                <Button onAction="#onRegenerateMeetingLink" style="-fx-padding: 5 10; -fx-background-color: #667eea;" styleClass="btn-primary" text="🔄" />
+                                            </children>
+                                        </HBox>
 
-                                        <Label text="Date:" styleClass="subtitle-label" GridPane.rowIndex="3" />
-                                        <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                        <Label text="Category:" styleClass="subtitle-label" GridPane.rowIndex="3" />
+                                        <TextField fx:id="txtCategory" promptText="e.g. Technology" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                        <Label text="Date:" styleClass="subtitle-label" GridPane.rowIndex="4" />
+                                        <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                             <children>
                                                 <DatePicker fx:id="dpDate" maxWidth="1.7976931348623157E308" onAction="#onDateSelected" />
                                                 <Label fx:id="lblWeather" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px; -fx-font-weight: bold;" text="" />
                                             </children>
                                         </VBox>
 
-                                        <Label text="Time:" styleClass="subtitle-label" GridPane.rowIndex="4" />
-                                        <TextField fx:id="txtTime" promptText="HH:mm" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                        <Label text="Time:" styleClass="subtitle-label" GridPane.rowIndex="5" />
+                                        <TextField fx:id="txtTime" promptText="HH:mm" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
-                                        <Label text="Capacity:" styleClass="subtitle-label" GridPane.rowIndex="5" />
-                                        <TextField fx:id="txtCapacity" promptText="Max participants" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                        <Label text="Capacity:" styleClass="subtitle-label" GridPane.rowIndex="6" />
+                                        <TextField fx:id="txtCapacity" promptText="Max participants" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="6" />
 
-                                        <Label text="Organizer:" styleClass="subtitle-label" GridPane.rowIndex="6" />
-                                        <TextField fx:id="txtOrganizer" promptText="Organizer name" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                        <Label text="Organizer:" styleClass="subtitle-label" GridPane.rowIndex="7" />
+                                        <TextField fx:id="txtOrganizer" promptText="Organizer name" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="7" />
 
-                                        <Label text="Image:" styleClass="subtitle-label" GridPane.rowIndex="7" />
-                                        <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                        <Label text="Image:" styleClass="subtitle-label" GridPane.rowIndex="8" />
+                                        <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
                                             <children>
                                                 <TextField fx:id="txtImagePath" editable="false" promptText="Upload image..." styleClass="search-bar" HBox.hgrow="ALWAYS" />
                                                 <Button onAction="#onUploadImage" style="-fx-padding: 5 10; -fx-background-color: #4a5568;" styleClass="btn-primary" text="📁" />
