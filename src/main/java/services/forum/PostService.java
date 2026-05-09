@@ -233,7 +233,7 @@ public class PostService implements ForumInterface<Post> {
      */
     public List<Post> getPendingPosts() throws SQLException {
         List<Post> posts = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE status IN ('PENDING', 'FLAGGED', 'PENDING_VISITOR') ORDER BY created_at ASC";
+        String sql = "SELECT * FROM post WHERE status IN ('pending', 'PENDING', 'FLAGGED', 'PENDING_VISITOR') ORDER BY created_at ASC";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
@@ -266,7 +266,7 @@ public class PostService implements ForumInterface<Post> {
      */
     public List<Post> getAcceptedPosts() throws SQLException {
         List<Post> posts = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE status IN ('ACCEPTED', 'APPROVED') ORDER BY pinned DESC, created_at DESC";
+        String sql = "SELECT * FROM post WHERE status IN ('published', 'solved', 'ACCEPTED', 'APPROVED') ORDER BY pinned DESC, created_at DESC";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {

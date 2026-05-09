@@ -6,14 +6,16 @@ import org.json.JSONObject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Properties;
 
 public class TextCorrectionService {
+    /** Circuit-breaker: skip all calls once we know credits are exhausted. */
+    private static volatile boolean apiUnavailable = false;
     private static String API_KEY;
     private static final String API_URL = "https://api.apiverve.com/v1/spellchecker";
 
@@ -40,12 +42,14 @@ public class TextCorrectionService {
      * @return The corrected text, or the original text if correction fails.
      */
     public static String correctText(String text) {
-        if (text == null || text.trim().isEmpty()) {
+        if (text == null || text.trim().isEmpty() || apiUnavailable) {
             return text;
         }
 
         try {
-            HttpClient client = HttpClient.newHttpClient();
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(2))
+                    .build();
             JSONObject bodyObj = new JSONObject();
             bodyObj.put("text", text);
 
@@ -53,17 +57,24 @@ public class TextCorrectionService {
                     .uri(URI.create(API_URL))
                     .header("x-api-key", API_KEY)
                     .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(2))
                     .POST(HttpRequest.BodyPublishers.ofString(bodyObj.toString(), StandardCharsets.UTF_8))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("[TextCorrectionService] API Response: " + response.body());
 
-            if (response.statusCode() == 200) {
-                //convertir
-                JSONObject jsonResponse = new JSONObject(response.body());
-                //check api status
-                if ("ok".equals(jsonResponse.getString("status"))) {
+            JSONObject jsonResponse = new JSONObject(response.body());
+            // Detect credit exhaustion and trip circuit-breaker
+            if ("error".equals(jsonResponse.optString("status")) &&
+                    jsonResponse.optString("error", "").contains("credit")) {
+                apiUnavailable = true;
+                System.err.println("[TextCorrectionService] Credit limit reached — disabling API calls.");
+                return text;
+            }
+
+            if (response.statusCode() == 200 && "ok".equals(jsonResponse.optString("status"))) {
+                {
                     /**this contains:
                     //corrections list
                    words to fix */

@@ -19,29 +19,20 @@ public class ModerationService {
             return text;
         }
 
-        // filter
         String cleanedText = text;
         for (String word : BAD_WORDS) {
-            // el maj w el min "toxic" matches, but "detoxical" won't
-            //protect other charecters
+            // Regex for case-insensitive, whole word replacement
+            // (?i) makes it case-insensitive
+            // \\b ensures it matches whole words only
             String regex = "(?i)\\b" + Pattern.quote(word) + "\\b";
             cleanedText = cleanedText.replaceAll(regex, "***");
         }
-
-        // api calls
-        try {
-            utils.DetectBadWordService.ModerationResult apiResult = utils.DetectBadWordService.moderate(cleanedText).join();
-            if (apiResult != null && apiResult.moderatedText != null) {
-                cleanedText = apiResult.moderatedText;
-            }
-        } catch (Exception e) {
-            System.err.println("[ModerationService] API Filter failed, using local result: " + e.getMessage());
-        }
-
         return cleanedText;
     }
 
-    // does contain any bad words
+    /**
+     * Checks if the text contains any profanity.
+     */
     public static boolean containsProfanity(String text) {
         if (text == null || text.isEmpty()) {
             return false;
@@ -55,7 +46,9 @@ public class ModerationService {
         return false;
     }
 
-   //This counts how many bad words exist
+    /**
+     * Counts how many profane words are present in the text.
+     */
     public static int countProfaneWords(String text) {
         if (text == null || text.isEmpty()) {
             return 0;

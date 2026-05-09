@@ -212,7 +212,7 @@ public class DisplayCommentController {
             // Filter comments: Hide "HIDDEN" comments unless you are the owner or post
             // owner
             List<Comment> visibleComments = allComments.stream()
-                    .filter(c -> !"HIDDEN".equals(c.getStatus()) || c.getUserId() == curUserId || isPostOwner
+                    .filter(c -> !"hidden".equals(c.getStatus()) || c.getUserId() == curUserId || isPostOwner
                             || isAdminMode)
                     .collect(Collectors.toList());
 
@@ -315,12 +315,12 @@ public class DisplayCommentController {
         uTxt.setStyle("-fx-font-weight: bold; -fx-fill: #1a1a2e; -fx-font-size: 13px;");
 
         String finalContent = textContent;
-        if ("HIDDEN".equals(comment.getStatus())) {
+        if ("hidden".equals(comment.getStatus())) {
             finalContent = "[HIDDEN BY POST OWNER] " + textContent;
         }
 
         javafx.scene.text.Text bTxt = new javafx.scene.text.Text(finalContent);
-        if ("HIDDEN".equals(comment.getStatus())) {
+        if ("hidden".equals(comment.getStatus())) {
             bTxt.setStyle("-fx-fill: #94a3b8; -fx-font-style: italic; -fx-font-size: 13px;");
         } else {
             bTxt.setStyle("-fx-fill: #4a5568; -fx-font-size: 13px;");
@@ -447,7 +447,7 @@ public class DisplayCommentController {
 
         // Hide/Unhide button (Only Post Owner can hide)
         if (isPostOwner && comment.getUserId() != curUserId) {
-            boolean isHidden = "HIDDEN".equals(comment.getStatus());
+            boolean isHidden = "hidden".equals(comment.getStatus());
             Button hideBtn = new Button(isHidden ? "Unhide" : "Hide");
             hideBtn.setStyle("-fx-font-weight: bold; " + metaStyle);
             hideBtn.setOnMouseEntered(e -> hideBtn.setStyle("-fx-font-weight: bold; " + metaHover));
@@ -718,7 +718,7 @@ public class DisplayCommentController {
                 comment.setProfane(isProfane);
                 comment.setProfaneWords(pWords);
                 comment.setGrammarErrors(gErrors);
-                comment.setStatus(isProfane ? "FLAGGED" : "APPROVED");
+                comment.setStatus(isProfane ? "pending" : "visible");
                 comment.setCreatedAt(LocalDateTime.now());
 
                 commentService.ajouter(comment);
@@ -758,7 +758,7 @@ public class DisplayCommentController {
 
                 comment.setBody(processedText);
                 comment.setProfane(isProfane);
-                comment.setStatus(isProfane ? "FLAGGED" : "APPROVED");
+                comment.setStatus(isProfane ? "pending" : "visible");
                 commentService.modifier(comment.getId(), comment);
                 return null;
             }
@@ -788,7 +788,7 @@ public class DisplayCommentController {
 
                 reply.setBody(processedText);
                 reply.setProfane(isProfane);
-                reply.setStatus(isProfane ? "FLAGGED" : "APPROVED");
+                reply.setStatus(isProfane ? "pending" : "visible");
 
                 reply.setCreatedAt(LocalDateTime.now());
                 commentService.ajouter(reply);

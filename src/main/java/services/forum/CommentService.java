@@ -34,7 +34,11 @@ public class CommentService implements ForumInterface<Comment> {
         ps.setString(2, comment.getStatus());
         ps.setInt(3, comment.getLikes());
         ps.setInt(4, comment.getPostId());
-        ps.setInt(5, comment.getUserId());
+        if (comment.getUserId() > 0) {
+            ps.setInt(5, comment.getUserId());
+        } else {
+            ps.setNull(5, Types.INTEGER);
+        }
         if (comment.getParentCommentId() != null) {
             ps.setInt(6, comment.getParentCommentId());
         } else {
@@ -99,7 +103,11 @@ public class CommentService implements ForumInterface<Comment> {
         
         ps.setString(2, comment.getStatus());
         ps.setInt(3, comment.getPostId());
-        ps.setInt(4, comment.getUserId());
+        if (comment.getUserId() > 0) {
+            ps.setInt(4, comment.getUserId());
+        } else {
+            ps.setNull(4, Types.INTEGER);
+        }
         ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
         ps.setInt(6, id);
         ps.executeUpdate();
