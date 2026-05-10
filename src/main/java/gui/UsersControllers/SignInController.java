@@ -5,15 +5,15 @@ import services.UsersService;
 import utils.SessionManager;
 import utils.GoogleAuthService;
 import com.google.api.services.oauth2.model.Userinfo;
-import javafx.concurrent.Worker;
+// import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
+// import javafx.scene.web.WebEngine;
+// import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -32,12 +32,12 @@ public class SignInController {
     private TextField txtPasswordVisible;
     @FXML
     private Button btnTogglePassword;
-    @FXML
-    private WebView webViewRecaptcha;
+//    @FXML
+//    private WebView webViewRecaptcha;
     @FXML
     private Label lblMessage;
 
-    private String recaptchaToken = null;
+//    private String recaptchaToken = null;
     private final UsersService usersService = new UsersService();
 
     @FXML
@@ -48,75 +48,75 @@ public class SignInController {
                 if (stage != null) stage.setMaximized(true);
             }
         });
-        setupRecaptcha();
+//        setupRecaptcha();
     }
 
-    private void setupRecaptcha() {
-        WebEngine engine = webViewRecaptcha.getEngine();
-
-        // 1. Load Site Key from config.properties
-        Properties props = new Properties();
-        String siteKey = "";
-        File configFile = new File("config.properties");
-
-        System.out.println("[reCAPTCHA] Looking for config at: " + configFile.getAbsolutePath());
-
-        if (configFile.exists()) {
-            try (FileInputStream fis = new FileInputStream(configFile)) {
-                props.load(fis);
-                siteKey = props.getProperty("RECAPTCHA_SITE_KEY", "").trim();
-                System.out.println("[reCAPTCHA] Key loaded (Length: " + siteKey.length() + ")");
-            } catch (IOException e) {
-                System.err.println("[reCAPTCHA] Error loading config.properties: " + e.getMessage());
-            }
-        } else {
-            System.err.println("[reCAPTCHA] config.properties NOT FOUND at root!");
-        }
-
-        final String finalSiteKey = siteKey;
-
-        // 2. Load the static HTML via XAMPP localhost (avoids file:// domain restriction for reCAPTCHA)
-        String recaptchaUrl = "http://localhost/recaptcha.html";
-        engine.load(recaptchaUrl);
-
-        // 3. Once the page loads: register Java bridge + inject site key
-        engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-                System.out.println("[reCAPTCHA] Page loaded, registering Java bridge...");
-                try {
-                    // Expose this controller to JavaScript as window.javaApp
-                    netscape.javascript.JSObject window =
-                            (netscape.javascript.JSObject) engine.executeScript("window");
-                    window.setMember("javaApp", this);
-
-                    // Inject site key into the widget
-                    engine.executeScript("initRecaptcha('" + finalSiteKey + "')");
-                    System.out.println("[reCAPTCHA] Bridge registered and key injected.");
-                } catch (Exception e) {
-                    System.err.println("[reCAPTCHA] Bridge setup failed: " + e.getMessage());
-                }
-            }
-        });
-    }
-
-    /**
-     * Called by JavaScript (window.javaApp.onToken) when reCAPTCHA is solved.
-     * Must be public so the JS bridge can invoke it via reflection.
-     */
-    public void onToken(String token) {
-        System.out.println("[reCAPTCHA] Token received via bridge, length=" + token.length());
-        recaptchaToken = token;
-        javafx.application.Platform.runLater(() -> showSuccess("✅ Verification successful!"));
-    }
-
-    /**
-     * Called by JavaScript (window.javaApp.onExpired) when reCAPTCHA expires.
-     */
-    public void onExpired() {
-        System.out.println("[reCAPTCHA] Token expired.");
-        recaptchaToken = null;
-        javafx.application.Platform.runLater(() -> showError("❌ Verification expired. Please try again."));
-    }
+//    private void setupRecaptcha() {
+//        WebEngine engine = webViewRecaptcha.getEngine();
+//
+//        // 1. Load Site Key from config.properties
+//        Properties props = new Properties();
+//        String siteKey = "";
+//        File configFile = new File("config.properties");
+//
+//        System.out.println("[reCAPTCHA] Looking for config at: " + configFile.getAbsolutePath());
+//
+//        if (configFile.exists()) {
+//            try (FileInputStream fis = new FileInputStream(configFile)) {
+//                props.load(fis);
+//                siteKey = props.getProperty("RECAPTCHA_SITE_KEY", "").trim();
+//                System.out.println("[reCAPTCHA] Key loaded (Length: " + siteKey.length() + ")");
+//            } catch (IOException e) {
+//                System.err.println("[reCAPTCHA] Error loading config.properties: " + e.getMessage());
+//            }
+//        } else {
+//            System.err.println("[reCAPTCHA] config.properties NOT FOUND at root!");
+//        }
+//
+//        final String finalSiteKey = siteKey;
+//
+//        // 2. Load the static HTML via XAMPP localhost (avoids file:// domain restriction for reCAPTCHA)
+//        String recaptchaUrl = "http://localhost/recaptcha.html";
+//        engine.load(recaptchaUrl);
+//
+//        // 3. Once the page loads: register Java bridge + inject site key
+//        engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+//            if (newState == Worker.State.SUCCEEDED) {
+//                System.out.println("[reCAPTCHA] Page loaded, registering Java bridge...");
+//                try {
+//                    // Expose this controller to JavaScript as window.javaApp
+//                    netscape.javascript.JSObject window =
+//                            (netscape.javascript.JSObject) engine.executeScript("window");
+//                    window.setMember("javaApp", this);
+//
+//                    // Inject site key into the widget
+//                    engine.executeScript("initRecaptcha('" + finalSiteKey + "')");
+//                    System.out.println("[reCAPTCHA] Bridge registered and key injected.");
+//                } catch (Exception e) {
+//                    System.err.println("[reCAPTCHA] Bridge setup failed: " + e.getMessage());
+//                }
+//            }
+//        });
+//    }
+//
+//    /**
+//     * Called by JavaScript (window.javaApp.onToken) when reCAPTCHA is solved.
+//     * Must be public so the JS bridge can invoke it via reflection.
+//     */
+//    public void onToken(String token) {
+//        System.out.println("[reCAPTCHA] Token received via bridge, length=" + token.length());
+//        recaptchaToken = token;
+//        javafx.application.Platform.runLater(() -> showSuccess("✅ Verification successful!"));
+//    }
+//
+//    /**
+//     * Called by JavaScript (window.javaApp.onExpired) when reCAPTCHA expires.
+//     */
+//    public void onExpired() {
+//        System.out.println("[reCAPTCHA] Token expired.");
+//        recaptchaToken = null;
+//        javafx.application.Platform.runLater(() -> showError("❌ Verification expired. Please try again."));
+//    }
 
     @FXML
     public void handleLogin() {
@@ -129,10 +129,10 @@ public class SignInController {
         }
  
         
-        if (recaptchaToken == null || recaptchaToken.isEmpty()) {
-            showError("❌ Please complete the security verification.");
-            return;
-        }
+//        if (recaptchaToken == null || recaptchaToken.isEmpty()) {
+//            showError("❌ Please complete the security verification.");
+//            return;
+//        }
 
         if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
             showError("❌ Invalid email address format.");
@@ -170,7 +170,8 @@ public class SignInController {
             SessionManager.getInstance().setCurrentUser(user);
 
             Stage stage = (Stage) txtEmail.getScene().getWindow();
-            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml")));
+            String fxmlFile = "/gui/front-first-view.fxml";
+            stage.getScene().setRoot(FXMLLoader.load(getClass().getResource(fxmlFile)));
             stage.setMaximized(true);
             stage.setTitle("CreaCo Dashboard");
 
@@ -214,7 +215,7 @@ public class SignInController {
             showSuccess("✅ Signed in with Google!");
             
             Stage stage = (Stage) txtEmail.getScene().getWindow();
-            String fxmlFile = user.getRole().equals("ADMIN") ? "/gui/AdminDashboard.fxml" : "/gui/front-main-view.fxml";
+            String fxmlFile = "/gui/front-first-view.fxml";
             stage.getScene().setRoot(FXMLLoader.load(getClass().getResource(fxmlFile)));
             stage.setMaximized(true);
 

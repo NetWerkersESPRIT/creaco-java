@@ -9,9 +9,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TextField;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 import services.CourseService;
 
@@ -69,7 +69,16 @@ public class CourseFormController {
     private Label durationErrorLabel;
 
     @FXML
-    private TextArea descriptionArea;
+    private HTMLEditor descriptionEditor;
+
+    @FXML
+    private javafx.scene.image.ImageView imagePreview;
+
+    @FXML
+    private TextField imagePathField;
+
+    @FXML
+    private Label noImageLabel;
 
     private Course course;
     private CourseCategory returnCategory;
@@ -116,11 +125,11 @@ public class CourseFormController {
         Course target = creating ? new Course() : course;
 
         target.setTitre(titleField.getText().trim());
-        target.setDescription(descriptionArea.getText().trim());
+        target.setDescription(descriptionEditor.getHtmlText());
         target.setStatut(publishedRadio.isSelected() ? "Published" : "Draft");
         target.setNiveau(levelCombo.getValue());
         target.setDateDeModification(LocalDateTime.now().toString());
-        target.setImage(target.getImage() != null ? target.getImage() : "");
+        target.setImage(imagePathField.getText().trim());
 
         // Handle category selection
         String selectedCategory = categoryCombo.getValue();
@@ -158,7 +167,7 @@ public class CourseFormController {
             }
             openCoursesPage();
         } catch (Exception exception) {
-            AlertHelper.showError("Save Error", "Unable to save the course: " + exception.getMessage());
+            gui.util.AlertHelper.showError("Save Error", "Unable to save the course: " + exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -232,7 +241,7 @@ public class CourseFormController {
         }
 
         if (!valid) {
-            AlertHelper.showError("Validation error", "Please correct the highlighted fields before saving.");
+            gui.util.AlertHelper.showError("Validation error", "Please correct the highlighted fields before saving.");
         }
 
         return valid;
@@ -270,6 +279,38 @@ public class CourseFormController {
         openCoursesPage();
     }
 
+    @FXML
+    private void onUploadImage() {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Select Course Image");
+        fileChooser.getExtensionFilters().addAll(
+            new javafx.stage.FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+        
+        java.io.File selectedFile = fileChooser.showOpenDialog(imagePreview.getScene().getWindow());
+        if (selectedFile != null) {
+            String path = selectedFile.toURI().toString();
+            imagePathField.setText(path);
+            updateImagePreview(path);
+        }
+    }
+
+    private void updateImagePreview(String imagePath) {
+        if (imagePath != null && !imagePath.isBlank()) {
+            try {
+                javafx.scene.image.Image img = new javafx.scene.image.Image(imagePath, true);
+                imagePreview.setImage(img);
+                noImageLabel.setVisible(false);
+            } catch (Exception e) {
+                imagePreview.setImage(null);
+                noImageLabel.setVisible(true);
+            }
+        } else {
+            imagePreview.setImage(null);
+            noImageLabel.setVisible(true);
+        }
+    }
+
     private void loadCategories() throws SQLException {
         categoryNameToId.clear();
         categoryCombo.getItems().clear();
@@ -291,14 +332,14 @@ public class CourseFormController {
             publishedRadio.setSelected(true);
             levelCombo.setValue(null);           // Shows prompt text "Select level"
             durationField.clear();
-            descriptionArea.clear();
+            descriptionEditor.setHtmlText("");
             titleField.clear();
             return;
         }
 
         // Editing existing course
         titleField.setText(course.getTitre() != null ? course.getTitre() : "");
-        descriptionArea.setText(course.getDescription() != null ? course.getDescription() : "");
+        descriptionEditor.setHtmlText(course.getDescription() != null ? course.getDescription() : "");
 
         // Set category
         String selectedCategory = categoryNameToId.entrySet().stream()
@@ -322,6 +363,10 @@ public class CourseFormController {
 
         // Set duration
         durationField.setText(course.getDureeEstimee() == null ? "" : String.valueOf(course.getDureeEstimee()));
+        
+        // Set image
+        imagePathField.setText(course.getImage() != null ? course.getImage() : "");
+        updateImagePreview(course.getImage());
     }
 
     private void openCoursesPage() {
@@ -330,7 +375,7 @@ public class CourseFormController {
             if (returnCategory != null) {
                 loader = new FXMLLoader(getClass().getResource("/gui/category-courses-view.fxml"));
             } else {
-                loader = new FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
+                loader = new FXMLLoader(getClass().getResource("/gui/admin-courses-view.fxml"));
             }
 
             Parent root = loader.load();
@@ -340,8 +385,17 @@ public class CourseFormController {
                 controller.setCategory(returnCategory);
             }
 
-            Stage stage = (Stage) titleField.getScene().getWindow();
-            stage.getScene().setRoot(root);
+            if (FrontMainController.getInstance() != null) {
+                if (returnCategory != null) {
+                    FrontMainController.setNavbarText("Category: " + returnCategory.getNom(), "Pages / Courses / Category");
+                } else {
+                    FrontMainController.setNavbarText("Courses Dashboard", "Pages / Courses");
+                }
+                FrontMainController.getInstance().setContent(root);
+            } else {
+                Stage stage = (Stage) titleField.getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
 
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to return to the courses page.", exception);
@@ -374,10 +428,7 @@ public class CourseFormController {
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("(^-|-$)", "");
     }
-    @javafx.fxml.FXML
-    public void goToPreview(javafx.event.ActionEvent event) {
-        gui.PreviewHelper.goToPreview(event);
-    }
+
 
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {

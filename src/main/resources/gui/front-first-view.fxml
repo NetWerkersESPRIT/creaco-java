@@ -196,13 +196,6 @@
                         <Insets top="24" left="24" right="24" bottom="0"/>
                     </padding>
                     <children>
-                        <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
-                               style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
-                            <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #854d0e; -fx-font-size: 14;" />
-                            <Region HBox.hgrow="ALWAYS" />
-                            <Button text="Exit Preview" onAction="#exitPreview"
-                                     style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
-                        </HBox>
 
                         <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
                             <children>
@@ -268,52 +261,6 @@
                                         <Insets bottom="24" left="24" right="24" top="24" />
                                     </padding>
                                     <children>
-                                        <!-- Dashboard Header Section -->
-                                        <GridPane hgap="22.0">
-                                            <columnConstraints>
-                                                <ColumnConstraints hgrow="ALWAYS" percentWidth="72.0" />
-                                                <ColumnConstraints hgrow="ALWAYS" percentWidth="28.0" />
-                                            </columnConstraints>
-                                            <children>
-                                                <!-- Workshop Discovery Card -->
-                                                <VBox styleClass="card" GridPane.columnIndex="0">
-                                                    <children>
-                                                        <VBox spacing="5.0">
-                                                            <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" text="Discover our workshops" />
-                                                            <Label styleClass="subtitle-label" text="Choose a category to explore available courses and resources." />
-                                                        </VBox>
-                                                        <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                                            <TextField fx:id="searchField" promptText="Rechercher" styleClass="search-bar" HBox.hgrow="ALWAYS" />
-                                                            <HBox fx:id="boxAdminActions" spacing="10.0">
-                                                                <children>
-                                                                    <Button onAction="#onManageCategories" prefHeight="45.0" styleClass="btn-primary" text="Manage Categories" />
-                                                                    <Button onAction="#onAddCourse" prefHeight="45.0" style="-fx-background-color: #2d3748; -fx-text-fill: white;" styleClass="btn-primary" text="+ Add Course" />
-                                                                </children>
-                                                            </HBox>
-                                                        </HBox>
-                                                    </children>
-                                                </VBox>
-
-                                                <!-- Mentoring Support Card -->
-                                                <VBox spacing="15.0" styleClass="mentoring-card" GridPane.columnIndex="1">
-                                                    <children>
-                                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                                            <Label style="-fx-font-size: 20px;" text="🤝" />
-                                                            <Label styleClass="mentoring-title" text="Mentoring Support" />
-                                                        </HBox>
-                                                        <Label styleClass="mentoring-subtitle" text="You have pending questions from creators." wrapText="true" />
-                                                        <Button onAction="#onViewQuestions" prefWidth="Infinity" styleClass="btn-mentoring" text="View Questions" />
-                                                    </children>
-                                                </VBox>
-                                            </children>
-                                        </GridPane>
-
-                                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                                            <content>
-                                                <FlowPane fx:id="coursesContainer" alignment="TOP_LEFT" hgap="24.0" prefWrapLength="1000" style="-fx-padding: 10 5;" vgap="24.0">
-                                                </FlowPane>
-                                            </content>
-                                        </ScrollPane>
                                     </children>
                                 </VBox>
                             </children>

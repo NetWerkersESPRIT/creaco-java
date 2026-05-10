@@ -47,7 +47,7 @@ public class CourseCategoryListController {
 
     @FXML
     private void onBackToCourses() {
-        openScene("/gui/main-view.fxml", null);
+        openScene("/gui/admin-courses-view.fxml", null);
     }
 
     @FXML
@@ -98,7 +98,7 @@ public class CourseCategoryListController {
         slugLabel.getStyleClass().add("card-subtitle");
         nameBox.getChildren().addAll(nameLabel, slugLabel);
 
-        Label descriptionLabel = new Label(safeText(category.getDescription()));
+        Label descriptionLabel = new Label(stripHtmlTags(safeText(category.getDescription())));
         descriptionLabel.setWrapText(true);
         descriptionLabel.setMinWidth(360);
         descriptionLabel.getStyleClass().add("card-subtitle");
@@ -116,9 +116,9 @@ public class CourseCategoryListController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actionsBox = new HBox(10);
-        Button coursesButton = createActionButton("Courses", "btn-action-dark");
-        Button editButton = createActionButton("Edit", "btn-action-dark");
-        Button deleteButton = createActionButton("Delete", "btn-action-light");
+        Button coursesButton = createIconButton("fas-layer-group", "btn-action-dark");
+        Button editButton = createIconButton("fas-edit", "btn-action-dark");
+        Button deleteButton = createIconButton("fas-trash-alt", "btn-action-light");
 
         coursesButton.setOnAction(event -> openScene("/gui/category-courses-view.fxml", controller -> {
             CategoryCoursesController coursesController = (CategoryCoursesController) controller;
@@ -129,17 +129,17 @@ public class CourseCategoryListController {
             formController.setCategory(category);
         }));
         deleteButton.setOnAction(event -> {
-            if (!AlertHelper.confirmDelete("category")) {
+            if (!gui.util.AlertHelper.confirmDelete("category")) {
                 return;
             }
             try {
                 courseCategoryService.supprimer(category.getId());
                 loadCategories();
                 statusLabel.setText("Category deleted successfully.");
-                AlertHelper.showInfo("Deleted", "Category deleted successfully.");
+                gui.util.AlertHelper.showInfo("Deleted", "Category deleted successfully.");
             } catch (SQLException exception) {
                 statusLabel.setText("Delete failed: " + exception.getMessage());
-                AlertHelper.showError("Delete failed", exception.getMessage());
+                gui.util.AlertHelper.showError("Delete failed", exception.getMessage());
             }
         });
 
@@ -148,10 +148,22 @@ public class CourseCategoryListController {
         return row;
     }
 
-    private Button createActionButton(String text, String colorClass) {
-        Button button = new Button(text);
-        button.getStyleClass().addAll("btn-action", colorClass);
-        button.setMinWidth(90);
+    private Button createIconButton(String iconCode, String colorClass) {
+        Button button = new Button();
+        org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon(iconCode);
+        icon.setIconSize(20);
+        
+        String baseStyle = "-fx-min-width: 44px; -fx-min-height: 44px; -fx-max-width: 44px; -fx-max-height: 44px; -fx-background-radius: 12px; -fx-cursor: hand; -fx-alignment: center; -fx-padding: 0;";
+        
+        if ("btn-action-dark".equals(colorClass)) {
+            icon.setIconColor(javafx.scene.paint.Color.WHITE);
+            button.setStyle(baseStyle + " -fx-background-color: #2d3748;");
+        } else {
+            icon.setIconColor(javafx.scene.paint.Color.BLACK);
+            button.setStyle(baseStyle + " -fx-background-color: #f1f5f9;");
+        }
+        
+        button.setGraphic(icon);
         return button;
     }
 
@@ -182,15 +194,15 @@ public class CourseCategoryListController {
         return value == null || value.isBlank() ? "-" : value;
     }
 
+    private String stripHtmlTags(String html) {
+        if (html == null) return "";
+        return html.replaceAll("<[^>]*>", "").replace("&nbsp;", " ").trim();
+    }
+
     @FunctionalInterface
     private interface ControllerInitializer {
         void initialize(Object controller);
     }
-    @javafx.fxml.FXML
-    public void goToPreview(javafx.event.ActionEvent event) {
-        gui.PreviewHelper.goToPreview(event);
-    }
-
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);

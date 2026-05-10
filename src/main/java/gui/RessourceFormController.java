@@ -178,13 +178,11 @@ public class RessourceFormController {
             throw new IllegalStateException("Unable to return to the resources page.", exception);
         }
     }
-    @javafx.fxml.FXML
-    public void goToPreview(javafx.event.ActionEvent event) {
-        gui.PreviewHelper.goToPreview(event);
-    }
+    
 
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
     }
 }
+

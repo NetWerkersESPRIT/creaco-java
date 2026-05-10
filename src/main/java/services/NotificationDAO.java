@@ -12,6 +12,41 @@ public class NotificationDAO {
 
     public NotificationDAO() {
         con = MyConnection.getInstance().getConnection();
+        if (con != null) {
+            createTableIfNotExists();
+        }
+    }
+
+    private void createTableIfNotExists() {
+        String createSql = "CREATE TABLE IF NOT EXISTS notification (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "message TEXT NOT NULL, " +
+                "is_read BOOLEAN DEFAULT FALSE, " +
+                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                "user_id_id INT NOT NULL, " +
+                "related_id INT, " +
+                "target_url VARCHAR(255), " +
+                "type VARCHAR(50), " +
+                "status VARCHAR(20)" +
+                ") ENGINE=InnoDB";
+        
+        boolean needsRecreate = false;
+        try (Statement st = con.createStatement()) {
+            st.executeQuery("SELECT 1 FROM notification LIMIT 1").close();
+        } catch (SQLException e) {
+            if (e.getMessage().contains("doesn't exist in engine") || e.getErrorCode() == 1146) {
+                needsRecreate = true;
+            }
+        }
+
+        try (Statement st = con.createStatement()) {
+            if (needsRecreate) {
+                st.executeUpdate("DROP TABLE IF EXISTS notification");
+            }
+            st.executeUpdate(createSql);
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to create/verify notification table: " + e.getMessage());
+        }
     }
 
     public void insertNotification(Notification n) throws SQLException {

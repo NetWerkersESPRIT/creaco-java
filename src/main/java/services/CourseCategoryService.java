@@ -13,6 +13,39 @@ public class CourseCategoryService {
 
     public CourseCategoryService() {
         con = MyConnection.getInstance().getConnection();
+        if (con != null) {
+            createTableIfNotExists();
+        }
+    }
+
+    private void createTableIfNotExists() {
+        String createSql = "CREATE TABLE IF NOT EXISTS categorie_cours (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "nom VARCHAR(255) NOT NULL, " +
+                "description TEXT, " +
+                "date_de_creation DATE, " +
+                "date_de_modification DATE, " +
+                "slug VARCHAR(255), " +
+                "deleted_at DATE" +
+                ") ENGINE=InnoDB";
+        
+        boolean needsRecreate = false;
+        try (Statement st = con.createStatement()) {
+            st.executeQuery("SELECT 1 FROM categorie_cours LIMIT 1").close();
+        } catch (SQLException e) {
+            if (e.getMessage().contains("doesn't exist in engine") || e.getErrorCode() == 1146) {
+                needsRecreate = true;
+            }
+        }
+
+        try (Statement st = con.createStatement()) {
+            if (needsRecreate) {
+                st.executeUpdate("DROP TABLE IF EXISTS categorie_cours");
+            }
+            st.executeUpdate(createSql);
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to create/verify categorie_cours table: " + e.getMessage());
+        }
     }
 
     // =========================

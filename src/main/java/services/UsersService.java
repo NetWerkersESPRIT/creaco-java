@@ -18,6 +18,76 @@ public class UsersService implements services.UsersInterface<Users> {
         con = MyConnection.getInstance().getConnection();
         if (con == null) {
             System.err.println("❌ UsersService: Connection is null! Database connection likely failed.");
+        } else {
+            createTableIfNotExists();
+        }
+    }
+
+    private void createTableIfNotExists() {
+        String createSql = "CREATE TABLE IF NOT EXISTS users (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "username VARCHAR(255) NOT NULL, " +
+                "email VARCHAR(255) NOT NULL UNIQUE, " +
+                "password VARCHAR(255) NOT NULL, " +
+                "role VARCHAR(50), " +
+                "numtel VARCHAR(20), " +
+                "points INT DEFAULT 0, " +
+                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                "is_banned BOOLEAN DEFAULT FALSE, " +
+                "image VARCHAR(255)" +
+                ") ENGINE=InnoDB";
+        
+        boolean needsRecreate = false;
+        try (Statement st = con.createStatement()) {
+            // Force a check by querying the table
+            st.executeQuery("SELECT 1 FROM users LIMIT 1").close();
+            System.out.println("✅ Users table exists and is accessible.");
+        } catch (SQLException e) {
+            if (e.getMessage().contains("doesn't exist in engine") || e.getErrorCode() == 1146) {
+                System.err.println("⚠️ Users table is corrupted or missing. Recreating...");
+                needsRecreate = true;
+            } else {
+                System.err.println("❌ Database check error: " + e.getMessage());
+            }
+        }
+
+        if (needsRecreate) {
+            try (Statement st = con.createStatement()) {
+                st.executeUpdate("DROP TABLE IF EXISTS users");
+                st.executeUpdate(createSql);
+                System.out.println("✅ Users table recreated successfully.");
+            } catch (SQLException e) {
+                System.err.println("❌ Failed to recreate users table: " + e.getMessage());
+            }
+        } else {
+            // If it didn't need recreate, still try to create it if it doesn't exist at all
+            try (Statement st = con.createStatement()) {
+                st.executeUpdate(createSql);
+            } catch (SQLException e) {
+                 // Ignore if it already exists
+            }
+        }
+        
+        // Always check for admin after verification
+        checkAndCreateDefaultAdmin();
+    }
+
+    private void checkAndCreateDefaultAdmin() {
+        String sql = "SELECT COUNT(*) FROM users WHERE role = 'ROLE_ADMIN'";
+        try (Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next() && rs.getInt(1) == 0) {
+                System.out.println("ℹ️ No admin found. Creating default admin...");
+                Users admin = new Users();
+                admin.setUsername("admin");
+                admin.setEmail("admin@creaco.tn");
+                admin.setPassword("admin123"); // Will be hashed in ajouter
+                admin.setRole("ROLE_ADMIN");
+                ajouter(admin);
+                System.out.println("✅ Default admin created: admin@creaco.tn / admin123");
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to check/create default admin: " + e.getMessage());
         }
     }
 

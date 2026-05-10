@@ -82,13 +82,13 @@
                 </VBox>
 
                 <!-- Google reCAPTCHA Section -->
-                <VBox spacing="8" alignment="CENTER">
-                    <Label style="-fx-padding: 0;" styleClass="section-header" text="SECURITY VERIFICATION" />
-                    <StackPane style="-fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12;"
-                               VBox.vgrow="SOMETIMES">
-                        <WebView fx:id="webViewRecaptcha" prefHeight="120" prefWidth="304" />
-                    </StackPane>
-                </VBox>
+<!--                <VBox spacing="8" alignment="CENTER">-->
+<!--                    <Label style="-fx-padding: 0;" styleClass="section-header" text="SECURITY VERIFICATION" />-->
+<!--                    <StackPane style="-fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12;"-->
+<!--                               VBox.vgrow="SOMETIMES">-->
+<!--                        <WebView fx:id="webViewRecaptcha" prefHeight="120" prefWidth="304" />-->
+<!--                    </StackPane>-->
+<!--                </VBox>-->
 
                 <Button maxWidth="Infinity" onAction="#handleLogin" prefHeight="45" styleClass="btn-primary" text="Sign In" />
 

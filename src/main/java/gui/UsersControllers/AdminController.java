@@ -356,7 +356,7 @@ public class AdminController {
     @FXML
     public void goBack() throws Exception {
         Stage stage = (Stage) usersList.getScene().getWindow();
-        stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/gui/front-main-view.fxml")));
+        stage.getScene().setRoot(FXMLLoader.load(getClass().getResource("/gui/front-first-view.fxml")));
         stage.setMaximized(true);
     }
 }
