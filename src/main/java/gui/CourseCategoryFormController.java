@@ -6,8 +6,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 import services.CourseCategoryService;
 
@@ -38,7 +38,7 @@ public class CourseCategoryFormController {
     private TextField slugField;
 
     @FXML
-    private TextArea descriptionArea;
+    private HTMLEditor descriptionEditor;
 
     public void setCategory(CourseCategory category) {
         this.category = category;
@@ -59,7 +59,7 @@ public class CourseCategoryFormController {
     private void onSave() {
         CourseCategory target = category == null ? new CourseCategory() : category;
         String name = nameField.getText() == null ? "" : nameField.getText().trim();
-        String description = descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
+        String description = descriptionEditor.getHtmlText() == null ? "" : descriptionEditor.getHtmlText().trim();
         String slug = slugField.getText() == null || slugField.getText().isBlank() ? toSlug(name) : slugField.getText().trim();
 
         if (!validateForm(name)) {
@@ -91,7 +91,7 @@ public class CourseCategoryFormController {
     private void populateForm() {
         nameField.setText(category.getNom());
         slugField.setText(category.getSlug());
-        descriptionArea.setText(category.getDescription());
+        descriptionEditor.setHtmlText(category.getDescription() == null ? "" : category.getDescription());
     }
 
     private boolean validateForm(String name) {
@@ -131,8 +131,12 @@ public class CourseCategoryFormController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/category-list-view.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) nameField.getScene().getWindow();
-            stage.getScene().setRoot(root);
+            if (gui.FrontMainController.getInstance() != null) {
+                gui.FrontMainController.getInstance().setContent(root);
+            } else {
+                Stage stage = (Stage) nameField.getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to return to the category list.", exception);
         }

@@ -283,11 +283,11 @@ public class MainController {
 
         VBox titleBox = new VBox(2);
         Label titleLabel = new Label(course.getTitre());
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+        titleLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
         titleLabel.setWrapText(true);
 
         Label categoryLabel = new Label(resolveCategoryName(course.getCategorieId()).toUpperCase());
-        categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 11px;");
+        categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 9px;");
 
         titleBox.getChildren().addAll(titleLabel, categoryLabel);
         HBox.setHgrow(titleBox, Priority.ALWAYS);
@@ -330,7 +330,7 @@ public class MainController {
 
     private void openRessources(Course course, Node sourceNode) {
         if (FrontMainController.getInstance() != null) {
-            FrontMainController.getInstance().openCourse(course);
+            FrontMainController.getInstance().openAdminCourse(course);
         } else {
             System.err.println("FrontMainController instance is null, cannot open course resources.");
         }

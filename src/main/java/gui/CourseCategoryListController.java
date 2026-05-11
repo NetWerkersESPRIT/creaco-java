@@ -47,7 +47,11 @@ public class CourseCategoryListController {
 
     @FXML
     private void onBackToCourses() {
-        openScene("/gui/admin-courses-view.fxml", null);
+        if (gui.FrontMainController.getInstance() != null) {
+            gui.FrontMainController.getInstance().onShowCourses();
+        } else {
+            openScene("/gui/admin-courses-view.fxml", null);
+        }
     }
 
     @FXML
@@ -116,14 +120,9 @@ public class CourseCategoryListController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actionsBox = new HBox(10);
-        Button coursesButton = createIconButton("fas-layer-group", "btn-action-dark");
-        Button editButton = createIconButton("fas-edit", "btn-action-dark");
-        Button deleteButton = createIconButton("fas-trash-alt", "btn-action-light");
+        Button editButton = createIconButton("📝", "btn-action-dark");
+        Button deleteButton = createIconButton("🗑", "btn-action-light");
 
-        coursesButton.setOnAction(event -> openScene("/gui/category-courses-view.fxml", controller -> {
-            CategoryCoursesController coursesController = (CategoryCoursesController) controller;
-            coursesController.setCategory(category);
-        }));
         editButton.setOnAction(event -> openScene("/gui/category-edit-form-view.fxml", controller -> {
             CourseCategoryFormController formController = (CourseCategoryFormController) controller;
             formController.setCategory(category);
@@ -143,27 +142,23 @@ public class CourseCategoryListController {
             }
         });
 
-        actionsBox.getChildren().addAll(coursesButton, editButton, deleteButton);
+        actionsBox.getChildren().addAll(editButton, deleteButton);
         row.getChildren().addAll(nameBox, descriptionLabel, dateBox, spacer, actionsBox);
         return row;
     }
 
-    private Button createIconButton(String iconCode, String colorClass) {
+    private Button createIconButton(String textOrIcon, String colorClass) {
         Button button = new Button();
-        org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon(iconCode);
-        icon.setIconSize(20);
         
-        String baseStyle = "-fx-min-width: 44px; -fx-min-height: 44px; -fx-max-width: 44px; -fx-max-height: 44px; -fx-background-radius: 12px; -fx-cursor: hand; -fx-alignment: center; -fx-padding: 0;";
+        String baseStyle = "-fx-min-width: 44px; -fx-min-height: 44px; -fx-max-width: 44px; -fx-max-height: 44px; -fx-background-radius: 12px; -fx-cursor: hand; -fx-alignment: center; -fx-padding: 0; -fx-font-size: 18px;";
         
         if ("btn-action-dark".equals(colorClass)) {
-            icon.setIconColor(javafx.scene.paint.Color.WHITE);
-            button.setStyle(baseStyle + " -fx-background-color: #2d3748;");
+            button.setStyle(baseStyle + " -fx-background-color: #2d3748; -fx-text-fill: white;");
         } else {
-            icon.setIconColor(javafx.scene.paint.Color.BLACK);
-            button.setStyle(baseStyle + " -fx-background-color: #f1f5f9;");
+            button.setStyle(baseStyle + " -fx-background-color: #f1f5f9; -fx-text-fill: black;");
         }
         
-        button.setGraphic(icon);
+        button.setText(textOrIcon);
         return button;
     }
 
@@ -176,8 +171,12 @@ public class CourseCategoryListController {
             if (initializer != null) {
                 initializer.initialize(loader.getController());
             }
-            Stage stage = (Stage) titleLabel.getScene().getWindow();
-            stage.getScene().setRoot(root);
+            if (gui.FrontMainController.getInstance() != null) {
+                gui.FrontMainController.getInstance().setContent(root);
+            } else {
+                Stage stage = (Stage) titleLabel.getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
         } catch (IOException exception) {
             throw new IllegalStateException("Unable to open view: " + resourcePath, exception);
         }

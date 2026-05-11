@@ -33,9 +33,9 @@
                             <Button onAction="#onCancel" text="Back" styleClass="btn-action-light" style="-fx-padding: 8 12; -fx-background-radius: 12;">
                             </Button>
                             
-                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 12px;" text="Pages / Courses / New" />
+                                <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 10px;" text="Pages / Courses / New" />
                                 <Label fx:id="titleLabel" styleClass="title-label" text="Create New Course" />
-                                <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" text="Fill in the details to launch your new course." />
+                                <Label fx:id="subtitleLabel" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 9px;" text="Fill in the details to launch your new course." />
 
                         </HBox>
                         <Region HBox.hgrow="ALWAYS" />
@@ -57,14 +57,14 @@
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Title *" />
                                         <TextField fx:id="titleField" promptText="Enter course title" />
-                                        <Label fx:id="titleErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                        <Label fx:id="titleErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 10px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Category *" />
                                         <ComboBox fx:id="categoryCombo" promptText="Select category" prefWidth="400" />
-                                        <Label fx:id="categoryErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                        <Label fx:id="categoryErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 10px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
@@ -76,21 +76,21 @@
                                                 <RadioButton fx:id="draftRadio" toggleGroup="$statusToggleGroup" text="Draft" />
                                             </children>
                                         </HBox>
-                                        <Label fx:id="statusErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                        <Label fx:id="statusErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 10px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Level *" />
                                         <ComboBox fx:id="levelCombo" promptText="Select level" prefWidth="400" />
-                                        <Label fx:id="levelErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                        <Label fx:id="levelErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 10px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
                                     <children>
                                         <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Estimated duration (min)" />
                                         <TextField fx:id="durationField" promptText="e.g., 45" />
-                                        <Label fx:id="durationErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
+                                        <Label fx:id="durationErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 10px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
                             </children>
@@ -98,20 +98,20 @@
                         
                         <VBox spacing="10.0" style="-fx-background-color: #f8fafc; -fx-padding: 12; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12;">
                             <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 13px;" text="Course Image" />
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 11px;" text="Course Image" />
                                 <HBox spacing="15.0" alignment="CENTER_LEFT">
                                     <children>
                                         <StackPane style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-overflow: hidden;" minWidth="120" minHeight="70" maxWidth="120" maxHeight="70">
                                             <children>
                                                 <javafx.scene.image.ImageView fx:id="imagePreview" fitWidth="120" fitHeight="70" preserveRatio="true" />
-                                                <Label fx:id="noImageLabel" text="No Image" style="-fx-text-fill: #94a3b8; -fx-font-size: 10px;" />
+                                                <Label fx:id="noImageLabel" text="No Image" style="-fx-text-fill: #94a3b8; -fx-font-size: 9px;" />
                                             </children>
                                         </StackPane>
                                         <VBox spacing="5.0">
                                             <children>
-                                                <Button onAction="#onUploadImage" styleClass="btn-action-light" style="-fx-padding: 5 10; -fx-font-size: 11px;" text="Choose Image">
+                                                <Button onAction="#onUploadImage" styleClass="btn-action-light" style="-fx-padding: 5 10; -fx-font-size: 9px;" text="Choose Image">
                                                 </Button>
-                                                <Label style="-fx-text-fill: #64748b; -fx-font-size: 10px;" text="Recommended: 800x500px" />
+                                                <Label style="-fx-text-fill: #64748b; -fx-font-size: 9px;" text="Recommended: 800x500px" />
                                                 <TextField fx:id="imagePathField" editable="false" prefWidth="150" style="-fx-font-size: 9px; -fx-background-color: transparent; -fx-padding: 0;" />
                                             </children>
                                         </VBox>
@@ -138,3 +138,4 @@
                 </VBox>
             </children>
         </VBox>
+

@@ -20,3 +20,5 @@ target/
 .project/
 .classpath/
 bin/
+
+.env

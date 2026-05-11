@@ -27,8 +27,8 @@
                         <HBox alignment="CENTER_LEFT" spacing="20.0">
                             <children>
                                 <VBox>
-                                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Courses" />
-                                    <Label styleClass="title-label" text="Content Creator Hub" style="-fx-font-size: 20px;"/>
+                                    <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 9px;" text="Pages / Courses" />
+                                    <Label styleClass="title-label" text="Content Creator Hub" style="-fx-font-size: 18px;"/>
                                 </VBox>
                                 <Region HBox.hgrow="ALWAYS" />
                                 <HBox spacing="15.0" alignment="CENTER_LEFT">
@@ -47,14 +47,14 @@
                         <HBox fx:id="gamificationCard" onMouseClicked="#onGoToLeaderboard" spacing="20" style="-fx-background-color: linear-gradient(to right, #ce2d7c, #6c2db1); -fx-background-radius: 15; -fx-padding: 20; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.3), 15, 0, 0, 5);">
                             <children>
                                 <StackPane style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 12; -fx-min-width: 50; -fx-min-height: 50;">
-                                    <Label text="🏆" style="-fx-font-size: 24px;" />
+                                    <Label text="🏆" style="-fx-font-size: 22px;" />
                                 </StackPane>
                                 <VBox spacing="2" HBox.hgrow="ALWAYS">
-                                    <Label text="LEARNING LEADERBOARD" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-weight: bold; -fx-font-size: 10px; -fx-letter-spacing: 1px;" />
-                                    <Label text="View your rank and earn achievements" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" />
+                                    <Label text="LEARNING LEADERBOARD" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-weight: bold; -fx-font-size: 9px; -fx-letter-spacing: 1px;" />
+                                    <Label text="View your rank and earn achievements" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
                                 </VBox>
                                 <HBox alignment="CENTER" spacing="10" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 8 15; -fx-background-radius: 20;">
-                                    <Label text="Explore Leaderboard →" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;" />
+                                    <Label text="Explore Leaderboard →" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10px;" />
                                 </HBox>
                             </children>
                         </HBox>
@@ -62,7 +62,7 @@
 
                         <!-- MIDDLE: Course Workshops Grid -->
                         <VBox spacing="10">
-                            <Label text="Course Workshops" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                            <Label text="Course Workshops" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
                             <ScrollPane fitToHeight="true" vbarPolicy="NEVER" hbarPolicy="AS_NEEDED" style="-fx-background: transparent; -fx-background-color: transparent;">
                                 <content>
                                     <HBox fx:id="coursesContainer" spacing="24.0" style="-fx-padding: 10 5;">
@@ -75,7 +75,7 @@
                         <!-- BOTTOM: Help Desk Section -->
                         <VBox spacing="20">
                             <HBox alignment="CENTER_LEFT" spacing="20">
-                                <Label text="Help Desk" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
+                                <Label text="Help Desk" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
                                 <Region HBox.hgrow="ALWAYS" />
                                 <Button text="+ New Question" onAction="#onSendQuestion" styleClass="btn-primary" prefHeight="40.0" />
                             </HBox>
@@ -89,3 +89,4 @@
         </ScrollPane>
     </center>
 </BorderPane>
+

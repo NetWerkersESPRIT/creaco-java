@@ -50,7 +50,7 @@ import java.net.http.HttpResponse;
 
 import animatefx.animation.*;
 
-public class FrontResourceController {
+public class AdminResourceController {
 
     private final RessourceService ressourceService = new RessourceService();
     private final QuizService quizService = new QuizService();
@@ -76,6 +76,8 @@ public class FrontResourceController {
     @FXML private VBox chatBox;
     @FXML private TextField chatInput;
     @FXML private ScrollPane chatScroll;
+
+    @FXML private Button addResourceBtn;
     @FXML private VBox mainContent;
 
     // Resource Modal UI
@@ -116,8 +118,6 @@ public class FrontResourceController {
                     lblNavUserRole.setStyle("-fx-background-color: #434a75;");
                 }
             }
-
-
         }
     }
 
@@ -185,17 +185,19 @@ public class FrontResourceController {
         openBtn.setPrefHeight(40);
         openBtn.setOnAction(e -> onOpenResource(ressource));
 
+        Button editBtn = new Button("✎");
+        editBtn.getStyleClass().add("btn-action-light");
+        editBtn.setStyle("-fx-font-size: 18px; -fx-padding: 5 12; -fx-background-radius: 10;");
+        editBtn.setPrefHeight(40);
+        editBtn.setOnAction(e -> onEditResource(ressource));
+
         Button downloadIconBtn = new Button("📥");
         downloadIconBtn.getStyleClass().add("btn-action-light");
         downloadIconBtn.setStyle("-fx-font-size: 18px; -fx-padding: 5 12; -fx-background-radius: 10;");
         downloadIconBtn.setPrefHeight(40);
         downloadIconBtn.setOnAction(e -> onDownloadResource(ressource));
 
-        topActions.getChildren().add(openBtn);
-
-
-
-        topActions.getChildren().add(downloadIconBtn);
+        topActions.getChildren().addAll(openBtn, editBtn, downloadIconBtn);
 
         VBox bottomActions = new VBox(10);
         bottomActions.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -609,6 +611,7 @@ public class FrontResourceController {
     @FXML
     private void goBack(javafx.event.ActionEvent event) {
         if (FrontMainController.getInstance() != null) {
+            FrontMainController.getInstance().setFloatingButtonVisible(false, null);
             FrontMainController.getInstance().onShowCourses();
         }
     }
@@ -635,7 +638,49 @@ public class FrontResourceController {
         zoomOut.play();
     }
 
+    @FXML
+    private void onAddResource() {
+        if (gui.FrontMainController.getInstance() != null && currentCourse != null) {
+            try {
+                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/resource-edit-form-view.fxml"));
+                javafx.scene.Parent root = loader.load();
+                
+                CourseResourceFormController controller = loader.getController();
+                if (controller != null) {
+                    controller.setAdminMode(true);
+                    controller.setCourse(currentCourse);
+                }
+                
+                gui.FrontMainController.getInstance().setContent(root);
+                gui.FrontMainController.getInstance().setNavbarText("Add Resource", "Pages / Courses / Resource");
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+                gui.util.AlertHelper.showError("Error", "Could not load the resource form: " + e.getMessage());
+            }
+        }
+    }
 
+    private void onEditResource(Ressource res) {
+        if (gui.FrontMainController.getInstance() != null && currentCourse != null) {
+            try {
+                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/resource-edit-form-view.fxml"));
+                javafx.scene.Parent root = loader.load();
+                
+                CourseResourceFormController controller = loader.getController();
+                if (controller != null) {
+                    controller.setAdminMode(true);
+                    controller.setCourse(currentCourse);
+                    controller.setResourceToEdit(res);
+                }
+                
+                gui.FrontMainController.getInstance().setContent(root);
+                gui.FrontMainController.getInstance().setNavbarText("Edit Resource", "Pages / Courses / Edit Resource");
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+                gui.util.AlertHelper.showError("Error", "Could not load the edit resource form: " + e.getMessage());
+            }
+        }
+    }
 
     @FXML
     private void sendChatMessage() {

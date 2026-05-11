@@ -27,6 +27,8 @@ public class FrontMainController {
     @FXML private FlowPane coursesContainer;
     @FXML private TextField searchField;
     @FXML private StackPane contentArea;
+    @FXML private Button floatingTutorBtn;
+    private Runnable floatingButtonAction;
     @FXML private StackPane rootStackPane;
     @FXML private VBox dashboardView;
     @FXML private Label txtWelcome;
@@ -245,6 +247,7 @@ public class FrontMainController {
 
     @FXML
     private void onGoToDashboard() {
+        setFloatingButtonVisible(false, null);
         if (txtWelcome != null) txtWelcome.setText("Explore");
         if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Dashboard");
         contentArea.getChildren().setAll(dashboardView);
@@ -415,6 +418,7 @@ public class FrontMainController {
     }
 
     private void loadSubView(String fxmlPath) {
+        setFloatingButtonVisible(false, null);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
@@ -425,7 +429,29 @@ public class FrontMainController {
         }
     }
 
+    public void setFloatingButtonVisible(boolean visible, Runnable action) {
+        if (floatingTutorBtn != null) {
+            floatingTutorBtn.setVisible(visible);
+            floatingTutorBtn.setManaged(visible);
+            this.floatingButtonAction = action;
+        }
+    }
+
+    @FXML
+    private void onFloatingTutorClick() {
+        if (floatingButtonAction != null) {
+            floatingButtonAction.run();
+        }
+    }
+
+    // Dummy handlers to prevent LoadExceptions if stale FXML snippets are present in cache
+    @FXML private void openTutorModal() {}
+    @FXML private void closeTutorModal() {}
+    @FXML private void sendChatMessage() {}
+    @FXML private void closeResourceModal() {}
+
     public void setContent(Parent root) {
+        setFloatingButtonVisible(false, null);
         if (root instanceof javafx.scene.layout.BorderPane) {
             Node center = ((javafx.scene.layout.BorderPane) root).getCenter();
             if (center instanceof VBox) {
@@ -461,6 +487,31 @@ public class FrontMainController {
         } catch (IOException e) { 
             e.printStackTrace(); 
             System.err.println("Error loading resource view: " + e.getMessage());
+        }
+    }
+
+    public void openAdminCourse(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/admin-resource-view.fxml"));
+            Parent root = loader.load();
+            AdminResourceController controller = loader.getController();
+            
+            if (controller != null) {
+                controller.setCourse(course);
+            }
+
+            // Standard sub-view loading pattern
+            if (root instanceof BorderPane) {
+                contentArea.getChildren().setAll(((BorderPane) root).getCenter());
+            } else {
+                contentArea.getChildren().setAll(root);
+            }
+
+            setNavbarText("Manage Resources: " + course.getTitre(), "Pages / Courses / Manage Resources");
+
+        } catch (IOException e) { 
+            e.printStackTrace(); 
+            System.err.println("Error loading admin resource view: " + e.getMessage());
         }
     }
 

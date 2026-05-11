@@ -243,7 +243,7 @@
                                 </HBox>
                                 <Button onAction="#logout" styleClass="btn-logout">
                                     <graphic>
-                                        <Label text="🏃" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                                        <Label text="Logout" style="-fx-text-fill: white; -fx-font-size: 14px;" />
                                     </graphic>
                                 </Button>
                             </children>
@@ -271,4 +271,13 @@
         </VBox>
     </center>
     </BorderPane>
+    
+    <Button fx:id="floatingTutorBtn" text="Ask AI Tutor" visible="false" managed="false"
+            onAction="#onFloatingTutorClick"
+            style="-fx-background-color: #6c2db1; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 12 24; -fx-font-size: 16px; -fx-font-weight: bold; -fx-effect: dropshadow(three-pass-box, rgba(108,45,177,0.4), 15, 0, 0, 5);" 
+            StackPane.alignment="BOTTOM_RIGHT">
+        <StackPane.margin>
+            <Insets bottom="30.0" right="30.0" />
+        </StackPane.margin>
+    </Button>
 </StackPane>
