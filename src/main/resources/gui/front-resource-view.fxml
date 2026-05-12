@@ -64,47 +64,6 @@
                 </VBox>
             </StackPane>
 
-            <!-- Quiz Modal -->
-            <StackPane fx:id="quizModal" visible="false" style="-fx-background-color: rgba(0,0,0,0.5);">
-                <VBox spacing="20" styleClass="card" maxWidth="700" maxHeight="650" style="-fx-padding: 30; -fx-background-color: white; -fx-background-radius: 20;">
-                    <children>
-                        <HBox alignment="CENTER_LEFT">
-                            <Label fx:id="quizModalTitle" styleClass="title-label" style="-fx-font-size: 18px;" />
-                            <Region HBox.hgrow="ALWAYS" />
-                            <Button text="✕" onAction="#closeQuizModal" styleClass="btn-action-light" />
-                        </HBox>
-                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                            <VBox fx:id="quizQuestionsContainer" spacing="15" />
-                        </ScrollPane>
-                        <HBox fx:id="quizResultCard" visible="false" managed="false" alignment="CENTER_LEFT" spacing="15">
-                            <Label fx:id="quizResultIcon" />
-                            <Label fx:id="quizResultLabel" wrapText="true" />
-                        </HBox>
-                        <Button fx:id="submitQuizButton" text="Submit Assessment" onAction="#submitQuizAnswers" styleClass="btn-primary" maxWidth="Infinity" />
-                    </children>
-                </VBox>
-            </StackPane>
-
-            <!-- AI Tutor Modal -->
-            <StackPane fx:id="tutorModal" visible="false" style="-fx-background-color: rgba(0,0,0,0.5);">
-                <VBox spacing="15" styleClass="card" maxWidth="400" maxHeight="600" StackPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 20; -fx-translate-x: -30; -fx-translate-y: -30;">
-                    <children>
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="✨ Smart Tutor" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #6c2db1;" />
-                            <Region HBox.hgrow="ALWAYS" />
-                            <Button text="✕" onAction="#closeTutorModal" styleClass="btn-action-light" />
-                        </HBox>
-                        <ScrollPane fx:id="chatScroll" fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: #f8fafc; -fx-background-radius: 10;">
-                            <VBox fx:id="chatBox" spacing="10" style="-fx-padding: 10;" />
-                        </ScrollPane>
-                        <HBox spacing="10">
-                            <TextField fx:id="chatInput" promptText="Ask a question..." HBox.hgrow="ALWAYS" style="-fx-background-radius: 15;" onAction="#sendChatMessage" />
-                            <Button text="Send" onAction="#sendChatMessage" styleClass="btn-primary" style="-fx-background-color: #6c2db1;" />
-                        </HBox>
-                    </children>
-                </VBox>
-            </StackPane>
         </StackPane>
     </center>
 </BorderPane>
-

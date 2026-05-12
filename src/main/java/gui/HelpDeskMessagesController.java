@@ -19,6 +19,12 @@ public class HelpDeskMessagesController {
     @FXML private StackPane rootStackPane;
     @FXML private StackPane mainContentContainer;
     
+    private static HelpDeskMessagesController instance;
+
+    public static HelpDeskMessagesController getInstance() {
+        return instance;
+    }
+    
     @FXML private Label lblBreadcrumb;
     @FXML private Label lblTitle;
     @FXML private Label lblAdminName;
@@ -33,6 +39,7 @@ public class HelpDeskMessagesController {
 
     @FXML
     public void initialize() {
+        instance = this;
         setupAdminInfo();
         // Optionally load a default view
         // onShowDashboard();
@@ -57,9 +64,13 @@ public class HelpDeskMessagesController {
     @FXML
     public void onShowDashboard() {
         updateActiveButton(btnDashboard);
-        lblBreadcrumb.setText("Pages / Admin / Support Hub");
-        lblTitle.setText("Support & Mentorat Hub");
-        loadSubView("/gui/admin-support-hub.fxml");
+        lblBreadcrumb.setText("Pages / Admin / Dashboard");
+        lblTitle.setText("Admin Workspace");
+        // Clear main container or load a welcome view
+        mainContentContainer.getChildren().clear();
+        Label welcome = new Label("Welcome to the Admin Panel");
+        welcome.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+        mainContentContainer.getChildren().add(welcome);
     }
 
     @FXML
@@ -114,6 +125,11 @@ public class HelpDeskMessagesController {
             e.printStackTrace();
             System.err.println("Error loading subview: " + fxmlPath);
         }
+    }
+
+    public void loadSubViewWithTitle(String fxmlPath, String title) {
+        if (lblTitle != null) lblTitle.setText(title);
+        loadSubView(fxmlPath);
     }
 
     private void updateActiveButton(Button activeButton) {

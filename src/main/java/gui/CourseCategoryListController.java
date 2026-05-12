@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import services.CourseCategoryService;
@@ -31,17 +32,10 @@ public class CourseCategoryListController {
     private List<CourseCategory> categories = Collections.emptyList();
 
     @FXML
-    private Label titleLabel;
-
-    @FXML
-    private Label statusLabel;
-
-    @FXML
     private VBox categoriesContainer;
 
     @FXML
     private void initialize() {
-        titleLabel.setText("Course Categories");
         loadCategories();
     }
 
@@ -65,11 +59,9 @@ public class CourseCategoryListController {
     private void loadCategories() {
         try {
             categories = courseCategoryService.afficher();
-            statusLabel.setText(categories.size() + " categories loaded from creaco.");
             renderCategories();
         } catch (SQLException exception) {
             categories = Collections.emptyList();
-            statusLabel.setText("Database error: " + exception.getMessage());
             renderCategories();
         }
     }
@@ -84,9 +76,40 @@ public class CourseCategoryListController {
             return;
         }
 
+        // Add the "Add New Category" card first
+        categoriesContainer.getChildren().add(buildAddCategoryRow());
+
         for (CourseCategory category : categories) {
             categoriesContainer.getChildren().add(buildCategoryRow(category));
         }
+    }
+
+    private Node buildAddCategoryRow() {
+        StackPane row = new StackPane();
+        row.getStyleClass().add("list-row");
+        row.setPadding(new Insets(25));
+        row.setStyle("-fx-background-color: #f8fafc; -fx-border-style: dashed; -fx-border-color: #cbd5e1; -fx-border-width: 2; -fx-background-radius: 15; -fx-border-radius: 15; -fx-cursor: hand;");
+
+        VBox content = new VBox(5);
+        content.setAlignment(javafx.geometry.Pos.CENTER);
+        
+        Label plusLabel = new Label("+");
+        plusLabel.setStyle("-fx-font-size: 32px; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;");
+        
+        Label textLabel = new Label("Add a new course category");
+        textLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #475569;");
+        
+        content.getChildren().addAll(plusLabel, textLabel);
+        row.getChildren().add(content);
+        StackPane.setAlignment(content, javafx.geometry.Pos.CENTER);
+
+        row.setOnMouseClicked(event -> onAddCategory());
+        
+        // Hover effect
+        row.setOnMouseEntered(e -> row.setStyle("-fx-background-color: #f1f5f9; -fx-border-style: dashed; -fx-border-color: -fx-primary-pink; -fx-border-width: 2; -fx-background-radius: 15; -fx-border-radius: 15; -fx-cursor: hand;"));
+        row.setOnMouseExited(e -> row.setStyle("-fx-background-color: #f8fafc; -fx-border-style: dashed; -fx-border-color: #cbd5e1; -fx-border-width: 2; -fx-background-radius: 15; -fx-border-radius: 15; -fx-cursor: hand;"));
+
+        return row;
     }
 
     private Node buildCategoryRow(CourseCategory category) {
@@ -94,7 +117,9 @@ public class CourseCategoryListController {
         row.getStyleClass().add("list-row");
 
         VBox nameBox = new VBox(8);
+        nameBox.setPrefWidth(260);
         nameBox.setMinWidth(260);
+        nameBox.setMaxWidth(260);
         Label nameLabel = new Label(safeText(category.getNom()));
         nameLabel.setWrapText(true);
         nameLabel.getStyleClass().add("card-title");
@@ -104,11 +129,15 @@ public class CourseCategoryListController {
 
         Label descriptionLabel = new Label(stripHtmlTags(safeText(category.getDescription())));
         descriptionLabel.setWrapText(true);
+        descriptionLabel.setPrefWidth(360);
         descriptionLabel.setMinWidth(360);
+        descriptionLabel.setMaxWidth(360);
         descriptionLabel.getStyleClass().add("card-subtitle");
 
         VBox dateBox = new VBox(8);
+        dateBox.setPrefWidth(150);
         dateBox.setMinWidth(150);
+        dateBox.setMaxWidth(150);
         Label createdLabel = new Label(formatDate(category.getDateDeCreation()));
         createdLabel.getStyleClass().add("card-title");
         createdLabel.setStyle("-fx-font-size: 14px;"); // Slight override for date font size
@@ -120,6 +149,9 @@ public class CourseCategoryListController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actionsBox = new HBox(10);
+        actionsBox.setPrefWidth(120); // Give actions a fixed space too
+        actionsBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        
         Button editButton = createIconButton("📝", "btn-action-dark");
         Button deleteButton = createIconButton("🗑", "btn-action-light");
 
@@ -134,10 +166,8 @@ public class CourseCategoryListController {
             try {
                 courseCategoryService.supprimer(category.getId());
                 loadCategories();
-                statusLabel.setText("Category deleted successfully.");
                 gui.util.AlertHelper.showInfo("Deleted", "Category deleted successfully.");
             } catch (SQLException exception) {
-                statusLabel.setText("Delete failed: " + exception.getMessage());
                 gui.util.AlertHelper.showError("Delete failed", exception.getMessage());
             }
         });
@@ -148,17 +178,20 @@ public class CourseCategoryListController {
     }
 
     private Button createIconButton(String textOrIcon, String colorClass) {
-        Button button = new Button();
-        
-        String baseStyle = "-fx-min-width: 44px; -fx-min-height: 44px; -fx-max-width: 44px; -fx-max-height: 44px; -fx-background-radius: 12px; -fx-cursor: hand; -fx-alignment: center; -fx-padding: 0; -fx-font-size: 18px;";
+        Button button = new Button(textOrIcon);
+        button.getStyleClass().add("btn-standard");
         
         if ("btn-action-dark".equals(colorClass)) {
-            button.setStyle(baseStyle + " -fx-background-color: #2d3748; -fx-text-fill: white;");
+            button.getStyleClass().add("btn-standard-pink");
         } else {
-            button.setStyle(baseStyle + " -fx-background-color: #f1f5f9; -fx-text-fill: black;");
+            button.getStyleClass().add("btn-standard-grey");
         }
         
-        button.setText(textOrIcon);
+        button.setMinWidth(44);
+        button.setMinHeight(44);
+        button.setMaxWidth(44);
+        button.setMaxHeight(44);
+        
         return button;
     }
 
@@ -174,7 +207,7 @@ public class CourseCategoryListController {
             if (gui.FrontMainController.getInstance() != null) {
                 gui.FrontMainController.getInstance().setContent(root);
             } else {
-                Stage stage = (Stage) titleLabel.getScene().getWindow();
+                Stage stage = (Stage) categoriesContainer.getScene().getWindow();
                 stage.getScene().setRoot(root);
             }
         } catch (IOException exception) {

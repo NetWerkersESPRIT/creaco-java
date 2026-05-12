@@ -5,35 +5,11 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.*?>
 
 <VBox spacing="0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.SupportController">
     <children>
-        <!-- Top Navigation / Header (Specific to Support) -->
-        <VBox spacing="10">
-            <padding>
-                <Insets top="24" left="24" right="24" bottom="0"/>
-            </padding>
-            <children>
-                <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
-                    <children>
-                        <VBox>
-                            <Label style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;" text="Pages / Admin / Support" />
-                            <Label styleClass="title-label" text="Support Mentorat Hub" style="-fx-font-size: 20px;"/>
-                        </VBox>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="searchField" promptText="Search messages..." prefWidth="250" styleClass="search-bar" />
-                        <HBox alignment="CENTER" spacing="12" style="-fx-background-color: white; -fx-background-radius: 18; -fx-padding: 8 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
-                            <children>
-                                <Label text="Admin" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 10px; -fx-font-weight: bold;" />
-                                <Label text="Support Team" style="-fx-text-fill: -fx-text-main; -fx-font-weight: bold; -fx-font-size: 14px;" />
-                            </children>
-                        </HBox>
-                    </children>
-                </HBox>
-            </children>
-        </VBox>
-
         <!-- Scrollable Content -->
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
             <content>
@@ -42,52 +18,68 @@
                         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
                     </padding>
                     <children>
-                        <!-- Stats Section -->
-                        <HBox spacing="20.0" alignment="CENTER">
+                        <!-- Navigation Row -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <VBox spacing="5.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                <Button onAction="#onBack" styleClass="btn-action-light" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 8 15;">
+                                    <graphic>
+                                        <Label text="⬅ Back to Courses" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                                    </graphic>
+                                </Button>
+                            </children>
+                        </HBox>
+
+                        <!-- Stats Section -->
+                        <FlowPane hgap="20.0" vgap="20.0" alignment="CENTER">
+                            <children>
+                                <VBox spacing="5.0" styleClass="stat-card" prefWidth="200">
                                     <children>
                                         <Label styleClass="stat-title" text="TOTAL OPEN" />
                                         <Label fx:id="lblTotalOpen" styleClass="stat-value" text="0" />
                                     </children>
                                 </VBox>
-                                <VBox spacing="5.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                <VBox spacing="5.0" styleClass="stat-card" prefWidth="200">
                                     <children>
                                         <Label styleClass="stat-title" text="PENDING REPLY" />
                                         <Label fx:id="lblPendingReply" styleClass="stat-value" text="0" />
                                     </children>
                                 </VBox>
-                                <VBox spacing="5.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                <VBox spacing="5.0" styleClass="stat-card" prefWidth="200">
                                     <children>
                                         <Label styleClass="stat-title" text="URGENT" />
                                         <Label fx:id="lblUrgentCount" styleClass="stat-value" text="0" />
                                     </children>
                                 </VBox>
-                                <VBox spacing="5.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                <VBox spacing="5.0" styleClass="stat-card" prefWidth="200">
                                     <children>
                                         <Label styleClass="stat-title" text="RESOLVED TODAY" />
                                         <Label fx:id="lblResolvedToday" styleClass="stat-value" text="0" />
                                     </children>
                                 </VBox>
-                                <VBox spacing="5.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                <VBox spacing="5.0" styleClass="stat-card" prefWidth="200">
                                     <children>
                                         <Label styleClass="stat-title" text="AVG RESPONSE" />
                                         <Label fx:id="lblAvgResponseTime" styleClass="stat-value" text="0.0h" />
                                     </children>
                                 </VBox>
                             </children>
-                        </HBox>
-
-                        <!-- Quick Filters -->
-                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        </FlowPane>
+                        
+                        <!-- Search & Filters -->
+                        <FlowPane hgap="15.0" vgap="15.0" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 15; -fx-background-radius: 15; -fx-background-color: white;">
                             <children>
-                                <Button fx:id="btnUnread" onAction="#filterUnread" text="📥 Unread" styleClass="btn-primary" />
-                                <Button fx:id="btnUrgent" onAction="#filterUrgent" text="🔴 Urgent" styleClass="btn-action-light" />
-                                <Button fx:id="btnMyMessages" onAction="#filterMyMessages" text="👤 My Cases" styleClass="btn-action-light" />
-                                <Button fx:id="btnToday" onAction="#filterToday" text="🕒 Today" styleClass="btn-action-light" />
-                                <Button fx:id="btnWeek" onAction="#filterThisWeek" text="📅 This Week" styleClass="btn-action-light" />
+                                <TextField fx:id="searchField" promptText="Search messages by subject or content..." prefWidth="350" styleClass="search-bar" style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 10; -fx-border-radius: 10;" />
+                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Button fx:id="btnUnread" onAction="#filterUnread" text="📥 Unread" styleClass="btn-primary" />
+                                        <Button fx:id="btnUrgent" onAction="#filterUrgent" text="🔴 Urgent" styleClass="btn-action-light" />
+                                        <Button fx:id="btnMyMessages" onAction="#filterMyMessages" text="👤 My Cases" styleClass="btn-action-light" />
+                                        <Button fx:id="btnToday" onAction="#filterToday" text="🕒 Today" styleClass="btn-action-light" />
+                                        <Button fx:id="btnWeek" onAction="#filterThisWeek" text="📅 This Week" styleClass="btn-action-light" />
+                                    </children>
+                                </HBox>
                             </children>
-                        </HBox>
+                        </FlowPane>
 
                         <!-- Messages Container -->
                         <VBox fx:id="messagesContainer" spacing="15.0" VBox.vgrow="ALWAYS" />

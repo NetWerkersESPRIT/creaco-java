@@ -8,6 +8,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -16,6 +18,11 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import services.CourseService;
 import gui.post.DisplayPostController;
+import utils.GroqService;
+import javafx.application.Platform;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
+import javafx.scene.paint.Color;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -48,12 +55,6 @@ public class MainController {
     @FXML private Label lblTotalCourses;
     @FXML private Label lblActiveWorkshops;
     @FXML private Label lblTotalCategories;
-
-    // AI Studio
-    @FXML private TextField aiTopicField;
-    @FXML private Button btnGenerateIdea;
-    @FXML private TextArea aiResultArea;
-    @FXML private Button btnDraftCourse;
 
     @FXML
     private void initialize() {
@@ -144,25 +145,19 @@ public class MainController {
     }
 
     private void loadSubView(String fxmlPath, String title) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            
-            if (pageTitleLabel != null) pageTitleLabel.setText(title);
-
-            if (root instanceof javafx.scene.layout.BorderPane) {
-                Node center = ((javafx.scene.layout.BorderPane) root).getCenter();
-                if (center instanceof VBox) {
-                    ((VBox) center).setPrefWidth(Double.MAX_VALUE);
-                    ((VBox) center).setPrefHeight(Double.MAX_VALUE);
+        if (HelpDeskMessagesController.getInstance() != null) {
+            HelpDeskMessagesController.getInstance().loadSubViewWithTitle(fxmlPath, title);
+        } else {
+            System.err.println("HelpDeskMessagesController instance is null. Falling back to internal loading.");
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+                Parent root = loader.load();
+                if (contentArea != null) {
+                    contentArea.getChildren().setAll(root);
+                } else if (FrontMainController.getInstance() != null) {
+                    FrontMainController.getInstance().setContent(root);
                 }
-                contentArea.getChildren().setAll(center);
-            } else {
-                contentArea.getChildren().setAll(root);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Failed to load sub-view: " + fxmlPath);
+            } catch (IOException e) { e.printStackTrace(); }
         }
     }
 
@@ -193,6 +188,11 @@ public class MainController {
         } else {
             System.err.println("FrontMainController instance is null, cannot manage categories.");
         }
+    }
+
+    @FXML
+    private void onShowHelpDesk() {
+        loadSubView("/gui/admin-support-hub.fxml", "Support Hub");
     }
 
     @FXML
@@ -242,88 +242,115 @@ public class MainController {
     }
 
     private Node buildCourseCard(Course course) {
-        VBox card = new VBox(18);
+        VBox card = new VBox(0); // Zero spacing for the banner-to-content transition
         card.getStyleClass().add("card");
-        card.setPrefWidth(380); // Slightly smaller card
-        card.setMinWidth(380);
-        card.setPadding(new Insets(25));
-        card.setStyle("-fx-background-radius: 25; -fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);");
+        card.setPrefWidth(345); 
+        card.setMinWidth(345);
+        card.setMaxWidth(345);
+        card.setStyle("-fx-background-radius: 20; -fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 15, 0, 0, 5); -fx-overflow: hidden;");
 
-        // Top Row: Icon/Image + Title/Category + Status
-        HBox header = new HBox(15);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        // Icon/Image Container
-        StackPane visualContainer = new StackPane();
-        visualContainer.setPrefSize(70, 70);
-        visualContainer.setMinSize(70, 70);
-        visualContainer.setStyle("-fx-background-radius: 18; -fx-background-color: linear-gradient(to bottom right, #ce2d7c, #6c2db1);");
+        // 1. Top Banner / Image
+        StackPane bannerContainer = new StackPane();
+        bannerContainer.setPrefHeight(145);
+        bannerContainer.setMinHeight(145);
+        bannerContainer.setStyle("-fx-background-radius: 20 20 0 0; -fx-background-color: linear-gradient(to bottom right, #ce2d7c, #6c2db1);");
 
         if (course.getImage() != null && !course.getImage().isBlank()) {
             try {
                 javafx.scene.image.ImageView img = new javafx.scene.image.ImageView(new javafx.scene.image.Image(course.getImage(), true));
-                img.setFitWidth(70);
-                img.setFitHeight(70);
-                img.setPreserveRatio(false);
-                javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(70, 70);
-                clip.setArcWidth(36);
-                clip.setArcHeight(36);
+                img.setFitWidth(260);
+                img.setFitHeight(130);
+                img.setPreserveRatio(true);
+                
+                // Round top corners of the image
+                javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(260, 130);
+                clip.setArcWidth(40);
+                clip.setArcHeight(40);
                 img.setClip(clip);
-                visualContainer.getChildren().add(img);
+                
+                bannerContainer.getChildren().add(img);
             } catch (Exception e) {
-                Label icon = new Label("📦");
-                icon.setStyle("-fx-text-fill: white; -fx-font-size: 24px;");
-                visualContainer.getChildren().add(icon);
+                Label placeholder = new Label("📚");
+                placeholder.setStyle("-fx-font-size: 50px; -fx-text-fill: white;");
+                bannerContainer.getChildren().add(placeholder);
             }
         } else {
-            Label icon = new Label("📦");
-            icon.setStyle("-fx-text-fill: white; -fx-font-size: 24px;");
-            visualContainer.getChildren().add(icon);
+            Label placeholder = new Label("📚");
+            placeholder.setStyle("-fx-font-size: 50px; -fx-text-fill: white;");
+            bannerContainer.getChildren().add(placeholder);
         }
 
-        VBox titleBox = new VBox(2);
+        // Overlay Category Badge on Banner
+        Label catBadge = new Label(resolveCategoryName(course.getCategorieId()).toUpperCase());
+        catBadge.setStyle("-fx-background-color: rgba(255,255,255,0.9); -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 5 12; -fx-background-radius: 10;");
+        StackPane.setAlignment(catBadge, Pos.TOP_RIGHT);
+        StackPane.setMargin(catBadge, new Insets(15));
+        bannerContainer.getChildren().add(catBadge);
+
+        // 2. Content Area
+        VBox content = new VBox(15);
+        content.setPadding(new Insets(20));
+
+        // Title + Menu Row
+        HBox titleRow = new HBox(10);
+        titleRow.setAlignment(Pos.TOP_LEFT);
+        
         Label titleLabel = new Label(course.getTitre());
-        titleLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
         titleLabel.setWrapText(true);
+        HBox.setHgrow(titleLabel, Priority.ALWAYS);
 
-        Label categoryLabel = new Label(resolveCategoryName(course.getCategorieId()).toUpperCase());
-        categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 9px;");
+        MenuButton menuButton = new MenuButton("⋮");
+        menuButton.setStyle("-fx-background-color: transparent; -fx-font-size: 20px; -fx-text-fill: #94a3b8; -fx-cursor: hand;");
+        MenuItem editItem = new MenuItem("Edit Course");
+        editItem.setOnAction(e -> onEditCourse(course));
+        MenuItem deleteItem = new MenuItem("Delete Course");
+        deleteItem.setStyle("-fx-text-fill: #ef4444;");
+        deleteItem.setOnAction(e -> onDeleteCourse(course));
+        menuButton.getItems().addAll(editItem, deleteItem);
 
-        titleBox.getChildren().addAll(titleLabel, categoryLabel);
-        HBox.setHgrow(titleBox, Priority.ALWAYS);
+        titleRow.getChildren().addAll(titleLabel, menuButton);
 
-        // Status Badge
-        Label statusBadge = new Label("PUBLISHED"); // Assuming published for now, could be dynamic
-        statusBadge.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #475569; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 6 12; -fx-background-radius: 12;");
+        // Description (Limited lines)
+        Label descLabel = new Label(safeText(course.getDescription()));
+        descLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+        descLabel.setWrapText(true);
+        descLabel.setMaxHeight(40);
+        descLabel.setMinHeight(40);
 
-        header.getChildren().addAll(visualContainer, titleBox, statusBadge);
+        // Footer Row: Progress/Stats + Date
+        HBox footer = new HBox(15);
+        footer.setAlignment(Pos.CENTER_LEFT);
+        
+        Label resourcesLabel = new Label("📂 12 Resources"); // Mocked count or service call needed
+        resourcesLabel.setStyle("-fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-color: #f1f5f9; -fx-padding: 4 10; -fx-background-radius: 8;");
 
-        // Updated Date
-        Label updatedLabel = new Label("Updated " + safeText(course.getDateDeModification()));
-        updatedLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px;");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Description
-        Label descriptionLabel = new Label(safeText(course.getDescription()));
-        descriptionLabel.setWrapText(true);
-        descriptionLabel.setMinHeight(50);
-        descriptionLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14px;");
+        Label dateLabel = new Label("🕒 " + safeText(course.getDateDeModification()));
+        dateLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
 
-        // Explore Link
-        Label exploreLink = new Label("EXPLORE RESOURCES →");
-        exploreLink.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
-        exploreLink.setOnMouseClicked(event -> {
+        footer.getChildren().addAll(resourcesLabel, spacer, dateLabel);
+
+        content.getChildren().addAll(titleRow, descLabel, footer);
+
+        card.getChildren().addAll(bannerContainer, content);
+        
+        // Interactivity
+        card.setCursor(javafx.scene.Cursor.HAND);
+        card.setOnMouseClicked(event -> {
+            if (event.getTarget() instanceof MenuButton || event.getTarget() instanceof MenuItem) return;
             openRessources(course, card);
-            event.consume();
         });
 
-        card.setOnMouseClicked(event -> openRessources(course, card));
-        card.setCursor(javafx.scene.Cursor.HAND);
-
-        card.getChildren().addAll(header, updatedLabel, descriptionLabel, exploreLink);
-        
-        // Hover effect
-        card.setOnMouseEntered(e -> card.setStyle("-fx-background-radius: 25; -fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(206,45,124,0.1), 20, 0, 0, 8); -fx-translate-y: -2;"));
-        card.setOnMouseExited(e -> card.setStyle("-fx-background-radius: 25; -fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5); -fx-translate-y: 0;"));
+        // Hover effect: Gentle lift + shadow grow
+        card.setOnMouseEntered(e -> {
+            card.setStyle("-fx-background-radius: 20; -fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(206,45,124,0.15), 25, 0, 0, 10); -fx-translate-y: -5;");
+        });
+        card.setOnMouseExited(e -> {
+            card.setStyle("-fx-background-radius: 20; -fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 15, 0, 0, 5); -fx-translate-y: 0;");
+        });
 
         return card;
     }
@@ -336,6 +363,38 @@ public class MainController {
         }
     }
 
+    private void onEditCourse(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/create-course-form.fxml"));
+            Parent root = loader.load();
+            
+            CourseFormController controller = loader.getController();
+            controller.setCourse(course);
+            
+            if (FrontMainController.getInstance() != null) {
+                FrontMainController.setNavbarText("Edit Course: " + course.getTitre(), "Pages / Courses / Edit");
+                FrontMainController.getInstance().setContent(root);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            gui.util.AlertHelper.showError("Navigation Error", "Could not open edit form: " + e.getMessage());
+        }
+    }
+
+    private void onDeleteCourse(Course course) {
+        if (gui.util.AlertHelper.confirmDelete("course \"" + course.getTitre() + "\"")) {
+            try {
+                courseService.supprimer(course.getId());
+                loadCourses(); // Refresh the grid
+                updateStats(); // Update stats after deletion
+                gui.util.AlertHelper.showInfo("Success", "Course deleted successfully.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                gui.util.AlertHelper.showError("Delete Error", "Could not delete course: " + e.getMessage());
+            }
+        }
+    }
+
     private String resolveCategoryName(int categoryId) {
         return categoryNames.getOrDefault(categoryId, "Unassigned");
     }
@@ -344,28 +403,34 @@ public class MainController {
         return value == null || value.isBlank() ? "-" : value;
     }
 
-    
+    @FXML
+    private void onShowAIDraft() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/ai-course-draft-modal.fxml"));
+            Parent modal = loader.load();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(modal);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+            
+            if (FrontMainController.getInstance() != null) {
+                FrontMainController.getInstance().applyBlur();
+            }
+            
+            stage.showAndWait();
+            
+            if (FrontMainController.getInstance() != null) {
+                FrontMainController.getInstance().removeBlur();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
     }
-
-    @FXML
-    private void onGenerateCourseIdea() {
-        String topic = aiTopicField.getText();
-        if (topic == null || topic.trim().isEmpty()) {
-            aiResultArea.setText("Please enter a topic first!");
-            return;
-        }
-        aiResultArea.setText("Generating outline for: " + topic + "...\n(AI Integration pending)");
-        btnDraftCourse.setDisable(false);
-    }
-
-    @FXML
-    private void onDraftCourse() {
-        // Logic to transition to course-edit-view with the generated content
-        aiResultArea.setText("Drafting course...");
-    }
 }
-

@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.*?>
 
@@ -14,88 +15,91 @@
     </padding>
     
     <children>
-
+        <!-- Welcome Header -->
+        <VBox spacing="5.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <children>
+                        <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="Course Management" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label style="-fx-text-fill: #64748b; -fx-font-weight: bold;" text="Tuesday, 12 May 2026" />
+                    </children>
+                </HBox>
+                <Label style="-fx-text-fill: #64748b; -fx-font-size: 14px;" text="Manage your curriculum, track engagement, and generate AI-powered drafts." />
+            </children>
+            <padding>
+                <Insets bottom="10.0" />
+            </padding>
+        </VBox>
 
         <!-- Stats Row -->
         <HBox spacing="20.0" alignment="CENTER_LEFT">
             <children>
-                <VBox spacing="5.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <VBox spacing="8.0" styleClass="stat-card" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 10, 0, 0, 5);">
                     <children>
-                        <Label styleClass="stat-title" text="TOTAL COURSES" />
-                        <Label fx:id="lblTotalCourses" styleClass="stat-value" text="0" />
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <Label text="📚" style="-fx-font-size: 20px;"/>
+                                <Label styleClass="stat-title" text="TOTAL COURSES" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                            </children>
+                        </HBox>
+                        <Label fx:id="lblTotalCourses" styleClass="stat-value" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
                     </children>
                 </VBox>
-                <VBox spacing="5.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <VBox spacing="8.0" styleClass="stat-card" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 10, 0, 0, 5);">
                     <children>
-                        <Label styleClass="stat-title" text="ACTIVE WORKSHOPS" />
-                        <Label fx:id="lblActiveWorkshops" styleClass="stat-value" text="0" />
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <Label text="🛠️" style="-fx-font-size: 20px;"/>
+                                <Label styleClass="stat-title" text="ACTIVE WORKSHOPS" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                            </children>
+                        </HBox>
+                        <Label fx:id="lblActiveWorkshops" styleClass="stat-value" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
                     </children>
                 </VBox>
-                <VBox spacing="5.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <VBox spacing="8.0" styleClass="stat-card" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 10, 0, 0, 5);">
                     <children>
-                        <Label styleClass="stat-title" text="TOTAL CATEGORIES" />
-                        <Label fx:id="lblTotalCategories" styleClass="stat-value" text="0" />
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <Label text="🏷️" style="-fx-font-size: 20px;"/>
+                                <Label styleClass="stat-title" text="TOTAL CATEGORIES" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                            </children>
+                        </HBox>
+                        <Label fx:id="lblTotalCategories" styleClass="stat-value" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
                     </children>
                 </VBox>
             </children>
         </HBox>
 
         <!-- Actions Row -->
-        <HBox spacing="15.0" alignment="CENTER_LEFT" styleClass="card">
+        <FlowPane hgap="15.0" vgap="15.0" alignment="CENTER_LEFT" styleClass="card" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-border-width: 1;">
             <children>
-                <TextField fx:id="searchField" promptText="Search courses by title or description..." styleClass="search-bar" HBox.hgrow="ALWAYS" />
-                <Button onAction="#onManageCategories" prefHeight="45.0" styleClass="btn-action-light" text="Manage Categories" />
-                <Button onAction="#onAddCourse" prefHeight="45.0" styleClass="btn-primary" text="+ Add New Course" />
+                <TextField fx:id="searchField" promptText="Search courses by title..." prefWidth="400" styleClass="search-bar" style="-fx-background-color: #f8fafc; -fx-text-fill: #1e293b; -fx-prompt-text-fill: #94a3b8; -fx-border-color: #e2e8f0; -fx-background-radius: 10; -fx-border-radius: 10;" />
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Button onAction="#onManageCategories" prefHeight="40.0" styleClass="btn-standard-grey" text="⚙ Manage Categories" />
+                        <Button onAction="#onShowHelpDesk" prefHeight="40.0" styleClass="btn-standard-grey" text="🎧 Help Desk" />
+                        <Separator orientation="VERTICAL" style="-fx-opacity: 0.5;" />
+                        <Button onAction="#onShowAIDraft" prefHeight="40.0" styleClass="btn-standard-ai" text="✨ AI Draft" />
+                        <Button onAction="#onAddCourse" prefHeight="40.0" styleClass="btn-standard-pink" text="+ Add Course" />
+                    </children>
+                </HBox>
             </children>
-        </HBox>
+        </FlowPane>
 
-        <!-- Grid and AI Studio Row -->
-        <HBox spacing="25.0" VBox.vgrow="ALWAYS">
+        <!-- Main Content Area -->
+        <VBox VBox.vgrow="ALWAYS">
             <children>
-                <!-- Courses Grid -->
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane" HBox.hgrow="ALWAYS">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
                     <content>
-                        <FlowPane fx:id="coursesContainer" hgap="20.0" vgap="20.0" prefWrapLength="800">
+                        <FlowPane fx:id="coursesContainer" hgap="25.0" vgap="25.0" prefWrapLength="1100">
                             <padding>
-                                <Insets bottom="20.0" left="5.0" right="5.0" top="10.0" />
+                                <Insets bottom="30.0" left="10.0" right="10.0" top="10.0" />
                             </padding>
                         </FlowPane>
                     </content>
                 </ScrollPane>
-
-                <!-- AI Course Studio Sidebar -->
-                <VBox spacing="20.0" styleClass="card" prefWidth="380.0" minWidth="380.0" style="-fx-background-color: linear-gradient(to bottom right, #ffffff, #f8fafc); -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-border-width: 1;">
-                    <children>
-                        <HBox spacing="12.0" alignment="CENTER_LEFT">
-                            <children>
-                                <StackPane style="-fx-background-color: -fx-primary-gradient; -fx-background-radius: 10; -fx-padding: 8;">
-                                    <Label text="✨" style="-fx-font-size: 16px; -fx-text-fill: white;" />
-                                </StackPane>
-                                <VBox>
-                                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="AI Course Studio" />
-                                    <Label style="-fx-font-size: 9px; -fx-text-fill: #ec4899; -fx-font-weight: bold;" text="GENERATE CONTENT INSTANTLY" />
-                                </VBox>
-                            </children>
-                        </HBox>
-                        
-                        <Label styleClass="subtitle-label" text="Type a topic and our AI will draft a complete course structure for you." wrapText="true" />
-                        
-                        <VBox spacing="8.0">
-                            <Label style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 9px;" text="TOPIC OR KEYWORDS" />
-                            <TextField fx:id="aiTopicField" promptText="e.g. Advanced JavaFX UI Design" styleClass="search-bar" />
-                        </VBox>
-                        
-                        <Button fx:id="btnGenerateIdea" onAction="#onGenerateCourseIdea" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-primary" style="-fx-background-color: #2d3748;" text="Generate Course Draft" />
-                        
-                        <VBox spacing="8.0" VBox.vgrow="ALWAYS">
-                            <Label style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 9px;" text="GENERATED OUTLINE" />
-                            <TextArea fx:id="aiResultArea" promptText="Generated content will appear here..." wrapText="true" VBox.vgrow="ALWAYS" style="-fx-font-size: 10px; -fx-control-inner-background: #ffffff;" />
-                        </VBox>
-                        
-                        <Button fx:id="btnDraftCourse" onAction="#onDraftCourse" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-primary" text="Use this Draft" disable="true" />
-                    </children>
-                </VBox>
             </children>
-        </HBox>
+        </VBox>
     </children>
 </VBox>

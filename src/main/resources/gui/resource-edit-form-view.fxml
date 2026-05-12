@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
 
@@ -62,13 +63,31 @@
                 </VBox>
                 <VBox spacing="8.0">
                     <children>
-                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="URL (Optional)" />
-                        <TextField fx:id="urlField" promptText="https://example.com/file.pdf" />
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Resource File" />
+                        <StackPane onMouseClicked="#onUploadFile" style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-style: dashed; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 20; -fx-cursor: hand;">
+                            <children>
+                                <VBox alignment="CENTER" spacing="8">
+                                    <children>
+                                        <Label text="📁" style="-fx-font-size: 24px;" />
+                                        <Label fx:id="uploadStatusLabel" text="Click to upload or drag and drop" style="-fx-text-fill: #64748b; -fx-font-size: 13px;" />
+                                        <Label fx:id="fileUrlLabel" text="No file selected" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px; -fx-font-weight: bold;" wrapText="true" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </StackPane>
+                        <!-- Hidden field to store the URL for saving -->
+                        <TextField fx:id="urlField" visible="false" managed="false" />
                     </children>
                 </VBox>
                 <VBox spacing="8.0" VBox.vgrow="ALWAYS">
                     <children>
-                        <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Content / Description" />
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Content / Description" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Button fx:id="btnParaphrase" onAction="#onParaphrase" text="✨ Paraphrase" styleClass="btn-action-light" style="-fx-font-size: 10px; -fx-padding: 4 8;" />
+                            </children>
+                        </HBox>
                         <TextArea fx:id="contentArea" prefHeight="150.0" promptText="Enter resource description or text content..." wrapText="true" />
                     </children>
                 </VBox>

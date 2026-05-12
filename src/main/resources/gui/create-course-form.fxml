@@ -112,7 +112,7 @@
                                                 <Button onAction="#onUploadImage" styleClass="btn-action-light" style="-fx-padding: 5 10; -fx-font-size: 9px;" text="Choose Image">
                                                 </Button>
                                                 <Label style="-fx-text-fill: #64748b; -fx-font-size: 9px;" text="Recommended: 800x500px" />
-                                                <TextField fx:id="imagePathField" editable="false" prefWidth="150" style="-fx-font-size: 9px; -fx-background-color: transparent; -fx-padding: 0;" />
+                                                <TextField fx:id="imagePathField" visible="false" managed="false" />
                                             </children>
                                         </VBox>
                                     </children>
@@ -129,7 +129,7 @@
 
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">
                             <children>
-                                <Button mnemonicParsing="false" onAction="#onSave"
+                                <Button fx:id="btnSave" mnemonicParsing="false" onAction="#onSave"
                                         styleClass="btn-primary" prefWidth="180" prefHeight="45"
                                         text="Launch Course" />
                             </children>

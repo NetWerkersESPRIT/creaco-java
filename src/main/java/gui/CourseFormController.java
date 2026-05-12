@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import utils.CloudinaryService;
 
 public class CourseFormController {
 
@@ -28,6 +30,9 @@ public class CourseFormController {
 
     @FXML
     private Label titleLabel;
+
+    @FXML
+    private Button btnSave;
 
     @FXML
     private Label subtitleLabel;
@@ -289,9 +294,16 @@ public class CourseFormController {
         
         java.io.File selectedFile = fileChooser.showOpenDialog(imagePreview.getScene().getWindow());
         if (selectedFile != null) {
-            String path = selectedFile.toURI().toString();
-            imagePathField.setText(path);
-            updateImagePreview(path);
+            try {
+                // Upload to Cloudinary
+                String uploadedUrl = CloudinaryService.uploadFile(selectedFile);
+                imagePathField.setText(uploadedUrl);
+                updateImagePreview(uploadedUrl);
+                gui.util.AlertHelper.showInfo("Upload Success", "Image has been uploaded to Cloudinary.");
+            } catch (IOException e) {
+                e.printStackTrace();
+                gui.util.AlertHelper.showError("Upload Error", "Could not upload image to Cloudinary: " + e.getMessage());
+            }
         }
     }
 
@@ -409,6 +421,9 @@ public class CourseFormController {
 
         boolean creating = course == null;
         titleLabel.setText(creating ? "Add Course" : "Edit Course");
+        if (btnSave != null) {
+            btnSave.setText(creating ? "Launch Course" : "Update Course");
+        }
 
         if (creating && returnCategory != null) {
             subtitleLabel.setText("Create a new course in " + returnCategory.getNom() + ".");

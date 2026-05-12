@@ -101,17 +101,64 @@
     -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.15), 10, 0, 0, 4);
 }
 
-/* Buttons */
-.btn {
-    -fx-cursor: hand;
+/* Radio Buttons */
+.radio-button {
+    -fx-text-fill: #1e293b; /* Dark primary text */
     -fx-font-weight: bold;
-    -fx-background-radius: 12;
+    -fx-font-size: 13px;
+}
+.radio-button:hover {
+    -fx-text-fill: #111827; /* Slight darker on hover */
 }
 
 .btn-primary {
     -fx-background-color: -fx-primary-gradient;
     -fx-text-fill: white;
     -fx-background-radius: 10;
+}
+
+/* Standardized Buttons */
+.btn-standard {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 10 20;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+}
+
+.btn-standard-pink {
+    -fx-background-color: -fx-primary-gradient;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.2), 10, 0, 0, 4);
+}
+
+.btn-standard-pink:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.4), 15, 0, 0, 6);
+    -fx-translate-y: -1;
+}
+
+.btn-standard-grey {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 2);
+}
+
+.btn-standard-grey:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 4);
+    -fx-translate-y: -1;
+}
+
+.btn-standard-ai {
+    -fx-background-color: linear-gradient(to bottom right, #4f46e5, #7c3aed);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(124, 58, 237, 0.2), 10, 0, 0, 4);
+}
+
+.btn-standard-ai:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(124, 58, 237, 0.4), 15, 0, 0, 6);
+    -fx-translate-y: -1;
 }
 
 .btn-logout {
@@ -1231,3 +1278,80 @@
     -fx-padding: 10 15;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 5);
 }
+
+/* Kebab Menu Styling */
+.kebab-menu {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0 5;
+    -fx-cursor: hand;
+    -fx-text-fill: #64748b;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-min-width: 30;
+    -fx-max-width: 30;
+    -fx-alignment: CENTER;
+}
+
+.kebab-menu .arrow-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-shape: null;
+}
+
+.kebab-menu .arrow {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-shape: null;
+}
+
+.kebab-menu:hover {
+    -fx-text-fill: -fx-primary-pink;
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 50;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.kebab-menu .context-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.menu-item {
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+}
+
+.menu-item:hover, .menu-item:focused {
+    -fx-background-color: #f1f5f9;
+}
+
+.menu-item .label {
+    -fx-text-fill: #1e293b;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+.menu-item-delete .label {
+    -fx-text-fill: #ef4444;
+}
+
+.btn-generate-quiz {
+    -fx-background-color: #f0f9ff;
+    -fx-text-fill: #0ea5e9;
+    -fx-border-color: #0ea5e9;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-font-weight: bold;
+}
+
+.btn-generate-quiz:hover {
+    -fx-background-color: #0ea5e9;
+    -fx-text-fill: white;
+}
+}

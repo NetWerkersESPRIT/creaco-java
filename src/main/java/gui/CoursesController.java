@@ -9,7 +9,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -301,7 +305,34 @@ public class CoursesController {
         if (catName == null) catName = "Unassigned";
         Label categoryLabel = new Label(catName.toUpperCase());
         categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 10px;");
-        titleBox.getChildren().addAll(categoryLabel, titleLabel);
+        
+        HBox titleRow = new HBox(10);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
+        VBox titleAndCat = new VBox(2);
+        titleAndCat.getChildren().addAll(categoryLabel, titleLabel);
+        HBox.setHgrow(titleAndCat, Priority.ALWAYS);
+        titleRow.getChildren().add(titleAndCat);
+
+        // Add 3-dots menu for Admin
+        Users user = SessionManager.getInstance().getCurrentUser();
+        if (user != null && "ROLE_ADMIN".equals(user.getRole())) {
+            MenuButton menuButton = new MenuButton("⋮");
+            menuButton.getStyleClass().add("kebab-menu");
+            
+            MenuItem editItem = new MenuItem("Edit Course");
+            editItem.getStyleClass().add("menu-item");
+            editItem.setOnAction(e -> onEditCourse(course));
+            
+            MenuItem deleteItem = new MenuItem("Delete Course");
+            deleteItem.getStyleClass().add("menu-item");
+            deleteItem.getStyleClass().add("menu-item-delete");
+            deleteItem.setOnAction(e -> onDeleteCourse(course));
+            
+            menuButton.getItems().addAll(editItem, deleteItem);
+            titleRow.getChildren().add(menuButton);
+        }
+
+        titleBox.getChildren().addAll(titleRow);
 
         String descText = course.getDescription() != null ? stripHtmlTags(course.getDescription()) : "No description available.";
         if (descText.isBlank()) descText = "No description available.";
@@ -437,6 +468,37 @@ public class CoursesController {
     private void openCourse(Course course) {
         if (FrontMainController.getInstance() != null) {
             FrontMainController.getInstance().openCourse(course);
+        }
+    }
+
+    private void onEditCourse(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/create-course-form.fxml"));
+            Parent root = loader.load();
+            
+            CourseFormController controller = loader.getController();
+            controller.setCourse(course);
+            
+            if (FrontMainController.getInstance() != null) {
+                FrontMainController.setNavbarText("Edit Course: " + course.getTitre(), "Pages / Courses / Edit");
+                FrontMainController.getInstance().setContent(root);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            gui.util.AlertHelper.showError("Navigation Error", "Could not open edit form: " + e.getMessage());
+        }
+    }
+
+    private void onDeleteCourse(Course course) {
+        if (gui.util.AlertHelper.confirmDelete("course \"" + course.getTitre() + "\"")) {
+            try {
+                courseService.supprimer(course.getId());
+                loadCourses(); // Refresh
+                gui.util.AlertHelper.showInfo("Success", "Course deleted successfully.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                gui.util.AlertHelper.showError("Delete Error", "Could not delete course: " + e.getMessage());
+            }
         }
     }
 

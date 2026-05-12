@@ -530,4 +530,16 @@ public class FrontMainController {
             System.err.println("Could not load Profile view: " + e.getMessage());
         }
     }
+
+    public void applyBlur() {
+        if (rootStackPane != null) {
+            rootStackPane.setEffect(new javafx.scene.effect.GaussianBlur(10));
+        }
+    }
+
+    public void removeBlur() {
+        if (rootStackPane != null) {
+            rootStackPane.setEffect(null);
+        }
+    }
 }

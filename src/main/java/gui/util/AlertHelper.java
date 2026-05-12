@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AlertHelper {
 
     public enum AlertType {
-        CONFIRMATION, INFORMATION, ERROR, WARNING
+        CONFIRMATION, INFORMATION, ERROR, WARNING, SUCCESS
     }
 
     public static boolean showCustomAlert(String title, String message, AlertType type) {
@@ -63,6 +63,14 @@ public class AlertHelper {
                     iconLabel.setText("!");
                     iconLabel.setStyle("-fx-text-fill: #d97706; -fx-font-size: 40px;");
                     confirmBtn.setText("Continue");
+                    break;
+                case SUCCESS:
+                    iconLabel.setText("✔");
+                    iconLabel.setStyle("-fx-text-fill: #38a169; -fx-font-size: 40px;");
+                    cancelBtn.setVisible(false);
+                    cancelBtn.setManaged(false);
+                    confirmBtn.setText("Perfect");
+                    confirmBtn.setStyle("-fx-background-color: #38a169; -fx-text-fill: white; -fx-background-radius: 12; -fx-font-weight: bold;");
                     break;
             }
 
@@ -131,6 +139,10 @@ public class AlertHelper {
 
     public static void showWarning(String title, String message) {
         showCustomAlert(title, message, AlertType.WARNING);
+    }
+
+    public static void showSuccess(String title, String message) {
+        showCustomAlert(title, message, AlertType.SUCCESS);
     }
 
     private static void animateOut(Stage stage, StackPane root, VBox dialogBox) {

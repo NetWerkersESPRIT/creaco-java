@@ -4,6 +4,8 @@ import entities.HelpTicket;
 import entities.Users;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -44,6 +46,41 @@ public class SupportController {
     @FXML private Button btnUrgent;
     @FXML private Button btnToday;
     @FXML private Button btnWeek;
+
+    @FXML
+    public void onBack() {
+        System.out.println("[SupportController] Back arrow clicked!");
+        
+        // 1. Try singleton first
+        if (HelpDeskMessagesController.getInstance() != null) {
+            System.out.println("[SupportController] Found Admin Shell instance. Navigating...");
+            Platform.runLater(() -> {
+                HelpDeskMessagesController.getInstance().onShowCourses();
+            });
+            return;
+        }
+
+        // 2. Fallback: Search in Scene
+        System.out.println("[SupportController] Singleton null, trying Scene lookup...");
+        try {
+            javafx.scene.Scene scene = searchField.getScene();
+            if (scene != null) {
+                StackPane contentArea = (StackPane) scene.lookup("#mainContentContainer");
+                if (contentArea == null) contentArea = (StackPane) scene.lookup("#contentArea");
+                
+                if (contentArea != null) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/admin-courses-view.fxml"));
+                    Parent root = loader.load();
+                    contentArea.getChildren().setAll(root);
+                    System.out.println("[SupportController] Manual navigation successful.");
+                } else {
+                    System.err.println("[SupportController] Could not find content container in scene.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     public void initialize() {
@@ -105,17 +142,18 @@ public class SupportController {
 
         List<HelpTicket> filtered = allTickets.stream()
                 .filter(t -> {
+                    if (currentFilter == null || "Unread".equals(currentFilter)) {
+                         return t.getAdminResponse() == null || t.getAdminResponse().isEmpty();
+                    }
+                    
                     switch (currentFilter) {
-                        case "Unread": return t.getAdminResponse() == null || t.getAdminResponse().isEmpty();
                         case "Urgent": return "Urgent".equalsIgnoreCase(t.getPriority()) || "Haute".equalsIgnoreCase(t.getPriority());
                         case "Today":
-                            if (t.getCreatedAt() == null) return false;
-                            LocalDateTime created = LocalDateTime.parse(t.getCreatedAt(), DB_FORMAT);
-                            return created.isAfter(now.minusHours(24));
+                            LocalDateTime createdT = parseDate(t.getCreatedAt());
+                            return createdT != null && createdT.toLocalDate().isEqual(now.toLocalDate());
                         case "Week":
-                            if (t.getCreatedAt() == null) return false;
-                            LocalDateTime createdW = LocalDateTime.parse(t.getCreatedAt(), DB_FORMAT);
-                            return createdW.isAfter(now.minusDays(7));
+                            LocalDateTime createdW = parseDate(t.getCreatedAt());
+                            return createdW != null && createdW.isAfter(now.minusDays(7));
                         default: return true;
                     }
                 })
@@ -123,6 +161,18 @@ public class SupportController {
                 .collect(Collectors.toList());
 
         renderGroupedTickets(filtered);
+    }
+
+    private LocalDateTime parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) return null;
+        try {
+            // Handle common SQL format variations
+            String cleaned = dateStr.replace("T", " ");
+            if (cleaned.length() > 19) cleaned = cleaned.substring(0, 19);
+            return LocalDateTime.parse(cleaned, DB_FORMAT);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void renderGroupedTickets(List<HelpTicket> tickets) {

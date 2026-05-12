@@ -11,15 +11,9 @@
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
     </padding>
 
-    <!-- Header Section -->
+    <!-- Header Section (Only Back Button) -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
         <Button onAction="#onBackToCourses" styleClass="btn-action-light" text="⬅" style="-fx-font-size: 16px; -fx-background-radius: 50%; -fx-min-width: 45px; -fx-min-height: 45px; -fx-max-width: 45px; -fx-max-height: 45px; -fx-padding: 0;"/>
-        <VBox spacing="5.0">
-            <Label fx:id="titleLabel" styleClass="title-label" text="Course Categories" />
-            <Label fx:id="statusLabel" styleClass="subtitle-label" text="Loading categories..." style="-fx-text-fill: #ec4899; -fx-font-weight: bold; -fx-font-size: 11px;"/>
-        </VBox>
-        <Region HBox.hgrow="ALWAYS" />
-        <Button onAction="#onAddCategory" prefHeight="45.0" styleClass="btn-primary" style="-fx-background-color: #ce2d7c; -fx-text-fill: white;" text="Add category" />
     </HBox>
 
     <!-- Column Headers -->
