@@ -21,6 +21,20 @@ public class QuestionService {
 
     public QuestionService() {
         con = MyConnection.getInstance().getConnection();
+        createTableIfNotExist();
+    }
+
+    private void createTableIfNotExist() {
+        try (Statement st = con.createStatement()) {
+            st.execute("CREATE TABLE IF NOT EXISTS question (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                    "quiz_id INT NOT NULL, " +
+                    "question_text TEXT NOT NULL, " +
+                    "options TEXT NOT NULL, " +
+                    "correct_answer_index INT NOT NULL)");
+        } catch (SQLException e) {
+            System.err.println("Error creating question table: " + e.getMessage());
+        }
     }
 
     public List<Question> afficherParQuiz(int quizId) throws SQLException {

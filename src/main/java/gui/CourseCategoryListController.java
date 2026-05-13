@@ -15,6 +15,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
 import services.CourseCategoryService;
 
 import java.io.IOException;
@@ -93,8 +94,11 @@ public class CourseCategoryListController {
         VBox content = new VBox(5);
         content.setAlignment(javafx.geometry.Pos.CENTER);
         
-        Label plusLabel = new Label("+");
-        plusLabel.setStyle("-fx-font-size: 32px; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;");
+        Label plusLabel = new Label();
+        FontIcon plusIcon = new FontIcon("fas-plus");
+        plusIcon.setIconSize(32);
+        plusIcon.setIconColor(javafx.scene.paint.Color.web("#ce2d7c"));
+        plusLabel.setGraphic(plusIcon);
         
         Label textLabel = new Label("Add a new course category");
         textLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #475569;");
@@ -152,8 +156,8 @@ public class CourseCategoryListController {
         actionsBox.setPrefWidth(120); // Give actions a fixed space too
         actionsBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
         
-        Button editButton = createIconButton("📝", "btn-action-dark");
-        Button deleteButton = createIconButton("🗑", "btn-action-light");
+        Button editButton = createIconButton("fas-edit", "btn-action-dark");
+        Button deleteButton = createIconButton("fas-trash-alt", "btn-action-light");
 
         editButton.setOnAction(event -> openScene("/gui/category-edit-form-view.fxml", controller -> {
             CourseCategoryFormController formController = (CourseCategoryFormController) controller;
@@ -177,14 +181,20 @@ public class CourseCategoryListController {
         return row;
     }
 
-    private Button createIconButton(String textOrIcon, String colorClass) {
-        Button button = new Button(textOrIcon);
+    private Button createIconButton(String iconLiteral, String colorClass) {
+        FontIcon icon = new FontIcon(iconLiteral);
+        icon.setIconSize(18);
+        
+        Button button = new Button();
+        button.setGraphic(icon);
         button.getStyleClass().add("btn-standard");
         
         if ("btn-action-dark".equals(colorClass)) {
             button.getStyleClass().add("btn-standard-pink");
+            icon.setIconColor(javafx.scene.paint.Color.WHITE);
         } else {
             button.getStyleClass().add("btn-standard-grey");
+            icon.setIconColor(javafx.scene.paint.Color.web("#475569"));
         }
         
         button.setMinWidth(44);
