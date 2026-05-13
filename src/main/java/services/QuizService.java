@@ -20,6 +20,19 @@ public class QuizService {
 
     public QuizService() {
         con = MyConnection.getInstance().getConnection();
+        createTableIfNotExist();
+    }
+
+    private void createTableIfNotExist() {
+        try (Statement st = con.createStatement()) {
+            st.execute("CREATE TABLE IF NOT EXISTS quiz (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                    "title VARCHAR(255) NOT NULL, " +
+                    "resource_id INT NOT NULL, " +
+                    "created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        } catch (SQLException e) {
+            System.err.println("Error creating quiz table: " + e.getMessage());
+        }
     }
 
     public List<Quiz> afficherParRessource(int resourceId) throws SQLException {

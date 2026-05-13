@@ -250,7 +250,11 @@ public class QuizManagementController {
 
     @FXML
     private void handleClose() {
-        ((Stage) questionsList.getScene().getWindow()).close();
+        if (FrontMainController.getInstance() != null) {
+            FrontMainController.getInstance().closeModal();
+        } else if (questionsList.getScene() != null) {
+            ((Stage) questionsList.getScene().getWindow()).close();
+        }
     }
 
     private void clearForm() {

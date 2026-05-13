@@ -11,13 +11,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 import services.QuestionService;
 import services.QuizResultService;
 import services.QuizService;
@@ -204,15 +204,21 @@ public class FrontResourceController {
         actionRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Button openBtn = new Button("Open");
-        openBtn.getStyleClass().add("btn-primary");
-        openBtn.setPrefWidth(120);
-        openBtn.setPrefHeight(36);
+        FontIcon openIcon = new FontIcon("fas-external-link-alt");
+        openIcon.setIconColor(javafx.scene.paint.Color.WHITE);
+        openBtn.setGraphic(openIcon);
+        openBtn.setPrefWidth(145);
+        openBtn.setPrefHeight(42);
+        openBtn.setStyle("-fx-background-color: #6c2db1; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12;");
         openBtn.setOnAction(e -> onOpenResource(ressource));
 
-        Button downloadIconBtn = new Button("📥");
-        downloadIconBtn.getStyleClass().add("btn-action-light");
-        downloadIconBtn.setStyle("-fx-font-size: 16px; -fx-padding: 5 10; -fx-background-radius: 8;");
-        downloadIconBtn.setPrefHeight(36);
+        Button downloadIconBtn = new Button("Export"); // Standardized naming to Export
+        FontIcon downloadIcon = new FontIcon("fas-download");
+        downloadIcon.setIconColor(javafx.scene.paint.Color.valueOf("#475569"));
+        downloadIconBtn.setGraphic(downloadIcon);
+        downloadIconBtn.setPrefWidth(135);
+        downloadIconBtn.setPrefHeight(42);
+        downloadIconBtn.setStyle("-fx-background-color: #f8fafc; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 1;");
         downloadIconBtn.setOnAction(e -> onDownloadResource(ressource));
 
         actionRow.getChildren().addAll(openBtn, downloadIconBtn);
@@ -220,9 +226,14 @@ public class FrontResourceController {
         try {
             if (quizService.hasQuizForResource(ressource.getId())) {
                 Button assessmentBtn = new Button("Start Assessment");
+                FontIcon assessIcon = new FontIcon("fas-play-circle");
+                assessIcon.setIconColor(javafx.scene.paint.Color.WHITE);
+                assessmentBtn.setGraphic(assessIcon);
+                
                 assessmentBtn.getStyleClass().add("btn-primary");
-                assessmentBtn.setPrefWidth(200);
-                assessmentBtn.setPrefHeight(36);
+                assessmentBtn.setPrefWidth(Double.MAX_VALUE);
+                assessmentBtn.setPrefHeight(42);
+                assessmentBtn.setStyle("-fx-background-radius: 12; -fx-font-weight: bold; -fx-background-color: linear-gradient(to right, #6c2db1, #ec4899); -fx-text-fill: white;");
                 
                 boolean hasCompleted = false;
                 if (currentUser != null) {
@@ -234,19 +245,15 @@ public class FrontResourceController {
 
                 if (hasCompleted) {
                     assessmentBtn.setText("View Results");
+                    assessIcon.setIconCode(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.CHECK_CIRCLE);
                     assessmentBtn.getStyleClass().setAll("btn-action-light");
+                    assessmentBtn.setStyle("-fx-background-radius: 12; -fx-font-weight: bold; -fx-background-color: #f8fafc; -fx-text-fill: #475569; -fx-border-color: #e2e8f0;");
+                    assessIcon.setIconColor(javafx.scene.paint.Color.valueOf("#475569"));
                     assessmentBtn.setOnAction(e -> openQuizModal(ressource));
                 } else {
                     assessmentBtn.setOnAction(e -> openQuizModal(ressource));
                 }
                 footer.getChildren().addAll(assessmentBtn, actionRow);
-            } else if (isPrivileged) {
-                Button setupQuizBtn = new Button("✨ Setup Quiz");
-                setupQuizBtn.getStyleClass().add("btn-generate-quiz");
-                setupQuizBtn.setPrefWidth(200);
-                setupQuizBtn.setPrefHeight(36);
-                setupQuizBtn.setOnAction(e -> openAdminQuizManagement(ressource));
-                footer.getChildren().addAll(setupQuizBtn, actionRow);
             } else {
                 footer.getChildren().add(actionRow);
             }
@@ -293,6 +300,12 @@ public class FrontResourceController {
     }
 
     private void showAsModal(Parent root, String title) {
+        if (FrontMainController.getInstance() != null) {
+            FrontMainController.getInstance().openModal(root);
+            return;
+        }
+
+        // Fallback for standalone mode
         GaussianBlur blur = new GaussianBlur(10);
         Node rootNode = mainContent.getScene().getRoot();
         rootNode.setEffect(blur);

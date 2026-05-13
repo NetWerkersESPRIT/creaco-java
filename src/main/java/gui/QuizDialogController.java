@@ -138,7 +138,11 @@ public class QuizDialogController {
 
     @FXML
     private void handleClose() {
-        ((Stage) questionsContainer.getScene().getWindow()).close();
+        if (FrontMainController.getInstance() != null) {
+            FrontMainController.getInstance().closeModal();
+        } else if (questionsContainer.getScene() != null) {
+            ((Stage) questionsContainer.getScene().getWindow()).close();
+        }
     }
 
     public void showAlreadyCompleted(QuizResult result, List<Question> questions) {

@@ -477,12 +477,18 @@ public class FrontMainController {
 
     public void openCourse(Course course) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
-            Parent root = loader.load();
-            FrontResourceController controller = loader.getController();
+            boolean isAdmin = utils.SessionManager.getInstance().isAdmin();
+            String fxmlPath = isAdmin ? "/gui/admin-resource-view.fxml" : "/gui/front-resource-view.fxml";
             
-            if (controller != null) {
-                controller.setCourse(course);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            
+            if (isAdmin) {
+                AdminResourceController controller = loader.getController();
+                if (controller != null) controller.setCourse(course);
+            } else {
+                FrontResourceController controller = loader.getController();
+                if (controller != null) controller.setCourse(course);
             }
 
             // Standard sub-view loading pattern
@@ -541,15 +547,60 @@ public class FrontMainController {
         }
     }
 
+    public void openModal(Parent modalNode) {
+        if (rootStackPane == null) return;
+        
+        applyBlur();
+        
+        StackPane overlay = new StackPane(modalNode);
+        overlay.setId("modalOverlay");
+        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.45);");
+        
+        // Ensure the overlay consumes mouse events to prevent clicking background
+        overlay.setOnMouseClicked(event -> {
+            if (event.getTarget() == overlay) {
+                // Optional: close on background click
+                // closeModal();
+            }
+            event.consume();
+        });
+        
+        rootStackPane.getChildren().add(overlay);
+        
+        // Add fade-in animation
+        overlay.setOpacity(0);
+        javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(300), overlay);
+        ft.setToValue(1.0);
+        ft.play();
+    }
+
+    public void closeModal() {
+        if (rootStackPane == null) return;
+        
+        Node overlay = rootStackPane.lookup("#modalOverlay");
+        if (overlay != null) {
+            javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(200), overlay);
+            ft.setToValue(0);
+            ft.setOnFinished(e -> {
+                rootStackPane.getChildren().remove(overlay);
+                removeBlur();
+            });
+            ft.play();
+        } else {
+            removeBlur();
+        }
+    }
+
     public void applyBlur() {
-        if (rootStackPane != null) {
-            rootStackPane.setEffect(new javafx.scene.effect.GaussianBlur(10));
+        if (rootStackPane != null && !rootStackPane.getChildren().isEmpty()) {
+            // Apply blur to the first child (the BorderPane) so it doesn't blur the modal
+            rootStackPane.getChildren().get(0).setEffect(new javafx.scene.effect.GaussianBlur(15));
         }
     }
 
     public void removeBlur() {
-        if (rootStackPane != null) {
-            rootStackPane.setEffect(null);
+        if (rootStackPane != null && !rootStackPane.getChildren().isEmpty()) {
+            rootStackPane.getChildren().get(0).setEffect(null);
         }
     }
 }
