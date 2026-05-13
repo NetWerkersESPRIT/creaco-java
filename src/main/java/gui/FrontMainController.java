@@ -237,11 +237,8 @@ public class FrontMainController {
         if (user != null && imgNavAvatar != null) {
             String displayName = user.getUsername() != null ? user.getUsername() : "User";
             lblUsername.setText(displayName);
-            String avatarUrl = user.getImage();
-            if (avatarUrl == null || avatarUrl.isEmpty()) {
-                avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + user.getUsername();
-            }
-            imgNavAvatar.setImage(new javafx.scene.image.Image(avatarUrl, true));
+            // Navbar Avatar using centralized method
+            imgNavAvatar.setImage(new javafx.scene.image.Image(user.getAvatarUrl(), true));
         }
     }
 

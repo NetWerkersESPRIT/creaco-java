@@ -114,6 +114,23 @@ public class Users {
         this.image = image;
     }
 
+    /**
+     * Returns the user's avatar URL.
+     * If the 'image' field is set, it returns it.
+     * Otherwise, it generates a DiceBear avatar URL based on the username.
+     */
+    public String getAvatarUrl() {
+        if (image != null && !image.trim().isEmpty()) {
+            // JavaFX ImageView does not support SVG. 
+            // If it's a DiceBear URL, we force it to PNG.
+            if (image.contains("dicebear.com") && image.contains("/svg")) {
+                return image.replace("/svg", "/png");
+            }
+            return image;
+        }
+        return utils.DiceBearService.generateInitialsUrl(username != null ? username : "User" + id);
+    }
+
     @Override
     public String toString() {
         return '\n'+

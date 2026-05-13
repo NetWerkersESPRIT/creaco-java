@@ -49,10 +49,7 @@ public class HelpDeskMessagesController {
         Users admin = SessionManager.getInstance().getCurrentUser();
         if (admin != null) {
             lblAdminName.setText(admin.getUsername());
-            String avatarUrl = admin.getImage();
-            if (avatarUrl == null || avatarUrl.isEmpty()) {
-                avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + admin.getUsername();
-            }
+            String avatarUrl = admin.getAvatarUrl();
             try {
                 imgAdminAvatar.setImage(new Image(avatarUrl, true));
             } catch (Exception e) {

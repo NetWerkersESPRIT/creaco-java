@@ -108,11 +108,7 @@ public class UserGroupsDashboardController {
         Circle clip = new Circle(20, 20, 20);
         avatar.setClip(clip);
         
-        String imgUrl = member.getImage();
-        if (imgUrl == null || imgUrl.isEmpty()) {
-            imgUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + member.getUsername();
-        }
-        avatar.setImage(new Image(imgUrl, true));
+        avatar.setImage(new Image(member.getAvatarUrl(), true));
 
         VBox textInfo = new VBox(2);
         Label nameLabel = new Label(member.getUsername() + (isOwner ? " (Owner)" : ""));

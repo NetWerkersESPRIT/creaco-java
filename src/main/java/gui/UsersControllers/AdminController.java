@@ -46,13 +46,9 @@ public class AdminController {
             if ("ADMIN".equals(role))
                 lblNavUserRole.setStyle("-fx-background-color: #434a75;");
 
-            // Navbar Avatar
+            // Navbar Avatar using centralized method
             if (imgNavAvatar != null) {
-                String avatarUrl = current.getImage();
-                if (avatarUrl == null || avatarUrl.isEmpty()) {
-                    avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + current.getUsername();
-                }
-                imgNavAvatar.setImage(new javafx.scene.image.Image(avatarUrl, true));
+                imgNavAvatar.setImage(new javafx.scene.image.Image(current.getAvatarUrl(), true));
             }
         }
     }
@@ -184,12 +180,7 @@ public class AdminController {
         avatarView.setFitHeight(40);
         avatarView.setFitWidth(40);
         avatarView.setPreserveRatio(true);
-
-        String avatarUrl = u.getImage();
-        if (avatarUrl == null || avatarUrl.isEmpty()) {
-            avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + u.getUsername();
-        }
-        avatarView.setImage(new javafx.scene.image.Image(avatarUrl, true));
+        avatarView.setImage(new javafx.scene.image.Image(u.getAvatarUrl(), true));
 
         // Clip to rounded corners
         javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(40, 40);

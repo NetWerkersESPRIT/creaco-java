@@ -11,9 +11,12 @@ import javafx.scene.layout.StackPane;
 
 public class ProfileController {
 
-    @FXML private Label lblUsername, lblEmail, lblNumtel, lblPoints, lblCreatedAt;
-    @FXML private Label lblUserRole;
-    @FXML private ImageView imgAvatar;
+    @FXML
+    private Label lblUsername, lblEmail, lblNumtel, lblPoints, lblCreatedAt;
+    @FXML
+    private Label lblUserRole;
+    @FXML
+    private ImageView imgAvatar;
 
     private Users currentUser;
 
@@ -26,22 +29,21 @@ public class ProfileController {
             lblUsername.setText(name);
             lblEmail.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "-");
             lblNumtel.setText(currentUser.getNumtel() != null && !currentUser.getNumtel().isEmpty()
-                    ? currentUser.getNumtel() : "Not set");
+                    ? currentUser.getNumtel()
+                    : "Not set");
             lblPoints.setText(currentUser.getPoints() + " XP");
             lblCreatedAt.setText(currentUser.getCreated_at() != null ? currentUser.getCreated_at() : "-");
 
-            // Load avatar
-            String avatarUrl = currentUser.getImage();
-            if (avatarUrl == null || avatarUrl.isEmpty()) {
-                avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + name;
-            }
+            // Load avatar using the centralized getAvatarUrl() method
+            String avatarUrl = currentUser.getAvatarUrl();
             if (imgAvatar != null) {
                 imgAvatar.setImage(new Image(avatarUrl, true));
             }
 
             if (lblUserRole != null) {
                 String role = currentUser.getRole() != null
-                        ? currentUser.getRole().replace("ROLE_", "") : "USER";
+                        ? currentUser.getRole().replace("ROLE_", "")
+                        : "USER";
                 lblUserRole.setText(role);
             }
         }

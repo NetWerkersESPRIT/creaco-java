@@ -89,11 +89,7 @@ public class FloatingChatController {
                     role = role.substring(0, 1).toUpperCase() + role.substring(1).toLowerCase();
                     userNameLabel.setText(name + " (" + role + ")");
                     
-                    String avatarUrl = otherUser.getImage();
-                    if (avatarUrl == null || avatarUrl.isEmpty()) {
-                        avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + name;
-                    }
-                    headerAvatar.setImage(new Image(avatarUrl, true));
+                    headerAvatar.setImage(new Image(otherUser.getAvatarUrl(), true));
                 }
                 loadMessages();
             }
@@ -131,7 +127,7 @@ public class FloatingChatController {
         ImageView avatar = new ImageView();
         avatar.setFitHeight(28);
         avatar.setFitWidth(28);
-        String avatarUrl = (sender != null && sender.getImage() != null) ? sender.getImage() : "https://api.dicebear.com/7.x/avataaars/png?seed=" + (sender != null ? sender.getUsername() : "User");
+        String avatarUrl = (sender != null) ? sender.getAvatarUrl() : utils.DiceBearService.generateAvatarUrl("User");
         avatar.setImage(new Image(avatarUrl, true));
         Circle clip = new Circle(14, 14, 14);
         avatar.setClip(clip);

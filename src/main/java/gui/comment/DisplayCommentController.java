@@ -610,66 +610,45 @@ public class DisplayCommentController {
     }
 
     private StackPane buildAvatar(entities.Users user) {
-        String username = (user != null) ? user.getUsername() : "Unknown";
-        String imageUrl = (user != null) ? user.getImage() : null;
-
         StackPane circle = new StackPane();
         circle.setPrefSize(32, 32);
         circle.setMinSize(32, 32);
         circle.setMaxSize(32, 32);
         circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
 
-        if (imageUrl == null || imageUrl.isEmpty()) {
-            if ("Anonyme".equals(username)) {
-                imageUrl = null; // Skip image to force AY initials
-            } else {
-                imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
-            }
-        }
-
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            try {
-                javafx.scene.image.Image img;
-                if (imageUrl.startsWith("http")) {
-                    img = new javafx.scene.image.Image(imageUrl, true);
-                } else {
-                    java.io.File file = new java.io.File("src/main/resources/uploads/images/" + imageUrl);
-                    if (file.exists()) {
-                        img = new javafx.scene.image.Image(file.toURI().toString());
-                    } else {
-                        // If local file not found, use dicebear as fallback instead of initials
-                        img = new javafx.scene.image.Image(
-                                "https://api.dicebear.com/7.x/avataaars/png?seed=" + username, true);
-                    }
-                }
-
-                if (img != null) {
-                    javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView(img);
-                    imageView.setFitWidth(32);
-                    imageView.setFitHeight(32);
-                    imageView.setPreserveRatio(true);
-
-                    // Clip to circle
-                    javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(16, 16, 16);
-                    imageView.setClip(clip);
-
-                    circle.getChildren().add(imageView);
-                    return circle;
-                }
-            } catch (Exception e) {
-            }
-        }
-
-        // Final fallback: Initials (should rarely be reached now)
-        String displayInit;
-        if ("Anonyme".equals(username)) {
-            displayInit = "AY";
+        String avatarUrl;
+        if (user == null || "Anonyme".equals(user.getUsername())) {
+            avatarUrl = utils.DiceBearService.generateInitialsUrl("Anonyme");
         } else {
-            displayInit = (username != null && !username.isEmpty()) ? String.valueOf(Character.toUpperCase(username.charAt(0))) : "V";
+            avatarUrl = user.getAvatarUrl();
         }
-        Label initLabel = new Label(displayInit);
-        initLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
-        circle.getChildren().add(initLabel);
+
+        try {
+            javafx.scene.image.Image img;
+            if (avatarUrl.startsWith("http") || avatarUrl.startsWith("file:")) {
+                img = new javafx.scene.image.Image(avatarUrl, true);
+            } else {
+                java.io.File file = new java.io.File("src/main/resources/uploads/images/" + avatarUrl);
+                if (file.exists()) {
+                    img = new javafx.scene.image.Image(file.toURI().toString());
+                } else {
+                    img = new javafx.scene.image.Image(utils.DiceBearService.generateInitialsUrl(user != null ? user.getUsername() : "Visitor"), true);
+                }
+            }
+
+            javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView(img);
+            imageView.setFitWidth(32);
+            imageView.setFitHeight(32);
+            imageView.setPreserveRatio(true);
+            imageView.setClip(new javafx.scene.shape.Circle(16, 16, 16));
+            circle.getChildren().add(imageView);
+        } catch (Exception e) {
+            String displayInit = (user != null && user.getUsername() != null && !user.getUsername().isEmpty()) 
+                ? String.valueOf(Character.toUpperCase(user.getUsername().charAt(0))) : "V";
+            Label initLabel = new Label(displayInit);
+            initLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #ce2d7c;");
+            circle.getChildren().add(initLabel);
+        }
 
         return circle;
     }

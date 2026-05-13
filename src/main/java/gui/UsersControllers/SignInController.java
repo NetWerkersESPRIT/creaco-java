@@ -53,7 +53,7 @@ public class SignInController {
                     stage.setMaximized(true);
             }
         });
-        setupRecaptcha();
+        // setupRecaptcha();
     }
 
     private void setupRecaptcha() {
@@ -144,12 +144,14 @@ public class SignInController {
             return;
         }
 
+        /*
         if (isRecaptchaEnabled) {
             if (recaptchaToken == null || recaptchaToken.isEmpty()) {
                 showError("❌ Please complete the security verification.");
                 return;
             }
         }
+        */
 
         if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
             showError("❌ Invalid email address format.");
