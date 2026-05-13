@@ -34,11 +34,8 @@ public class ProfileController {
             lblPoints.setText(currentUser.getPoints() + " XP");
             lblCreatedAt.setText(currentUser.getCreated_at() != null ? currentUser.getCreated_at() : "-");
 
-            // Load avatar
-            String avatarUrl = currentUser.getImage();
-            if (avatarUrl == null || avatarUrl.isEmpty()) {
-                avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + name;
-            }
+            // Load avatar using the centralized getAvatarUrl() method
+            String avatarUrl = currentUser.getAvatarUrl();
             if (imgAvatar != null) {
                 imgAvatar.setImage(new Image(avatarUrl, true));
             }

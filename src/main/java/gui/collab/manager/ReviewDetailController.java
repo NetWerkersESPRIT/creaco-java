@@ -73,11 +73,7 @@ public class ReviewDetailController {
             Users creator = userService.getUserById(req.getCreatorId());
             creatorInfoLabel.setText("Requested by " + creator.getUsername());
             
-            String avatarUrl = creator.getImage();
-            if (avatarUrl == null || avatarUrl.isEmpty()) {
-                avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + creator.getUsername();
-            }
-            creatorAvatar.setImage(new Image(avatarUrl, true));
+            creatorAvatar.setImage(new Image(creator.getAvatarUrl(), true));
         } catch (Exception e) {
             e.printStackTrace();
         }

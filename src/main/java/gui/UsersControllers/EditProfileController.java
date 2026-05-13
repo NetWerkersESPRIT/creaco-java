@@ -41,11 +41,8 @@ public class EditProfileController {
             txtEmail.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
             txtNumtel.setText(currentUser.getNumtel() != null ? currentUser.getNumtel() : "");
             
-            // Load existing avatar or default
-            currentAvatarUrl = currentUser.getImage();
-            if (currentAvatarUrl == null || currentAvatarUrl.isEmpty()) {
-                currentAvatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + currentUser.getUsername();
-            }
+            // Load existing avatar or default using the new service
+            currentAvatarUrl = currentUser.getAvatarUrl();
             imgAvatar.setImage(new Image(currentAvatarUrl, true)); // true = load in background
 
             // Handle Google accounts: lock password field
@@ -135,9 +132,9 @@ public class EditProfileController {
         String prompt = txtAiPrompt.getText().trim();
         
         if (prompt.isEmpty()) {
-            // Fallback to random Dicebear if no prompt
+            // Fallback to random Dicebear if no prompt using our new service
             String randomSeed = UUID.randomUUID().toString();
-            currentAvatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + randomSeed;
+            currentAvatarUrl = utils.DiceBearService.generateAvatarUrl(randomSeed);
             showSuccess("✨ Random avatar generated! (Save to keep it)");
         } else {
             // Use Pollinations AI for custom prompts
@@ -146,7 +143,7 @@ public class EditProfileController {
                 currentAvatarUrl = "https://image.pollinations.ai/prompt/" + encodedPrompt + "?width=512&height=512&nologo=true";
                 showSuccess("🎨 AI is generating: '" + prompt + "'...");
             } catch (Exception e) {
-                currentAvatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + prompt;
+                currentAvatarUrl = utils.DiceBearService.generateAvatarUrl(prompt);
                 showError("❌ Error encoding prompt, using fallback.");
             }
         }
