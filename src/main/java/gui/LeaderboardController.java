@@ -73,11 +73,8 @@ public class LeaderboardController {
         countLbl.setText(data.get("count") + " Resources");
         
         String imgUrl = (String) data.get("image");
-        if (imgUrl != null && !imgUrl.isEmpty()) {
-            try {
-                imgView.setImage(new Image(imgUrl, true));
-            } catch (Exception e) { /* use default if fails */ }
-        }
+        String username = (String) data.get("name");
+        imgView.setImage(new Image(getProcessedAvatarUrl(imgUrl, username), true));
         
         try {
             badgeView.setImage(new Image(getClass().getResourceAsStream(badgePath)));
@@ -104,9 +101,8 @@ public class LeaderboardController {
         userImg.setFitWidth(36);
         userImg.setClip(clip);
         String url = (String) data.get("image");
-        if (url != null && !url.isEmpty()) {
-            try { userImg.setImage(new Image(url, true)); } catch (Exception e) {}
-        }
+        String username = (String) data.get("name");
+        userImg.setImage(new Image(getProcessedAvatarUrl(url, username), true));
         imgContainer.getChildren().add(userImg);
 
         Label nameLbl = new Label((String) data.get("name"));
@@ -151,9 +147,8 @@ public class LeaderboardController {
         userImg.setFitHeight(50);
         userImg.setClip(clip);
         String url = (String) data.get("userImage");
-        if (url != null && !url.isEmpty()) {
-            try { userImg.setImage(new Image(url, true)); } catch (Exception e) {}
-        }
+        String username = (String) data.get("userName");
+        userImg.setImage(new Image(getProcessedAvatarUrl(url, username), true));
 
         Label nameLbl = new Label((String) data.get("userName"));
         nameLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
@@ -163,6 +158,16 @@ public class LeaderboardController {
 
         card.getChildren().addAll(catLbl, userImg, nameLbl, scoreLbl);
         return card;
+    }
+
+    private String getProcessedAvatarUrl(String rawUrl, String username) {
+        if (rawUrl != null && !rawUrl.trim().isEmpty()) {
+            if (rawUrl.contains("dicebear.com") && rawUrl.contains("/svg")) {
+                return rawUrl.replace("/svg", "/png");
+            }
+            return rawUrl;
+        }
+        return utils.DiceBearService.generateInitialsUrl(username != null ? username : "User");
     }
 
     @FXML
