@@ -215,13 +215,11 @@ public class RessourceListController {
     private interface ControllerInitializer {
         void initialize(Object controller);
     }
-    @javafx.fxml.FXML
-    public void goToPreview(javafx.event.ActionEvent event) {
-        gui.PreviewHelper.goToPreview(event);
-    }
+    
 
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
     }
 }
+

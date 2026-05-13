@@ -196,13 +196,7 @@
                         <Insets top="24" left="24" right="24" bottom="0"/>
                     </padding>
                     <children>
-                        <HBox fx:id="previewBanner" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false"
-                               style="-fx-background-color: #fef08a; -fx-padding: 12 24; -fx-background-radius: 8;">
-                            <Label text="You are now in preview mode" style="-fx-font-weight: bold; -fx-text-fill: #854d0e; -fx-font-size: 14;" />
-                            <Region HBox.hgrow="ALWAYS" />
-                            <Button text="Exit Preview" onAction="#exitPreview"
-                                     style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
-                        </HBox>
+
 
                         <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="20.0">
                             <children>
