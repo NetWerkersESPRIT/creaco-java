@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="gui.QuizDialogController" stylesheets="@styles.css"
+           fx:id="rootPane" style="-fx-background-color: transparent;">
+    
+    <VBox spacing="20" styleClass="card" maxWidth="750" maxHeight="680" 
+          style="-fx-padding: 35; -fx-background-color: white; -fx-background-radius: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 30, 0, 0, 15);">
+        <children>
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT">
+                <children>
+                    <VBox>
+                        <Label fx:id="quizTitle" text="Assessment" styleClass="title-label" style="-fx-font-size: 24px;" />
+                        <Label fx:id="quizSubtitle" text="Test your knowledge" styleClass="subtitle-label" />
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button text="✕" onAction="#handleClose" styleClass="btn-action-light" 
+                            style="-fx-background-radius: 50; -fx-min-width: 40; -fx-min-height: 40; -fx-font-size: 16px;" />
+                </children>
+            </HBox>
+
+            <Separator style="-fx-opacity: 0.5;" />
+
+            <!-- Questions Area -->
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
+                <content>
+                    <VBox fx:id="questionsContainer" spacing="25" style="-fx-padding: 5 10 5 0;">
+                        <!-- Questions will be injected here -->
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- Result Feedback -->
+            <VBox fx:id="resultContainer" visible="false" managed="false" spacing="15" 
+                  style="-fx-padding: 20; -fx-background-radius: 15; -fx-border-radius: 15;">
+                <children>
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <Label fx:id="resultIcon" style="-fx-font-size: 28px;" />
+                        <VBox>
+                            <Label fx:id="resultHeader" style="-fx-font-weight: bold; -fx-font-size: 16px;" />
+                            <Label fx:id="resultMessage" wrapText="true" style="-fx-font-size: 13px;" />
+                        </VBox>
+                    </HBox>
+                </children>
+            </VBox>
+
+            <!-- Actions -->
+            <HBox spacing="15" alignment="CENTER_RIGHT">
+                <children>
+                    <Button fx:id="submitButton" text="Submit My Answers" onAction="#handleSubmit" 
+                            styleClass="btn-primary" prefWidth="250" prefHeight="45" 
+                            style="-fx-font-size: 14px; -fx-background-radius: 12;" />
+                </children>
+            </HBox>
+        </children>
+    </VBox>
+</StackPane>

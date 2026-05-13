@@ -4,13 +4,17 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" spacing="22.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.Events.EventController">
+<VBox alignment="TOP_CENTER" spacing="22.0"
+      maxWidth="Infinity" maxHeight="Infinity"
+      style="-fx-background-color: transparent;"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="gui.Events.EventController">
     <padding>
         <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
     </padding>
     <children>
         <!-- Header Section -->
-        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="top-nav">
+        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="top-nav" minHeight="60.0">
             <children>
                 <VBox>
                     <children>
@@ -44,79 +48,96 @@
 
         <HBox spacing="20.0" VBox.vgrow="ALWAYS">
             <children>
-                <!-- Form Card -->
-                <VBox prefWidth="450.0" spacing="20.0" styleClass="card">
-                    <children>
-                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" text="Event Details" />
-                        
-                        <GridPane hgap="15.0" vgap="15.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="100.0" />
-                                <ColumnConstraints hgrow="ALWAYS" />
-                            </columnConstraints>
+                <!-- Form Card (wrapped in ScrollPane so buttons always visible) -->
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+                            style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;"
+                            prefWidth="470.0" minWidth="370.0" maxWidth="470.0">
+                    <content>
+                        <VBox spacing="20.0" styleClass="card" maxWidth="Infinity">
                             <children>
-                                <Label text="Name:" styleClass="subtitle-label" />
-                                <TextField fx:id="txtName" promptText="Enter event name" styleClass="search-bar" GridPane.columnIndex="1" />
-                                
-                                <Label text="Type:" styleClass="subtitle-label" GridPane.rowIndex="1" />
-                                <ComboBox fx:id="cbType" promptText="Select type" maxWidth="Infinity" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                
-                                <Label text="Category:" styleClass="subtitle-label" GridPane.rowIndex="2" />
-                                <TextField fx:id="txtCategory" promptText="e.g. Technology" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                
-                                <Label text="Date:" styleClass="subtitle-label" GridPane.rowIndex="3" />
-                                <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" text="Event Details" />
+
+                                <GridPane hgap="15.0" vgap="15.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="100.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" />
+                                    </columnConstraints>
                                     <children>
-                                        <DatePicker fx:id="dpDate" maxWidth="1.7976931348623157E308" onAction="#onDateSelected" />
-                                        <Label fx:id="lblWeather" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px; -fx-font-weight: bold;" text="" />
+                                        <Label text="Name:" styleClass="subtitle-label" />
+                                        <TextField fx:id="txtName" promptText="Enter event name" styleClass="search-bar" GridPane.columnIndex="1" />
+
+                                        <Label text="Type:" styleClass="subtitle-label" GridPane.rowIndex="1" />
+                                        <ComboBox fx:id="cbType" promptText="Select type" maxWidth="Infinity" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="1" onAction="#onTypeChanged" />
+
+                                        <!-- Meeting Link row – only visible for Online events -->
+                                        <Label fx:id="lblMeetingLink" text="Meeting Link:" styleClass="subtitle-label" GridPane.rowIndex="2" managed="false" visible="false" />
+                                        <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="hboxMeetingLink" managed="false" visible="false">
+                                            <children>
+                                                <TextField fx:id="txtMeetingLink" editable="false" promptText="Auto-generated link" styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#onCopyMeetingLink" style="-fx-padding: 5 10; -fx-background-color: #4a5568;" styleClass="btn-primary" text="📋" />
+                                                <Button onAction="#onRegenerateMeetingLink" style="-fx-padding: 5 10; -fx-background-color: #667eea;" styleClass="btn-primary" text="🔄" />
+                                            </children>
+                                        </HBox>
+
+                                        <Label text="Category:" styleClass="subtitle-label" GridPane.rowIndex="3" />
+                                        <TextField fx:id="txtCategory" promptText="e.g. Technology" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                        <Label text="Date:" styleClass="subtitle-label" GridPane.rowIndex="4" />
+                                        <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                            <children>
+                                                <DatePicker fx:id="dpDate" maxWidth="1.7976931348623157E308" onAction="#onDateSelected" />
+                                                <Label fx:id="lblWeather" style="-fx-text-fill: -fx-primary-pink; -fx-font-size: 11px; -fx-font-weight: bold;" text="" />
+                                            </children>
+                                        </VBox>
+
+                                        <Label text="Time:" styleClass="subtitle-label" GridPane.rowIndex="5" />
+                                        <TextField fx:id="txtTime" promptText="HH:mm" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+                                        <Label text="Capacity:" styleClass="subtitle-label" GridPane.rowIndex="6" />
+                                        <TextField fx:id="txtCapacity" promptText="Max participants" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+                                        <Label text="Organizer:" styleClass="subtitle-label" GridPane.rowIndex="7" />
+                                        <TextField fx:id="txtOrganizer" promptText="Organizer name" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+
+                                        <Label text="Image:" styleClass="subtitle-label" GridPane.rowIndex="8" />
+                                        <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
+                                            <children>
+                                                <TextField fx:id="txtImagePath" editable="false" promptText="Upload image..." styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#onUploadImage" style="-fx-padding: 5 10; -fx-background-color: #4a5568;" styleClass="btn-primary" text="📁" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </GridPane>
+
+                                <VBox spacing="8.0">
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                        <children>
+                                            <Label styleClass="subtitle-label" text="Description:" />
+                                            <Region HBox.hgrow="ALWAYS" />
+                                            <Button onAction="#onGenerateAI" style="-fx-font-size: 10px; -fx-padding: 3 8; -fx-background-radius: 8;" styleClass="btn-primary" text="✨ AI Generate" />
+                                        </children>
+                                    </HBox>
+                                    <TextArea fx:id="txtDescription" prefHeight="100.0" promptText="Event description..." styleClass="search-bar" wrapText="true" />
+                                </VBox>
+
+                                <!-- Action Buttons - always visible thanks to ScrollPane -->
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <Button fx:id="btnAdd" onAction="#addEvent" prefHeight="45.0" styleClass="btn-primary" text="Add Event" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                                                <Button fx:id="btnUpdate" onAction="#updateEvent" prefHeight="45.0" styleClass="btn-primary" text="Update" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #2d3748;" />
+                                            </children>
+                                        </HBox>
+                                        <Button fx:id="btnDelete" onAction="#deleteEvent" prefHeight="45.0" styleClass="btn-primary" text="Delete Selected" maxWidth="Infinity" style="-fx-background-color: #cbd5e0; -fx-text-fill: #4a5568;" />
                                     </children>
                                 </VBox>
-                                
-                                <Label text="Time:" styleClass="subtitle-label" GridPane.rowIndex="4" />
-                                <TextField fx:id="txtTime" promptText="HH:mm" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                                
-                                <Label text="Capacity:" styleClass="subtitle-label" GridPane.rowIndex="5" />
-                                <TextField fx:id="txtCapacity" promptText="Max participants" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                
-                                <Label text="Organizer:" styleClass="subtitle-label" GridPane.rowIndex="6" />
-                                <TextField fx:id="txtOrganizer" promptText="Organizer name" styleClass="search-bar" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                                
-                                <Label text="Image:" styleClass="subtitle-label" GridPane.rowIndex="7" />
-                                <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
-                                    <children>
-                                        <TextField fx:id="txtImagePath" editable="false" promptText="Upload image..." styleClass="search-bar" HBox.hgrow="ALWAYS" />
-                                        <Button onAction="#onUploadImage" style="-fx-padding: 5 10; -fx-background-color: #4a5568;" styleClass="btn-primary" text="📁" />
-                                    </children>
-                                </HBox>
-                            </children>
-                        </GridPane>
-                        
-                        <VBox spacing="8.0">
-                            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                <children>
-                                    <Label styleClass="subtitle-label" text="Description:" />
-                                    <Region HBox.hgrow="ALWAYS" />
-                                    <Button onAction="#onGenerateAI" style="-fx-font-size: 10px; -fx-padding: 3 8; -fx-background-radius: 8;" styleClass="btn-primary" text="✨ AI Generate" />
-                                </children>
-                            </HBox>
-                            <TextArea fx:id="txtDescription" prefHeight="100.0" promptText="Event description..." styleClass="search-bar" wrapText="true" />
-                        </VBox>
-                        
-                        <VBox spacing="10.0">
-                            <children>
-                                <HBox spacing="10.0">
-                                    <children>
-                                        <Button fx:id="btnAdd" onAction="#addEvent" prefHeight="45.0" styleClass="btn-primary" text="Add Event" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
-                                        <Button fx:id="btnUpdate" onAction="#updateEvent" prefHeight="45.0" styleClass="btn-primary" text="Update" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #2d3748;" />
-                                    </children>
-                                </HBox>
-                                <Button fx:id="btnDelete" onAction="#deleteEvent" prefHeight="45.0" styleClass="btn-primary" text="Delete Selected" maxWidth="Infinity" style="-fx-background-color: #cbd5e0; -fx-text-fill: #4a5568;" />
                             </children>
                         </VBox>
-                    </children>
-                </VBox>
+                    </content>
+                </ScrollPane>
 
-                <!-- Table Card -->
+                <!-- Events List Card -->
                 <VBox spacing="15.0" styleClass="card" HBox.hgrow="ALWAYS">
                     <children>
                         <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-text-main;" text="Existing Events" />

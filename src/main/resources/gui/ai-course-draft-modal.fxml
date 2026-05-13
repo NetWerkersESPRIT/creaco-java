@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20.0" styleClass="card" prefWidth="500.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.AICourseDraftController">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+    <children>
+        <HBox spacing="15.0" alignment="CENTER_LEFT">
+            <children>
+                <StackPane style="-fx-background-color: -fx-primary-gradient; -fx-background-radius: 12; -fx-padding: 10;">
+                    <Label text="✨" style="-fx-font-size: 20px; -fx-text-fill: white;" />
+                </StackPane>
+                <VBox>
+                    <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="AI Course Studio" />
+                    <Label style="-fx-font-size: 10px; -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;" text="GENERATE CONTENT INSTANTLY" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#onClose" text="✕" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 18px; -fx-cursor: hand;" />
+            </children>
+        </HBox>
+        
+        <Label style="-fx-text-fill: #64748b; -fx-font-size: 13px;" text="Type a topic and our AI will draft a complete course structure for you." wrapText="true" />
+        
+        <VBox spacing="10.0">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 11px;" text="TOPIC OR KEYWORDS" />
+            <TextField fx:id="aiTopicField" promptText="e.g. Advanced JavaFX UI Design" styleClass="search-bar" prefHeight="45.0" />
+        </VBox>
+        
+        <Button fx:id="btnGenerateIdea" onAction="#onGenerateCourseIdea" prefHeight="50.0" prefWidth="Infinity" styleClass="btn-primary" style="-fx-background-color: #1e293b; -fx-font-weight: bold;" text="Generate Course Draft" />
+        
+        <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 11px;" text="GENERATED OUTLINE" />
+            <TextArea fx:id="aiResultArea" promptText="Generated content will appear here..." wrapText="true" VBox.vgrow="ALWAYS" prefHeight="250.0" style="-fx-font-size: 12px; -fx-control-inner-background: #ffffff; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10;" />
+        </VBox>
+        
+        <HBox spacing="15.0">
+            <children>
+                <Button onAction="#onClose" prefHeight="45.0" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-action-light" text="Cancel" />
+                <Button fx:id="btnDraftCourse" onAction="#onDraftCourse" prefHeight="45.0" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-primary" text="Use this Draft" disable="true" />
+            </children>
+        </HBox>
+    </children>
+</VBox>

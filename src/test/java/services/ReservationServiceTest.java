@@ -1,6 +1,7 @@
 package services;
 
 import entities.Event;
+import entities.Users;
 import entities.Reservation;
 import org.junit.jupiter.api.*;
 
@@ -34,7 +35,7 @@ public class ReservationServiceTest {
         event.setId(EXISTING_EVENT_ID);
         r.setEvent(event);
 
-        Personne user = new Personne();
+        Users user = new Users();
         user.setId(EXISTING_USER_ID);
         r.setUser(user);
 
@@ -91,7 +92,7 @@ public class ReservationServiceTest {
         event.setId(EXISTING_EVENT_ID);
         r.setEvent(event);
 
-        Personne user = new Personne();
+        Users user = new Users();
         user.setId(EXISTING_USER_ID);
         r.setUser(user);
 

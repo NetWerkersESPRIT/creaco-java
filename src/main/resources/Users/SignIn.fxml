@@ -82,7 +82,7 @@
                 </VBox>
 
                 <!-- Google reCAPTCHA Section -->
-                <VBox spacing="8" alignment="CENTER">
+                <VBox fx:id="vboxRecaptcha" spacing="8" alignment="CENTER">
                     <Label style="-fx-padding: 0;" styleClass="section-header" text="SECURITY VERIFICATION" />
                     <StackPane style="-fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12;"
                                VBox.vgrow="SOMETIMES">

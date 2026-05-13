@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="gui.QuizManagementController" stylesheets="@styles.css"
+           fx:id="rootPane" style="-fx-background-color: transparent;">
+    
+    <VBox spacing="25" styleClass="card" maxWidth="850" maxHeight="720" 
+          style="-fx-padding: 35; -fx-background-color: white; -fx-background-radius: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 30, 0, 0, 15);">
+        <children>
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT">
+                <children>
+                    <VBox>
+                        <Label text="Quiz Management" styleClass="title-label" style="-fx-font-size: 24px;" />
+                        <Label fx:id="resourceLabel" text="Resource: -" styleClass="subtitle-label" />
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button text="✕" onAction="#handleClose" styleClass="btn-action-light" 
+                            style="-fx-background-radius: 50; -fx-min-width: 40; -fx-min-height: 40; -fx-font-size: 16px;" />
+                </children>
+            </HBox>
+
+            <Separator style="-fx-opacity: 0.5;" />
+
+            <!-- Main Content Area -->
+            <StackPane VBox.vgrow="ALWAYS">
+                <!-- Initial State: No Quiz -->
+                <VBox fx:id="noQuizView" alignment="CENTER" spacing="30" visible="false">
+                    <children>
+                        <Label text="✨" style="-fx-font-size: 60px;" />
+                        <VBox alignment="CENTER" spacing="10">
+                            <Label text="No Quiz Yet" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                            <Label text="Choose how you want to create the assessment for this resource." 
+                                   style="-fx-text-fill: #64748b; -fx-text-alignment: center;" wrapText="true" maxWidth="400" />
+                        </VBox>
+                        <HBox spacing="20" alignment="CENTER">
+                            <Button fx:id="btnAiGenerate" text="Generate with AI" onAction="#handleAiGenerate" 
+                                    styleClass="btn-primary" prefWidth="220" prefHeight="50" 
+                                    style="-fx-font-size: 14px; -fx-background-radius: 15;" />
+                            <Button text="Create Manually" onAction="#handleCreateManually" 
+                                    styleClass="btn-action-light" prefWidth="220" prefHeight="50" 
+                                    style="-fx-font-size: 14px; -fx-background-radius: 15; -fx-border-color: #cbd5e1; -fx-border-radius: 15;" />
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <!-- Management State: Quiz Exists -->
+                <VBox fx:id="manageQuizView" spacing="20" visible="false">
+                    <children>
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="Questions List" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1e293b;" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button text="+ Add Question" onAction="#handleAddQuestion" styleClass="btn-primary" 
+                                    style="-fx-background-radius: 10; -fx-padding: 8 15; -fx-font-size: 12px;" />
+                            <Button text="Delete Quiz" onAction="#handleDeleteQuiz" styleClass="btn-delete" 
+                                    style="-fx-background-radius: 10; -fx-padding: 8 15; -fx-font-size: 12px; -fx-margin-left: 10;">
+                                <HBox.margin>
+                                    <Insets left="10.0" />
+                                </HBox.margin>
+                            </Button>
+                        </HBox>
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
+                            <content>
+                                <VBox fx:id="questionsList" spacing="15" />
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+
+                <!-- Loading State -->
+                <VBox fx:id="loadingView" alignment="CENTER" spacing="20" visible="false">
+                    <children>
+                        <ProgressIndicator prefWidth="50" prefHeight="50" />
+                        <Label text="Generating your quiz using AI..." style="-fx-text-fill: #64748b; -fx-font-weight: bold;" />
+                    </children>
+                </VBox>
+
+                <!-- Manual Add/Edit Form (Overlay) -->
+                <VBox fx:id="questionForm" spacing="20" visible="false" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 20; -fx-border-color: #e2e8f0; -fx-border-radius: 20;">
+                    <children>
+                        <Label fx:id="formTitle" text="Add New Question" style="-fx-font-weight: bold; -fx-font-size: 16px;" />
+                        <VBox spacing="8">
+                            <Label text="Question Text" styleClass="form-label" />
+                            <TextArea fx:id="fieldQuestionText" prefHeight="80" promptText="Enter question here..." wrapText="true" />
+                        </VBox>
+                        <GridPane hgap="15" vgap="15">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="ALWAYS" />
+                                <ColumnConstraints hgrow="NEVER" />
+                            </columnConstraints>
+                            <children>
+                                <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <Label text="Option 1" styleClass="form-label" />
+                                    <TextField fx:id="fieldOption1" promptText="Option A" />
+                                </VBox>
+                                <RadioButton fx:id="radio1" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-padding: 30 0 0 0;">
+                                    <toggleGroup>
+                                        <ToggleGroup fx:id="correctAnswerGroup" />
+                                    </toggleGroup>
+                                </RadioButton>
+
+                                <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <Label text="Option 2" styleClass="form-label" />
+                                    <TextField fx:id="fieldOption2" promptText="Option B" />
+                                </VBox>
+                                <RadioButton fx:id="radio2" toggleGroup="$correctAnswerGroup" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-padding: 30 0 0 0;" />
+
+                                <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                    <Label text="Option 3" styleClass="form-label" />
+                                    <TextField fx:id="fieldOption3" promptText="Option C" />
+                                </VBox>
+                                <RadioButton fx:id="radio3" toggleGroup="$correctAnswerGroup" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-padding: 30 0 0 0;" />
+
+                                <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                                    <Label text="Option 4" styleClass="form-label" />
+                                    <TextField fx:id="fieldOption4" promptText="Option D" />
+                                </VBox>
+                                <RadioButton fx:id="radio4" toggleGroup="$correctAnswerGroup" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-padding: 30 0 0 0;" />
+                            </children>
+                        </GridPane>
+                        <HBox spacing="15" alignment="CENTER_RIGHT">
+                            <Button text="Cancel" onAction="#handleCancelForm" styleClass="btn-cancel" />
+                            <Button text="Save Question" onAction="#handleSaveQuestion" styleClass="btn-primary" prefWidth="150" />
+                        </HBox>
+                    </children>
+                </VBox>
+            </StackPane>
+        </children>
+    </VBox>
+</StackPane>

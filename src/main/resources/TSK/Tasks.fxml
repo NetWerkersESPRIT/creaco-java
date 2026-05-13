@@ -72,7 +72,7 @@
                                      -fx-border-color: #f1f5f9; -fx-border-radius: 20;">
 
                             <!-- TO DO Column -->
-                            <VBox spacing="10" HBox.hgrow="ALWAYS" maxHeight="Infinity"
+                            <VBox spacing="10" HBox.hgrow="ALWAYS" minWidth="0" prefWidth="0" maxHeight="Infinity"
                                   style="-fx-background-color: #f8f9fa; -fx-background-radius: 14;
                                          -fx-padding: 16; -fx-border-color: #64748b;
                                          -fx-border-radius: 14; -fx-border-width: 4 0 0 0;">
@@ -84,7 +84,7 @@
                             </VBox>
 
                             <!-- DOING Column -->
-                            <VBox spacing="10" HBox.hgrow="ALWAYS" maxHeight="Infinity"
+                            <VBox spacing="10" HBox.hgrow="ALWAYS" minWidth="0" prefWidth="0" maxHeight="Infinity"
                                   style="-fx-background-color: #f0f9ff; -fx-background-radius: 14;
                                          -fx-padding: 16; -fx-border-color: #21d4fd;
                                          -fx-border-radius: 14; -fx-border-width: 4 0 0 0;">
@@ -96,7 +96,7 @@
                             </VBox>
 
                             <!-- DONE Column -->
-                            <VBox spacing="10" HBox.hgrow="ALWAYS" maxHeight="Infinity"
+                            <VBox spacing="10" HBox.hgrow="ALWAYS" minWidth="0" prefWidth="0" maxHeight="Infinity"
                                   style="-fx-background-color: #f0fff4; -fx-background-radius: 14;
                                          -fx-padding: 16; -fx-border-color: #82d616;
                                          -fx-border-radius: 14; -fx-border-width: 4 0 0 0;">
@@ -115,8 +115,8 @@
                             <Label text="TASK DETAILS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="300"/>
                             <Region HBox.hgrow="ALWAYS" />
                             <Label text="STATUS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="137" />
-                            <Label text="DEADLINE" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="230" />
-                            <Label text="ACTIONS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="70" />
+                            <Label text="DEADLINE" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="190" />
+                            <Label text="ACTIONS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="110" />
                         </HBox>
 
                         <!-- Block 7: Tasks List — plain VBox, outer scroll handles overflow -->

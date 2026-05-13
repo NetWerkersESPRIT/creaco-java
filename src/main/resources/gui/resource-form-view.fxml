@@ -98,15 +98,21 @@
                         </VBox>
                         <VBox spacing="4.0">
                             <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="URL *" />
-                                <TextField fx:id="urlField" promptText="https://example.com/resource" />
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Resource File *" />
+                                <HBox alignment="CENTER_LEFT" styleClass="file-upload-field">
+                                    <children>
+                                        <Button fx:id="btnUpload" onAction="#onUploadFileAction" styleClass="btn-upload-trigger" text="Choose File" />
+                                        <Label fx:id="fileNameLabel" styleClass="file-name-label" text="No file chosen" />
+                                    </children>
+                                </HBox>
+                                <TextField fx:id="urlField" visible="false" managed="false" />
                                 <Label fx:id="urlErrorLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;" visible="false" managed="false" />
                             </children>
                         </VBox>
                         <VBox spacing="8.0">
                             <children>
                                 <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Content" />
-                                <TextArea fx:id="contentArea" prefHeight="220.0" promptText="Optional content or notes..." wrapText="true" />
+                                <TextArea fx:id="contentArea" prefHeight="250.0" promptText="Optional content or notes..." wrapText="true" />
                             </children>
                         </VBox>
                         <HBox alignment="CENTER_RIGHT" spacing="12.0">

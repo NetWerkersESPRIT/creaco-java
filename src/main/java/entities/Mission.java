@@ -7,21 +7,22 @@ public class Mission {
     private String state;
     private String created_at;
     private String last_update;
-    private String mission_date;
+    private String mission_datetime;
     private String completed_at;
     private int implement_idea_id;
     private int assigned_by_id;
+    private String creatorName; // New field for UI display
 
     public Mission() {}
 
-    public Mission(int id, String title, String description, String state, String created_at, String last_update, String mission_date, String completed_at, int implement_idea_id, int assigned_by_id) {
+    public Mission(int id, String title, String description, String state, String created_at, String last_update, String mission_datetime, String completed_at, int implement_idea_id, int assigned_by_id) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.state = state;
         this.created_at = created_at;
         this.last_update = last_update;
-        this.mission_date = mission_date;
+        this.mission_datetime = mission_datetime;
         this.completed_at = completed_at;
         this.implement_idea_id = implement_idea_id;
         this.assigned_by_id = assigned_by_id;
@@ -45,8 +46,8 @@ public class Mission {
     public String getLast_update() { return last_update; }
     public void setLast_update(String last_update) { this.last_update = last_update; }
 
-    public String getMission_date() { return mission_date; }
-    public void setMission_date(String mission_date) { this.mission_date = mission_date; }
+    public String getMission_datetime() { return mission_datetime; }
+    public void setMission_datetime(String mission_datetime) { this.mission_datetime = mission_datetime; }
 
     public String getCompleted_at() { return completed_at; }
     public void setCompleted_at(String completed_at) { this.completed_at = completed_at; }
@@ -56,6 +57,9 @@ public class Mission {
 
     public int getAssigned_by_id() { return assigned_by_id; }
     public void setAssigned_by_id(int assigned_by_id) { this.assigned_by_id = assigned_by_id; }
+
+    public String getCreatorName() { return creatorName; }
+    public void setCreatorName(String creatorName) { this.creatorName = creatorName; }
 
     @Override
     public String toString() {

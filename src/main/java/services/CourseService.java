@@ -21,8 +21,48 @@ public class CourseService {
     private final Connection con;
 
     public CourseService() {
-
         con = MyConnection.getInstance().getConnection();
+        if (con != null) {
+            createTableIfNotExists();
+        }
+    }
+
+    private void createTableIfNotExists() {
+        String createSql = "CREATE TABLE IF NOT EXISTS cours (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "titre VARCHAR(255) NOT NULL, " +
+                "description TEXT, " +
+                "image VARCHAR(255), " +
+                "date_de_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                "date_de_modification TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, " +
+                "categorie_id INT, " +
+                "slug VARCHAR(255), " +
+                "views INT DEFAULT 0, " +
+                "statut VARCHAR(50), " +
+                "niveau VARCHAR(50), " +
+                "duree_estimee INT, " +
+                "deleted_at TIMESTAMP NULL, " +
+                "likes INT DEFAULT 0, " +
+                "dislikes INT DEFAULT 0" +
+                ") ENGINE=InnoDB";
+        
+        boolean needsRecreate = false;
+        try (Statement st = con.createStatement()) {
+            st.executeQuery("SELECT 1 FROM cours LIMIT 1").close();
+        } catch (SQLException e) {
+            if (e.getMessage().contains("doesn't exist in engine") || e.getErrorCode() == 1146) {
+                needsRecreate = true;
+            }
+        }
+
+        try (Statement st = con.createStatement()) {
+            if (needsRecreate) {
+                st.executeUpdate("DROP TABLE IF EXISTS cours");
+            }
+            st.executeUpdate(createSql);
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to create/verify cours table: " + e.getMessage());
+        }
     }
 
     public List<Course> afficher() throws SQLException {
@@ -89,8 +129,8 @@ public class CourseService {
 
     public void ajouter(Course course) throws SQLException {
         String sql = "INSERT INTO cours (titre, description, image, date_de_creation, date_de_modification, "
-                + "categorie_id, slug, views, statut, niveau, duree_estimee, deleted_at) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "categorie_id, slug, views, statut, niveau, duree_estimee, deleted_at, likes, dislikes) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, course.getTitre());
@@ -113,13 +153,16 @@ public class CourseService {
                 ps.setInt(11, course.getDureeEstimee());
             }
             ps.setNull(12, java.sql.Types.TIMESTAMP);
+            ps.setInt(13, course.getLikes());
+            ps.setInt(14, course.getDislikes());
             ps.executeUpdate();
         }
     }
 
     public void modifier(Course course) throws SQLException {
         String sql = "UPDATE cours SET titre = ?, description = ?, image = ?, date_de_modification = ?, "
-                + "categorie_id = ?, slug = ?, views = ?, statut = ?, niveau = ?, duree_estimee = ? "
+                + "categorie_id = ?, slug = ?, views = ?, statut = ?, niveau = ?, duree_estimee = ?, "
+                + "likes = ?, dislikes = ? "
                 + "WHERE id = ?";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -141,7 +184,9 @@ public class CourseService {
             } else {
                 ps.setInt(10, course.getDureeEstimee());
             }
-            ps.setInt(11, course.getId());
+            ps.setInt(11, course.getLikes());
+            ps.setInt(12, course.getDislikes());
+            ps.setInt(13, course.getId());
             ps.executeUpdate();
         }
     }
@@ -169,7 +214,7 @@ public class CourseService {
         String sql = "SELECT id, nom FROM categorie_cours WHERE deleted_at IS NULL ORDER BY nom";
 
         try (Statement stmt = con.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 categories.put(rs.getInt("id"), rs.getString("nom"));
             }
@@ -193,6 +238,8 @@ public class CourseService {
         course.setNiveau(rs.getString("niveau"));
         course.setDureeEstimee((Integer) rs.getObject("duree_estimee"));
         course.setDeletedAt(toString(rs.getTimestamp("deleted_at")));
+        course.setLikes((Integer) rs.getObject("likes"));
+        course.setDislikes((Integer) rs.getObject("dislikes"));
         return course;
     }
 
@@ -242,5 +289,37 @@ public class CourseService {
             }
         }
         return false;
+    }
+
+    public void likeCourse(int id) throws SQLException {
+        String sql = "UPDATE cours SET likes = likes + 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
+    public void unlikeCourse(int id) throws SQLException {
+        String sql = "UPDATE cours SET likes = likes - 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
+    public void dislikeCourse(int id) throws SQLException {
+        String sql = "UPDATE cours SET dislikes = dislikes + 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
+    public void undislikeCourse(int id) throws SQLException {
+        String sql = "UPDATE cours SET dislikes = dislikes - 1 WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
     }
 }
