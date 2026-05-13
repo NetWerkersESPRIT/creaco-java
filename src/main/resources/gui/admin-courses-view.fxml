@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox spacing="25.0" styleClass="dashboard-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MainController">
     <padding>
@@ -37,7 +38,7 @@
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <Label text="📚" style="-fx-font-size: 20px;"/>
+                                <FontIcon iconLiteral="fas-book" iconSize="22" iconColor="#434a75"/>
                                 <Label styleClass="stat-title" text="TOTAL COURSES" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px;"/>
                             </children>
                         </HBox>
@@ -48,7 +49,7 @@
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <Label text="🛠️" style="-fx-font-size: 20px;"/>
+                                <FontIcon iconLiteral="fas-tools" iconSize="22" iconColor="#ce2d7c"/>
                                 <Label styleClass="stat-title" text="ACTIVE WORKSHOPS" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px;"/>
                             </children>
                         </HBox>
@@ -59,7 +60,7 @@
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <Label text="🏷️" style="-fx-font-size: 20px;"/>
+                                <FontIcon iconLiteral="fas-tags" iconSize="22" iconColor="#6c2db1"/>
                                 <Label styleClass="stat-title" text="TOTAL CATEGORIES" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px;"/>
                             </children>
                         </HBox>

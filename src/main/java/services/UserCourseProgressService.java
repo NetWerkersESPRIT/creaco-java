@@ -21,6 +21,7 @@ public class UserCourseProgressService {
             // 2. Ensure columns exist in user_cours_progress
             ensureColumnExists("user_cours_progress", "progress", "DOUBLE DEFAULT 0.0");
             ensureColumnExists("user_cours_progress", "progress_percentage", "DOUBLE DEFAULT 0.0");
+            ensureColumnExists("user_cours_progress", "total_ressources", "INT DEFAULT 0");
             ensureColumnExists("user_cours_progress", "created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
             ensureColumnExists("user_cours_progress", "updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
 
@@ -105,7 +106,7 @@ public class UserCourseProgressService {
         // 4. Update the overall course progress
         double progress = (double) completedResources / totalResources;
         System.out.println("[DEBUG] New calculated progress: " + (progress * 100) + "%");
-        setProgress(userId, courseId, progress);
+        setProgress(userId, courseId, progress, totalResources);
     }
 
     public boolean isResourceCompleted(int userId, int resourceId) throws SQLException {
@@ -224,7 +225,7 @@ public class UserCourseProgressService {
         return 0.0;
     }
 
-    public void setProgress(int userId, int courseId, double progress) throws SQLException {
+    public void setProgress(int userId, int courseId, double progress, int totalResources) throws SQLException {
         if (progress > 1.0) progress = 1.0;
 
         String checkSql = "SELECT COUNT(*) FROM user_cours_progress WHERE user_id = ? AND cours_id = ?";
@@ -240,21 +241,23 @@ public class UserCourseProgressService {
         }
 
         if (exists) {
-            String updateSql = "UPDATE user_cours_progress SET progress = ?, progress_percentage = ?, updated_at = NOW() WHERE user_id = ? AND cours_id = ?";
+            String updateSql = "UPDATE user_cours_progress SET progress = ?, progress_percentage = ?, total_ressources = ?, updated_at = NOW() WHERE user_id = ? AND cours_id = ?";
             try (PreparedStatement ps = con.prepareStatement(updateSql)) {
                 ps.setDouble(1, progress);
                 ps.setDouble(2, progress * 100);
-                ps.setInt(3, userId);
-                ps.setInt(4, courseId);
+                ps.setInt(3, totalResources);
+                ps.setInt(4, userId);
+                ps.setInt(5, courseId);
                 ps.executeUpdate();
             }
         } else {
-            String insertSql = "INSERT INTO user_cours_progress (user_id, cours_id, progress, progress_percentage, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())";
+            String insertSql = "INSERT INTO user_cours_progress (user_id, cours_id, progress, progress_percentage, total_ressources, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
             try (PreparedStatement ps = con.prepareStatement(insertSql)) {
                 ps.setInt(1, userId);
                 ps.setInt(2, courseId);
                 ps.setDouble(3, progress);
                 ps.setDouble(4, progress * 100);
+                ps.setInt(5, totalResources);
                 ps.executeUpdate();
             }
         }

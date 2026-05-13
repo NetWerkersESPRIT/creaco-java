@@ -63,13 +63,13 @@ public class AICourseDraftController {
             onCloseCallback.run();
             return;
         }
-        // Fallback: close the stage (when used as a dialog)
-        if (aiTopicField.getScene() != null) {
+        
+        if (FrontMainController.getInstance() != null) {
+            FrontMainController.getInstance().closeModal();
+        } else if (aiTopicField.getScene() != null) {
+            // Fallback: close the stage (when used as a standalone window)
             Stage stage = (Stage) aiTopicField.getScene().getWindow();
             stage.close();
-            if (FrontMainController.getInstance() != null) {
-                FrontMainController.getInstance().removeBlur();
-            }
         }
     }
 }

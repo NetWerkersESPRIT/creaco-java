@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
 import services.CourseService;
 import gui.post.DisplayPostController;
 
@@ -225,18 +226,11 @@ public class MainController {
 
     @FXML
     private void onShowAIDraft() {
-        if (contentArea == null && FrontMainController.getInstance() != null) {
-            // Let FrontMainController handle the overlay
+        if (FrontMainController.getInstance() != null) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/ai-course-draft-modal.fxml"));
                 Parent modal = loader.load();
-                AICourseDraftController ctrl = loader.getController();
-                FrontMainController fmc = FrontMainController.getInstance();
-                javafx.scene.layout.StackPane overlay = new javafx.scene.layout.StackPane(modal);
-                overlay.setStyle("-fx-background-color: rgba(0,0,0,0.45);");
-                fmc.getContentArea().getChildren().add(overlay);
-                if (ctrl != null)
-                    ctrl.setOnClose(() -> fmc.getContentArea().getChildren().remove(overlay));
+                FrontMainController.getInstance().openModal(modal);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -384,15 +378,28 @@ public class MainController {
                     if (isError) {
                         javafx.application.Platform.runLater(() -> {
                             imageArea.getChildren().remove(img);
-                            imageArea.setStyle("-fx-background-color: linear-gradient(to bottom right, #e879f9, #818cf8); -fx-background-radius: 16 16 0 0;");
+                            imageArea.setStyle("-fx-background-color: linear-gradient(to bottom right, #f472b6, #a855f7); -fx-background-radius: 16 16 0 0;");
+                            
+                            FontIcon fallbackIcon = new FontIcon("fas-graduation-cap");
+                            fallbackIcon.setIconSize(64);
+                            fallbackIcon.setIconColor(javafx.scene.paint.Color.WHITE);
+                            imageArea.getChildren().add(fallbackIcon);
                         });
                     }
                 });
             } catch (Exception e) {
-                imageArea.setStyle("-fx-background-color: linear-gradient(to bottom right, #e879f9, #818cf8); -fx-background-radius: 16 16 0 0;");
+                imageArea.setStyle("-fx-background-color: linear-gradient(to bottom right, #f472b6, #a855f7); -fx-background-radius: 16 16 0 0;");
+                FontIcon fallbackIcon = new FontIcon("fas-graduation-cap");
+                fallbackIcon.setIconSize(64);
+                fallbackIcon.setIconColor(javafx.scene.paint.Color.WHITE);
+                imageArea.getChildren().add(fallbackIcon);
             }
         } else {
-            imageArea.setStyle("-fx-background-color: linear-gradient(to bottom right, #e879f9, #818cf8); -fx-background-radius: 16 16 0 0;");
+            imageArea.setStyle("-fx-background-color: linear-gradient(to bottom right, #f472b6, #a855f7); -fx-background-radius: 16 16 0 0;");
+            FontIcon fallbackIcon = new FontIcon("fas-graduation-cap");
+            fallbackIcon.setIconSize(64);
+            fallbackIcon.setIconColor(javafx.scene.paint.Color.WHITE);
+            imageArea.getChildren().add(fallbackIcon);
         }
 
         // Category badge overlaid on image
@@ -443,31 +450,7 @@ public class MainController {
         descLabel.setMaxHeight(40);
         descLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
 
-        // ── FOOTER ───────────────────────────────────────────────
-        HBox footer = new HBox(8);
-        footer.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        footer.setPadding(new Insets(8, 0, 0, 0));
-
-        int resCount = getResourceCount(course.getId());
-        Label resLabel = new Label("📚 " + resCount + " Resources");
-        resLabel.setStyle("-fx-text-fill: #ec4899; -fx-font-weight: bold; -fx-font-size: 11px;" +
-                "-fx-background-color: #fdf2f8; -fx-padding: 4 10; -fx-background-radius: 8;");
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        String dateStr = course.getDateDeModification() != null && !course.getDateDeModification().isBlank()
-                ? course.getDateDeModification()
-                : (course.getDateDeCreation() != null ? course.getDateDeCreation() : "");
-        // Trim to datetime without nanos
-        if (dateStr.length() > 19)
-            dateStr = dateStr.substring(0, 19);
-        Label dateLabel = new Label("🕐 " + dateStr);
-        dateLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
-
-        footer.getChildren().addAll(resLabel, spacer, dateLabel);
-
-        content.getChildren().addAll(titleRow, descLabel, footer);
+        content.getChildren().addAll(titleRow, descLabel);
         card.getChildren().addAll(imageArea, content);
 
         // Card click → open resources (but not when clicking menu)
@@ -544,9 +527,9 @@ public class MainController {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/admin-resource-view.fxml"));
             Parent root = loader.load();
-            FrontResourceController controller = loader.getController();
+            AdminResourceController controller = loader.getController();
             if (controller != null) {
                 controller.setCourse(course);
             }
@@ -558,7 +541,7 @@ public class MainController {
                 } else {
                     contentArea.getChildren().setAll(root);
                 }
-                if (pageTitleLabel != null) pageTitleLabel.setText("Resources: " + course.getTitre());
+                if (pageTitleLabel != null) pageTitleLabel.setText("Course Content: " + course.getTitre());
             } else {
                 // Last resort fallback
                 Stage stage = (Stage) (sourceNode != null ? sourceNode.getScene().getWindow() : pageTitleLabel.getScene().getWindow());

@@ -11,13 +11,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.effect.GaussianBlur;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.geometry.Pos;
+import org.kordamp.ikonli.javafx.FontIcon;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 import services.QuestionService;
 import services.QuizResultService;
 import services.QuizService;
@@ -156,82 +158,98 @@ public class AdminResourceController {
         card.getStyleClass().add("card");
         card.setPrefWidth(320);
         card.setMinWidth(320);
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);");
 
-        // Header with Title and Kebab Menu
+        // Header: Title + Kebab Menu
         HBox header = new HBox(10);
         header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         
         Label name = new Label(ressource.getNom());
-        name.getStyleClass().add("card-title");
+        name.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
         HBox.setHgrow(name, Priority.ALWAYS);
         name.setMaxWidth(Double.MAX_VALUE);
 
-        // Kebab Menu
-        MenuButton kebab = new MenuButton("⋮");
-        kebab.getStyleClass().add("kebab-menu");
+        MenuButton kebab = new MenuButton();
+        kebab.setGraphic(new FontIcon("fas-ellipsis-v"));
+        ((FontIcon) kebab.getGraphic()).setIconColor(javafx.scene.paint.Color.valueOf("#94a3b8"));
+        kebab.setStyle("-fx-background-color: transparent; -fx-padding: 0; -fx-cursor: hand;");
         
-        MenuItem editItem = new MenuItem("Edit");
-        editItem.getStyleClass().add("menu-item");
+        MenuItem editItem = new MenuItem("Edit Resource");
+        editItem.setGraphic(new FontIcon("fas-edit"));
         editItem.setOnAction(e -> onEditResource(ressource));
         
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.getStyleClass().add("menu-item");
-        deleteItem.getStyleClass().add("menu-item-delete");
+        MenuItem deleteItem = new MenuItem("Delete Resource");
+        deleteItem.setGraphic(new FontIcon("fas-trash-alt"));
+        deleteItem.setStyle("-fx-text-fill: #dc2626;");
         deleteItem.setOnAction(e -> onDeleteResource(ressource));
         
         kebab.getItems().addAll(editItem, deleteItem);
-        
         header.getChildren().addAll(name, kebab);
 
-        Label type = new Label("Type: " + (ressource.getType() == null ? "-" : ressource.getType()));
-        type.getStyleClass().add("badge-pink"); 
-        type.setMaxWidth(Region.USE_PREF_SIZE);
+        // Type Badge
+        Label type = new Label("Type: " + (ressource.getType() == null ? "-" : ressource.getType().toUpperCase()));
+        type.setStyle("-fx-background-color: #fdf2f8; -fx-text-fill: #ec4899; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 4 10; -fx-background-radius: 8;");
 
-        Label desc = new Label(ressource.getContenu() == null ? "-" : ressource.getContenu());
+        // Description
+        Label desc = new Label(ressource.getContenu() == null || ressource.getContenu().isBlank() ? "No content available." : ressource.getContenu());
         desc.setWrapText(true);
-        desc.setPrefHeight(60);
-        desc.getStyleClass().add("card-subtitle");
+        desc.setMinHeight(50);
+        desc.setMaxHeight(50);
+        desc.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
 
         // Footer Actions
         VBox footer = new VBox(12);
         footer.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        HBox actionRow = new HBox(10);
+        // Quiz Button
+        Button quizBtn = new Button();
+        quizBtn.setPrefWidth(Double.MAX_VALUE);
+        quizBtn.setPrefHeight(42);
+        
+        try {
+            if (quizService.hasQuizForResource(ressource.getId())) {
+                quizBtn.setText("Manage Quiz");
+                FontIcon icon = new FontIcon("fas-tasks");
+                icon.setIconColor(javafx.scene.paint.Color.WHITE);
+                quizBtn.setGraphic(icon);
+                quizBtn.setStyle("-fx-background-color: linear-gradient(to right, #6c2db1, #ec4899); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(108,45,177,0.2), 10, 0, 0, 4);");
+            } else {
+                quizBtn.setText("Setup Quiz");
+                FontIcon icon = new FontIcon("fas-magic");
+                icon.setIconColor(javafx.scene.paint.Color.WHITE);
+                quizBtn.setGraphic(icon);
+                quizBtn.setStyle("-fx-background-color: linear-gradient(to right, #a855f7, #ec4899); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(168,85,247,0.2), 10, 0, 0, 4);");
+            }
+        } catch (SQLException e) {
+            quizBtn.setText("Quiz System Unavailable");
+            quizBtn.setDisable(true);
+        }
+        quizBtn.setOnAction(e -> openQuizManagementModal(ressource));
+
+        // Action Row: Open & Export
+        HBox actionRow = new HBox(12);
         actionRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Button openBtn = new Button("Open");
-        openBtn.getStyleClass().add("btn-primary");
-        openBtn.setPrefWidth(120);
-        openBtn.setPrefHeight(36);
+        FontIcon openIcon = new FontIcon("fas-external-link-alt");
+        openIcon.setIconColor(javafx.scene.paint.Color.WHITE);
+        openBtn.setGraphic(openIcon);
+        openBtn.setPrefWidth(145);
+        openBtn.setPrefHeight(42);
+        openBtn.setStyle("-fx-background-color: #6c2db1; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(108,45,177,0.2), 10, 0, 0, 4);");
         openBtn.setOnAction(e -> onOpenResource(ressource));
 
-        Button downloadIconBtn = new Button("📥");
-        downloadIconBtn.getStyleClass().add("btn-action-light");
-        downloadIconBtn.setStyle("-fx-font-size: 16px; -fx-padding: 5 10; -fx-background-radius: 8;");
-        downloadIconBtn.setPrefHeight(36);
-        downloadIconBtn.setOnAction(e -> onDownloadResource(ressource));
+        Button exportBtn = new Button("Export");
+        FontIcon exportIcon = new FontIcon("fas-download");
+        exportIcon.setIconColor(javafx.scene.paint.Color.valueOf("#475569"));
+        exportBtn.setGraphic(exportIcon);
+        exportBtn.setPrefWidth(135);
+        exportBtn.setPrefHeight(42);
+        exportBtn.setStyle("-fx-background-color: #f8fafc; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 2);");
+        exportBtn.setOnAction(e -> onDownloadResource(ressource));
 
-        actionRow.getChildren().addAll(openBtn, downloadIconBtn);
-
-        try {
-            if (quizService.hasQuizForResource(ressource.getId())) {
-                Button manageQuizBtn = new Button("Manage Quiz");
-                manageQuizBtn.getStyleClass().add("btn-primary");
-                manageQuizBtn.setPrefWidth(200);
-                manageQuizBtn.setPrefHeight(36);
-                manageQuizBtn.setOnAction(e -> openQuizManagementModal(ressource));
-                footer.getChildren().addAll(manageQuizBtn, actionRow);
-            } else {
-                Button createQuizBtn = new Button("✨ Setup Quiz");
-                createQuizBtn.getStyleClass().add("btn-generate-quiz");
-                createQuizBtn.setPrefWidth(200);
-                createQuizBtn.setPrefHeight(36);
-                createQuizBtn.setOnAction(e -> openQuizManagementModal(ressource));
-                footer.getChildren().addAll(createQuizBtn, actionRow);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        actionRow.getChildren().addAll(openBtn, exportBtn);
+        footer.getChildren().addAll(quizBtn, actionRow);
 
         card.getChildren().addAll(header, type, desc, footer);
         return card;
@@ -246,7 +264,12 @@ public class AdminResourceController {
             controller.setResource(res);
             controller.setOnRefreshCard(this::renderResources);
             
-            // Apply blur
+            if (FrontMainController.getInstance() != null) {
+                FrontMainController.getInstance().openModal(root);
+                return;
+            }
+
+            // Fallback
             GaussianBlur blur = new GaussianBlur(10);
             Node rootNode = mainContent.getScene().getRoot();
             rootNode.setEffect(blur);
@@ -377,7 +400,12 @@ public class AdminResourceController {
             SmartTutorChatController controller = loader.getController();
             controller.setCourse(currentCourse);
             
-            // Apply blur to the background view
+            if (FrontMainController.getInstance() != null) {
+                FrontMainController.getInstance().openModal(root);
+                return;
+            }
+
+            // Fallback to standalone dialog
             GaussianBlur blur = new GaussianBlur(10);
             Node rootNode = mainContent.getScene().getRoot();
             rootNode.setEffect(blur);

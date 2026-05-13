@@ -26,6 +26,9 @@
                                         style="-fx-background-radius: 20; -fx-padding: 8 20; -fx-font-weight: bold;" />
                                 <Region HBox.hgrow="ALWAYS" />
 
+                                <Button text="✨ Ask AI Assistant" onAction="#openTutorModal" 
+                                        styleClass="btn-primary" style="-fx-background-color: #1e293b; -fx-background-radius: 20; -fx-padding: 8 20;" />
+
                                 <Button fx:id="addResourceBtn" text="+ Add a new resource" onAction="#onAddResource" 
                                         styleClass="btn-primary" style="-fx-background-radius: 20; -fx-padding: 8 20;" />
 

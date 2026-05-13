@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox spacing="25.0" styleClass="dashboard-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.CourseCategoryListController">
     <padding>
@@ -13,7 +14,11 @@
 
     <!-- Header Section (Only Back Button) -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Button onAction="#onBackToCourses" styleClass="btn-action-light" text="⬅" style="-fx-font-size: 16px; -fx-background-radius: 50%; -fx-min-width: 45px; -fx-min-height: 45px; -fx-max-width: 45px; -fx-max-height: 45px; -fx-padding: 0;"/>
+        <Button onAction="#onBackToCourses" styleClass="btn-action-light" style="-fx-background-radius: 50%; -fx-min-width: 45px; -fx-min-height: 45px; -fx-max-width: 45px; -fx-max-height: 45px; -fx-padding: 0;">
+            <graphic>
+                <FontIcon iconLiteral="fas-arrow-left" iconSize="18" iconColor="#475569"/>
+            </graphic>
+        </Button>
     </HBox>
 
     <!-- Column Headers -->

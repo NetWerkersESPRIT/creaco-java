@@ -72,6 +72,10 @@ public class SmartTutorChatController {
 
     @FXML
     private void closeDialog() {
-        chatInput.getScene().getWindow().hide();
+        if (FrontMainController.getInstance() != null) {
+            FrontMainController.getInstance().closeModal();
+        } else if (chatInput.getScene() != null) {
+            chatInput.getScene().getWindow().hide();
+        }
     }
 }

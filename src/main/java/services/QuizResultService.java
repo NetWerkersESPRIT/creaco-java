@@ -22,6 +22,21 @@ public class QuizResultService {
 
     public QuizResultService() {
         con = MyConnection.getInstance().getConnection();
+        createTableIfNotExist();
+    }
+
+    private void createTableIfNotExist() {
+        try (Statement st = con.createStatement()) {
+            st.execute("CREATE TABLE IF NOT EXISTS quiz_result (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                    "user_id INT NOT NULL, " +
+                    "quiz_id INT NOT NULL, " +
+                    "score DOUBLE NOT NULL, " +
+                    "submitted_date VARCHAR(255), " +
+                    "answers TEXT)");
+        } catch (SQLException e) {
+            System.err.println("Error creating quiz_result table: " + e.getMessage());
+        }
     }
 
     public boolean hasUserCompletedQuiz(int userId, int quizId) throws SQLException {
