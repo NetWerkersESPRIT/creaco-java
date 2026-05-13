@@ -928,40 +928,36 @@ public class DisplayPostController {
         circle.setMaxSize(32, 32);
         circle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 50;");
 
-        // Use Dicebear fallback if no image (matches Profile view)
-        if (imageUrl == null || imageUrl.isEmpty()) {
-            if (!"Anonyme".equals(username)) {
-                imageUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + username;
-            }
-        }
-
+        Image img = null;
         if (imageUrl != null && !imageUrl.isEmpty()) {
             try {
-                Image img;
                 if (imageUrl.startsWith("http")) {
                     img = new Image(imageUrl, true);
                 } else {
                     File file = new File("src/main/resources/uploads/images/" + imageUrl);
                     if (file.exists()) {
                         img = new Image(file.toURI().toString());
-                    } else {
-                        // Fallback to dicebear if local file missing
-                        img = new Image("https://api.dicebear.com/7.x/avataaars/png?seed=" + username, true);
                     }
                 }
-
-                if (img != null) {
-                    ImageView imageView = new ImageView(img);
-                    imageView.setFitWidth(32);
-                    imageView.setFitHeight(32);
-                    imageView.setPreserveRatio(true);
-                    imageView.setClip(new javafx.scene.shape.Circle(16, 16, 16));
-
-                    circle.getChildren().add(imageView);
-                    return circle;
-                }
             } catch (Exception e) {
+                // Error handled by fallback below
             }
+        }
+
+        // Fallback to Dicebear if no image, error, or anonymous
+        if (img == null || img.isError() || "Anonyme".equals(username)) {
+            String seed = "Anonyme".equals(username) ? "anon" : username;
+            img = new Image("https://api.dicebear.com/7.x/avataaars/png?seed=" + seed, true);
+        }
+
+        if (img != null) {
+            ImageView imageView = new ImageView(img);
+            imageView.setFitWidth(32);
+            imageView.setFitHeight(32);
+            imageView.setPreserveRatio(true);
+            imageView.setClip(new javafx.scene.shape.Circle(16, 16, 16));
+            circle.getChildren().add(imageView);
+            return circle;
         }
 
         String displayInit;

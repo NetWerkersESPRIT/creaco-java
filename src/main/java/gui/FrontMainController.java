@@ -237,11 +237,32 @@ public class FrontMainController {
         if (user != null && imgNavAvatar != null) {
             String displayName = user.getUsername() != null ? user.getUsername() : "User";
             lblUsername.setText(displayName);
+            
             String avatarUrl = user.getImage();
-            if (avatarUrl == null || avatarUrl.isEmpty()) {
-                avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + user.getUsername();
+            javafx.scene.image.Image img = null;
+
+            if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                try {
+                    if (avatarUrl.startsWith("http")) {
+                        img = new javafx.scene.image.Image(avatarUrl, true);
+                    } else {
+                        java.io.File file = new java.io.File("src/main/resources/uploads/images/" + avatarUrl);
+                        if (file.exists()) {
+                            img = new javafx.scene.image.Image(file.toURI().toString());
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error loading profile image: " + e.getMessage());
+                }
             }
-            imgNavAvatar.setImage(new javafx.scene.image.Image(avatarUrl, true));
+
+            // Fallback to Dicebear if no image or error
+            if (img == null || img.isError()) {
+                String fallbackUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=" + displayName;
+                img = new javafx.scene.image.Image(fallbackUrl, true);
+            }
+            
+            imgNavAvatar.setImage(img);
         }
     }
 
