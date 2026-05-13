@@ -19,7 +19,7 @@ public class ForumStatsService {
     public List<Post> getTopLikedPosts(int limit) throws SQLException {
         List<Post> posts = new ArrayList<>();
         String sql = "SELECT p.*, (SELECT COUNT(*) FROM post_reaction WHERE post_id = p.id) as real_likes " +
-                     "FROM post p WHERE p.status IN ('ACCEPTED', 'APPROVED') " +
+                     "FROM post p WHERE p.status IN ('published', 'solved') " +
                      "ORDER BY real_likes DESC LIMIT ?";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setInt(1, limit);
@@ -37,7 +37,7 @@ public class ForumStatsService {
         String sql = "SELECT p.*, COUNT(c.id) as comment_count " +
                      "FROM post p " +
                      "LEFT JOIN comment c ON p.id = c.post_id " +
-                     "WHERE p.status IN ('ACCEPTED', 'APPROVED') " +
+                     "WHERE p.status IN ('published', 'solved') " +
                      "GROUP BY p.id " +
                      "ORDER BY comment_count DESC " +
                      "LIMIT ?";
@@ -56,8 +56,8 @@ public class ForumStatsService {
         List<UserActivity> results = new ArrayList<>();
         // Simple subquery approach to avoid join issues
         String sql = "SELECT u.username, " +
-                     "(SELECT COUNT(*) FROM post WHERE user_id = u.id AND status IN ('ACCEPTED', 'APPROVED')) as post_count, " +
-                     "(SELECT COUNT(*) FROM comment WHERE user_id = u.id AND post_id IN (SELECT id FROM post WHERE status IN ('ACCEPTED', 'APPROVED'))) as comment_count, " +
+                     "(SELECT COUNT(*) FROM post WHERE user_id = u.id AND status IN ('published', 'solved')) as post_count, " +
+                     "(SELECT COUNT(*) FROM comment WHERE user_id = u.id AND post_id IN (SELECT id FROM post WHERE status IN ('published', 'solved'))) as comment_count, " +
                      "(SELECT COUNT(*) FROM post_reaction WHERE user_id = u.id) as reaction_count " +
                      "FROM users u " +
                      "WHERE u.id IN (SELECT user_id FROM post UNION SELECT user_id FROM comment UNION SELECT user_id FROM post_reaction) " +
@@ -85,7 +85,7 @@ public class ForumStatsService {
     }
 
     public int getTotalPosts() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM post WHERE status IN ('ACCEPTED', 'APPROVED')";
+        String sql = "SELECT COUNT(*) FROM post WHERE status IN ('published', 'solved')";
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(sql);
         return rs.next() ? rs.getInt(1) : 0;

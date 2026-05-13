@@ -87,16 +87,19 @@ public class AddCommentController {
                 c.setGrammarErrors(mod.grammarErrorsCount);
                 
                 if (mod.isProfane) {
-                    c.setStatus("FLAGGED");
+                    c.setStatus("pending");
                 } else {
-                    c.setStatus("APPROVED");
+                    c.setStatus("visible");
                 }
                 
                 c.setPostId(currentPost.getId());
                 
                 entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
+                boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
                 if (user != null) {
                     c.setUserId(user.getId());
+                } else if (isVisitor) {
+                    c.setUserId(0); // Anonymous
                 } else {
                     c.setUserId(isAdminMode ? 5 : 1);
                 }

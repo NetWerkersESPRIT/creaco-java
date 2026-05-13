@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>reCAPTCHA Enterprise Verification</title>
     <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
@@ -31,29 +32,25 @@
         }
     </script>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            background-color: transparent; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            overflow: hidden; 
-            height: 100vh; 
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
         }
     </style>
 </head>
+
 <body>
     <form action="" method="POST">
         <!-- The sitekey is injected dynamically by the Controller -->
-        <div id="recaptcha-container" 
-             class="g-recaptcha" 
-             data-sitekey="" 
-             data-action="LOGIN"
-             data-callback="onRecaptchaSuccess"
-             data-expired-callback="onRecaptchaExpired"></div>
+        <div id="recaptcha-container" class="g-recaptcha" data-sitekey="" data-action="LOGIN"
+            data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
     </form>
 </body>
+
 </html>
-
-

@@ -24,18 +24,13 @@ import java.util.Map;
 
 public class FrontMainController {
 
-    private final CourseService courseService = new CourseService();
-
-    private List<Course> courses = Collections.emptyList();
-    private Map<Integer, String> categoryNames = Collections.emptyMap();
-    private List<Node> allCourseCards = new ArrayList<>();
-
     @FXML private FlowPane coursesContainer;
     @FXML private TextField searchField;
     @FXML private StackPane contentArea;
+    @FXML private Button floatingTutorBtn;
+    private Runnable floatingButtonAction;
     @FXML private StackPane rootStackPane;
     @FXML private VBox dashboardView;
-    @FXML private javafx.scene.layout.HBox previewBanner;
     @FXML private Label txtWelcome;
     @FXML private Label lblBreadcrumb;
 
@@ -60,16 +55,13 @@ public class FrontMainController {
 
     private static FrontMainController instance;
 
+    public static FrontMainController getInstance() {
+        return instance;
+    }
+
     @FXML
     private void initialize() {
         instance = this;
-        loadCourses();
-
-        if (searchField != null) {
-            searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-                filterCourses(newVal);
-            });
-        }
 
         // Role-based visibility and Personalization
         Users user = SessionManager.getInstance().getCurrentUser();
@@ -189,13 +181,6 @@ public class FrontMainController {
         }
     }
 
-    public void setPreviewMode(boolean isPreview) {
-        if (previewBanner != null) {
-            previewBanner.setVisible(isPreview);
-            previewBanner.setManaged(isPreview);
-        }
-    }
-
     public static void refreshNavbar() {
         if (instance != null) {
             instance.updateNavbarProfile();
@@ -262,6 +247,7 @@ public class FrontMainController {
 
     @FXML
     private void onGoToDashboard() {
+        setFloatingButtonVisible(false, null);
         if (txtWelcome != null) txtWelcome.setText("Explore");
         if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Dashboard");
         contentArea.getChildren().setAll(dashboardView);
@@ -360,181 +346,183 @@ public class FrontMainController {
 
     @FXML
     public void onShowCourses() { 
-        onGoToDashboard(); 
-    }
-
-    @FXML
-    private void onManageCategories() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/category-list-view.fxml"));
-            Parent root = loader.load();
-            javafx.stage.Stage stage = (javafx.stage.Stage) contentArea.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException exception) {
-            System.err.println("Navigation error: " + exception.getMessage());
+        if (SessionManager.getInstance().isAdmin()) {
+            loadSubView("/gui/admin-courses-view.fxml");
+            setNavbarText("Admin Course Management", "Pages / Admin / Courses");
+        } else if (SessionManager.getInstance().isContentCreator()) {
+            loadSubView("/gui/front-courses-grid-view.fxml");
+            setNavbarText("Content Creator Hub", "Pages / Courses");
+        } else {
+            onGoToDashboard(); 
         }
     }
 
     @FXML
-    private void onAddCourse() {
+    public void onManageCategories() {
+        if (txtWelcome != null) txtWelcome.setText("Manage Categories");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Courses / Categories");
+        loadSubView("/gui/category-list-view.fxml");
+    }
+
+    @FXML
+    public void onAddCourse() {
+        if (txtWelcome != null) txtWelcome.setText("Add New Course");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Courses / Add Course");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
+            var resource = getClass().getResource("/gui/create-course-form.fxml");
+            if (resource == null) {
+                System.err.println("Navigation error: Resource not found: /gui/create-course-form.fxml");
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(resource);
             Parent root = loader.load();
             CourseFormController controller = loader.getController();
-            controller.setCourse(null);
-            javafx.stage.Stage stage = (javafx.stage.Stage) contentArea.getScene().getWindow();
-            stage.getScene().setRoot(root);
+            if (controller != null) {
+                controller.setCourse(null);
+            }
+            setContent(root);
         } catch (IOException exception) {
             System.err.println("Navigation error: " + exception.getMessage());
+            exception.printStackTrace();
         }
     }
 
     @FXML
     private void onViewQuestions() {
-        System.out.println("Mentoring Questions - Coming soon");
+        onShowHelpTicketForm(null);
+    }
+
+    public void onShowHelpTicketForm(entities.HelpTicket ticket) {
+        if (txtWelcome != null) txtWelcome.setText(ticket == null ? "Send Question" : "Edit Question");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Courses / Help");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/help-ticket-form-view.fxml"));
+            Parent root = loader.load();
+            if (ticket != null) {
+                // Assuming HelpTicketFormController is the name
+                Object controller = loader.getController();
+                if (controller instanceof gui.HelpTicketFormController) {
+                    ((gui.HelpTicketFormController) controller).setTicket(ticket);
+                }
+            }
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onShowLeaderboard() {
+        if (txtWelcome != null) txtWelcome.setText("Learning Leaderboard");
+        if (lblBreadcrumb != null) lblBreadcrumb.setText("Pages / Courses / Leaderboard");
+        loadSubView("/gui/front-leaderboard.fxml");
     }
 
     private void loadSubView(String fxmlPath) {
+        setFloatingButtonVisible(false, null);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            if (root instanceof javafx.scene.layout.BorderPane) {
-                Node center = ((javafx.scene.layout.BorderPane) root).getCenter();
-                if (center instanceof VBox) {
-                    ((VBox) center).setPrefWidth(Double.MAX_VALUE);
-                    ((VBox) center).setPrefHeight(Double.MAX_VALUE);
-                }
-                contentArea.getChildren().setAll(center);
-            } else {
-                contentArea.getChildren().setAll(root);
-            }
+            setContent(root);
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Failed to load sub-view: " + fxmlPath);
         }
     }
 
-    private void loadCourses() {
-        if (coursesContainer == null) return;
-        try {
-            categoryNames = courseService.getCategoryNames();
-            courses = courseService.afficherPublie();
-            renderCourses();
-        } catch (SQLException e) {
-            courses = Collections.emptyList();
-            coursesContainer.getChildren().clear();
-            Label error = new Label("Error loading courses: " + e.getMessage());
-            error.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
-            coursesContainer.getChildren().add(error);
+    /** Public accessor for delegation from MainController sub-view instances. */
+    public void loadSubViewPublic(String fxmlPath) {
+        loadSubView(fxmlPath);
+    }
+
+    /** Public accessor to contentArea for overlay support from sub-view controllers. */
+    public StackPane getContentArea() {
+        return contentArea;
+    }
+
+    public void setFloatingButtonVisible(boolean visible, Runnable action) {
+        if (floatingTutorBtn != null) {
+            floatingTutorBtn.setVisible(visible);
+            floatingTutorBtn.setManaged(visible);
+            this.floatingButtonAction = action;
         }
     }
 
-    private void renderCourses() {
-        if (coursesContainer == null) return;
-        coursesContainer.getChildren().clear();
-        allCourseCards.clear();
-
-        if (courses.isEmpty()) {
-            Label empty = new Label("No courses available.");
-            empty.setStyle("-fx-text-fill: #64748b; -fx-font-size: 16px;");
-            coursesContainer.getChildren().add(empty);
-            return;
-        }
-
-        for (Course course : courses) {
-            Node card = buildCourseCard(course);
-            card.setUserData(course.getTitre().toLowerCase());
-            coursesContainer.getChildren().add(card);
-            allCourseCards.add(card);
+    @FXML
+    private void onFloatingTutorClick() {
+        if (floatingButtonAction != null) {
+            floatingButtonAction.run();
         }
     }
 
-    private void filterCourses(String keyword) {
-        if (coursesContainer == null) return;
-        coursesContainer.getChildren().clear();
+    // Dummy handlers to prevent LoadExceptions if stale FXML snippets are present in cache
+    @FXML private void openTutorModal() {}
+    @FXML private void closeTutorModal() {}
+    @FXML private void sendChatMessage() {}
+    @FXML private void closeResourceModal() {}
 
-        if (keyword == null || keyword.trim().isEmpty()) {
-            coursesContainer.getChildren().addAll(allCourseCards);
-            return;
-        }
-
-        String lower = keyword.toLowerCase();
-        for (Node card : allCourseCards) {
-            if (card.getUserData() != null && card.getUserData().toString().contains(lower)) {
-                coursesContainer.getChildren().add(card);
+    public void setContent(Parent root) {
+        setFloatingButtonVisible(false, null);
+        if (root instanceof javafx.scene.layout.BorderPane) {
+            Node center = ((javafx.scene.layout.BorderPane) root).getCenter();
+            if (center instanceof VBox) {
+                ((VBox) center).setPrefWidth(Double.MAX_VALUE);
+                ((VBox) center).setPrefHeight(Double.MAX_VALUE);
             }
+            contentArea.getChildren().setAll(center);
+        } else {
+            contentArea.getChildren().setAll(root);
         }
     }
 
-    private Node buildCourseCard(Course course) {
-        VBox card = new VBox(15);
-        card.getStyleClass().add("card");
-        card.setPrefWidth(320);
-        card.setMinWidth(320);
 
-        // Header: Icon and Title
-        HBox header = new HBox(15);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        StackPane iconContainer = new StackPane();
-        String catName = categoryNames.getOrDefault(course.getCategorieId(), "General").toLowerCase();
-        String iconClass = "card-icon-pink";
-        String iconEmoji = "📦";
-        if (catName.contains("prog") || catName.contains("java") || catName.contains("tech")) {
-            iconClass = "card-icon-purple";
-            iconEmoji = "💻";
-        } else if (catName.contains("design") || catName.contains("vfx") || catName.contains("video")) {
-            iconClass = "card-icon-blue";
-            iconEmoji = "🎨";
-        }
-        iconContainer.getStyleClass().addAll("card-icon-container", iconClass);
-        Label iconLabel = new Label(iconEmoji);
-        iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
-        iconContainer.getChildren().add(iconLabel);
-
-        VBox titleBox = new VBox(2);
-        Label titleLabel = new Label(course.getTitre());
-        titleLabel.getStyleClass().add("card-title");
-        titleLabel.setWrapText(true);
-        Label categoryLabel = new Label(catName.toUpperCase());
-        categoryLabel.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 10px;");
-        titleBox.getChildren().addAll(titleLabel, categoryLabel);
-        HBox.setHgrow(titleBox, Priority.ALWAYS);
-        header.getChildren().addAll(iconContainer, titleBox);
-
-        // Content: Subtitle and Description
-        VBox contentBox = new VBox(6);
-        Label updatedLabel = new Label("Updated " + (course.getDateDeModification() != null ? course.getDateDeModification() : "recently"));
-        updatedLabel.getStyleClass().add("card-subtitle");
-        Label descriptionLabel = new Label(course.getDescription() != null ? course.getDescription() : "No description available.");
-        descriptionLabel.setWrapText(true);
-        descriptionLabel.setMinHeight(60);
-        descriptionLabel.getStyleClass().add("subtitle-label");
-        contentBox.getChildren().addAll(updatedLabel, descriptionLabel);
-
-        // Footer: Action Link
-        Label exploreLink = new Label("EXPLORE RESOURCES →");
-        exploreLink.getStyleClass().add("card-action-link");
-        exploreLink.setOnMouseClicked(event -> openCourse(course));
-
-        card.getChildren().addAll(header, contentBox, exploreLink);
-        card.setCursor(javafx.scene.Cursor.HAND);
-        card.setOnMouseClicked(event -> openCourse(course));
-
-        return card;
-    }
-
-    private void openCourse(Course course) {
+    public void openCourse(Course course) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/front-resource-view.fxml"));
             Parent root = loader.load();
             FrontResourceController controller = loader.getController();
-            controller.setCourse(course);
-            boolean isPrev = previewBanner != null && previewBanner.isVisible();
-            controller.setPreviewMode(isPrev);
-            javafx.stage.Stage stage = (javafx.stage.Stage) contentArea.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) { e.printStackTrace(); }
+            
+            if (controller != null) {
+                controller.setCourse(course);
+            }
+
+            // Standard sub-view loading pattern
+            if (root instanceof BorderPane) {
+                contentArea.getChildren().setAll(((BorderPane) root).getCenter());
+            } else {
+                contentArea.getChildren().setAll(root);
+            }
+
+            setNavbarText("Resources: " + course.getTitre(), "Pages / Courses / " + course.getTitre());
+
+        } catch (IOException e) { 
+            e.printStackTrace(); 
+            System.err.println("Error loading resource view: " + e.getMessage());
+        }
+    }
+
+    public void openAdminCourse(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/admin-resource-view.fxml"));
+            Parent root = loader.load();
+            AdminResourceController controller = loader.getController();
+            
+            if (controller != null) {
+                controller.setCourse(course);
+            }
+
+            // Standard sub-view loading pattern
+            if (root instanceof BorderPane) {
+                contentArea.getChildren().setAll(((BorderPane) root).getCenter());
+            } else {
+                contentArea.getChildren().setAll(root);
+            }
+
+            setNavbarText("Manage Resources: " + course.getTitre(), "Pages / Courses / Manage Resources");
+
+        } catch (IOException e) { 
+            e.printStackTrace(); 
+            System.err.println("Error loading admin resource view: " + e.getMessage());
+        }
     }
 
     @FXML public void logout(javafx.event.ActionEvent event) { gui.SessionHelper.logout(event); }
@@ -553,13 +541,15 @@ public class FrontMainController {
         }
     }
 
-    @FXML
-    private void exitPreview(javafx.event.ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/main-view.fxml"));
-            Parent root = loader.load();
-            javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) { e.printStackTrace(); }
+    public void applyBlur() {
+        if (rootStackPane != null) {
+            rootStackPane.setEffect(new javafx.scene.effect.GaussianBlur(10));
+        }
+    }
+
+    public void removeBlur() {
+        if (rootStackPane != null) {
+            rootStackPane.setEffect(null);
+        }
     }
 }

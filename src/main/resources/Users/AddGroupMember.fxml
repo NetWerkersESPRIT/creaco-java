@@ -41,7 +41,7 @@
                                 <javafx.scene.control.TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" styleClass="floating-tabs" style="-fx-tab-min-width: 180;">
                                     <tabs>
                                         <!-- CREATE NEW MEMBER TAB -->
-                                        <javafx.scene.control.Tab text="👤 Create New Member">
+                                        <javafx.scene.control.Tab text=" Create New Member">
                                             <content>
                                                 <VBox spacing="20.0" style="-fx-padding: 25 0 0 0;">
                                                     <children>

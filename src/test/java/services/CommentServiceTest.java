@@ -3,10 +3,11 @@ package services;
 import entities.Comment;
 import entities.Post;
 import org.junit.jupiter.api.*;
-
+import utils.MyConnection;
 import services.forum.PostService;
 import services.forum.CommentService;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class CommentServiceTest {
 
     private static CommentService commentService;
     private static PostService postService;
+    private static Connection connection;
     
     // Identifiants pour le suivi du cycle CRUD
     private static int createdPostId = -1;
@@ -26,6 +28,7 @@ public class CommentServiceTest {
     public static void setUpAll() throws SQLException {
         commentService = new CommentService();
         postService = new PostService();
+        connection = MyConnection.getInstance().getConnection();
         
         // Créer un Post pour respecter la liaison post_id
         Post p = new Post();
@@ -59,7 +62,7 @@ public class CommentServiceTest {
 
     @AfterEach
     public void cleanUp() {
-        System.out.println("End of execution of a test services.CommentServiceTest.");
+        System.out.println("End of execution of a test CommentServiceTest.");
     }
 
     @Test

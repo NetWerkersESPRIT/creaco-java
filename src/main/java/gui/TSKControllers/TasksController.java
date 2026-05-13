@@ -179,7 +179,12 @@ public class TasksController {
     // ── Data ──────────────────────────────────────────────────────────────────
     private void loadTasks() {
         try {
-            allTasks = tskService.afficher();
+            entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
+            if (user != null) {
+                allTasks = tskService.afficher(user.getId(), user.getRole());
+            } else {
+                allTasks = tskService.afficher(); // Fallback
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -268,18 +273,16 @@ public class TasksController {
             : "-fx-background-color: white; -fx-background-radius: 14; -fx-padding: 14; -fx-effect: dropshadow(three-pass-box,rgba(0,0,0,0.05),8,0,0,2); -fx-border-color: transparent; -fx-cursor: hand;";
         card.setStyle(cardStyle);
 
-        // Header row (assigned user + task id)
+        // Header row (assigned user)
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
-        Label lblId = new Label("#" + t.getId());
-        lblId.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #adb5bd;");
         Region hspacer = new Region(); HBox.setHgrow(hspacer, Priority.ALWAYS);
         if (done) {
             Label lock = new Label("🔒");
             lock.setStyle("-fx-font-size: 10px;");
-            header.getChildren().addAll(lblId, hspacer, lock);
+            header.getChildren().addAll(hspacer, lock);
         } else {
-            header.getChildren().addAll(lblId, hspacer);
+            header.getChildren().addAll(hspacer);
         }
 
         Label lblTitle = new Label(t.getTitle());
@@ -316,6 +319,16 @@ public class TasksController {
                 db.setContent(content);
                 event.consume();
             });
+
+            // View task on click
+            card.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 1) showTaskDetailsDialog(t);
+            });
+        } else {
+            // Even if done, allow viewing
+            card.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 1) showTaskDetailsDialog(t);
+            });
         }
 
         return card;
@@ -337,7 +350,7 @@ public class TasksController {
 
         entities.Mission assocMission = (t.getBelong_to_id() > 0) ? missionService.getMissionById(t.getBelong_to_id()) : null;
         String missionStr = assocMission != null ? "Mission: " + assocMission.getTitle() : "No Mission associated";
-        Label lblSub = new Label("#" + t.getId() + " | " + missionStr);
+        Label lblSub = new Label(missionStr);
         lblSub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
         taskInfo.getChildren().addAll(lblTitle, lblSub);
 
@@ -397,7 +410,11 @@ public class TasksController {
             }
         });
 
-        actions.getChildren().addAll(btnEdit, btnDelete);
+        Button btnView = new Button("👁 View");
+        btnView.setStyle("-fx-background-color: #8b5cf615; -fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 11px;");
+        btnView.setOnAction(e -> showTaskDetailsDialog(t));
+
+        actions.getChildren().addAll(btnView, btnEdit, btnDelete);
         row.getChildren().addAll(taskInfo, spacer, lblStatus, lblDeadline, actions);
 
         row.setOnMouseEntered(e -> row.setStyle("-fx-padding: 15; -fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"));
@@ -441,4 +458,61 @@ public class TasksController {
         try { switchScene("/Users/Profile.fxml"); } catch (Exception e) { e.printStackTrace(); }
     }
     @FXML public void logout(javafx.event.ActionEvent event) { gui.SessionHelper.logout(event); }
+
+    private void showTaskDetailsDialog(Tasks t) {
+        javafx.stage.Stage stage = new javafx.stage.Stage();
+        stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+        stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+
+        VBox root = new VBox(15);
+        root.setStyle("-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-border-radius: 15; -fx-border-color: #cbd5e1; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 0);");
+        root.setPrefWidth(400);
+
+        Label lblHeader = new Label("Task Details");
+        lblHeader.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #cb0c9f;");
+
+        entities.Mission assocMission = (t.getBelong_to_id() > 0) ? missionService.getMissionById(t.getBelong_to_id()) : null;
+        String missionName = assocMission != null ? assocMission.getTitle() : "N/A";
+        String state = t.getState() != null ? t.getState().replace("_", " ").toUpperCase() : "TO DO";
+
+        String details = "Title: " + t.getTitle() + "\n\n" +
+                         "Description: " + (t.getDescription() != null && !t.getDescription().isEmpty() ? t.getDescription() : "No description provided.") + "\n\n" +
+                         "Status: " + state + "\n\n" +
+                         "Mission: " + missionName + "\n\n" +
+                         "Deadline: " + (t.getTime_limit() != null ? t.getTime_limit() : "No deadline");
+
+        Label lblDetails = new Label(details);
+        lblDetails.setWrapText(true);
+        lblDetails.setStyle("-fx-font-size: 13px; -fx-text-fill: #475569; -fx-line-spacing: 5px;");
+
+        HBox buttons = new HBox(10);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+
+        Button btnEdit = new Button("✎ Edit Task");
+        btnEdit.setStyle("-fx-background-color: #cb0c9f; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
+        btnEdit.setDisable("completed".equalsIgnoreCase(t.getState()) || "done".equalsIgnoreCase(t.getState()));
+        btnEdit.setOnAction(e -> {
+            stage.close();
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/TSK/EditTask.fxml"));
+                javafx.scene.Node editRoot = loader.load();
+                EditTaskController ctrl = loader.getController();
+                ctrl.setTask(t);
+                StackPane contentArea = (StackPane) (tasksList != null ? tasksList.getScene().lookup("#contentArea") : kanbanPane.getScene().lookup("#contentArea"));
+                if (contentArea != null) contentArea.getChildren().setAll(editRoot);
+            } catch (Exception ex) { ex.printStackTrace(); }
+        });
+
+        Button btnClose = new Button("Close");
+        btnClose.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
+        btnClose.setOnAction(e -> stage.close());
+
+        buttons.getChildren().addAll(btnEdit, btnClose);
+        root.getChildren().addAll(lblHeader, lblDetails, buttons);
+
+        javafx.scene.Scene scene = new javafx.scene.Scene(root);
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        stage.setScene(scene);
+        stage.showAndWait();
+    }
 }

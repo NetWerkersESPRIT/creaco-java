@@ -311,17 +311,17 @@ public class UpdatePostController {
         
         boolean isVisitor = utils.SessionManager.getInstance().isVisitor();
         if (isAdminMode) {
-            postToUpdate.setStatus("APPROVED");
+            postToUpdate.setStatus("published");
             postToUpdate.setPinned(requestPin);
         } else if (isVisitor) {
-            postToUpdate.setStatus("PENDING_VISITOR");
+            postToUpdate.setStatus("pending");
             postToUpdate.setUserId(0); // Anonymous
             postToUpdate.setPinned(false);
         } else {
             if (postToUpdate.isProfane() || postToUpdate.isSpam()) {
-                postToUpdate.setStatus("FLAGGED");
+                postToUpdate.setStatus("pending"); // Moderation needed
             } else {
-                postToUpdate.setStatus("PENDING");
+                postToUpdate.setStatus("pending");
             }
             postToUpdate.setPinned(false);
         }

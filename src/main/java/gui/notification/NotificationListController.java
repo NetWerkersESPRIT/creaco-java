@@ -63,6 +63,13 @@ public class NotificationListController {
             return "/Users/Admin.fxml";
         }
 
+        if (lower.startsWith("/forum/")) {
+            return "post/" + normalized.substring("/forum/".length());
+        }
+        if (lower.startsWith("forum/")) {
+            return "post/" + normalized.substring("forum/".length());
+        }
+
         if (lower.startsWith("/admin/posts/pending") || lower.startsWith("admin/posts/pending")) {
             return "admin-posts-pending";
         }

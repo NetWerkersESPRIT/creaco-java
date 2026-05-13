@@ -12,7 +12,13 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import services.RessourceService;
 
+import utils.FileStorageService;
+import java.io.File;
 import java.io.IOException;
+import javafx.application.Platform;
+import javafx.scene.control.Button;
+import java.util.Properties;
+import java.io.FileInputStream;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
@@ -49,6 +55,12 @@ public class RessourceFormController {
 
     @FXML
     private TextArea contentArea;
+
+    @FXML
+    private Button btnUpload;
+
+    @FXML
+    private Label fileNameLabel;
 
     public void setContext(Course course, Ressource ressource) {
         this.course = course;
@@ -166,6 +178,25 @@ public class RessourceFormController {
         urlErrorLabel.setManaged(false);
     }
 
+    @FXML
+    private void onUploadFileAction() {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Upload Resource File");
+        
+        File selectedFile = fileChooser.showOpenDialog(urlField.getScene().getWindow());
+        if (selectedFile != null) {
+            try {
+                String storedPath = FileStorageService.storeFile(selectedFile, "resources");
+                urlField.setText(storedPath);
+                if (fileNameLabel != null) fileNameLabel.setText(selectedFile.getName());
+                gui.util.AlertHelper.showInfo("Storage Success", "File has been saved locally.");
+            } catch (IOException e) {
+                e.printStackTrace();
+                gui.util.AlertHelper.showError("Storage Error", "Could not save file locally: " + e.getMessage());
+            }
+        }
+    }
+
     private void openRessourceList() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resource-list-view.fxml"));
@@ -178,13 +209,11 @@ public class RessourceFormController {
             throw new IllegalStateException("Unable to return to the resources page.", exception);
         }
     }
-    @javafx.fxml.FXML
-    public void goToPreview(javafx.event.ActionEvent event) {
-        gui.PreviewHelper.goToPreview(event);
-    }
+    
 
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
     }
 }
+

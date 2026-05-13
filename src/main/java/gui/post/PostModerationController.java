@@ -243,7 +243,7 @@ public class PostModerationController {
                 } else {
                     postService.rejectPinRequest(selectedPost.getId());
                 }
-                selectedPost.setStatus("APPROVED");
+                selectedPost.setStatus("published");
                 postService.updatePostStatus(selectedPost);
                 
                 // Notify User
@@ -259,7 +259,7 @@ public class PostModerationController {
         } else {
             if (gui.util.AlertHelper.showCustomAlert("Approve?", "Make this post public?", gui.util.AlertHelper.AlertType.CONFIRMATION)) {
                 try {
-                    selectedPost.setStatus("APPROVED");
+                    selectedPost.setStatus("published");
                     postService.updatePostStatus(selectedPost);
                     
                     // Notify User
@@ -321,7 +321,7 @@ public class PostModerationController {
                 return;
             }
             try {
-                selectedPost.setStatus("REJECTED");
+                selectedPost.setStatus("refused");
                 selectedPost.setRefusalReason(reason);
                 postService.updatePostStatus(selectedPost);
                 

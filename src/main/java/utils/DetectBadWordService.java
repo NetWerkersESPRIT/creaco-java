@@ -11,10 +11,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 public class DetectBadWordService {
+    /** Circuit-breaker: skip all calls once we know credits are exhausted. */
+    private static volatile boolean apiUnavailable = false;
     private static String API_KEY;
     private static final String API_URL = "https://api.apiverve.com/v1/profanityfilter";
 
@@ -53,14 +56,15 @@ public class DetectBadWordService {
      //Moderates the text by detecting profanity and grammar errors.
      //Replaces bad words with ****.
     public static CompletableFuture<ModerationResult> moderate(String text) {
-        if (text == null || text.trim().isEmpty()) {
+        if (text == null || text.trim().isEmpty() || apiUnavailable) {
             return CompletableFuture.completedFuture(new ModerationResult(text, 0, 0));
         }
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                //send a request
-                HttpClient client = HttpClient.newHttpClient();
+                HttpClient client = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(2))
+                        .build();
                 //Create JSON body
                 JSONObject bodyObj = new JSONObject();
                 bodyObj.put("text", text);
@@ -69,27 +73,33 @@ public class DetectBadWordService {
                         .uri(URI.create(API_URL))
                         .header("x-api-key", API_KEY)
                         .header("Content-Type", "application/json")
+                        .timeout(Duration.ofSeconds(2))
                         .POST(HttpRequest.BodyPublishers.ofString(bodyObj.toString(), StandardCharsets.UTF_8))
                         .build();
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 System.out.println("[DetectBadWordService] API Response: " + response.body());
 
+                JSONObject json = new JSONObject(response.body());
+                // Detect credit exhaustion and trip circuit-breaker
+                if ("error".equals(json.optString("status")) &&
+                        json.optString("error", "").contains("credit")) {
+                    apiUnavailable = true;
+                    System.err.println("[DetectBadWordService] Credit limit reached — disabling API calls.");
+                    return new ModerationResult(text, 0, 0);
+                }
+
                 String moderatedText = text;
                 int profanityCount = 0;
 
-                if (response.statusCode() == 200) {
-                    JSONObject json = new JSONObject(response.body());
-                    if ("ok".equals(json.getString("status"))) {
-                        JSONObject data = json.getJSONObject("data");
-                        // Use optString and handle potential null in JSON
-                        moderatedText = data.isNull("filteredText") ? text : data.getString("filteredText");
-                        profanityCount = data.optInt("profaneWords", 0);
-                        System.out.println("[DetectBadWordService] Found " + profanityCount + " bad words.");
-                    }
+                if (response.statusCode() == 200 && "ok".equals(json.optString("status"))) {
+                    JSONObject data = json.getJSONObject("data");
+                    moderatedText = data.isNull("filteredText") ? text : data.getString("filteredText");
+                    profanityCount = data.optInt("profaneWords", 0);
+                    System.out.println("[DetectBadWordService] Found " + profanityCount + " bad words.");
                 }
 
-                return new ModerationResult(moderatedText, profanityCount, 0); // Grammar errors not checked here anymore
+                return new ModerationResult(moderatedText, profanityCount, 0);
 
             } catch (Exception e) {
                 System.err.println("Moderation failed: " + e.getMessage());

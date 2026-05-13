@@ -51,11 +51,12 @@ public class ReactionDAO {
     public void addReaction(int userId, int postId, ReactionType type) throws SQLException {
         String sql = "INSERT INTO post_reaction (type, created_at, user_id, post_id) VALUES (?, NOW(), ?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, type.name());
+            ps.setString(1, type.name().toLowerCase());
             ps.setInt(2, userId);
             ps.setInt(3, postId);
             ps.executeUpdate();
         }
+        updatePostLikes(postId);
         System.out.println("[ReactionDAO] addReaction userId=" + userId + " postId=" + postId + " type=" + type);
     }
 
@@ -66,7 +67,7 @@ public class ReactionDAO {
     public void updateReaction(int userId, int postId, ReactionType type) throws SQLException {
         String sql = "UPDATE post_reaction SET type = ? WHERE user_id = ? AND post_id = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, type.name());
+            ps.setString(1, type.name().toLowerCase());
             ps.setInt(2, userId);
             ps.setInt(3, postId);
             ps.executeUpdate();
@@ -84,7 +85,17 @@ public class ReactionDAO {
             ps.setInt(2, postId);
             ps.executeUpdate();
         }
+        updatePostLikes(postId);
         System.out.println("[ReactionDAO] removeReaction userId=" + userId + " postId=" + postId);
+    }
+
+    private void updatePostLikes(int postId) throws SQLException {
+        String sql = "UPDATE post p SET p.likes = (SELECT COUNT(*) FROM post_reaction WHERE post_id = ?) WHERE p.id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, postId);
+            ps.setInt(2, postId);
+            ps.executeUpdate();
+        }
     }
 
     // -----------------------------------------------------------------------

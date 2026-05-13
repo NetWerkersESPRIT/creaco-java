@@ -65,14 +65,20 @@ public class CategoryCoursesController {
     @FXML
     private void onAddCourse() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/course-edit-view.fxml"));
+            var resource = getClass().getResource("/gui/create-course-form.fxml");
+            if (resource == null) {
+                System.err.println("Navigation error: Resource not found: /gui/create-course-form.fxml");
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(resource);
             Parent root = loader.load();
             CourseFormController controller = loader.getController();
             controller.setCourse(null, category);
             Stage stage = (Stage) titleLabel.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to open the course creation view.", exception);
+            System.err.println("Navigation error: " + exception.getMessage());
+            exception.printStackTrace();
         }
     }
 
@@ -242,13 +248,11 @@ public class CategoryCoursesController {
     private interface ControllerInitializer {
         void initialize(Object controller);
     }
-    @javafx.fxml.FXML
-    public void goToPreview(javafx.event.ActionEvent event) {
-        gui.PreviewHelper.goToPreview(event);
-    }
+    
 
     @javafx.fxml.FXML
     public void logout(javafx.event.ActionEvent event) {
         gui.SessionHelper.logout(event);
     }
 }
+

@@ -11,13 +11,12 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.TSKControllers.AddMissionController" stylesheets="@../gui/styles.css">
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="main-container" stylesheets="@../gui/styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.TSKControllers.AddMissionController">
 
     <center>
-        <VBox spacing="20.0" alignment="TOP_CENTER">
+        <VBox alignment="TOP_CENTER" spacing="20.0">
             <padding>
                 <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
             </padding>
@@ -26,35 +25,47 @@
                 <VBox maxWidth="650" spacing="30" styleClass="card">
                     <children>
                         <VBox spacing="8">
-                            <Label text="Mission Details" styleClass="card-title" />
-                            <Label text="Define the goals and scope of this mission" styleClass="card-subtitle" />
+                            <Label styleClass="card-title" text="Mission Details" />
+                            <Label styleClass="card-subtitle" text="Define the goals and scope of this mission" />
                         </VBox>
                         
                         <Separator />
 
                         <VBox spacing="10">
-                            <Label text="TITLE" styleClass="section-header" style="-fx-padding: 0;"/>
+                            <Label style="-fx-padding: 0;" styleClass="section-header" text="TITLE" />
                             <TextField fx:id="txtTitle" promptText="Mission name" styleClass="search-bar" />
                         </VBox>
 
                         <VBox spacing="10">
-                            <Label text="MISSION DATE" styleClass="section-header" style="-fx-padding: 0;"/>
-                            <DatePicker fx:id="dateMission" maxWidth="Infinity" styleClass="search-bar" />
+                            <Label style="-fx-padding: 0;" styleClass="section-header" text="MISSION DATE &amp; TIME" />
+                            <HBox spacing="10">
+                                <DatePicker fx:id="dateMission" maxWidth="500.0" prefHeight="63.0" prefWidth="55.0" styleClass="search-bar" />
+                                <TextField fx:id="txtTime" prefHeight="42.0" prefWidth="59.0" promptText="HH:mm" styleClass="search-bar" text="12:00">
+                           <HBox.margin>
+                              <Insets left="10.0" top="10.0" />
+                           </HBox.margin></TextField>
+                            </HBox>
                         </VBox>
 
                         <VBox spacing="10">
-                            <Label text="IMPLEMENT IDEA" styleClass="section-header" style="-fx-padding: 0;"/>
+                            <Label style="-fx-padding: 0;" styleClass="section-header" text="IMPLEMENT IDEA" />
                             <ComboBox fx:id="comboIdea" maxWidth="Infinity" promptText="Select an idea..." styleClass="search-bar" />
                         </VBox>
 
                         <VBox spacing="10">
-                            <Label text="DESCRIPTION" styleClass="section-header" style="-fx-padding: 0;"/>
-                            <TextArea fx:id="txtDescription" promptText="Describe the mission goals..." prefHeight="150" wrapText="true" styleClass="search-bar" style="-fx-background-radius: 12;"/>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <children>
+                                    <Label style="-fx-padding: 0;" styleClass="section-header" text="DESCRIPTION" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button onAction="#onGenerateAI" style="-fx-font-size: 10px; -fx-padding: 3 8; -fx-background-radius: 8;" styleClass="btn-primary" text="✨ AI Generate" />
+                                </children>
+                            </HBox>
+                            <TextArea fx:id="txtDescription" prefHeight="150" promptText="Describe the mission goals..." style="-fx-background-radius: 12;" styleClass="search-bar" wrapText="true" />
                         </VBox>
 
-                        <HBox spacing="20" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
-                            <Button text="Cancel" onAction="#goBack" prefWidth="100" prefHeight="40" style="-fx-background-color: transparent; -fx-text-fill: #718096;"/>
-                            <Button text="＋ Create Mission" onAction="#saveMission" prefWidth="180" prefHeight="45" styleClass="btn-primary" />
+                        <HBox alignment="CENTER_RIGHT" spacing="20" style="-fx-padding: 10 0 0 0;">
+                            <Button onAction="#goBack" prefHeight="40" prefWidth="100" style="-fx-background-color: transparent; -fx-text-fill: #718096;" text="Cancel" />
+                            <Button onAction="#saveMission" prefHeight="45" prefWidth="180" styleClass="btn-primary" text="＋ Create Mission" />
                         </HBox>
                         
                         <Label fx:id="lblMessage" style="-fx-font-weight: bold; -fx-text-fill: -fx-primary-pink;" />

@@ -345,14 +345,14 @@ public class AddPostController {
 
                 boolean isVisitor = SessionManager.getInstance().isVisitor();
                 if (isAdminMode) {
-                    post.setStatus("APPROVED");
+                    post.setStatus("published");
                 } else if (isVisitor) {
-                    post.setStatus("PENDING_VISITOR");
+                    post.setStatus("pending");
                     post.setUserId(0); // Visitor/Anonymous ID
                 } else if (post.isProfane() || post.isSpam()) {
-                    post.setStatus("FLAGGED");
+                    post.setStatus("pending"); // Needs moderation
                 } else {
-                    post.setStatus("PENDING");
+                    post.setStatus("pending");
                 }
 
                 post.setPinned(false);
