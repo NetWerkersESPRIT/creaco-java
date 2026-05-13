@@ -3,7 +3,6 @@
 [![Java Version](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
 [![JavaFX](https://img.shields.io/badge/JavaFX-21-blue.svg)](https://openjfx.io/)
 [![Maven](https://img.shields.io/badge/Maven-3.9-red.svg)](https://maven.apache.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **Creaco** est une application desktop moderne développée en JavaFX, conçue pour accompagner les créateurs de contenu dans leur processus créatif et optimiser la collaboration au sein de leurs équipes. Grâce à l'intégration de l'intelligence artificielle (Gemini) et de services de productivité (Google Calendar, DocuSign), Creaco rend la production de contenu plus fluide et professionnelle.
 
