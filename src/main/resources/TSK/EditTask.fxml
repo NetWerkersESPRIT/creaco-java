@@ -44,7 +44,10 @@
 
                         <VBox spacing="8">
                             <Label text="DEADLINE" styleClass="section-header" style="-fx-padding: 0;"/>
-                            <DatePicker fx:id="dateTimeLimit" promptText="Select deadline" maxWidth="Infinity" styleClass="search-bar" style="-fx-background-radius: 12;"/>
+                            <HBox spacing="10">
+                                <DatePicker fx:id="dateTimeLimit" promptText="Select date" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="search-bar" style="-fx-background-radius: 12;"/>
+                                <TextField fx:id="txtTime" promptText="HH:mm" prefWidth="100" styleClass="search-bar" />
+                            </HBox>
                         </VBox>
                         
                         <VBox spacing="8">

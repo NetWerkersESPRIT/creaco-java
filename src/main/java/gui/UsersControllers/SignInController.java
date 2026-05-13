@@ -1,10 +1,13 @@
 package gui.UsersControllers;
 
-import entities.Users;
-import services.UsersService;
-import utils.SessionManager;
-import utils.GoogleAuthService;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 import com.google.api.services.oauth2.model.Userinfo;
+
+import entities.Users;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,15 +15,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-
-import java.util.Properties;
+import services.UsersService;
+import utils.GoogleAuthService;
+import utils.SessionManager;
 
 public class SignInController {
 
@@ -35,8 +36,11 @@ public class SignInController {
     @FXML
     private WebView webViewRecaptcha;
     @FXML
+    private VBox vboxRecaptcha;
+    @FXML
     private Label lblMessage;
 
+    private boolean isRecaptchaEnabled = true;
     private String recaptchaToken = null;
     private final UsersService usersService = new UsersService();
 
@@ -45,7 +49,8 @@ public class SignInController {
         javafx.application.Platform.runLater(() -> {
             if (txtEmail.getScene() != null) {
                 Stage stage = (Stage) txtEmail.getScene().getWindow();
-                if (stage != null) stage.setMaximized(true);
+                if (stage != null)
+                    stage.setMaximized(true);
             }
         });
         setupRecaptcha();
@@ -65,7 +70,11 @@ public class SignInController {
             try (FileInputStream fis = new FileInputStream(configFile)) {
                 props.load(fis);
                 siteKey = props.getProperty("RECAPTCHA_SITE_KEY", "").trim();
+                String enabledProp = props.getProperty("RECAPTCHA_ENABLED", "true").trim();
+                isRecaptchaEnabled = Boolean.parseBoolean(enabledProp);
+
                 System.out.println("[reCAPTCHA] Key loaded (Length: " + siteKey.length() + ")");
+                System.out.println("[reCAPTCHA] Enabled: " + isRecaptchaEnabled);
             } catch (IOException e) {
                 System.err.println("[reCAPTCHA] Error loading config.properties: " + e.getMessage());
             }
@@ -73,9 +82,17 @@ public class SignInController {
             System.err.println("[reCAPTCHA] config.properties NOT FOUND at root!");
         }
 
+        if (!isRecaptchaEnabled) {
+            vboxRecaptcha.setVisible(false);
+            vboxRecaptcha.setManaged(false);
+            System.out.println("[reCAPTCHA] reCAPTCHA is disabled in config.");
+            return;
+        }
+
         final String finalSiteKey = siteKey;
 
-        // 2. Load the static HTML via XAMPP localhost (avoids file:// domain restriction for reCAPTCHA)
+        // 2. Load the static HTML via XAMPP localhost (avoids file:// domain
+        // restriction for reCAPTCHA)
         String recaptchaUrl = "http://localhost/recaptcha.html";
         engine.load(recaptchaUrl);
 
@@ -85,8 +102,7 @@ public class SignInController {
                 System.out.println("[reCAPTCHA] Page loaded, registering Java bridge...");
                 try {
                     // Expose this controller to JavaScript as window.javaApp
-                    netscape.javascript.JSObject window =
-                            (netscape.javascript.JSObject) engine.executeScript("window");
+                    netscape.javascript.JSObject window = (netscape.javascript.JSObject) engine.executeScript("window");
                     window.setMember("javaApp", this);
 
                     // Inject site key into the widget
@@ -127,11 +143,12 @@ public class SignInController {
             showError("❌ Please fill in all fields.");
             return;
         }
- 
-        
-        if (recaptchaToken == null || recaptchaToken.isEmpty()) {
-            showError("❌ Please complete the security verification.");
-            return;
+
+        if (isRecaptchaEnabled) {
+            if (recaptchaToken == null || recaptchaToken.isEmpty()) {
+                showError("❌ Please complete the security verification.");
+                return;
+            }
         }
 
         if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
@@ -212,7 +229,7 @@ public class SignInController {
             // Authenticate and navigate
             SessionManager.getInstance().setCurrentUser(user);
             showSuccess("✅ Signed in with Google!");
-            
+
             Stage stage = (Stage) txtEmail.getScene().getWindow();
             String fxmlFile = user.getRole().equals("ADMIN") ? "/gui/AdminDashboard.fxml" : "/gui/front-main-view.fxml";
             stage.getScene().setRoot(FXMLLoader.load(getClass().getResource(fxmlFile)));
@@ -223,7 +240,6 @@ public class SignInController {
             showError("❌ Google Sign-In failed: " + e.getMessage());
         }
     }
-
 
     @FXML
     public void togglePassword() {
