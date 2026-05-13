@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import services.CollabRequestService;
 import services.CollaboratorService;
 import services.AiAssistLogService;
+import utils.AnimationUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
@@ -133,7 +134,13 @@ public class AddRequestController {
     @FXML
     private void onSaveRequest() {
         resetErrors();
-        if (!validate()) return;
+        if (!validate()) {
+            // Shake the form to indicate errors
+            if (reqTitleField.getScene() != null) {
+                AnimationUtils.shake(reqTitleField.getScene().getRoot());
+            }
+            return;
+        }
 
         try {
             BigDecimal budget = new BigDecimal(reqBudgetField.getText().trim());
@@ -233,6 +240,7 @@ public class AddRequestController {
             javafx.application.Platform.runLater(() -> {
                 reqDescArea.setText(rephrased);
                 reqDescArea.setDisable(false);
+                AnimationUtils.pulse(reqDescArea);
             });
             if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
                 aiAssistLogService.logUsage("description", original, rephrased);
@@ -253,6 +261,7 @@ public class AddRequestController {
             javafx.application.Platform.runLater(() -> {
                 reqDeliverablesArea.setText(rephrased);
                 reqDeliverablesArea.setDisable(false);
+                AnimationUtils.pulse(reqDeliverablesArea);
             });
             if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
                 aiAssistLogService.logUsage("deliverables", original, rephrased);
@@ -273,6 +282,7 @@ public class AddRequestController {
             javafx.application.Platform.runLater(() -> {
                 reqPaymentTermsArea.setText(rephrased);
                 reqPaymentTermsArea.setDisable(false);
+                AnimationUtils.pulse(reqPaymentTermsArea);
             });
             if (!original.equals(rephrased) && !rephrased.startsWith("Failed to parse") && !rephrased.startsWith("Groq API Error")) {
                 aiAssistLogService.logUsage("payment_terms", original, rephrased);

@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.ContractListController">
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.ContractListController">
     <stylesheets>
-        <URL value="@../../styles.css" />
+        <URL value="@/gui/styles.css" />
     </stylesheets>
     <children>
 

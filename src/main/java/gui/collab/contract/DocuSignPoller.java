@@ -5,10 +5,6 @@ import javafx.concurrent.Task;
 import javafx.util.Duration;
 import services.DocuSignService;
 
-/**
- * Polls DocuSign specifically for RECIPIENT status summary.
- * Returns: "PARTNER_SIGNED", "CREATOR_SIGNED", "BOTH_SIGNED", or "NONE"
- */
 public class DocuSignPoller extends ScheduledService<String> {
 
     private final DocuSignService docuSignService = new DocuSignService();

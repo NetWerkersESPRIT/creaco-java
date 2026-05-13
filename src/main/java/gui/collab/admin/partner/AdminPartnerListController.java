@@ -74,7 +74,7 @@ public class AdminPartnerListController {
         avatarBox.setMaxSize(50, 50);
         avatarBox.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 14; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.03), 5, 0, 0, 1);");
         Label iconLabel = new Label(collab.getCompanyName().substring(0, 1).toUpperCase());
-        iconLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #6366f1;");
+        iconLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -fx-primary-pink;");
         avatarBox.getChildren().add(iconLabel);
 
         // Info
@@ -116,14 +116,14 @@ public class AdminPartnerListController {
         HBox actions = new HBox(12);
         actions.setAlignment(Pos.CENTER_RIGHT);
 
-        Button viewBtn = createIconButton("👁", "#6366f1", "View Details");
+        Button viewBtn = createIconButton("👁", "#6c2db1", "View Details");
         viewBtn.setOnAction(e -> onViewPartner(collab));
 
         boolean isActive = "ACTIVE".equalsIgnoreCase(collab.getStatus());
-        Button toggleBtn = createIconButton(isActive ? "🚫" : "✅", isActive ? "#ef4444" : "#10b981", isActive ? "Deactivate Partner" : "Activate Partner");
+        Button toggleBtn = createIconButton(isActive ? "🚫" : "✅", isActive ? "#6c2db1" : "#ce2d7c", isActive ? "Deactivate Partner" : "Activate Partner");
         toggleBtn.setOnAction(e -> onToggleStatus(collab));
 
-        Button editBtn = createIconButton("✎", "#f59e0b", "Edit Partner");
+        Button editBtn = createIconButton("✎", "#ce2d7c", "Edit Partner");
         editBtn.setOnAction(e -> onEditPartner(collab));
 
         actions.getChildren().addAll(viewBtn, toggleBtn, editBtn);

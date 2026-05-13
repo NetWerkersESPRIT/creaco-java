@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 import services.CollaboratorService;
 import services.CollabRequestService;
 import services.ContractService;
+import utils.AnimationUtils;
 import utils.SessionManager;
 import java.math.BigDecimal;
 import java.util.List;
@@ -51,6 +52,12 @@ public class HubOverviewController {
             activeContractsLabel.setText(activeCount + " / " + contracts.size());
             totalBudgetLabel.setText(String.format("%,.0f DT", totalBudget).replace(',', ' '));
             pendingRequestsLabel.setText(pendingCount + " Items");
+
+            // Animate stat labels
+            AnimationUtils.bounceIn(totalPartnersLabel);
+            AnimationUtils.bounceIn(activeContractsLabel);
+            AnimationUtils.bounceIn(totalBudgetLabel);
+            AnimationUtils.bounceIn(pendingRequestsLabel);
 
         } catch (Exception e) {
             e.printStackTrace();

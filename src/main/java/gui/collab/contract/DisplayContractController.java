@@ -17,6 +17,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import java.util.List;
 import java.util.function.Consumer;
+import utils.AnimationUtils;
 
 public class DisplayContractController {
 
@@ -53,7 +54,9 @@ public class DisplayContractController {
                     setGraphic(null);
                     setStyle("-fx-background-color: transparent;");
                 } else {
-                    setGraphic(createContractCell(item));
+                    Node cell = createContractCell(item);
+                    setGraphic(cell);
+                    AnimationUtils.animateListCell(cell);
                     setStyle("-fx-background-color: transparent;");
                 }
             }
@@ -126,11 +129,11 @@ public class DisplayContractController {
         statusBadge.getStyleClass().add("status-badge");
         
         if ("SIGNED".equals(statusStr)) {
-            statusBadge.setStyle("-fx-background-color: #f0fdf4; -fx-text-fill: #166534;");
+            statusBadge.getStyleClass().add("status-active");
         } else if ("SENT_TO_PARTNER".equals(statusStr)) {
-            statusBadge.setStyle("-fx-background-color: #fef9c3; -fx-text-fill: #854d0e;");
+            statusBadge.getStyleClass().add("status-pending");
         } else {
-            statusBadge.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #475569;");
+            statusBadge.getStyleClass().add("status-rejected");
         }
         
         statusBadge.setMinWidth(130);
@@ -146,8 +149,8 @@ public class DisplayContractController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button viewBtn = new Button("View");
-        viewBtn.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #7c3aed; -fx-font-weight: bold; -fx-cursor: hand;");
+        Button viewBtn = new Button("VIEW DETAILS →");
+        viewBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #6c2db1; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 12px;");
         viewBtn.setOnAction(e -> {
             if (onViewRequested != null) {
                 System.out.println("DisplayContractController: View requested for contract " + c.getContractNumber());

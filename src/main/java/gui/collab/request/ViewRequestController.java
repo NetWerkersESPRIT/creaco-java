@@ -3,11 +3,14 @@ package gui.collab.request;
 import entities.CollabRequest;
 import entities.Collaborator;
 import entities.Contract;
+import entities.Users;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.layout.VBox;
 import services.CollaboratorService;
 import services.ContractService;
+import services.UserService;
 import java.text.SimpleDateFormat;
 
 public class ViewRequestController {
@@ -23,11 +26,13 @@ public class ViewRequestController {
     @FXML private VBox commentsContainer;
     
     @FXML private Label partnerNameLabel;
+    @FXML private Hyperlink viewPartnerLink;
     @FXML private Label revisorNameLabel;
     @FXML private VBox contractCard;
 
     private final CollaboratorService partnerService = new CollaboratorService();
     private final ContractService contractService = new ContractService();
+    private final UserService userService = new UserService();
     
     private CollabRequest currentRequest;
     private Runnable onBackRequested;
@@ -41,6 +46,13 @@ public class ViewRequestController {
         this.onBackRequested = onBack;
         this.onViewPartnerRequested = onViewPartner;
         this.onConsultContractRequested = onConsultContract;
+    }
+
+    public void setPartnerProfileVisible(boolean visible) {
+        if (viewPartnerLink != null) {
+            viewPartnerLink.setVisible(visible);
+            viewPartnerLink.setManaged(visible);
+        }
     }
 
     public void setRequest(CollabRequest req) {
@@ -77,6 +89,22 @@ public class ViewRequestController {
         } else {
             commentsContainer.setVisible(false);
             commentsContainer.setManaged(false);
+        }
+
+        // Load Revisor
+        if (req.getRevisorId() > 0) {
+            try {
+                Users revisor = userService.getUserById(req.getRevisorId());
+                if (revisor != null && revisor.getUsername() != null) {
+                    revisorNameLabel.setText(revisor.getUsername());
+                } else {
+                    revisorNameLabel.setText("Not assigned");
+                }
+            } catch (Exception e) {
+                revisorNameLabel.setText("Error loading revisor");
+            }
+        } else {
+            revisorNameLabel.setText("Not assigned");
         }
 
         // Load Partner

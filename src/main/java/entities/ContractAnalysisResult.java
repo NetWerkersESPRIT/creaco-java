@@ -60,9 +60,7 @@ public class ContractAnalysisResult {
 
     /** Returns a CSS hex color matching the score tier (for dynamic coloring). */
     public static String gradeColor(int score) {
-        if (score >= 80) return "#10b981"; // green
-        if (score >= 65) return "#f59e0b"; // amber
-        if (score >= 50) return "#f97316"; // orange
-        return "#ef4444";                  // red
+        if (score >= 65) return "#ce2d7c"; // primary pink
+        return "#6c2db1";                  // primary purple
     }
 }

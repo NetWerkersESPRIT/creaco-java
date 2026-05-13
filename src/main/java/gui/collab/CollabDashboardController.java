@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.Button;
+import utils.AnimationUtils;
 import java.io.IOException;
 
 public class CollabDashboardController {
@@ -20,6 +21,8 @@ public class CollabDashboardController {
     public void initialize() {
         showPartners();
         applyAiBackground();
+        // Animate hero banner on load
+        if (heroBanner != null) AnimationUtils.animateHeroBanner(heroBanner);
     }
 
     private void applyAiBackground() {
@@ -61,6 +64,7 @@ public class CollabDashboardController {
             });
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateViewTransition(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,6 +87,7 @@ public class CollabDashboardController {
             );
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,6 +103,7 @@ public class CollabDashboardController {
             controller.setOnSave(() -> showPartners());
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -114,6 +120,7 @@ public class CollabDashboardController {
             controller.setOnSave(() -> showPartners());
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -141,6 +148,7 @@ public class CollabDashboardController {
             });
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateViewTransition(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -160,6 +168,7 @@ public class CollabDashboardController {
             );
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -175,6 +184,7 @@ public class CollabDashboardController {
             controller.setOnSave(() -> showRequests());
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -191,6 +201,7 @@ public class CollabDashboardController {
             controller.setOnSave(() -> showRequests());
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -211,12 +222,14 @@ public class CollabDashboardController {
             });
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateViewTransition(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void showContractConsultation(entities.Contract contract) {
+        if (bannerTitle != null) bannerTitle.setText("Contract Consultation");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/collab/contract/viewContract.fxml"));
             Parent root = loader.load();
@@ -230,6 +243,7 @@ public class CollabDashboardController {
             });
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -242,6 +256,7 @@ public class CollabDashboardController {
         
         if (activeBtn != null) {
             activeBtn.getStyleClass().add("tab-btn-active");
+            AnimationUtils.pulse(activeBtn);
         }
     }
 }

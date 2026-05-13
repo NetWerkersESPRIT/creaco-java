@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.fxml.FXMLLoader;
 import java.io.IOException;
 import services.CollaboratorService;
+import utils.AnimationUtils;
 
 public class DisplayPartnerController {
 
@@ -52,7 +53,9 @@ public class DisplayPartnerController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    setGraphic(createPartnerCell(item));
+                    Node cell = createPartnerCell(item);
+                    setGraphic(cell);
+                    AnimationUtils.animateListCell(cell);
                 }
             }
         });

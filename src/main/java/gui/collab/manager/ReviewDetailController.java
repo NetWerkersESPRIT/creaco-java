@@ -10,6 +10,7 @@ import javafx.scene.image.ImageView;
 import services.CollaboratorService;
 import services.CollabRequestService;
 import services.UserService;
+import utils.AnimationUtils;
 import java.text.SimpleDateFormat;
 import java.sql.SQLException;
 
@@ -81,6 +82,11 @@ public class ReviewDetailController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // Animate the detail view appearing
+        if (titleLabel.getScene() != null && titleLabel.getScene().getRoot() != null) {
+            AnimationUtils.animateFormIn(titleLabel.getScene().getRoot());
+        }
     }
 
     @FXML
@@ -145,6 +151,7 @@ public class ReviewDetailController {
             );
             
             setRequest(currentRequest); // Refresh UI
+            AnimationUtils.flash(statusBadge); // Flash the status badge to draw attention
             
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
             alert.setTitle("Status Updated");

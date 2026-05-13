@@ -178,9 +178,9 @@
 
                         <VBox spacing="10.0" styleClass="action-needed-card" GridPane.columnIndex="2">
                             <children>
-                                <Label text="ACTION NEEDED" style="-fx-font-weight: bold; -fx-text-fill: #92400e; -fx-font-size: 11px;" />
-                                <Label fx:id="actionNeededCountLabel" styleClass="stat-value" text="11" style="-fx-text-fill: #92400e;" />
-                                <Label fx:id="actionNeededDescLabel" wrapText="true" text="8 pending requests · 3 expiring contracts" style="-fx-text-fill: #b45309; -fx-font-size: 13px;" />
+                                <Label text="ACTION NEEDED" style="-fx-font-weight: bold; -fx-text-fill: -fx-primary-pink; -fx-font-size: 11px;" />
+                                <Label fx:id="actionNeededCountLabel" styleClass="stat-value" text="11" style="-fx-text-fill: -fx-primary-pink;" />
+                                <Label fx:id="actionNeededDescLabel" wrapText="true" text="8 pending requests · 3 expiring contracts" style="-fx-text-fill: #4c1d95; -fx-font-size: 13px;" />
                             </children>
                         </VBox>
                     </children>
@@ -199,7 +199,7 @@
                             <children>
                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
-                                        <Region styleClass="section-indicator" style="-fx-background-color: #6366f1;" />
+                                        <Region styleClass="section-indicator" style="-fx-background-color: -fx-primary-purple;" />
                                         <Label text="Recent partners" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
                                     </children>
                                 </HBox>
@@ -212,7 +212,7 @@
                             <children>
                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
-                                        <Region styleClass="section-indicator" style="-fx-background-color: #10b981;" />
+                                        <Region styleClass="section-indicator" style="-fx-background-color: -fx-primary-pink;" />
                                         <Label text="Recent contracts" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
                                     </children>
                                 </HBox>
@@ -221,11 +221,11 @@
                         </VBox>
 
                         <!-- Requests to Review List -->
-                        <VBox spacing="15.0" styleClass="dashboard-list-card" GridPane.columnIndex="2" style="-fx-border-color: #f59e0b; -fx-border-width: 0 0 0 1.5;">
+                        <VBox spacing="15.0" styleClass="dashboard-list-card" GridPane.columnIndex="2" style="-fx-border-color: -fx-primary-purple; -fx-border-width: 0 0 0 1.5;">
                             <children>
                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
-                                        <Region styleClass="section-indicator" style="-fx-background-color: #f59e0b;" />
+                                        <Region styleClass="section-indicator" style="-fx-background-color: -fx-primary-purple;" />
                                         <Label text="Requests to review" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" />
                                     </children>
                                 </HBox>

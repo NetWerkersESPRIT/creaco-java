@@ -49,7 +49,7 @@ public class GroqContractAnalystService {
                                                   String confidentiality,
                                                   String cancellationTerms) {
         try {
-            // ── Build the user message ──────────────────────────────────────────────
+            // Build the user message 
             String userMessage = "CONTRACT TITLE: "         + nvl(title)              + "\n" +
                                  "TERMS / DESCRIPTION: "   + nvl(description)        + "\n" +
                                  "BUDGET / AMOUNT: "        + nvl(amount)             + "\n" +

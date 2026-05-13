@@ -21,9 +21,9 @@ public class GroqAssistService {
             HttpClient client = HttpClient.newHttpClient();
 
             String systemPrompt = "You are a professional business consultant and contract expert. " +
-                    "Your task is to rewrite the provided rough or informal text into highly formal, authoritative, and convincing business language. "
+                    "Your task is to rewrite the provided rough or informal text into formal and convincing business language. "
                     +
-                    "Remove conversational filler and use sophisticated vocabulary appropriate for a business contract. "
+                    "Remove conversational filler and use an appropriate vocabulary for a business contract. "
                     +
                     "The text pertains to the '" + context + "' section of a collaboration proposal. " +
                     "Provide ONLY the rewritten text without any additional commentary, introduction, or markdown formatting.";

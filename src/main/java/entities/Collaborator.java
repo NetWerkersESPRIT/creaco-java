@@ -14,9 +14,9 @@ public class Collaborator {
     private String description;
     private String logo;
     private boolean isPublic;
-    private String status;
-    private Date createdAt;
-    private int addedByUserId;
+    private String status = "ACTIVE";
+    private Date createdAt = new Date();
+    private Integer addedByUserId;
 
 
 

@@ -18,16 +18,7 @@
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
     </padding>
     <children>
-        <!-- Hero Banner -->
-        <VBox styleClass="hero-banner-consultation">
-            <children>
-                <VBox spacing="8.0">
-                    <children>
-                        <Label styleClass="hero-title-white" text="Contract Consultation" />
-                    </children>
-                </VBox>
-            </children>
-        </VBox>
+
 
         <HBox spacing="30.0">
             <children>
@@ -121,7 +112,6 @@
                                 <VBox spacing="10.0">
                                     <children>
                                         <Button fx:id="btnUpdate" onAction="#onUpdateSpecifications" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-update-spec" text="📑 UPDATE SPECIFICATIONS" />
-                                        <Button fx:id="btnTransmit" onAction="#onTransmitToPartner" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-transmit" text="TRANSMIT TO PARTNER" />
                                     </children>
                                 </VBox>
 
@@ -180,7 +170,7 @@
                                                             <Label fx:id="clarityScoreLabel" text="--/100" style="-fx-font-size: 11px; -fx-text-fill: #7c3aed; -fx-font-weight: bold;" />
                                                         </children>
                                                     </HBox>
-                                                    <ProgressBar fx:id="clarityBar" progress="0" maxWidth="Infinity" style="-fx-accent: #7c3aed;" prefHeight="8.0" />
+                                                    <ProgressBar fx:id="clarityBar" progress="0" maxWidth="Infinity" style="-fx-accent: #ce2d7c;" prefHeight="8.0" />
                                                 </children>
                                             </VBox>
                                             <VBox spacing="3.0">
@@ -192,7 +182,7 @@
                                                             <Label fx:id="budgetScoreLabel" text="--/100" style="-fx-font-size: 11px; -fx-text-fill: #7c3aed; -fx-font-weight: bold;" />
                                                         </children>
                                                     </HBox>
-                                                    <ProgressBar fx:id="budgetBar" progress="0" maxWidth="Infinity" style="-fx-accent: #10b981;" prefHeight="8.0" />
+                                                    <ProgressBar fx:id="budgetBar" progress="0" maxWidth="Infinity" style="-fx-accent: #ce2d7c;" prefHeight="8.0" />
                                                 </children>
                                             </VBox>
                                             <VBox spacing="3.0">
@@ -204,7 +194,7 @@
                                                             <Label fx:id="timelineScoreLabel" text="--/100" style="-fx-font-size: 11px; -fx-text-fill: #7c3aed; -fx-font-weight: bold;" />
                                                         </children>
                                                     </HBox>
-                                                    <ProgressBar fx:id="timelineBar" progress="0" maxWidth="Infinity" style="-fx-accent: #f59e0b;" prefHeight="8.0" />
+                                                    <ProgressBar fx:id="timelineBar" progress="0" maxWidth="Infinity" style="-fx-accent: #6c2db1;" prefHeight="8.0" />
                                                 </children>
                                             </VBox>
                                         </children>

@@ -88,7 +88,7 @@
                                 <Label styleClass="comments-label" text="MANAGER COMMENTS / REASON" />
                                 <VBox styleClass="comments-box">
                                     <children>
-                                        <Label fx:id="commentsLabel" text="&quot;Request looks good, approved as submitted.&quot;" wrapText="true" style="-fx-text-fill: #991b1b; -fx-font-size: 14px; -fx-font-style: italic;" />
+                                        <Label fx:id="commentsLabel" text="&quot;Request looks good, approved as submitted.&quot;" wrapText="true" style="-fx-text-fill: -fx-primary-purple; -fx-font-size: 14px; -fx-font-style: italic;" />
                                     </children>
                                 </VBox>
                             </children>
@@ -123,7 +123,7 @@
                                         <VBox spacing="2.0">
                                             <children>
                                                 <Label fx:id="partnerNameLabel" styleClass="card-title" style="-fx-font-size: 15px;" text="Amazon" />
-                                                <Hyperlink onAction="#onViewPartner" styleClass="action-link" style="-fx-font-size: 12px;" text="View profile" />
+                                                <Hyperlink fx:id="viewPartnerLink" onAction="#onViewPartner" styleClass="action-link" style="-fx-font-size: 12px;" text="View profile" />
                                             </children>
                                         </VBox>
                                     </children>
@@ -159,8 +159,8 @@
                         <!-- Contract Status -->
                         <VBox fx:id="contractCard" spacing="15.0" styleClass="contract-card">
                             <children>
-                                <Label style="-fx-text-fill: #15803d; -fx-font-weight: bold; -fx-font-size: 14px;" text="Contract available" />
-                                <Label style="-fx-text-fill: #3f6212; -fx-font-size: 13px;" text="The request has been validated and the contract is ready." wrapText="true" />
+                                <Label style="-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; -fx-font-size: 14px;" text="Contract available" />
+                                <Label style="-fx-text-fill: -fx-primary-purple; -fx-font-size: 13px;" text="The request has been validated and the contract is ready." wrapText="true" />
                                 <Button onAction="#onConsultContract" prefHeight="45.0" prefWidth="Infinity" styleClass="btn-consult" text="CONSULT CONTRACT" />
                             </children>
                         </VBox>

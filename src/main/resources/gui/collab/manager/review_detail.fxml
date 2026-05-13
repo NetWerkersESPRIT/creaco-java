@@ -9,37 +9,12 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.ReviewDetailController">
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.ReviewDetailController">
     <stylesheets>
-        <URL value="@../../styles.css" />
+        <URL value="@/gui/styles.css" />
     </stylesheets>
     <children>
-        <!-- Top Banner -->
-        <VBox styleClass="hero-banner" style="-fx-min-height: 200; -fx-background-color: linear-gradient(to right, #ec4899, #a855f7); -fx-background-radius: 20;">
-            <children>
-                <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 15; -fx-padding: 20;" maxWidth="Infinity">
-                    <children>
-                        <ImageView fx:id="creatorAvatar" fitHeight="60.0" fitWidth="60.0" style="-fx-background-radius: 50;" />
-                        <VBox spacing="2.0">
-                            <children>
-                                <Label fx:id="titleLabel" styleClass="hero-title" style="-fx-text-fill: #1e293b; -fx-font-size: 22px;" text="test collab request" />
-                                <Label fx:id="creatorInfoLabel" styleClass="hero-subtitle" style="-fx-text-fill: #64748b;" text="Requested by creatorA" />
-                            </children>
-                        </VBox>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <VBox alignment="TOP_RIGHT" spacing="5.0">
-                            <children>
-                                <Label fx:id="statusBadge" styleClass="status-badge, status-active" text="APPROVED" />
-                                <Label fx:id="dateLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" text="Created: 22/04/2026 20:22" />
-                            </children>
-                        </VBox>
-                    </children>
-                </HBox>
-            </children>
-            <padding>
-                <Insets left="40" right="40" top="70"/>
-            </padding>
-        </VBox>
+
 
         <!-- Content Area -->
         <HBox spacing="25.0">
@@ -63,7 +38,7 @@
                                 <VBox alignment="CENTER" spacing="10.0" styleClass="card" HBox.hgrow="ALWAYS">
                                     <padding><Insets bottom="25.0" left="25.0" right="25.0" top="25.0" /></padding>
                                     <children>
-                                        <VBox alignment="CENTER" styleClass="pulsation-icon" style="-fx-background-color: #f0fdf4; -fx-background-radius: 10; -fx-min-width: 45; -fx-min-height: 45;">
+                                        <VBox alignment="CENTER" styleClass="pulsation-icon" style="-fx-background-color: #f3e8ff; -fx-background-radius: 10; -fx-min-width: 45; -fx-min-height: 45;">
                                             <Label text="💰" style="-fx-font-size: 18px;" />
                                         </VBox>
                                         <Label styleClass="card-subtitle" text="Budget" />

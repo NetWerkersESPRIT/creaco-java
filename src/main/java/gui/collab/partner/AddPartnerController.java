@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import services.CollaboratorService;
+import utils.AnimationUtils;
 import java.io.File;
 import java.time.LocalDateTime;
 
@@ -36,7 +37,12 @@ public class AddPartnerController {
     private void onSavePartner() {
         resetErrors();
         boolean isValid = validate();
-        if (!isValid) return;
+        if (!isValid) {
+            if (pCompanyField.getScene() != null) {
+                AnimationUtils.shake(pCompanyField.getScene().getRoot());
+            }
+            return;
+        }
 
         try {
             int currentUserId = 1;

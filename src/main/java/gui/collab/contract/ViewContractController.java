@@ -14,6 +14,9 @@ import services.DocuSignService;
 import utils.EnvelopeStore;
 import utils.SessionManager;
 import services.NotificationService;
+import services.UserService;
+import services.CollabRequestService;
+import utils.AnimationUtils;
 import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,13 +29,14 @@ public class ViewContractController {
     @FXML private TextField partnerEmailField, partnerNameField;
     @FXML private Button btnSendDocuSign, btnSignContract, btnCheckStatus;
     @FXML private Label dsStatusLabel, dsEnvelopeIdLabel;
-    @FXML private VBox dsSentBox, dsReadyBox, heroBanner;
+    @FXML private VBox dsSentBox, dsReadyBox, howItWorksBox;
 
     private final CollaboratorService collaboratorService = new CollaboratorService();
     private final ContractService contractService = new ContractService();
     private final DocuSignService docuSignService = new DocuSignService();
     private final NotificationService notificationService = new NotificationService();
-    private final services.CollabRequestService requestService = new services.CollabRequestService();
+    private final UserService userService = new UserService();
+    private final CollabRequestService requestService = new CollabRequestService();
 
     private Contract currentContract;
     private DocuSignPoller poller;
@@ -45,8 +49,18 @@ public class ViewContractController {
         refLabel.setText("REF: " + contract.getContractNumber());
         protocolLabel.setText("DIGITAL PROTOCOL #" + contract.getContractNumber());
         
-        Users creator = SessionManager.getInstance().getCurrentUser();
-        if (clientNameLabel != null) clientNameLabel.setText(creator != null ? creator.getUsername() : "Creator");
+        // Fetch actual creator instead of session user
+        if (contract.getCreatorId() != null) {
+            try {
+                Users actualCreator = userService.getUserById(contract.getCreatorId());
+                if (clientNameLabel != null) clientNameLabel.setText(actualCreator != null ? actualCreator.getUsername() : "Creator");
+            } catch (Exception e) {
+                if (clientNameLabel != null) clientNameLabel.setText("Creator");
+            }
+        } else {
+            if (clientNameLabel != null) clientNameLabel.setText("Creator");
+        }
+
         if (termsText != null) termsText.setText(contract.getTerms() != null ? contract.getTerms() : "No terms defined.");
         if (issuanceDateLabel != null) issuanceDateLabel.setText(contract.getStartDate() != null ? contract.getStartDate().toString() : "N/A");
 
@@ -68,26 +82,29 @@ public class ViewContractController {
             showReadyState();
         }
 
-        // Generate AI Background
-        applyAiBackground();
+        // Role-based restrictions (Hide signing actions for Admin)
+        if (SessionManager.getInstance().isAdmin()) {
+            if (btnSignContract != null) {
+                btnSignContract.setVisible(false);
+                btnSignContract.setManaged(false);
+            }
+            if (btnSendDocuSign != null) {
+                btnSendDocuSign.setVisible(false);
+                btnSendDocuSign.setManaged(false);
+            }
+            if (howItWorksBox != null) {
+                howItWorksBox.setVisible(false);
+                howItWorksBox.setManaged(false);
+            }
+            if (partnerNameField != null) partnerNameField.setEditable(false);
+            if (partnerEmailField != null) partnerEmailField.setEditable(false);
+        }
+
+        // Animate the view
+        // AnimationUtils.animateHeroBanner(heroBanner); // Removed since banner is in parent
     }
 
-    private void applyAiBackground() {
-        new Thread(() -> {
-            javafx.scene.image.Image bg = utils.GeminiImageService.generateHeroBackground("Signing a professional digital contract on a tablet in a premium office environment");
-            if (bg != null) {
-                Platform.runLater(() -> {
-                    heroBanner.setBackground(new javafx.scene.layout.Background(
-                        new javafx.scene.layout.BackgroundImage(bg, 
-                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
-                            javafx.scene.layout.BackgroundRepeat.NO_REPEAT, 
-                            javafx.scene.layout.BackgroundPosition.CENTER, 
-                            new javafx.scene.layout.BackgroundSize(100, 100, true, true, true, true))
-                    ));
-                });
-            }
-        }).start();
-    }
+
 
     @FXML
     private void onSendForSignature() {

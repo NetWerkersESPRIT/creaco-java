@@ -164,8 +164,8 @@
 }
 
 .stat-badge-green {
-    -fx-background-color: #f0fdf4;
-    -fx-text-fill: #166534;
+    -fx-background-color: #fce7f3;
+    -fx-text-fill: -fx-primary-pink;
 }
 
 .stat-badge-gray {
@@ -174,32 +174,34 @@
 }
 
 .stat-badge-blue {
-    -fx-background-color: #eff6ff;
-    -fx-text-fill: #1e40af;
+    -fx-background-color: #f3e8ff;
+    -fx-text-fill: -fx-primary-purple;
 }
 
 .stat-badge-orange {
-    -fx-background-color: #fff7ed;
-    -fx-text-fill: #9a3412;
+    -fx-background-color: #f3e8ff;
+    -fx-text-fill: -fx-primary-purple;
 }
 
 .stat-badge-red {
     -fx-background-color: #fef2f2;
-    -fx-text-fill: #991b1b;
+    -fx-text-fill: #991b1b; /* Keeping red for critical errors is usually okay, but if the user insists on 2 colors, I should change it */
+    /* Let's change it to a dark purple instead */
+    -fx-text-fill: #4c1d95;
 }
 
 .stat-badge-purple {
     -fx-background-color: #faf5ff;
-    -fx-text-fill: #6b21a8;
+    -fx-text-fill: -fx-primary-purple;
 }
 
 /* Ensure labels inside badges inherit the correct colors */
-.stat-badge-green .label { -fx-text-fill: #166534; -fx-font-weight: bold; }
+.stat-badge-green .label { -fx-text-fill: -fx-primary-pink; -fx-font-weight: bold; }
 .stat-badge-gray .label { -fx-text-fill: #475569; -fx-font-weight: bold; }
-.stat-badge-blue .label { -fx-text-fill: #1e40af; -fx-font-weight: bold; }
-.stat-badge-orange .label { -fx-text-fill: #9a3412; -fx-font-weight: bold; }
-.stat-badge-red .label { -fx-text-fill: #991b1b; -fx-font-weight: bold; }
-.stat-badge-purple .label { -fx-text-fill: #6b21a8; -fx-font-weight: bold; }
+.stat-badge-blue .label { -fx-text-fill: -fx-primary-purple; -fx-font-weight: bold; }
+.stat-badge-orange .label { -fx-text-fill: -fx-primary-purple; -fx-font-weight: bold; }
+.stat-badge-red .label { -fx-text-fill: #4c1d95; -fx-font-weight: bold; }
+.stat-badge-purple .label { -fx-text-fill: -fx-primary-purple; -fx-font-weight: bold; }
 
 .stat-icon-bg {
     -fx-background-color: #f1f5f9;
@@ -217,13 +219,13 @@
 }
 
 .kpi-trend-up {
-    -fx-text-fill: #10b981;
+    -fx-text-fill: -fx-primary-pink;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
 
 .kpi-trend-down {
-    -fx-text-fill: #ef4444;
+    -fx-text-fill: -fx-primary-purple;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
@@ -634,18 +636,18 @@
 }
 
 .status-active {
-    -fx-background-color: #dcfce7;
-    -fx-text-fill: #166534;
+    -fx-background-color: #fce7f3;
+    -fx-text-fill: -fx-primary-pink;
 }
 
 .status-pending {
-    -fx-background-color: #fef3c7;
-    -fx-text-fill: #92400e;
+    -fx-background-color: #f3e8ff;
+    -fx-text-fill: -fx-primary-purple;
 }
 
 .status-rejected {
-    -fx-background-color: #fee2e2;
-    -fx-text-fill: #991b1b;
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #64748b;
 }
 
 /* Action Links */
@@ -871,14 +873,14 @@
 }
 
 .btn-consult {
-    -fx-background-color: #65a30d;
+    -fx-background-color: -fx-primary-pink;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-background-radius: 10;
 }
 
 .btn-consult:hover {
-    -fx-background-color: #4d7c0f;
+    -fx-background-color: -fx-primary-purple;
 }
 
 /* Manager Dashboard Specifics */

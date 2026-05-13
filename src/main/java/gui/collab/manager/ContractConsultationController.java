@@ -28,7 +28,6 @@ public class ContractConsultationController {
     @FXML private Label creatorNameLabel;
     @FXML private Label statusLabel;
     @FXML private Button btnUpdate;
-    @FXML private Button btnTransmit;
 
     // ── AI Panel FXML nodes ───────────────────────────────────────────────────
     @FXML private Button  btnAnalyze;
@@ -89,7 +88,6 @@ public class ContractConsultationController {
 
         // Lock action buttons if the contract is no longer a draft
         if (!"DRAFT".equalsIgnoreCase(contract.getStatus())) {
-            btnTransmit.setVisible(false);
             btnUpdate.setDisable(true);
         }
 
@@ -109,24 +107,7 @@ public class ContractConsultationController {
         alert.showAndWait();
     }
 
-    @FXML
-    private void onTransmitToPartner() {
-        try {
-            currentContract.setStatus("SENT_TO_PARTNER");
-            currentContract.setSentAt(new java.util.Date());
-            contractService.modifier(currentContract.getId(), currentContract);
-            setContract(currentContract); // refresh UI
 
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                    javafx.scene.control.Alert.AlertType.INFORMATION);
-            alert.setTitle("Success");
-            alert.setHeaderText("Contract Transmitted");
-            alert.setContentText("The digital protocol has been securely transmitted to the partner for signature.");
-            alert.showAndWait();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     @FXML
     private void onBack() {

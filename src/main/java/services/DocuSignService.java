@@ -20,7 +20,7 @@ import java.util.List;
 public class DocuSignService {
 
     private static final SimpleDateFormat DATE_FMT = new SimpleDateFormat("dd/MM/yyyy");
-
+    /* point d'entree: creation de l'enveloppe et envoi, retourne id unique de ce dernier*/
     public String sendEnvelopeForSignature(Contract contract,
                                            String partnerName, String partnerEmail,
                                            String creatorName, String creatorEmail)
@@ -33,13 +33,13 @@ public class DocuSignService {
         EnvelopeSummary summary = envelopesApi.createEnvelope(DocuSignConfig.ACCOUNT_ID, envelope);
         return summary.getEnvelopeId();
     }
-
+    /* genere un url securisé temporel lel cc pour signer le contract*/
     public String getEmbeddedSigningUrl(String envelopeId, String creatorName, String creatorEmail)
             throws ApiException, IOException {
         ApiClient apiClient = buildAuthenticatedClient();
         EnvelopesApi envelopesApi = new EnvelopesApi(apiClient);
 
-        RecipientViewRequest viewRequest = new RecipientViewRequest();
+        RecipientViewRequest viewRequest = new RecipientViewRequest(); //hia l page li bch tet7al lel cc embedded
         viewRequest.setReturnUrl("https://www.docusign.com"); // URL where user is redirected after signing
         viewRequest.setAuthenticationMethod("none");
         viewRequest.setEmail(creatorEmail);
@@ -50,11 +50,7 @@ public class DocuSignService {
         return viewUrl.getUrl();
     }
 
-    /**
-     * Polls DocuSign for the current status of an envelope. to check individual signature progress.
-     *
-     * @return A string summary of progress: "PARTNER_SIGNED", "CREATOR_SIGNED", "BOTH_SIGNED", or "NONE"
-     */
+    /* interroge l api bch taaref statut mtaa l contract*/
     public String getRecipientStatusSummary(String envelopeId) throws ApiException, IOException {
         ApiClient apiClient = buildAuthenticatedClient();
         EnvelopesApi envelopesApi = new EnvelopesApi(apiClient);
@@ -75,12 +71,11 @@ public class DocuSignService {
         if (creatorSigned) return "CREATOR_SIGNED";
         return "NONE";
     }
-
+    //telechargement pdf du contract
     public byte[] downloadCombinedDocument(String envelopeId) throws ApiException, IOException {
         ApiClient apiClient = buildAuthenticatedClient();
         EnvelopesApi envelopesApi = new EnvelopesApi(apiClient);
-        
-        // "combined" retrieves all documents in the envelope plus the summary/audit log
+
         return envelopesApi.getDocument(DocuSignConfig.ACCOUNT_ID, envelopeId, "combined");
     }
 

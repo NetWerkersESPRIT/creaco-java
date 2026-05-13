@@ -12,6 +12,7 @@ import javafx.scene.layout.*;
 import services.CollaboratorService;
 import services.CollabRequestService;
 import services.UserService;
+import utils.AnimationUtils;
 import utils.SessionManager;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -166,6 +167,7 @@ public class ReviewListController {
                 }
 
                 setGraphic(root);
+                AnimationUtils.animateListCell(root);
             }
         }
     }

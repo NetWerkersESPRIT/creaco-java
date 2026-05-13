@@ -10,6 +10,7 @@ import services.CollabRequestService;
 import services.CollaboratorService;
 import services.ContractService;
 import javafx.fxml.FXMLLoader;
+import utils.AnimationUtils;
 import java.io.IOException;
 
 import java.math.BigDecimal;
@@ -57,6 +58,13 @@ public class AdminDashboardController {
             loadContractStats();
             loadRequestStats();
             loadKPIs();
+
+            // Animate stat labels bouncing in
+            AnimationUtils.bounceIn(totalPartnersLabel);
+            AnimationUtils.bounceIn(totalContractsLabel);
+            AnimationUtils.bounceIn(totalRequestsLabel);
+            AnimationUtils.bounceIn(totalRevenueLabel);
+            AnimationUtils.bounceIn(actionNeededCountLabel);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -125,6 +133,7 @@ public class AdminDashboardController {
         for (Collaborator p : recent) {
             partnersList.getChildren().add(createPartnerRow(p));
         }
+        AnimationUtils.animateChildren(partnersList);
     }
 
     private void loadContractStats() throws SQLException {
@@ -149,6 +158,7 @@ public class AdminDashboardController {
         for (Contract c : recent) {
             contractsList.getChildren().add(createContractRow(c));
         }
+        AnimationUtils.animateChildren(contractsList);
     }
 
     private void loadRequestStats() throws SQLException {
@@ -176,6 +186,7 @@ public class AdminDashboardController {
         for (CollabRequest r : toReview) {
             requestsList.getChildren().add(createRequestRow(r));
         }
+        AnimationUtils.animateChildren(requestsList);
     }
 
     private void loadKPIs() throws SQLException {

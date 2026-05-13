@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import services.CollabRequestService;
 import services.ContractService;
+import utils.AnimationUtils;
 import utils.SessionManager;
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,6 +30,7 @@ public class DashboardController {
     public void initialize() {
         showHub();
         applyAiBackground();
+        if (heroBanner != null) AnimationUtils.animateHeroBanner(heroBanner);
     }
 
     private void applyAiBackground() {
@@ -74,6 +76,7 @@ public class DashboardController {
             }
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateViewTransition(root);
         } catch (Throwable t) {
             System.err.println("CRITICAL ERROR loading Review Dashboard: " + t.getMessage());
             t.printStackTrace();
@@ -81,6 +84,7 @@ public class DashboardController {
     }
 
     private void showReviewDetail(entities.CollabRequest req) {
+        updateBanner("Proposal Analysis", "Deep-dive into the collaboration specifics and evaluator feedback.", "Executive business review, high-end professional data room, collaborative atmosphere");
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/collab/manager/review_detail.fxml"));
             javafx.scene.Parent root = loader.load();
@@ -90,6 +94,7 @@ public class DashboardController {
             controller.setCallbacks(() -> showReview());
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (Exception e) {
             System.err.println("Error loading Review Detail: " + e.getMessage());
             e.printStackTrace();
@@ -114,12 +119,14 @@ public class DashboardController {
             }
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateViewTransition(root);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void showContractConsultation(entities.Contract contract) {
+        updateBanner("Contract Consultation", "Detailed analysis and legal overview of the partnership protocol.", "Legal documents, architectural business setting, formal corporate agreement atmosphere");
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/gui/collab/manager/contract_consultation.fxml"));
             javafx.scene.Parent root = loader.load();
@@ -129,6 +136,7 @@ public class DashboardController {
             controller.setCallbacks(() -> showContracts());
             
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateSlideInRight(root);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -139,6 +147,7 @@ public class DashboardController {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource(fxmlPath));
             javafx.scene.Parent root = loader.load();
             contentArea.getChildren().setAll(root);
+            AnimationUtils.animateViewTransition(root);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
@@ -148,7 +157,10 @@ public class DashboardController {
         btnHub.getStyleClass().remove("tab-btn-active");
         btnReview.getStyleClass().remove("tab-btn-active");
         btnContracts.getStyleClass().remove("tab-btn-active");
-        if (activeBtn != null) activeBtn.getStyleClass().add("tab-btn-active");
+        if (activeBtn != null) {
+            activeBtn.getStyleClass().add("tab-btn-active");
+            AnimationUtils.pulse(activeBtn);
+        }
         
         // Dynamic Banner Update
         if (activeBtn == btnHub) {

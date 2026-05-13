@@ -7,9 +7,9 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.DashboardController">
+<VBox spacing="25.0" styleClass="main-container" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.collab.manager.DashboardController">
     <stylesheets>
-        <URL value="@../../styles.css" />
+        <URL value="@/gui/styles.css" />
     </stylesheets>
     <padding>
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />

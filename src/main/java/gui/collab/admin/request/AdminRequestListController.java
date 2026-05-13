@@ -88,9 +88,9 @@ public class AdminRequestListController {
         avatarBox.setAlignment(Pos.CENTER);
         avatarBox.setMinSize(50, 50);
         avatarBox.setMaxSize(50, 50);
-        avatarBox.setStyle("-fx-background-color: #fff7ed; -fx-background-radius: 14; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.03), 5, 0, 0, 1);");
+        avatarBox.setStyle("-fx-background-color: #fce7f3; -fx-background-radius: 14; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.03), 5, 0, 0, 1);");
         Label iconLabel = new Label("👥");
-        iconLabel.setStyle("-fx-font-size: 20px;");
+        iconLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: -fx-primary-pink;");
         avatarBox.getChildren().add(iconLabel);
 
         // Title
@@ -106,13 +106,13 @@ public class AdminRequestListController {
         Label partnerLabel = new Label(getPartnerName(req.getCollaboratorId()));
         partnerLabel.setPrefWidth(200);
         partnerLabel.getStyleClass().add("list-item-title");
-        partnerLabel.setStyle("-fx-text-fill: #3b82f6;");
+        partnerLabel.setStyle("-fx-text-fill: -fx-primary-purple;");
 
         // Budget
         Label budget = new Label(req.getBudget() != null ? String.format("%,.0f DT", req.getBudget()) : "N/A");
         budget.setPrefWidth(120);
         budget.getStyleClass().add("list-item-subtitle");
-        budget.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
+        budget.setStyle("-fx-text-fill: -fx-primary-pink; -fx-font-weight: bold;");
 
         // Status
         Label statusBadge = new Label(req.getStatus() != null ? req.getStatus().toUpperCase() : "UNKNOWN");
@@ -144,7 +144,7 @@ public class AdminRequestListController {
         HBox actions = new HBox(12);
         actions.setAlignment(Pos.CENTER_RIGHT);
 
-        Button viewBtn = createIconButton("👁", "#6366f1", "Preview Details");
+        Button viewBtn = createIconButton("👁", "#6c2db1", "Preview Details");
         viewBtn.setOnAction(e -> onViewRequest(req));
 
         actions.getChildren().add(viewBtn);
@@ -177,6 +177,7 @@ public class AdminRequestListController {
             gui.collab.request.ViewRequestController controller = loader.getController();
             
             controller.setRequest(req);
+            controller.setPartnerProfileVisible(false);
             // Re-route the callbacks to simply return to this list for the admin view
             controller.setCallbacks(
                 this::refreshAndReturn, // Back button

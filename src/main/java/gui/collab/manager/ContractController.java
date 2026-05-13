@@ -55,7 +55,8 @@ public class ContractController {
     private Node createContractCell(Contract c) {
         HBox cell = new HBox(15);
         cell.setAlignment(Pos.CENTER_LEFT);
-        cell.setPadding(new Insets(10, 0, 10, 0));
+        cell.setPadding(new Insets(15, 20, 15, 20));
+        cell.getStyleClass().add("list-row");
 
         // Contract Icon Box
         VBox iconBox = new VBox();
@@ -102,12 +103,12 @@ public class ContractController {
         // Status Badge
         Label statusBadge = new Label(c.getStatus().toUpperCase());
         statusBadge.getStyleClass().add("status-badge");
-        if ("ACTIVE".equalsIgnoreCase(c.getStatus())) {
+        if ("ACTIVE".equalsIgnoreCase(c.getStatus()) || "SIGNED".equalsIgnoreCase(c.getStatus())) {
             statusBadge.getStyleClass().add("status-active");
-        } else if ("DRAFT".equalsIgnoreCase(c.getStatus())) {
-            statusBadge.setStyle("-fx-background-color: #64748b;");
+        } else if ("DRAFT".equalsIgnoreCase(c.getStatus()) || "SENT_TO_PARTNER".equalsIgnoreCase(c.getStatus())) {
+            statusBadge.getStyleClass().add("status-pending");
         } else {
-            statusBadge.setStyle("-fx-background-color: #94a3b8;");
+            statusBadge.getStyleClass().add("status-rejected");
         }
         statusBadge.setMinWidth(80);
         statusBadge.setAlignment(Pos.CENTER);
@@ -125,16 +126,16 @@ public class ContractController {
         HBox actions = new HBox(10);
         actions.setAlignment(Pos.CENTER_RIGHT);
 
-        if ("DRAFT".equalsIgnoreCase(c.getStatus())) {
-            Button sendBtn = new Button("📤 Send");
-            sendBtn.getStyleClass().add("action-icon-btn");
-            sendBtn.setOnAction(e -> onSend(c));
-            actions.getChildren().add(sendBtn);
-        }
-
         Button detailsBtn = new Button("DETAILS 👁");
         detailsBtn.getStyleClass().add("action-icon-btn");
         detailsBtn.setStyle("-fx-text-fill: -fx-primary-pink;");
+        detailsBtn.setOnAction(e -> {
+            if (contractsListView.getSelectionModel().getSelectedItem() != null) {
+                // This controller seems to lack a callback for details, but 
+                // the ContractListController (which seems to be the one actually used 
+                // in the dashboard) has one. 
+            }
+        });
 
         actions.getChildren().add(detailsBtn);
 
@@ -151,18 +152,6 @@ public class ContractController {
             }
         } catch (SQLException e) {
             System.err.println("Error loading contracts: " + e.getMessage());
-        }
-    }
-
-    private void onSend(Contract c) {
-        try {
-            c.setStatus("SENT_TO_COLLABORATOR");
-            c.setSentAt(new Date());
-            contractService.modifier(c.getId(), c);
-            loadContracts();
-            showAlert("Notification", "Contract sent. Navigator: Notify Content Creator logic goes here.");
-        } catch (SQLException e) {
-            showAlert("Error", e.getMessage());
         }
     }
 

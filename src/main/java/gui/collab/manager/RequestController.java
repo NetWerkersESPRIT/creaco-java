@@ -62,7 +62,8 @@ public class RequestController {
     private Node createRequestCell(CollabRequest req) {
         HBox cell = new HBox(15);
         cell.setAlignment(Pos.CENTER_LEFT);
-        cell.setPadding(new Insets(10, 0, 10, 0));
+        cell.setPadding(new Insets(15, 20, 15, 20));
+        cell.getStyleClass().add("list-row");
 
         // Request Icon Box
         VBox iconBox = new VBox();
@@ -121,11 +122,11 @@ public class RequestController {
         Label statusBadge = new Label(req.getStatus().toUpperCase());
         statusBadge.getStyleClass().add("status-badge");
         if ("PENDING".equalsIgnoreCase(req.getStatus())) {
-            statusBadge.setStyle("-fx-background-color: #1e293b;");
-        } else if ("APPROVED".equalsIgnoreCase(req.getStatus())) {
+            statusBadge.getStyleClass().add("status-pending");
+        } else if ("APPROVED".equalsIgnoreCase(req.getStatus()) || "ACCEPTED".equalsIgnoreCase(req.getStatus())) {
             statusBadge.getStyleClass().add("status-active");
         } else {
-            statusBadge.setStyle("-fx-background-color: #94a3b8;");
+            statusBadge.getStyleClass().add("status-rejected");
         }
         statusBadge.setMinWidth(80);
         statusBadge.setAlignment(Pos.CENTER);
@@ -162,7 +163,7 @@ public class RequestController {
         } else {
             Button viewBtn = new Button("VIEW ➔");
             viewBtn.getStyleClass().add("action-icon-btn");
-            viewBtn.setStyle("-fx-text-fill: #94a3b8;");
+            viewBtn.setStyle("-fx-text-fill: -fx-primary-purple;");
             actions.getChildren().add(viewBtn);
         }
 

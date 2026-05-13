@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import services.CollabRequestService;
 import services.CollaboratorService;
 import services.ContractService;
+import utils.AnimationUtils;
 import java.util.List;
 
 public class DisplayRequestController {
@@ -54,7 +55,9 @@ public class DisplayRequestController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    setGraphic(createRequestCell(item));
+                    Node cell = createRequestCell(item);
+                    setGraphic(cell);
+                    AnimationUtils.animateListCell(cell);
                 }
             }
         });
@@ -85,9 +88,9 @@ public class DisplayRequestController {
         iconBox.setAlignment(Pos.CENTER);
         iconBox.setMinSize(45, 45);
         iconBox.setMaxSize(45, 45);
-        iconBox.setStyle("-fx-background-color: #fef3c7; -fx-background-radius: 12;");
+        iconBox.setStyle("-fx-background-color: #fce7f3; -fx-background-radius: 12;");
         Label iconLabel = new Label("🚀");
-        iconLabel.setStyle("-fx-font-size: 22px;");
+        iconLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: -fx-primary-pink;");
         iconBox.getChildren().add(iconLabel);
 
         // Project Info
