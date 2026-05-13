@@ -58,6 +58,42 @@ public class EditMissionController {
     }
 
     @FXML
+    public void onGenerateAI(javafx.event.ActionEvent event) {
+        String title = txtTitle.getText().trim();
+
+        if (title.isEmpty()) {
+            lblMessage.setText("❌ Please enter a mission title first.");
+            lblMessage.setStyle("-fx-text-fill: red;");
+            return;
+        }
+
+        String currentDescription = txtDescription.getText().trim();
+        String prompt;
+
+        if (currentDescription.isEmpty() || currentDescription.equals("Generating description...")) {
+            prompt = String.format(
+                "Generate a professional and motivating description for a mission named '%s'. " +
+                "Keep it concise (max 2 sentences).",
+                title);
+        } else {
+            prompt = String.format(
+                "I have a mission named '%s' with the following initial description: '%s'. " +
+                "Improve this description to make it more professional and motivating. " +
+                "Keep it concise (max 2 sentences).",
+                title, currentDescription);
+        }
+
+        txtDescription.setText("Generating description...");
+        
+        new Thread(() -> {
+            String response = utils.GeminiService.getGeminiResponse(prompt);
+            javafx.application.Platform.runLater(() -> {
+                txtDescription.setText(response);
+            });
+        }).start();
+    }
+
+    @FXML
     public void goBack() throws Exception {
         switchScene("/TSK/Mission.fxml");
     }

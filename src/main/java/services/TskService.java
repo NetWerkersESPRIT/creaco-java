@@ -27,8 +27,8 @@ public class TskService {
         ps.setString(3, task.getState() != null ? task.getState() : "to do"); // Use task state, fallback to 'to do'
         ps.setString(4, now);   // current timestamp
         ps.setString(5, task.getTime_limit());
-        ps.setInt(6, 1);        // issued_by_id is always 1
-        ps.setInt(7, 1);        // assumed_by_id is always 1
+        ps.setInt(6, task.getIssued_by_id());
+        ps.setInt(7, task.getAssumed_by_id());
         ps.setInt(8, task.getBelong_to_id());
         
         ps.executeUpdate();
@@ -42,10 +42,42 @@ public class TskService {
     }
 
     public List<Tasks> afficher() throws SQLException {
+        return afficher(0, "ROLE_ADMIN");
+    }
+
+    public List<Tasks> afficher(int userId, String role) throws SQLException {
         List<Tasks> tasksList = new ArrayList<>();
-        String sql = "SELECT * FROM task";
-        Statement statement = con.createStatement();
-        ResultSet rs = statement.executeQuery(sql);
+        String sql;
+
+        if ("ROLE_ADMIN".equals(role)) {
+            sql = "SELECT * FROM task";
+        } else {
+            // Non-admin: Filter by mission visibility OR user is issuer/assumed OR issuer/assumed shares group
+            sql = "SELECT DISTINCT t.* FROM task t " +
+                  "LEFT JOIN mission m ON t.belong_to_id = m.id " +
+                  "LEFT JOIN users u_miss ON m.assigned_by_id = u_miss.id " +
+                  "LEFT JOIN users u_iss ON t.issued_by_id = u_iss.id " +
+                  "LEFT JOIN users u_ass ON t.assumed_by_id = u_ass.id " +
+                  "LEFT JOIN group_user gu_miss ON u_miss.id = gu_miss.users_id " +
+                  "LEFT JOIN group_user gu_iss ON u_iss.id = gu_iss.users_id " +
+                  "LEFT JOIN group_user gu_ass ON u_ass.id = gu_ass.users_id " +
+                  "WHERE m.assigned_by_id = ? OR t.issued_by_id = ? OR t.assumed_by_id = ? " +
+                  "OR gu_miss.group_id IN (SELECT group_id FROM group_user WHERE users_id = ?) " +
+                  "OR gu_iss.group_id IN (SELECT group_id FROM group_user WHERE users_id = ?) " +
+                  "OR gu_ass.group_id IN (SELECT group_id FROM group_user WHERE users_id = ?)";
+        }
+
+        PreparedStatement ps = con.prepareStatement(sql);
+        if (!"ROLE_ADMIN".equals(role)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, userId);
+            ps.setInt(3, userId);
+            ps.setInt(4, userId);
+            ps.setInt(5, userId);
+            ps.setInt(6, userId);
+        }
+
+        ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             Tasks t = new Tasks();
             t.setId(rs.getInt("id"));

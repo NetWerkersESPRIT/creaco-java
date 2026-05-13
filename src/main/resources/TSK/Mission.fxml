@@ -81,8 +81,8 @@
                             <Region HBox.hgrow="ALWAYS" />
                             <Label text="IDEA" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="135" />
                             <Label text="STATUS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="130" />
-                            <Label text="DATE" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="210" />
-                            <Label text="ACTIONS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="100" />
+                            <Label text="DATE" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="225" />
+                            <Label text="ACTIONS" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 11px;" prefWidth="140" />
                         </HBox>
 
                         <!-- Block 7: Missions List — plain VBox, no fixed height, outer scroll handles overflow -->

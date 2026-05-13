@@ -73,4 +73,15 @@ public class IdeaService {
         } catch (SQLException e) { e.printStackTrace(); }
         return null;
     }
+
+    public List<String> getDistinctCategories() throws SQLException {
+        List<String> categories = new ArrayList<>();
+        String sql = "SELECT DISTINCT category FROM idea WHERE category IS NOT NULL AND category != ''";
+        Statement statement = con.createStatement();
+        ResultSet rs = statement.executeQuery(sql);
+        while (rs.next()) {
+            categories.add(rs.getString("category"));
+        }
+        return categories;
+    }
 }

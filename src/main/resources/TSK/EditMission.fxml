@@ -42,7 +42,13 @@
                         </VBox>
                         
                         <VBox spacing="8">
-                            <Label text="DESCRIPTION" styleClass="section-header" style="-fx-padding: 0;"/>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <children>
+                                    <Label text="DESCRIPTION" styleClass="section-header" style="-fx-padding: 0;"/>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button onAction="#onGenerateAI" style="-fx-font-size: 10px; -fx-padding: 3 8; -fx-background-radius: 8;" styleClass="btn-primary" text="✨ AI Generate" />
+                                </children>
+                            </HBox>
                             <TextArea fx:id="txtDescription" promptText="Mission details..." prefHeight="150" wrapText="true" styleClass="search-bar" style="-fx-background-radius: 12;"/>
                         </VBox>
 
