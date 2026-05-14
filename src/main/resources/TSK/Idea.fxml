@@ -47,15 +47,19 @@
                         </HBox>
 
                         <!-- Block 3: Search + Category Filter (visible in Browse mode) -->
-                        <HBox fx:id="searchBar" alignment="CENTER_LEFT" spacing="12"
+                        <VBox fx:id="searchBar" spacing="12"
                               style="-fx-padding: 0 0 14 0;" managed="false" visible="false">
-                            <TextField fx:id="txtSearch" promptText="🔍  Search ideas..." prefHeight="36"
-                                       style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 8 14; -fx-font-size: 13px;"
-                                       onKeyReleased="#onSearch" HBox.hgrow="ALWAYS" />
-                            <ComboBox fx:id="cmbCategory" promptText="All Categories" prefHeight="36" prefWidth="180"
-                                      onAction="#onSearch"
-                                      style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-font-size: 13px;" />
-                        </HBox>
+                            <HBox alignment="CENTER_LEFT" maxWidth="Infinity">
+                                <TextField fx:id="txtSearch" promptText="🔍  Search ideas..." prefHeight="36"
+                                           style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 8 14; -fx-font-size: 13px;"
+                                           onKeyReleased="#onSearch" HBox.hgrow="ALWAYS" />
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <ComboBox fx:id="cmbCategory" promptText="All Categories" prefHeight="36" prefWidth="180"
+                                          onAction="#onSearch"
+                                          style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-font-size: 13px;" />
+                            </HBox>
+                        </VBox>
 
                         <!-- Separator -->
                         <Separator style="-fx-padding: 0 0 10 0;" />

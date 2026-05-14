@@ -81,6 +81,12 @@ public class AddMissionController {
         }
     }
 
+    public void setSelectedIdea(Idea idea) {
+        if (comboIdea != null && idea != null) {
+            comboIdea.getSelectionModel().select(idea);
+        }
+    }
+
     @FXML
     public void goToIdea() throws Exception {
         switchScene("/TSK/Idea.fxml");

@@ -40,7 +40,7 @@ public class IdeaController {
     @FXML
     private Button btnViewBrowse;
     @FXML
-    private HBox searchBar;
+    private VBox searchBar;
     @FXML
     private HBox columnHeaders;
 
@@ -303,6 +303,13 @@ public class IdeaController {
         row.setOnMouseExited(e -> row.setStyle(
                 "-fx-padding: 15; -fx-background-color: white;  -fx-background-radius: 12; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;"));
 
+        row.setOnMouseClicked(e -> {
+            // Avoid triggering when clicking the delete button specifically
+            if (!(e.getTarget() instanceof Button)) {
+                navigateToCreateMission(i);
+            }
+        });
+
         return row;
     }
 
@@ -343,6 +350,9 @@ public class IdeaController {
                 e -> card.setStyle("-fx-background-color: white; -fx-background-radius: 18; -fx-padding: 18; " +
                         "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 15, 0, 0, 8); " +
                         "-fx-border-color: #f1f5f9; -fx-border-radius: 18; -fx-cursor: hand;"));
+
+        card.setOnMouseClicked(e -> navigateToCreateMission(i));
+
         return card;
     }
 
@@ -374,6 +384,30 @@ public class IdeaController {
         else {
             javafx.stage.Stage stage = (javafx.stage.Stage) ideasList.getScene().getWindow();
             stage.getScene().setRoot(root);
+        }
+    }
+
+    private void navigateToCreateMission(Idea idea) {
+        try {
+            StackPane contentArea = (StackPane) ideasList.getScene().lookup("#contentArea");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/TSK/AddMission.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            AddMissionController controller = loader.getController();
+            controller.setSelectedIdea(idea);
+
+            javafx.scene.Node view = root;
+            if (root instanceof BorderPane)
+                view = ((BorderPane) root).getCenter();
+
+            if (contentArea != null)
+                contentArea.getChildren().setAll(view);
+            else {
+                javafx.stage.Stage stage = (javafx.stage.Stage) ideasList.getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
