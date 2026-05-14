@@ -532,6 +532,13 @@ public class CoursesController {
     private Node buildTicketCard(HelpTicket t) {
         VBox card = new VBox(15);
         card.getStyleClass().add("question-card");
+        
+        // Dynamic border color based on status
+        if ("RESOLVED".equalsIgnoreCase(t.getStatus())) {
+            card.setStyle("-fx-border-color: transparent transparent transparent #10b981;");
+        } else {
+            card.setStyle("-fx-border-color: transparent transparent transparent #ce2d7c;");
+        }
 
         // Header Row
         HBox header = new HBox(10);
@@ -560,10 +567,6 @@ public class CoursesController {
         String dateStr = t.getCreatedAt() != null ? t.getCreatedAt().split(" ")[0] : "Recently";
         String courseInfo = "";
         if (t.getCourseId() != null) {
-            String courseTitle = categoryNames.getOrDefault(t.getCourseId(), "Course #" + t.getCourseId());
-            // Wait, categoryNames mapping is from loadCourses, it maps categoryId to categoryName.
-            // I need course title. I'll just show the ID or skip for now to avoid complexity unless I fetch course title specifically.
-            // Actually, I can use a simple trick: search in the courses list I already have.
             for(Course c : courses) { if(c.getId() == t.getCourseId()) { courseInfo = " • " + c.getTitre(); break; } }
         }
         Label infoLabel = new Label("Sent on " + dateStr + courseInfo);
@@ -572,10 +575,10 @@ public class CoursesController {
         // Content
         VBox contentBox = new VBox();
         contentBox.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-padding: 15;");
-        Label content = new Label(stripHtmlTags(t.getMessage()));
-        content.setWrapText(true);
-        content.setStyle("-fx-text-fill: #334155; -fx-font-size: 13px;");
-        contentBox.getChildren().add(content);
+        Label contentText = new Label(stripHtmlTags(t.getMessage()));
+        contentText.setWrapText(true);
+        contentText.setStyle("-fx-text-fill: #334155; -fx-font-size: 13px;");
+        contentBox.getChildren().add(contentText);
 
         card.getChildren().addAll(header, infoLabel, contentBox);
 

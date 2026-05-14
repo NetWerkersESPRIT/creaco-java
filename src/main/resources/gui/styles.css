@@ -812,17 +812,22 @@
 
 /* Hero Banner Styling */
 .hero-banner {
-    -fx-background-color: #1e293b; /* Fallback dark slate */
-    -fx-background-radius: 20;
-    -fx-min-height: 220;
-    -fx-alignment: BOTTOM_LEFT;
+    -fx-background-image: url("../assets/collab_hero.png");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-radius: 25;
+    -fx-min-height: 260;
+    -fx-alignment: CENTER_LEFT;
     -fx-overflow: hidden;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 8);
 }
 
 .hero-overlay {
-    -fx-background-color: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
-    -fx-background-radius: 20;
-    -fx-padding: 0 0 40 40;
+    /* Premium Gradient Overlay: Deep Purple to Vibrant Pink */
+    -fx-background-color: linear-gradient(to right, rgba(108, 45, 177, 0.85), rgba(206, 45, 124, 0.4));
+    -fx-background-radius: 25;
+    -fx-padding: 45;
 }
 
 .hero-content-box {
@@ -831,10 +836,18 @@
 }
 
 .hero-title {
-    -fx-font-size: 32px;
+    -fx-font-family: "Outfit", "Segoe UI", sans-serif;
+    -fx-font-size: 38px;
     -fx-font-weight: bold;
     -fx-text-fill: white;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 2);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 0, 3);
+}
+
+.hero-subtitle-white {
+    -fx-font-size: 15px;
+    -fx-text-fill: #f1f5f9;
+    -fx-opacity: 0.9;
+    -fx-padding: 5 0 0 0;
 }
 
 /* Tab Navigation */
@@ -977,18 +990,21 @@
 
 /* Manager Dashboard Specifics */
 .hero-banner-dark {
-    -fx-background-color: #0f172a;
-    -fx-background-radius: 20;
-    -fx-min-height: 250;
-    -fx-alignment: BOTTOM_LEFT;
+    -fx-background-image: url("../assets/collab_hero.png"); /* Reuse image for consistency */
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-radius: 25;
+    -fx-min-height: 280;
+    -fx-alignment: CENTER_LEFT;
 }
 
 .hero-banner-dark > .VBox {
-    -fx-background-color: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
-    -fx-background-radius: 20;
-    -fx-padding: 0 0 50 50;
+    /* Slightly darker/more professional gradient for managers */
+    -fx-background-color: linear-gradient(to right, rgba(15, 23, 42, 0.9), rgba(108, 45, 177, 0.5));
+    -fx-background-radius: 25;
+    -fx-padding: 50;
     -fx-min-width: 10000;
-    -fx-min-height: 250;
+    -fx-min-height: 280;
 }
 
 .hero-title-white {
@@ -1434,4 +1450,64 @@
     -fx-text-fill: #64748b;
     -fx-font-size: 13px;
 }
+
+/* Help Desk / Tickets Styles */
+.question-card {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-padding: 22;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 10, 0, 0, 4);
+    -fx-border-color: transparent transparent transparent #cbd5e1;
+    -fx-border-width: 0 0 0 5;
+    -fx-border-radius: 15 0 0 15;
+}
+
+.question-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(206, 45, 124, 0.08), 15, 0, 0, 6);
+    -fx-translate-y: -2;
+}
+
+.reply-box {
+    -fx-background-color: #f0fdf4;
+    -fx-background-radius: 12;
+    -fx-padding: 18;
+    -fx-border-color: #dcfce7;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+}
+
+.admin-reply-label {
+    -fx-text-fill: #166534;
+    -fx-font-weight: bold;
+    -fx-font-size: 10px;
+    -fx-letter-spacing: 0.5px;
+}
+
+.badge-pending {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10;
+    -fx-background-radius: 10;
+}
+
+.badge-resolved {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #166534;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10;
+    -fx-background-radius: 10;
+}
+
+.badge-awaiting {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #991b1b;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10;
+    -fx-background-radius: 10;
+}
+
 

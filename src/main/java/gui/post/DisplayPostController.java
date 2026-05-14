@@ -72,11 +72,6 @@ public class DisplayPostController {
     @FXML
     private Button btnBack;
 
-    @FXML
-    private Label lblUsername;
-    @FXML
-    private Label lblUserRole;
-
     private final PostService postService = new PostService();
     private final CommentService commentService = new CommentService();
     private final UserService userService = new UserService();
@@ -128,29 +123,6 @@ public class DisplayPostController {
         this.isAdminMode = utils.SessionManager.getInstance().isAdmin();
         initialized = true;
         loadPosts();
-
-        // Populate User Profile
-        if (isVisitor) {
-            if (lblUsername != null) lblUsername.setText("Visitor");
-            if (lblUserRole != null) {
-                lblUserRole.setText("GUEST");
-                lblUserRole.setStyle("-fx-background-color: #64748b;");
-            }
-        } else {
-            entities.Users user = utils.SessionManager.getInstance().getCurrentUser();
-            if (user != null && lblUsername != null) {
-                String displayName = user.getUsername() != null ? user.getUsername() : "User";
-                lblUsername.setText(displayName);
-
-                String role = user.getRole() != null ? user.getRole().replace("ROLE_", "") : "USER";
-                lblUserRole.setText(role);
-
-                // Special styling for ADMIN
-                if ("ADMIN".equals(role)) {
-                    lblUserRole.setStyle("-fx-background-color: #434a75;");
-                }
-            }
-        }
     }
 
     public void loadPosts() {

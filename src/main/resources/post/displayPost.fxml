@@ -21,14 +21,15 @@
             <children>
                 <Button fx:id="btnBack" onAction="#goWelcome" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;" text="←" />
                 <Label text="Recent Discussions" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3748;" />
-                <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="search-bar" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="search-bar" prefWidth="350.0" maxWidth="400.0">
                     <children>
                         <Label text="🔍" style="-fx-font-size: 14px; -fx-text-fill: #a0aec0;" />
                         <TextField fx:id="searchField" onKeyReleased="#onSearch" promptText="Search discussions..." 
                                    style="-fx-background-color: transparent; -fx-padding: 0;" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
-                <Button mnemonicParsing="false" onAction="#goAddPost" styleClass="btn-primary" prefHeight="45.0" prefWidth="180.0" text="+ CREATE NEW POST" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button mnemonicParsing="false" onAction="#goAddPost" styleClass="btn-primary" prefHeight="45.0" prefWidth="210.0" text="+ CREATE NEW POST" />
             </children>
         </HBox>
 

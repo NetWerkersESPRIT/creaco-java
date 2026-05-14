@@ -31,7 +31,10 @@ public class SentimentService implements AIAnalysisStrategy {
 
     @Override
     public SentimentResult analyze(String text) {
-        if (text == null || text.trim().isEmpty()) {
+        if (text == null || text.trim().isEmpty() || API_KEY == null) {
+            if (API_KEY == null) {
+                System.err.println("[SentimentService] Warning: APIVERVE_API_KEY is missing in config.properties. Sentiment analysis skipped.");
+            }
             return new SentimentResult("POSITIVE", 1.0);
         }
 
